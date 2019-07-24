@@ -12,6 +12,7 @@ matrix:
 branches:
   only:
     - master
+    - develop
     - /release-.*/
 notifications:
   - provider: Email
