@@ -3,6 +3,10 @@ uuid = "b12df14e-adf7-11e9-0606-d5813a258349"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
 
+[deps]
+Fortran90Namelists = "8fb689aa-71ff-4044-8071-0cffc910b57d"
+QuantumESPRESSO = "95228164-aa68-11e9-35aa-d79ea5c4658d"
+
 [compat]
 julia = "1"
 
