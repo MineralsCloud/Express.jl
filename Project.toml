@@ -7,6 +7,7 @@ version = "0.1.0"
 EquationsOfState = "0438fec6-b81c-52d9-9651-d286848f50a8"
 Fortran90Namelists = "8fb689aa-71ff-4044-8071-0cffc910b57d"
 QuantumESPRESSO = "95228164-aa68-11e9-35aa-d79ea5c4658d"
+Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 
 [compat]
 julia = "1"
