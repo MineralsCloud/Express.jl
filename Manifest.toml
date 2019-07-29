@@ -238,7 +238,7 @@ version = "2.0.3"
 
 [[QuantumESPRESSO]]
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "LinearAlgebra", "Parameters"]
-git-tree-sha1 = "8f66b8c39ca86e42a797965b88f783167763f809"
+git-tree-sha1 = "4b7e38de9cc7287e65e067985014c6609c401c91"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
