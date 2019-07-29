@@ -11,6 +11,8 @@ julia>
 """
 module StructureOptimization
 
+using LinearAlgebra
+
 using EquationsOfState
 using QuantumESPRESSO.QuantumESPRESSOInput.PW
 using Setfield
