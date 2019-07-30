@@ -15,9 +15,11 @@ using LinearAlgebra
 
 using EquationsOfState
 using QuantumESPRESSO.QuantumESPRESSOInput.PW
+using QuantumESPRESSO.BasicIO
 using Setfield
 
-export update_alat
+export update_alat,
+    generate_input
 
 const ALAT_LENS = @lens _.system.celldm[1]
 
@@ -32,6 +34,18 @@ function update_alat(pw::PWInput, eos::EquationOfState, pressures::AbstractVecOr
     volumes = eval_volume(eos, pressures)
     alats = (volumes ./ det(pw.cellparameters)).^(1 / 3)
     update_alat(pw, alats)
+end
+
+function generate_input(
+    pw::PWInput,
+    eos::EquationOfState,
+    pressures::AbstractVecOrMat,
+    output::AbstractVecOrMat,
+    debug::Bool = true
+)
+    for input in update_alat(pw, eos, pressures)
+        write(output, input, debug)
+    end
 end
 
 end
