@@ -43,6 +43,7 @@ function generate_input(
     output::AbstractVecOrMat,
     debug::Bool = true
 )
+    @assert size(output) == size(pressures)
     for input in update_alat(pw, eos, pressures)
         write(output, input, debug)
     end
