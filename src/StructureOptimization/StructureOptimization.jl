@@ -31,7 +31,7 @@ function update_alat(pw::PWInput, alats::AbstractVecOrMat)
     return results
 end
 function update_alat(pw::PWInput, eos::EquationOfState, pressures::AbstractVecOrMat)
-    volumes = eval_volume(eos, pressures)
+    volumes = find_volume(eos, pressures)
     alats = (volumes ./ det(pw.cellparameters)).^(1 / 3)
     update_alat(pw, alats)
 end
