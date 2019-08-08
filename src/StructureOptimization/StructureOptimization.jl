@@ -58,21 +58,21 @@ function generate_input(
     end
 end
 
-function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat, name)
-    content = raw"#!$(string(shell.path))\n"
-    content *= scriptify(sbatch)
-    content *= scriptify(modules)
-    content *= raw"""
+function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat)
+    content = "#!$(string(shell.path))\n"
+    content *= scriptify(sbatch) * '\n'
+    content *= scriptify(modules) * '\n'
+    content *= """
     for i in $(join(pressures, ' ')); do
         (
-            cd vc_$i || return
-            mpirun -np $(Int(24 / length(pressures))) pw.x -in vc_$i.in > vc_$i.out &
+            cd vc_\$i || return
+            mpirun -np $(div(24, length(pressures))) pw.x -in vc_\$i.in > vc_\$i.out &
             sleep 3
         )
     done
     wait
     """
-    open(name, "r+") do io
+    open(sbatch.script, "r+") do io
         write(io, content)
     end
 end # function generate_script
