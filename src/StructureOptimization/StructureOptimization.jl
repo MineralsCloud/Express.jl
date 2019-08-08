@@ -18,9 +18,12 @@ using QuantumESPRESSOBase
 using QuantumESPRESSOBase.QuantumESPRESSOInput.PW
 using QuantumESPRESSOParsers.InputParsers
 using Setfield
+using Slurm.Commands
+using Slurm.Scriptify
 
 export update_alat,
-    generate_input
+    generate_input,
+    generate_script
 
 const ALAT_LENS = @lens _.system.celldm[1]
 
@@ -49,6 +52,25 @@ function generate_input(
         write(output, input, debug)
     end
 end
+
+function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat, name)
+    content = raw"#!$(string(shell.path))\n"
+    content *= scriptify(sbatch)
+    content *= scriptify(modules)
+    content *= raw"""
+    for i in $(join(pressures, ' ')); do
+        (
+            cd vc_$i || return
+            mpirun -np $(Int(24 / length(pressures))) pw.x -in vc_$i.in > vc_$i.out &
+            sleep 3
+        )
+    done
+    wait
+    """
+    open(name, "r+") do io
+        write(io, content)
+    end
+end # function generate_script
 
 function total(pw::PWInput, trial_eos::EquationOfState, pressures::AbstractVecOrMat)
     eos = fit_energy(trial_eos, volumes, parse_total_energy(outfiles))
