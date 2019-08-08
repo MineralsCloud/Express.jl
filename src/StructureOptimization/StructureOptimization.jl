@@ -14,8 +14,9 @@ module StructureOptimization
 using LinearAlgebra
 
 using EquationsOfState
-using QuantumESPRESSO.QuantumESPRESSOInput.PW
-using QuantumESPRESSO.BasicIO
+using QuantumESPRESSOBase
+using QuantumESPRESSOBase.QuantumESPRESSOInput.PW
+using QuantumESPRESSOParsers.InputParsers
 using Setfield
 
 export update_alat,
@@ -48,5 +49,10 @@ function generate_input(
         write(output, input, debug)
     end
 end
+
+function total(pw::PWInput, trial_eos::EquationOfState, pressures::AbstractVecOrMat)
+    eos = fit_energy(trial_eos, volumes, parse_total_energy(outfiles))
+    generate_input(pw, eos, pressures, new_input)
+end # function total
 
 end
