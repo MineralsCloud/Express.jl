@@ -122,7 +122,7 @@ version = "0.6.0"
 deps = ["Compat", "IterTools", "Parameters"]
 git-tree-sha1 = "5b4cf3e5ba15c9fb676dc36ccb953f3251a0d529"
 repo-rev = "develop"
-repo-url = "git@github.com:singularitti/Fortran90Namelists.jl.git"
+repo-url = "https://github.com/singularitti/Fortran90Namelists.jl.git"
 uuid = "8fb689aa-71ff-4044-8071-0cffc910b57d"
 version = "0.1.0"
 
@@ -251,7 +251,7 @@ version = "2.0.3"
 deps = ["FilePaths", "Fortran90Namelists", "IterTools", "JSON", "Parameters"]
 git-tree-sha1 = "73f083f5bfc17e75375f7ab72cfed236f5c1f564"
 repo-rev = "develop"
-repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
+repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
@@ -259,7 +259,7 @@ version = "0.1.0"
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "QuantumESPRESSOBase"]
 git-tree-sha1 = "d6e2f70f4a1b8b7887d1ecfbc741623a31354179"
 repo-rev = "develop"
-repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
+repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
 version = "0.1.0"
 
@@ -313,7 +313,7 @@ uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
 [[Slurm]]
 deps = ["Parameters"]
-git-tree-sha1 = "41b94c38440e65ad80e9184bd86302d1a5798f8a"
+git-tree-sha1 = "95a4bfc80c0ae09d6db2060832e305a63f3e3a06"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/Slurm.jl.git"
 uuid = "ca04f62e-b8d1-11e9-21e4-5fd4efd763a3"
