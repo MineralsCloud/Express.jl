@@ -12,7 +12,11 @@ julia>
 module StructureOptimization
 
 using LinearAlgebra
+using Statistics
 
+using IntervalArithmetic
+using IntervalRootFinding
+using EquationsOfState
 using EquationsOfState
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.QuantumESPRESSOInput.PW
@@ -20,6 +24,7 @@ using QuantumESPRESSOParsers.InputParsers
 using Setfield
 using Slurm.Commands
 using Slurm.Scriptify
+using Slurm.Shells
 
 export update_alat,
     generate_input,
@@ -35,8 +40,8 @@ function update_alat(pw::PWInput, alats::AbstractVecOrMat)
     return results
 end
 function update_alat(pw::PWInput, eos::EquationOfState, pressures::AbstractVecOrMat)
-    volumes = find_volume(eos, pressures)
-    alats = (volumes ./ det(pw.cellparameters)).^(1 / 3)
+    volumes = [find_volume(eos, p, 0..1000, Newton).interval.lo for p in pressures]
+    alats = (volumes ./ det(pw.cellparameters.data)).^(1 / 3)
     update_alat(pw, alats)
 end
 
@@ -48,8 +53,8 @@ function generate_input(
     debug::Bool = true
 )
     @assert size(output) == size(pressures)
-    for input in update_alat(pw, eos, pressures)
-        write(output, input, debug)
+    for (out, input) in zip(output, update_alat(pw, eos, pressures))
+        write(out, input, debug)
     end
 end
 
