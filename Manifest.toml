@@ -292,7 +292,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "QuantumESPRESSOBase", "Reexport"]
-git-tree-sha1 = "f3345c05e12dff2922e7d11e2c6ce94f27b2ee2a"
+git-tree-sha1 = "4b50fbacdc83ffd4d3466ac56392be06e944815b"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
