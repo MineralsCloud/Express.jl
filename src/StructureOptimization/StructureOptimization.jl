@@ -29,12 +29,11 @@ export update_alat,
     generate_input,
     generate_script
 
-const ALAT_LENS = @lens _.system.celldm[1]
-
 function update_alat(pw::PWscfInput, alats::AbstractVecOrMat)
+    lens = @lens _.system.celldm[1]
     results = similar(alats, typeof(pw))
     for (i, alat) in enumerate(alats)
-        results[i] = set(pw, ALAT_LENS, alat)
+        results[i] = set(pw, lens, alat)
     end
     return results
 end
