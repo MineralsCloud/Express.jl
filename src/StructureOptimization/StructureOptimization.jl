@@ -17,6 +17,7 @@ using IntervalArithmetic
 using IntervalRootFinding
 using EquationsOfState
 using EquationsOfState.Collections
+using EquationsOfState.NumericallyFindVolume
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
@@ -29,18 +30,12 @@ export update_alat,
     generate_input,
     generate_script
 
-function update_alat(pw::PWscfInput, alats::AbstractVecOrMat)
+function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
+    volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
+    alat = cbrt(volume / det(pw.cell_parameters.data))
+
     lens = @lens _.system.celldm[1]
-    results = similar(alats, typeof(pw))
-    for (i, alat) in enumerate(alats)
-        results[i] = set(pw, lens, alat)
-    end
-    return results
-end
-function update_alat(pw::PWscfInput, eos::EquationOfState, pressures::AbstractVecOrMat)
-    volumes = [find_volume(PressureTarget, eos, p, 0..1000, Newton).interval.lo for p in pressures]
-    alats = (volumes ./ det(pw.cellparameters.data)).^(1 / 3)
-    update_alat(pw, alats)
+    set(pw, lens, alat)
 end
 
 function generate_input(
@@ -51,8 +46,8 @@ function generate_input(
     debug::Bool = true
 )
     @assert size(output) == size(pressures)
-    for (out, input) in zip(output, update_alat(pw, eos, pressures))
-        write(out, input, debug)
+    for (out, objects) in zip(output, map(v -> update_alat(pw, eos, v), pressures))
+        write(out, objects, debug)
     end
 end
 
