@@ -12,19 +12,18 @@ julia>
 module StructureOptimization
 
 using LinearAlgebra
-using Statistics
 
 using IntervalArithmetic
 using IntervalRootFinding
 using EquationsOfState
-using EquationsOfState
+using EquationsOfState.Collections
 using QuantumESPRESSOBase
-using QuantumESPRESSOBase.QuantumESPRESSOInput.PW
+using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
 using Setfield
-using Slurm.Commands
-using Slurm.Scriptify
-using Slurm.Shells
+using SlurmWorkloadFileGenerator.Commands
+using SlurmWorkloadFileGenerator.Scriptify
+using SlurmWorkloadFileGenerator.Shells
 
 export update_alat,
     generate_input,
@@ -32,21 +31,21 @@ export update_alat,
 
 const ALAT_LENS = @lens _.system.celldm[1]
 
-function update_alat(pw::PWInput, alats::AbstractVecOrMat)
+function update_alat(pw::PWscfInput, alats::AbstractVecOrMat)
     results = similar(alats, typeof(pw))
     for (i, alat) in enumerate(alats)
         results[i] = set(pw, ALAT_LENS, alat)
     end
     return results
 end
-function update_alat(pw::PWInput, eos::EquationOfState, pressures::AbstractVecOrMat)
-    volumes = [find_volume(eos, p, 0..1000, Newton).interval.lo for p in pressures]
+function update_alat(pw::PWscfInput, eos::EquationOfState, pressures::AbstractVecOrMat)
+    volumes = [find_volume(PressureTarget, eos, p, 0..1000, Newton).interval.lo for p in pressures]
     alats = (volumes ./ det(pw.cellparameters.data)).^(1 / 3)
     update_alat(pw, alats)
 end
 
 function generate_input(
-    pw::PWInput,
+    pw::PWscfInput,
     eos::EquationOfState,
     pressures::AbstractVecOrMat,
     output::AbstractVecOrMat,
@@ -77,7 +76,7 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-function total(pw::PWInput, trial_eos::EquationOfState, pressures::AbstractVecOrMat)
+function total(pw::PWscfInput, trial_eos::EquationOfState, pressures::AbstractVecOrMat)
     eos = fit_energy(trial_eos, volumes, parse_total_energy(outfiles))
     generate_input(pw, eos, pressures, new_input)
 end # function total
