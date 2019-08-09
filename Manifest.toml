@@ -77,10 +77,10 @@ deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqDiffTools]]
-deps = ["ArrayInterface", "LinearAlgebra", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "d6582a0e9e26a6453a4c03f2837b1049f7007a3f"
+deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
+git-tree-sha1 = "21b855cb29ec4594f9651e0e9bdc0cdcfdcd52c1"
 uuid = "01453d9d-ee7c-5054-8395-0335cb756afa"
-version = "1.2.0"
+version = "1.3.0"
 
 [[DiffResults]]
 deps = ["Compat", "StaticArrays"]
@@ -106,7 +106,7 @@ version = "0.21.1"
 
 [[EquationsOfState]]
 deps = ["InteractiveUtils", "IntervalRootFinding", "LinearAlgebra", "LsqFit", "Parameters", "Polynomials", "Reexport", "Rematch", "StaticArrays"]
-git-tree-sha1 = "ad55d94bc04593db844dc7153297d3eddb05cdf1"
+git-tree-sha1 = "0a2fa77d5eefa07e97771ce816d57bbdc9f68943"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/EquationsOfState.jl"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -195,6 +195,12 @@ git-tree-sha1 = "186c2afbdb3cd52191078cfc6176f7084ed9dfb7"
 uuid = "2fda8390-95c7-5789-9bda-21331edee243"
 version = "0.8.1"
 
+[[MLStyle]]
+deps = ["Statistics", "Test"]
+git-tree-sha1 = "12d2f421dcff9c12b2aebcc25759f0cdca16a16b"
+uuid = "d8e11817-5142-5d16-987a-aa16d5891078"
+version = "0.3.0"
+
 [[MacroTools]]
 deps = ["CSTParser", "Compat", "DataStructures", "Test", "Tokenize"]
 git-tree-sha1 = "d6e9dedb8c92c3465575442da456aec15a89ff76"
@@ -277,8 +283,8 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
-deps = ["FilePaths", "Fortran90Namelists", "IterTools", "JSON", "Parameters"]
-git-tree-sha1 = "73f083f5bfc17e75375f7ab72cfed236f5c1f564"
+deps = ["FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters"]
+git-tree-sha1 = "92a642e687d02e0920a12941cbae8b9eda4b9fe6"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -286,7 +292,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "QuantumESPRESSOBase", "Reexport"]
-git-tree-sha1 = "3e359227f5e79821015eb4ce57fae67b6db27236"
+git-tree-sha1 = "f3345c05e12dff2922e7d11e2c6ce94f27b2ee2a"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -351,12 +357,12 @@ version = "0.3.4"
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
 uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
-[[Slurm]]
+[[SlurmWorkloadFileGenerator]]
 deps = ["Parameters"]
-git-tree-sha1 = "95a4bfc80c0ae09d6db2060832e305a63f3e3a06"
-repo-rev = "develop"
-repo-url = "https://github.com/singularitti/Slurm.jl.git"
-uuid = "ca04f62e-b8d1-11e9-21e4-5fd4efd763a3"
+git-tree-sha1 = "b15156e287a37aaa7f1ccb75de52793b6297a1ef"
+repo-rev = "master"
+repo-url = "git@github.com:singularitti/SlurmWorkloadFileGenerator.jl.git"
+uuid = "da235a08-baf4-11e9-2387-6f19a530ddff"
 version = "0.1.0"
 
 [[Sockets]]
