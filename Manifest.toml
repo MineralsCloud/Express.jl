@@ -176,6 +176,14 @@ git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
+[[Kaleido]]
+deps = ["Requires", "Setfield"]
+git-tree-sha1 = "31ec44b443069b53edd7b8a903462d2f32ea6255"
+repo-rev = "master"
+repo-url = "https://github.com/tkf/Kaleido.jl.git"
+uuid = "caafb194-7e8d-11e9-2724-d5981dd0806d"
+version = "0.1.0"
+
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
@@ -246,9 +254,9 @@ version = "1.1.0"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "f99548922adf8dd5df2f02ab0063944201a12ed8"
+git-tree-sha1 = "9d6a9b3e19634612fb1edcafc4b1d75242b24bde"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.9.8"
+version = "0.9.9"
 
 [[Parameters]]
 deps = ["OrderedCollections"]
@@ -283,8 +291,8 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
-deps = ["FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters"]
-git-tree-sha1 = "a76417abfad1ec272e7508689242f36ae95cd4db"
+deps = ["DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters", "Setfield"]
+git-tree-sha1 = "1481a3865c12d057020ea165ae62818c76190ef3"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
