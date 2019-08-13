@@ -37,7 +37,7 @@ function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
     alat = cbrt(volume / det(pw.cell_parameters.data))
 
     lenses = @batchlens begin
-        _.system.celldm[1]
+        _.system.celldm ∘ _[$1]
         _.cell.press
     end
     set(pw, lenses, (alat, pressure))
