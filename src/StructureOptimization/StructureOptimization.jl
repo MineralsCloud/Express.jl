@@ -13,6 +13,8 @@ module StructureOptimization
 
 using LinearAlgebra
 
+using Kaleido: @batchlens
+
 using IntervalArithmetic
 using IntervalRootFinding
 using EquationsOfState
@@ -34,9 +36,11 @@ function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
     alat = cbrt(volume / det(pw.cell_parameters.data))
 
-    alat_lens = @lens _.system.celldm[1]
-    press_lens = @lens _.cell.press
-    set(set(pw, alat_lens, alat), press_lens, pressure)
+    lenses = @batchlens begin
+        _.system.celldm[1]
+        _.cell.press
+    end
+    set(pw, lenses, (alat, pressure))
 end
 
 function generate_input(
