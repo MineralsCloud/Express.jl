@@ -28,34 +28,30 @@ using SlurmWorkloadFileGenerator.Commands
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat,
+export update_alat_press,
     generate_input!,
     generate_script
 
-function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
+function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
-    alat = cbrt(volume / det(pw.cell_parameters.data))
-
+    alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens begin
         _.system.celldm ∘ _[$1]
         _.cell.press
     end
-    set(pw, lenses, (alat, pressure))
+    set(template, lenses, (alat, pressure))
 end
 
 function generate_input!(
-    inputs::AbstractVecOrMat,
+    input::AbstractString,
     template::PWscfInput,
     eos::EquationOfState,
-    pressures::AbstractVecOrMat,
+    pressure::Real,
     verbose::Bool = false
 )
-    @assert size(inputs) == size(pressures)
-    objects = (update_alat(template, eos, p) for p in pressures)
-    for (input, object) in zip(inputs, objects)
-        open(input, "r+") do io
-            write(io, to_qe(object, verbose = verbose))
-        end
+    object = update_alat_press(template, eos, pressure)
+    open(input, "r+") do io
+        write(io, to_qe(object, verbose = verbose))
     end
 end
 
