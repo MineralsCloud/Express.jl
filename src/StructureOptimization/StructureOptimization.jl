@@ -13,10 +13,13 @@ module StructureOptimization
 
 using LinearAlgebra
 
+using Kaleido: @batchlens
+
 using IntervalArithmetic
 using IntervalRootFinding
 using EquationsOfState
 using EquationsOfState.Collections
+using EquationsOfState.NumericallyFindVolume
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
@@ -26,34 +29,33 @@ using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
 export update_alat,
-    generate_input,
+    generate_input!,
     generate_script
 
-const ALAT_LENS = @lens _.system.celldm[1]
+function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
+    volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
+    alat = cbrt(volume / det(pw.cell_parameters.data))
 
-function update_alat(pw::PWscfInput, alats::AbstractVecOrMat)
-    results = similar(alats, typeof(pw))
-    for (i, alat) in enumerate(alats)
-        results[i] = set(pw, ALAT_LENS, alat)
+    lenses = @batchlens begin
+        _.system.celldm ∘ _[$1]
+        _.cell.press
     end
-    return results
-end
-function update_alat(pw::PWscfInput, eos::EquationOfState, pressures::AbstractVecOrMat)
-    volumes = [find_volume(PressureTarget, eos, p, 0..1000, Newton).interval.lo for p in pressures]
-    alats = (volumes ./ det(pw.cellparameters.data)).^(1 / 3)
-    update_alat(pw, alats)
+    set(pw, lenses, (alat, pressure))
 end
 
-function generate_input(
-    pw::PWscfInput,
+function generate_input!(
+    inputs::AbstractVecOrMat,
+    template::PWscfInput,
     eos::EquationOfState,
     pressures::AbstractVecOrMat,
-    output::AbstractVecOrMat,
-    debug::Bool = true
+    verbose::Bool = true
 )
-    @assert size(output) == size(pressures)
-    for (out, input) in zip(output, update_alat(pw, eos, pressures))
-        write(out, input, debug)
+    @assert size(inputs) == size(pressures)
+    objects = map(p -> update_alat(template, eos, p), pressures)
+    for (input, object) in zip(inputs, objects)
+        open(input, "r+") do io
+            write(io, to_qe(object, verbose = verbose))
+        end
     end
 end
 
