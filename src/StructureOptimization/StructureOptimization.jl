@@ -51,8 +51,11 @@ function generate_input!(
     verbose::Bool = true
 )
     @assert size(inputs) == size(pressures)
-    for (input, objects) in zip(inputs, map(p -> update_alat(template, eos, p), pressures))
-        write(input, objects, verbose)
+    objects = map(p -> update_alat(template, eos, p), pressures)
+    for (input, object) in zip(inputs, objects)
+        open(input, "r+") do io
+            write(io, to_qe(object, verbose = verbose))
+        end
     end
 end
 
