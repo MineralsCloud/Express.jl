@@ -29,7 +29,7 @@ using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
 export update_alat,
-    generate_input,
+    generate_input!,
     generate_script
 
 function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
@@ -43,16 +43,16 @@ function update_alat(pw::PWscfInput, eos::EquationOfState, pressure::Real)
     set(pw, lenses, (alat, pressure))
 end
 
-function generate_input(
-    pw::PWscfInput,
+function generate_input!(
+    inputs::AbstractVecOrMat,
+    template::PWscfInput,
     eos::EquationOfState,
     pressures::AbstractVecOrMat,
-    output::AbstractVecOrMat,
-    debug::Bool = true
+    verbose::Bool = true
 )
-    @assert size(output) == size(pressures)
-    for (out, objects) in zip(output, map(v -> update_alat(pw, eos, v), pressures))
-        write(out, objects, debug)
+    @assert size(inputs) == size(pressures)
+    for (input, objects) in zip(inputs, map(p -> update_alat(template, eos, p), pressures))
+        write(input, objects, verbose)
     end
 end
 
