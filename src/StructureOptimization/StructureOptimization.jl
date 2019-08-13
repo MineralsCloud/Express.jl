@@ -48,10 +48,10 @@ function generate_input!(
     template::PWscfInput,
     eos::EquationOfState,
     pressures::AbstractVecOrMat,
-    verbose::Bool = true
+    verbose::Bool = false
 )
     @assert size(inputs) == size(pressures)
-    objects = map(p -> update_alat(template, eos, p), pressures)
+    objects = (update_alat(template, eos, p) for p in pressures)
     for (input, object) in zip(inputs, objects)
         open(input, "r+") do io
             write(io, to_qe(object, verbose = verbose))
