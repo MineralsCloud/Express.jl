@@ -28,9 +28,7 @@ using SlurmWorkloadFileGenerator.Commands
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press,
-    generate_input!,
-    generate_script
+export update_alat_press, generate_input!, generate_script
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -55,10 +53,10 @@ function generate_input!(
     end
 end
 function generate_input!(
-    inputs::AbstractVector{<: AbstractString},
+    inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     eos::EquationOfState,
-    pressures::AbstractVector{<: Real},
+    pressures::AbstractVector{<:Real},
     verbose::Bool = false
 )
     length(inputs) == length(pressures) || throw(DimensionMismatch("The number of inputs should equal the number of pressures!"))
