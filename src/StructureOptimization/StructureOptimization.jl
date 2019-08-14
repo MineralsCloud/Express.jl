@@ -48,7 +48,6 @@ function generate_input!(
     verbose::Bool = false
 )
     object = update_alat_press(template, eos, pressure)
-    ispath(input) || touch(input)
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
     end
