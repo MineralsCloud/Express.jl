@@ -19,6 +19,7 @@ using IntervalArithmetic
 using IntervalRootFinding
 using EquationsOfState
 using EquationsOfState.Collections
+using EquationsOfState.NonlinearFitting
 using EquationsOfState.NumericallyFindVolume
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
@@ -38,7 +39,7 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
         _.cell.press
     end
     set(template, lenses, (alat, pressure))
-end
+end # function update_alat_press
 
 function generate_input!(
     input::AbstractString,
@@ -51,7 +52,7 @@ function generate_input!(
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
     end
-end
+end # function generate_input!
 function generate_input!(
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
@@ -61,7 +62,7 @@ function generate_input!(
 )
     length(inputs) == length(pressures) || throw(DimensionMismatch("The number of inputs should equal the number of pressures!"))
     [generate_input!(input, template, eos, pressure, verbose) for (input, pressure) in zip(inputs, pressures)]
-end
+end # function generate_input!
 
 function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat)
     content = "#!$(string(shell.path))\n"
@@ -82,9 +83,30 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-function total(pw::PWscfInput, trial_eos::EquationOfState, pressures::AbstractVecOrMat)
-    eos = fit_energy(trial_eos, volumes, parse_total_energy(outfiles))
-    generate_input(pw, eos, pressures, new_input)
-end # function total
+function first_step(
+    inputs::AbstractVector,
+    template::PWscfInput,
+    trial_eos::EquationOfState,
+    pressures::AbstractVector
+)
+    isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    generate_input!(inputs, template, trial_eos, pressures)
+end # function first_step
+
+function second_step(
+    new_inputs::AbstractVector,
+    previous_outputs::AbstractVector,
+    template::PWscfInput,
+    trial_eos::EquationOfState,
+    pressures::AbstractVector,
+    volumes::AbstractVector
+)
+    length(new_inputs) == length(previous_outputs) == length(pressures) ==
+    length(volumes) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
+    isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    energies = parse_total_energy.(previous_outputs)
+    eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
+    generate_input!(new_inputs, template, eos, pressures)
+end # function second_step
 
 end
