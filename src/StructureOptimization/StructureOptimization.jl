@@ -29,7 +29,7 @@ using SlurmWorkloadFileGenerator.Commands
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input!, generate_script
+export update_alat_press, generate_input!, generate_script, prepare
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -83,7 +83,9 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-function first_step(
+prepare(step::Int, args...) = prepare(Val(step), args...)
+function prepare(
+    step::Val{1},
     inputs::AbstractVector,
     template::PWscfInput,
     trial_eos::EquationOfState,
@@ -91,9 +93,9 @@ function first_step(
 )
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     generate_input!(inputs, template, trial_eos, pressures)
-end # function first_step
-
-function second_step(
+end # function prepare
+function prepare(
+    step::Val{2},
     new_inputs::AbstractVector,
     previous_outputs::AbstractVector,
     template::PWscfInput,
@@ -107,6 +109,6 @@ function second_step(
     energies = parse_total_energy.(previous_outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
     generate_input!(new_inputs, template, eos, pressures)
-end # function second_step
+end # function prepare
 
 end
