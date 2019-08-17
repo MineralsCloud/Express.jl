@@ -19,6 +19,7 @@ using IntervalArithmetic
 using IntervalRootFinding
 using EquationsOfState
 using EquationsOfState.Collections
+using EquationsOfState.NonlinearFitting
 using EquationsOfState.NumericallyFindVolume
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
@@ -82,9 +83,20 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-function total(pw::PWscfInput, trial_eos::EquationOfState, pressures::AbstractVecOrMat)
-    eos = fit_energy(trial_eos, volumes, parse_total_energy(outfiles))
-    generate_input(pw, eos, pressures, new_input)
-end # function total
+function second_step(
+    new_inputs::AbstractVector,
+    previous_outputs::AbstractVector,
+    template::PWscfInput,
+    trial_eos::EquationOfState,
+    pressures::AbstractVector,
+    volumes::AbstractVector
+)
+    length(new_inputs) == length(previous_outputs) == length(pressures) ==
+    length(volumes) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
+    isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    energies = parse_total_energy.(previous_outputs)
+    eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
+    generate_input!(new_inputs, template, eos, pressures)
+end # function second_step
 
 end
