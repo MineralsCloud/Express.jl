@@ -39,7 +39,7 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
         _.cell.press
     end
     set(template, lenses, (alat, pressure))
-end
+end # function update_alat_press
 
 function generate_input!(
     input::AbstractString,
@@ -52,7 +52,7 @@ function generate_input!(
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
     end
-end
+end # function generate_input!
 function generate_input!(
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
@@ -62,7 +62,7 @@ function generate_input!(
 )
     length(inputs) == length(pressures) || throw(DimensionMismatch("The number of inputs should equal the number of pressures!"))
     [generate_input!(input, template, eos, pressure, verbose) for (input, pressure) in zip(inputs, pressures)]
-end
+end # function generate_input!
 
 function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat)
     content = "#!$(string(shell.path))\n"
