@@ -83,6 +83,16 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
+function first_step(
+    inputs::AbstractVector,
+    template::PWscfInput,
+    trial_eos::EquationOfState,
+    pressures::AbstractVector
+)
+    isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    generate_input!(inputs, template, trial_eos, pressures)
+end # function first_step
+
 function second_step(
     new_inputs::AbstractVector,
     previous_outputs::AbstractVector,
