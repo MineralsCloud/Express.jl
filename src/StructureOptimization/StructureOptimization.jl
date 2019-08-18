@@ -26,6 +26,7 @@ using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
 using Setfield
 using SlurmWorkloadFileGenerator.Commands
+using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
@@ -93,6 +94,12 @@ function prepare(
 )
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     generate_input!(inputs, template, trial_eos, pressures)
+    generate_script(
+        Shell("/bin/bash"),
+        Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
+        [SystemModule("intel-parallel-studio/2017")],
+        pressures
+    )
 end # function prepare
 function prepare(
     step::Val{2},
@@ -109,6 +116,12 @@ function prepare(
     energies = parse_total_energy.(previous_outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
     generate_input!(new_inputs, template, eos, pressures)
+    generate_script(
+        Shell("/bin/bash"),
+        Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
+        [SystemModule("intel-parallel-studio/2017")],
+        pressures
+    )
 end # function prepare
 
 end
