@@ -30,7 +30,7 @@ using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input!, generate_script, prepare
+export update_alat_press, generate_input!, generate_script, prepare_for_step
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -84,8 +84,8 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-prepare(step::Int, args...) = prepare(Val(step), args...)
-function prepare(
+prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
+function prepare_for_step(
     step::Val{1},
     inputs::AbstractVector,
     template::PWscfInput,
@@ -100,8 +100,8 @@ function prepare(
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
-end # function prepare
-function prepare(
+end # function prepare_for_step
+function prepare_for_step(
     step::Val{2},
     new_inputs::AbstractVector,
     previous_outputs::AbstractVector,
@@ -122,6 +122,6 @@ function prepare(
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
-end # function prepare
+end # function prepare_for_step
 
 end
