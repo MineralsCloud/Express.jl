@@ -312,7 +312,7 @@ version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters", "Setfield"]
-git-tree-sha1 = "f1665d8c0c436700dafc2441244ee0d68f5d1c54"
+git-tree-sha1 = "63f660f1337ce5755e3a89c0242541a3debe943e"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -320,7 +320,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "PyFortran90Namelists", "QuantumESPRESSOBase", "Reexport"]
-git-tree-sha1 = "21577b8a4346f0326cef2ad20578094bbc80b629"
+git-tree-sha1 = "cf2b0540b25213ddcac5d6260eb7a496b1ce74f9"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
