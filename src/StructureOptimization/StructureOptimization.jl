@@ -26,10 +26,11 @@ using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
 using Setfield
 using SlurmWorkloadFileGenerator.Commands
+using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input!, generate_script
+export update_alat_press, generate_input!, generate_script, prepare_for_step
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -83,7 +84,9 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-function first_step(
+prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
+function prepare_for_step(
+    step::Val{1},
     inputs::AbstractVector,
     template::PWscfInput,
     trial_eos::EquationOfState,
@@ -91,9 +94,15 @@ function first_step(
 )
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     generate_input!(inputs, template, trial_eos, pressures)
-end # function first_step
-
-function second_step(
+    generate_script(
+        Shell("/bin/bash"),
+        Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
+        [SystemModule("intel-parallel-studio/2017")],
+        pressures
+    )
+end # function prepare_for_step
+function prepare_for_step(
+    step::Val{2},
     new_inputs::AbstractVector,
     previous_outputs::AbstractVector,
     template::PWscfInput,
@@ -107,6 +116,12 @@ function second_step(
     energies = parse_total_energy.(previous_outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
     generate_input!(new_inputs, template, eos, pressures)
-end # function second_step
+    generate_script(
+        Shell("/bin/bash"),
+        Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
+        [SystemModule("intel-parallel-studio/2017")],
+        pressures
+    )
+end # function prepare_for_step
 
 end
