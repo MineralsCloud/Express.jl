@@ -85,14 +85,14 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
-function dump_metadata!(output::AbstractString, object::PWscfInput, inputs::AbstractVector{<:AbstractString})
+function dump_metadata!(output::AbstractString, object::PWscfInput, input::AbstractString)
     metadata = Dict(
         "outdir" => object.control.outdir,
         "prefix" => object.control.prefix,
         "lkpoint_dir" => object.control.lkpoint_dir,
         "pseudo_dir" => object.control.pseudo_dir,
         "pseudopotentials" => map(getfield(:pseudopotential), object.atomic_species.data),
-        "input_files" => inputs
+        "input" => input
     )
     if object.control.wf_collect
         metadata["wfcdir"] = object.control.wfcdir
