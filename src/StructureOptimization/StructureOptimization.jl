@@ -109,6 +109,7 @@ function dump_metadata!(output::AbstractString, object::PWscfInput, input::Abstr
 end # function dump_metadata!
 
 prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
+prepare_for_step(::Val, args...) = error("The only allowed steps are `1` and `2`!")
 function prepare_for_step(
     step::Val{1},
     inputs::AbstractVector,
