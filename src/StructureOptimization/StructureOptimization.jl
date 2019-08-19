@@ -86,16 +86,16 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
 end # function generate_script
 
 function dump_metadata!(output::AbstractString, object::PWscfInput, input::AbstractString)
+    f = x -> abspath(joinpath(input, x))
     metadata = Dict(
-        "outdir" => object.control.outdir,
+        "outdir" => f(object.control.outdir),
         "prefix" => object.control.prefix,
-        "lkpoint_dir" => object.control.lkpoint_dir,
         "pseudo_dir" => object.control.pseudo_dir,
         "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
-        "input" => input
+        "input" => abspath(input)
     )
     if object.control.wf_collect
-        metadata["wfcdir"] = object.control.wfcdir
+        metadata["wfcdir"] = f(object.control.wfcdir)
     end
     lowercase(splitext(output)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
     open(output, "r+") do io
