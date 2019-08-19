@@ -13,6 +13,7 @@ module StructureOptimization
 
 using LinearAlgebra
 
+import JSON
 using Kaleido: @batchlens
 
 using IntervalArithmetic
@@ -30,7 +31,7 @@ using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input!, generate_script, prepare_for_step
+export update_alat_press, generate_input!, generate_script, dump_metadata!, prepare_for_step
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -83,6 +84,24 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
         write(io, content)
     end
 end # function generate_script
+
+function dump_metadata!(output::AbstractString, object::PWscfInput, inputs::AbstractVector{<:AbstractString})
+    metadata = Dict(
+        "outdir" => object.control.outdir,
+        "prefix" => object.control.prefix,
+        "lkpoint_dir" => object.control.lkpoint_dir,
+        "pseudo_dir" => object.control.pseudo_dir,
+        "pseudopotentials" => map(getfield(:pseudopotential), object.atomic_species.data),
+        "input_files" => inputs
+    )
+    if object.control.wf_collect
+        metadata["wfcdir"] = object.control.wfcdir
+    end
+    splitext(output) != "json" && error("The file to be dumped must be a JSON file!")
+    open(output, "r+") do io
+        JSON.print(io, metadata)
+    end
+end # function dump_metadata!
 
 prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
 function prepare_for_step(
