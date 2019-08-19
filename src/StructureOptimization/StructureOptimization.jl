@@ -13,6 +13,7 @@ module StructureOptimization
 
 using LinearAlgebra
 
+import JSON
 using Kaleido: @batchlens
 
 using IntervalArithmetic
@@ -30,7 +31,7 @@ using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input!, generate_script, prepare_for_step
+export update_alat_press, generate_input!, generate_script, dump_metadata!, prepare_for_step, postprocess
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -84,13 +85,37 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     end
 end # function generate_script
 
+function dump_metadata!(output::AbstractString, object::PWscfInput, input::AbstractString)
+    metadata = Dict(
+        "outdir" => object.control.outdir,
+        "prefix" => object.control.prefix,
+        "pseudo_dir" => object.control.pseudo_dir,
+        "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
+        "input" =>input
+    )
+    metadata["wfcdir"] = if object.control.wf_collect
+        metadata["outdir"]
+    else
+        object.control.wfcdir
+    end
+    if object.control.lkpoint_dir
+        metadata["lkpoint_dir"] = metadata["outdir"] * "/" * metadata["prefix"] * ".save"
+    end
+    metadata["wfc_namepattern"] = metadata["prefix"] * ".wfc"
+    lowercase(splitext(output)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
+    open(output, "r+") do io
+        JSON.print(io, metadata)
+    end
+end # function dump_metadata!
+
 prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
 function prepare_for_step(
     step::Val{1},
     inputs::AbstractVector,
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector
+    pressures::AbstractVector,
+    metadatafiles::AbstractVector
 )
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     generate_input!(inputs, template, trial_eos, pressures)
@@ -100,6 +125,7 @@ function prepare_for_step(
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
+    dump_metadata!.(metadatafiles, template, inputs)
 end # function prepare_for_step
 function prepare_for_step(
     step::Val{2},
@@ -108,7 +134,8 @@ function prepare_for_step(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
-    volumes::AbstractVector
+    volumes::AbstractVector,
+    metadatafiles::AbstractVector
 )
     length(new_inputs) == length(previous_outputs) == length(pressures) ==
     length(volumes) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
@@ -122,6 +149,13 @@ function prepare_for_step(
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
+    dump_metadata!.(metadatafiles, template, new_inputs)
 end # function prepare_for_step
+
+function postprocess(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
+    energies = parse_total_energy.(outputs)
+    eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
+    return eos
+end # function postprocess
 
 end
