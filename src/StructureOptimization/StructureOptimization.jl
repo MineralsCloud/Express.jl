@@ -109,7 +109,8 @@ function prepare_for_step(
     inputs::AbstractVector,
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector
+    pressures::AbstractVector,
+    metadatafiles::AbstractVector
 )
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     generate_input!(inputs, template, trial_eos, pressures)
@@ -119,6 +120,7 @@ function prepare_for_step(
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
+    dump_metadata!.(metadatafiles, template, inputs)
 end # function prepare_for_step
 function prepare_for_step(
     step::Val{2},
@@ -127,7 +129,8 @@ function prepare_for_step(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
-    volumes::AbstractVector
+    volumes::AbstractVector,
+    metadatafiles::AbstractVector
 )
     length(new_inputs) == length(previous_outputs) == length(pressures) ==
     length(volumes) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
@@ -141,6 +144,7 @@ function prepare_for_step(
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
+    dump_metadata!.(metadatafiles, template, new_inputs)
 end # function prepare_for_step
 
 end
