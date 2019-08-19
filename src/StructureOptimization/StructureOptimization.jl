@@ -31,7 +31,7 @@ using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input!, generate_script, dump_metadata!, prepare_for_step
+export update_alat_press, generate_input!, generate_script, dump_metadata!, prepare_for_step, postprocess
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
@@ -146,5 +146,11 @@ function prepare_for_step(
     )
     dump_metadata!.(metadatafiles, template, new_inputs)
 end # function prepare_for_step
+
+function postprocess(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
+    energies = parse_total_energy.(outputs)
+    eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
+    return eos
+end # function postprocess
 
 end
