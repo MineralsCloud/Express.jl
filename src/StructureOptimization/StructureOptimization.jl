@@ -91,7 +91,7 @@ function dump_metadata!(output::AbstractString, object::PWscfInput, input::Abstr
         "prefix" => object.control.prefix,
         "pseudo_dir" => object.control.pseudo_dir,
         "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
-        "input" =>input
+        "input" => input
     )
     metadata["wfcdir"] = if object.control.wf_collect
         metadata["outdir"]
