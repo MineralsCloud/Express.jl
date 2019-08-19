@@ -109,6 +109,7 @@ function dump_metadata!(output::AbstractString, object::PWscfInput, input::Abstr
 end # function dump_metadata!
 
 prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
+prepare_for_step(::Val, args...) = error("The only allowed steps are `1` and `2`!")
 function prepare_for_step(
     step::Val{1},
     inputs::AbstractVector,
@@ -118,6 +119,10 @@ function prepare_for_step(
     metadatafiles::AbstractVector
 )
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    if template.control.calculation != "scf"
+        @warn "The calculation type is $(template.control.calculation), not \"scf\"! We will set it for you."
+        @set! template.control.calculation = "scf"
+    end
     generate_input!(inputs, template, trial_eos, pressures)
     generate_script(
         Shell("/bin/bash"),
@@ -139,6 +144,10 @@ function prepare_for_step(
 )
     length(new_inputs) == length(previous_outputs) == length(pressures) ==
     length(volumes) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
+    if template.control.calculation != "vc-relax"
+        @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
+        @set! template.control.calculation = "vc-relax"
+    end
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     energies = parse_total_energy.(previous_outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
