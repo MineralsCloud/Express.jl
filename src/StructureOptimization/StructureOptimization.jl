@@ -91,13 +91,13 @@ function dump_metadata!(output::AbstractString, object::PWscfInput, input::Abstr
         "prefix" => object.control.prefix,
         "lkpoint_dir" => object.control.lkpoint_dir,
         "pseudo_dir" => object.control.pseudo_dir,
-        "pseudopotentials" => map(getfield(:pseudopotential), object.atomic_species.data),
+        "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
         "input" => input
     )
     if object.control.wf_collect
         metadata["wfcdir"] = object.control.wfcdir
     end
-    splitext(output) != "json" && error("The file to be dumped must be a JSON file!")
+    lowercase(splitext(output)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
     open(output, "r+") do io
         JSON.print(io, metadata)
     end
