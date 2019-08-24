@@ -21,7 +21,7 @@ using IntervalRootFinding
 using EquationsOfState
 using EquationsOfState.Collections
 using EquationsOfState.NonlinearFitting
-using EquationsOfState.NumericallyFindVolume
+using EquationsOfState.FindVolume
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
