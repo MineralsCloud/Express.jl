@@ -13,15 +13,14 @@ module StructureOptimization
 
 using LinearAlgebra
 
-import JSON
-using Kaleido: @batchlens
-
-using IntervalArithmetic
-using IntervalRootFinding
 using EquationsOfState
 using EquationsOfState.Collections
 using EquationsOfState.NonlinearFitting
 using EquationsOfState.FindVolume
+using IntervalArithmetic
+using IntervalRootFinding
+import JSON
+using Kaleido: @batchlens
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.InputParsers
