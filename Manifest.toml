@@ -111,10 +111,10 @@ uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.1"
 
 [[EquationsOfState]]
-deps = ["InteractiveUtils", "IntervalRootFinding", "LinearAlgebra", "LsqFit", "Parameters", "Polynomials", "Reexport", "Rematch", "StaticArrays"]
-git-tree-sha1 = "109dfe0580b563c1dac42ce047a487d0adfab0c1"
-repo-rev = "develop"
-repo-url = "https://github.com/MineralsCloud/EquationsOfState.jl"
+deps = ["InteractiveUtils", "IntervalRootFinding", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "StaticArrays"]
+git-tree-sha1 = "85545c82f3a9b7808caa3d711b3f084d0047316c"
+repo-rev = "master"
+repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
 
@@ -137,9 +137,9 @@ version = "0.8.0"
 
 [[FilePathsBase]]
 deps = ["Dates", "LinearAlgebra", "Printf", "Test", "UUIDs"]
-git-tree-sha1 = "fe0fbbcf56af2000b5ba85f63245a3ed48854b29"
+git-tree-sha1 = "2ee1d999c462425e2f848524f732ed51bc1ab63a"
 uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
-version = "0.6.0"
+version = "0.6.2"
 
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
@@ -185,8 +185,6 @@ version = "0.21.0"
 [[Kaleido]]
 deps = ["Requires", "Setfield"]
 git-tree-sha1 = "31ec44b443069b53edd7b8a903462d2f32ea6255"
-repo-rev = "master"
-repo-url = "https://github.com/tkf/Kaleido.jl.git"
 uuid = "caafb194-7e8d-11e9-2724-d5981dd0806d"
 version = "0.1.0"
 
@@ -210,10 +208,9 @@ uuid = "2fda8390-95c7-5789-9bda-21331edee243"
 version = "0.8.1"
 
 [[MLStyle]]
-deps = ["Statistics", "Test"]
-git-tree-sha1 = "12d2f421dcff9c12b2aebcc25759f0cdca16a16b"
+git-tree-sha1 = "67f9a88611bc79f992aa705d9bbc833a2547dec7"
 uuid = "d8e11817-5142-5d16-987a-aa16d5891078"
-version = "0.3.0"
+version = "0.3.1"
 
 [[MacroTools]]
 deps = ["CSTParser", "Compat", "DataStructures", "Test", "Tokenize"]
@@ -236,9 +233,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[NLSolversBase]]
 deps = ["Calculus", "DiffEqDiffTools", "DiffResults", "Distributed", "ForwardDiff"]
-git-tree-sha1 = "1c4b1d76f731dee88a0f494c59c750f3fd7d9ddd"
+git-tree-sha1 = "c430bd3f2dfcffc30688cf4a9cb61535e8d85f65"
 uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
-version = "7.4.0"
+version = "7.4.1"
 
 [[NaNMath]]
 deps = ["Compat"]
@@ -312,7 +309,7 @@ version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters", "Setfield"]
-git-tree-sha1 = "63f660f1337ce5755e3a89c0242541a3debe943e"
+git-tree-sha1 = "e0ecc9355ff06ba0797562976a1ad8174be6be56"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -343,12 +340,6 @@ version = "0.7.0"
 deps = ["Pkg"]
 git-tree-sha1 = "7b1d07f411bc8ddb7977ec7f377b97b158514fe0"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
-version = "0.2.0"
-
-[[Rematch]]
-deps = ["Compat", "MacroTools"]
-git-tree-sha1 = "3abde2b1c5d0f942b40700bebdc6c8cfa60c8b37"
-uuid = "bfecab0d-fd4d-5014-a23f-56c5fae6447a"
 version = "0.2.0"
 
 [[Requires]]
@@ -387,7 +378,7 @@ uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
 [[SlurmWorkloadFileGenerator]]
 deps = ["Parameters"]
-git-tree-sha1 = "b15156e287a37aaa7f1ccb75de52793b6297a1ef"
+git-tree-sha1 = "f0a171cc4b328a3cb9c7bec35d2172b0661ceb18"
 repo-rev = "master"
 repo-url = "git@github.com:singularitti/SlurmWorkloadFileGenerator.jl.git"
 uuid = "da235a08-baf4-11e9-2387-6f19a530ddff"
@@ -435,7 +426,7 @@ uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "0.8.0"
 
 [[SuiteSparse]]
-deps = ["Libdl", "LinearAlgebra", "SparseArrays"]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[Test]]
