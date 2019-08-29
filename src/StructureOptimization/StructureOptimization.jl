@@ -34,7 +34,7 @@ using SlurmWorkloadFileGenerator.Shells
 export update_alat_press, generate_input!, generate_script, dump_metadata!, prepare_for_step, postprocess
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
-    volume = find_volume(PressureTarget, eos, pressure, 0..1000, Newton).interval.lo
+    volume = find_volume(PressureRelation, eos, pressure, 0..1000, Newton).interval.lo
     alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens begin
         _.system.celldm ∘ _[$1]
