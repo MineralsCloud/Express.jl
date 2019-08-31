@@ -35,7 +35,7 @@ using Express
 export update_alat_press, write_input, write_metadata, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
-    volume = find_volume(PressureRelation, eos, pressure, 0..1000, Newton).interval.lo
+    volume = find_volume(PressureForm(), eos, pressure, 0..1000, Newton).interval.lo
     alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens begin
         _.system.celldm ∘ _[$1]
