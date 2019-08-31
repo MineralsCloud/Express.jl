@@ -30,7 +30,7 @@ using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, generate_input, generate_script, dump_metadata, prepare_for_step, postprocess
+export update_alat_press, write_input, write_script, write_metadata, prepare_for_step, postprocess
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureRelation, eos, pressure, 0..1000, Newton).interval.lo
@@ -42,7 +42,7 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
     set(template, lenses, (alat, pressure))
 end # function update_alat_press
 
-function generate_input(
+function write_input(
     input::AbstractString,
     template::PWscfInput,
     eos::EquationOfState,
@@ -53,8 +53,8 @@ function generate_input(
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
     end
-end # function generate_input
-function generate_input(
+end # function write_input
+function write_input(
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     eos::EquationOfState,
@@ -62,10 +62,10 @@ function generate_input(
     verbose::Bool = false
 )
     length(inputs) == length(pressures) || throw(DimensionMismatch("The number of inputs should equal the number of pressures!"))
-    [generate_input(input, template, eos, pressure, verbose) for (input, pressure) in zip(inputs, pressures)]
-end # function generate_input
+    [write_input(input, template, eos, pressure, verbose) for (input, pressure) in zip(inputs, pressures)]
+end # function write_input
 
-function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat)
+function write_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat)
     content = "#!$(string(shell.path))\n"
     content *= scriptify(sbatch) * '\n'
     content *= scriptify(modules) * '\n'
@@ -82,9 +82,9 @@ function generate_script(shell::Shell, sbatch::Sbatch, modules, pressures::Abstr
     open(sbatch.script, "r+") do io
         write(io, content)
     end
-end # function generate_script
+end # function write_script
 
-function dump_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
+function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
     metadata = Dict(
         "outdir" => object.control.outdir,
         "prefix" => object.control.prefix,
@@ -105,7 +105,7 @@ function dump_metadata(output::AbstractString, object::PWscfInput, input::Abstra
     open(output, "r+") do io
         JSON.print(io, metadata)
     end
-end # function dump_metadata
+end # function write_metadata
 
 prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
 prepare_for_step(::Val, args...) = error("The only allowed steps are `1` and `2`!")
@@ -122,14 +122,14 @@ function prepare_for_step(
         @warn "The calculation type is $(template.control.calculation), not \"scf\"! We will set it for you."
         @set! template.control.calculation = "scf"
     end
-    generate_input(inputs, template, trial_eos, pressures)
-    generate_script(
+    write_input(inputs, template, trial_eos, pressures)
+    write_script(
         Shell("/bin/bash"),
         Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
-    dump_metadata.(metadatafiles, template, inputs)
+    write_metadata.(metadatafiles, template, inputs)
 end # function prepare_for_step
 function prepare_for_step(
     step::Val{2},
@@ -150,14 +150,14 @@ function prepare_for_step(
     isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
     energies = parse_total_energy.(previous_outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
-    generate_input(new_inputs, template, eos, pressures)
-    generate_script(
+    write_input(new_inputs, template, eos, pressures)
+    write_script(
         Shell("/bin/bash"),
         Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
         [SystemModule("intel-parallel-studio/2017")],
         pressures
     )
-    dump_metadata.(metadatafiles, template, new_inputs)
+    write_metadata.(metadatafiles, template, new_inputs)
 end # function prepare_for_step
 
 function postprocess(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
