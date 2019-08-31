@@ -32,7 +32,7 @@ using SlurmWorkloadFileGenerator.Shells
 
 using Express
 
-export update_alat_press, write_input, write_script, write_metadata, prepare, finish
+export update_alat_press, write_input, write_metadata, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureRelation, eos, pressure, 0..1000, Newton).interval.lo
@@ -68,25 +68,6 @@ function write_input(
     write_input.(inputs, template, eos, pressures, verbose)
 end # function write_input
 
-function write_script(shell::Shell, sbatch::Sbatch, modules, pressures::AbstractVecOrMat)
-    content = "#!$(string(shell.path))\n"
-    content *= scriptify(sbatch) * '\n'
-    content *= scriptify(modules) * '\n'
-    content *= """
-    for i in $(join(pressures, ' ')); do
-        (
-            cd vc_\$i || return
-            mpirun -np $(div(24, length(pressures))) pw.x -in vc_\$i.in > vc_\$i.out &
-            sleep 3
-        )
-    done
-    wait
-    """
-    open(sbatch.script, "r+") do io
-        write(io, content)
-    end
-end # function write_script
-
 function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
     metadata = Dict(
         "outdir" => object.control.outdir,
@@ -121,12 +102,6 @@ function prepare(
         @set! template.control.calculation = "scf"
     end
     write_input(inputs, template, trial_eos, pressures)
-    write_script(
-        Shell("/bin/bash"),
-        Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
-        [SystemModule("intel-parallel-studio/2017")],
-        pressures
-    )
     length(pressures) == length(metadatafiles) || throw(DimensionMismatch("The number of pressures should equal the number of metadata files!"))
     # Only `metadatafiles` and `inputs` are broadcasted
     write_metadata.(metadatafiles, template, inputs)
@@ -150,12 +125,6 @@ function prepare(
     volumes = prase_volume.(previous_outputs)
     eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
     write_input(new_inputs, template, eos, pressures)
-    write_script(
-        Shell("/bin/bash"),
-        Sbatch([NTASKS_PER_NODE(24), TIME("24:00:00"), NODES(2)], "job.sh"),
-        [SystemModule("intel-parallel-studio/2017")],
-        pressures
-    )
     write_metadata.(metadatafiles, template, new_inputs)
 end # function prepare
 
