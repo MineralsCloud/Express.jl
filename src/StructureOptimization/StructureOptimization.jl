@@ -30,7 +30,9 @@ using SlurmWorkloadFileGenerator.SystemModules
 using SlurmWorkloadFileGenerator.Scriptify
 using SlurmWorkloadFileGenerator.Shells
 
-export update_alat_press, write_input, write_script, write_metadata, prepare_for_step, postprocess
+using Express
+
+export update_alat_press, write_input, write_script, write_metadata, prepare, postprocess
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureRelation, eos, pressure, 0..1000, Newton).interval.lo
@@ -107,10 +109,9 @@ function write_metadata(output::AbstractString, object::PWscfInput, input::Abstr
     end
 end # function write_metadata
 
-prepare_for_step(step::Int, args...) = prepare_for_step(Val(step), args...)
-prepare_for_step(::Val, args...) = error("The only allowed steps are `1` and `2`!")
-function prepare_for_step(
-    step::Val{1},
+prepare(::Step, args...) = error("The only allowed steps are `1` and `2`!")
+function prepare(
+    step::Step{1},
     inputs::AbstractVector,
     template::PWscfInput,
     trial_eos::EquationOfState,
@@ -130,9 +131,9 @@ function prepare_for_step(
         pressures
     )
     write_metadata.(metadatafiles, template, inputs)
-end # function prepare_for_step
-function prepare_for_step(
-    step::Val{2},
+end # function prepare
+function prepare(
+    step::Step{2},
     new_inputs::AbstractVector,
     previous_outputs::AbstractVector,
     template::PWscfInput,
@@ -158,7 +159,7 @@ function prepare_for_step(
         pressures
     )
     write_metadata.(metadatafiles, template, new_inputs)
-end # function prepare_for_step
+end # function prepare
 
 function postprocess(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
     energies = parse_total_energy.(outputs)
