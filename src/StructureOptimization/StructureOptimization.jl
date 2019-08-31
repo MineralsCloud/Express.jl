@@ -32,7 +32,7 @@ using SlurmWorkloadFileGenerator.Shells
 
 using Express
 
-export update_alat_press, write_input, write_script, write_metadata, prepare, postprocess
+export update_alat_press, write_input, write_script, write_metadata, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = find_volume(PressureRelation, eos, pressure, 0..1000, Newton).interval.lo
@@ -161,10 +161,10 @@ function prepare(
     write_metadata.(metadatafiles, template, new_inputs)
 end # function prepare
 
-function postprocess(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
+function finish(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
     energies = parse_total_energy.(outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
     return eos
-end # function postprocess
+end # function finish
 
 end
