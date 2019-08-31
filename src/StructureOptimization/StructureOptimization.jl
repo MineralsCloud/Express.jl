@@ -118,7 +118,7 @@ function prepare(
     pressures::AbstractVector,
     metadatafiles::AbstractVector
 )
-    isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     if template.control.calculation != "scf"
         @warn "The calculation type is $(template.control.calculation), not \"scf\"! We will set it for you."
         @set! template.control.calculation = "scf"
@@ -148,7 +148,7 @@ function prepare(
         @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
         @set! template.control.calculation = "vc-relax"
     end
-    isnothing(template.cell_parameters) && (template = autogenerate_cell_parameters(template))
+    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     energies = parse_total_energy.(previous_outputs)
     eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
     write_input(new_inputs, template, eos, pressures)
