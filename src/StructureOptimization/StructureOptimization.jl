@@ -138,18 +138,17 @@ function prepare(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
-    volumes::AbstractVector,
     metadatafiles::AbstractVector
 )
-    length(new_inputs) == length(previous_outputs) == length(pressures) ==
-    length(volumes) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
+    length(new_inputs) == length(previous_outputs) == length(pressures) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
     if template.control.calculation != "vc-relax"
         @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
         @set! template.control.calculation = "vc-relax"
     end
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     energies = parse_total_energy.(previous_outputs)
-    eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
+    volumes = prase_volume.(previous_outputs)
+    eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
     write_input(new_inputs, template, eos, pressures)
     write_script(
         Shell("/bin/bash"),
@@ -162,7 +161,7 @@ end # function prepare
 
 function finish(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
     energies = parse_total_energy.(outputs)
-    eos = lsqfit(EnergyTarget, trial_eos, volumes, energies)
+    eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
     return eos
 end # function finish
 
