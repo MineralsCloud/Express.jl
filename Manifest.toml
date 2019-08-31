@@ -112,8 +112,8 @@ version = "0.21.1"
 
 [[EquationsOfState]]
 deps = ["InteractiveUtils", "IntervalRootFinding", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "StaticArrays"]
-git-tree-sha1 = "85545c82f3a9b7808caa3d711b3f084d0047316c"
-repo-rev = "master"
+git-tree-sha1 = "c169d864af1cf4089ea726bedd9d3c2b0e1a1308"
+repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
@@ -308,8 +308,8 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
-deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters", "Setfield"]
-git-tree-sha1 = "e0ecc9355ff06ba0797562976a1ad8174be6be56"
+deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
+git-tree-sha1 = "4d04ffcc078c52f03ac8f1e824033ea418c337a2"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
