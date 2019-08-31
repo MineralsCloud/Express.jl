@@ -94,15 +94,11 @@ function write_metadata(output::AbstractString, object::PWscfInput, input::Abstr
         "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
         "input" => input
     )
-    metadata["wfcdir"] = if object.control.wf_collect
-        metadata["outdir"]
-    else
-        object.control.wfcdir
-    end
+    metadata["wfcdir"] = object.control.wf_collect ? metadata["outdir"] : object.control.wfcdir
+    metadata["wfc_namepattern"] = metadata["prefix"] * ".wfc"
     if object.control.lkpoint_dir
         metadata["lkpoint_dir"] = metadata["outdir"] * "/" * metadata["prefix"] * ".save"
     end
-    metadata["wfc_namepattern"] = metadata["prefix"] * ".wfc"
     lowercase(splitext(output)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
     open(output, "r+") do io
         JSON.print(io, metadata)
