@@ -116,7 +116,7 @@ function prepare(
         @set! template.control.calculation = "vc-relax"
     end
     # Prepare a "crude guess" equation of state
-    eos = finish(Step(1), previous_outputs, trial_eos)
+    eos = finish(previous_outputs, trial_eos)
     # Write input and metadata files
     for (input, pressure) in zip(new_inputs, pressures)
         write_input(input, template, eos, pressure, verbose)
@@ -126,12 +126,7 @@ function prepare(
     end
 end # function prepare
 
-function finish(step::Step{1}, outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
-    energies = parse_total_energy.(outputs)
-    volumes = prase_volume.(outputs)
-    return lsqfit(EnergyForm(), trial_eos, volumes, energies)
-end # function finish
-function finish(step::Step{2}, outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
+function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
     energies = parse_total_energy.(outputs)
     volumes = prase_volume.(outputs)
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
