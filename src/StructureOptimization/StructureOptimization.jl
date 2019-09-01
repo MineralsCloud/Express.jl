@@ -84,12 +84,14 @@ function prepare(
     pressures::AbstractVector,
     metadatafiles::AbstractVector
 )
+    # Checking parameters
     @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     if template.control.calculation != "scf"
         @warn "The calculation type is $(template.control.calculation), not \"scf\"! We will set it for you."
         @set! template.control.calculation = "scf"
     end
+    # Write input and metadata files
     for (input, pressure) in zip(inputs, pressures)
         write_input(input, template, eos, pressure, verbose)
     end
@@ -106,15 +108,18 @@ function prepare(
     pressures::AbstractVector,
     metadatafiles::AbstractVector
 )
+    # Checking parameters
     @assert length(new_inputs) == length(previous_outputs) == length(pressures) == length(metadatafiles) "The inputs, outputs, pressures and the metadata files must be the same size!"
+    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     if template.control.calculation != "vc-relax"
         @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
         @set! template.control.calculation = "vc-relax"
     end
-    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
+    # Prepare a "crude guess" equation of state
     energies = parse_total_energy.(previous_outputs)
     volumes = prase_volume.(previous_outputs)
     eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
+    # Write input and metadata files
     for (input, pressure) in zip(new_inputs, pressures)
         write_input(input, template, eos, pressure, verbose)
     end
