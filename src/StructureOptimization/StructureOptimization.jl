@@ -115,11 +115,9 @@ function prepare(
         @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
         @set! template.control.calculation = "vc-relax"
     end
-    # Prepare a "crude guess" equation of state
-    eos = finish(previous_outputs, trial_eos)
     # Write input and metadata files
     for (input, pressure) in zip(new_inputs, pressures)
-        write_input(input, template, eos, pressure, verbose)
+        write_input(input, template, trial_eos, pressure, verbose)
     end
     for (metadata, input) in zip(metadatafiles, inputs)
         write_metadata(metadata, template, input)
@@ -131,5 +129,13 @@ function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOf
     volumes = prase_volume.(outputs)
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
 end # function finish
+
+# This is what the web service does
+function workflow(args)
+    prepare(Step(1), inputs, template, trial_eos, pressures, metadatafiles)
+    trial_eos = finish(outputs, trial_eos)
+    prepare(Step(2), inputs, previous_outputs, template, trial_eos, pressures, metadatafiles)
+    return finish(outputs, trial_eos)
+end # function workflow
 
 end
