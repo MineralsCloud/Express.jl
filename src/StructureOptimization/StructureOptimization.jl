@@ -65,7 +65,7 @@ function write_input(
 )
     length(inputs) == length(pressures) || throw(DimensionMismatch("The number of inputs should equal the number of pressures!"))
     # Only `inputs` and `pressures` are broadcasted
-    write_input.(inputs, template, eos, pressures, verbose)
+    [write_input(input, template, eos, pressure, verbose) for (input, pressure) in zip(inputs, pressures)]
 end # function write_input
 
 function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
@@ -102,9 +102,9 @@ function prepare(
         @set! template.control.calculation = "scf"
     end
     write_input(inputs, template, trial_eos, pressures)
-    length(pressures) == length(metadatafiles) || throw(DimensionMismatch("The number of pressures should equal the number of metadata files!"))
+    length(metadatafiles) == length(inputs) || throw(DimensionMismatch("The number of metadata files should equal the number of inputs!"))
     # Only `metadatafiles` and `inputs` are broadcasted
-    write_metadata.(metadatafiles, template, inputs)
+    [write_metadata(metadata, template, input) for (metadata, input) in zip(metadatafiles, inputs)]
 end # function prepare
 function prepare(
     step::Step{2},
@@ -125,7 +125,7 @@ function prepare(
     volumes = prase_volume.(previous_outputs)
     eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
     write_input(new_inputs, template, eos, pressures)
-    write_metadata.(metadatafiles, template, new_inputs)
+    [write_metadata(metadata, template, input) for (metadata, input) in zip(metadatafiles, inputs)]
 end # function prepare
 
 function finish(outputs::AbstractVector, trial_eos)
