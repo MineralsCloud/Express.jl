@@ -78,11 +78,11 @@ end # function write_metadata
 
 function prepare(
     step::Step{1},
-    inputs::AbstractVector,
+    inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector,
-    metadatafiles::AbstractVector
+    pressures::AbstractVector{<:Real},
+    metadatafiles::AbstractVector{<:AbstractString}
 )
     # Checking parameters
     @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
@@ -101,12 +101,12 @@ function prepare(
 end # function prepare
 function prepare(
     step::Step{2},
-    new_inputs::AbstractVector,
-    previous_outputs::AbstractVector,
+    new_inputs::AbstractVector{<:AbstractString},
+    previous_outputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector,
-    metadatafiles::AbstractVector
+    pressures::AbstractVector{<:Real},
+    metadatafiles::AbstractVector{<:AbstractString}
 )
     # Checking parameters
     @assert length(new_inputs) == length(previous_outputs) == length(pressures) == length(metadatafiles) "The inputs, outputs, pressures and the metadata files must be the same size!"
@@ -128,7 +128,7 @@ function prepare(
     end
 end # function prepare
 
-function finish(outputs::AbstractVector, trial_eos)
+function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
     energies = parse_total_energy.(outputs)
     volumes = prase_volume.(outputs)
     eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
