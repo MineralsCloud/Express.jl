@@ -86,7 +86,6 @@ function write_metadata(output::AbstractString, object::PWscfInput, input::Abstr
     end
 end # function write_metadata
 
-prepare(::Step, args...) = error("The only allowed steps are `1` and `2`!")
 function prepare(
     step::Step{1},
     inputs::AbstractVector,
