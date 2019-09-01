@@ -128,8 +128,9 @@ function prepare(
     write_metadata.(metadatafiles, template, new_inputs)
 end # function prepare
 
-function finish(outputs::AbstractVector, trial_eos, volumes::AbstractVector)
+function finish(outputs::AbstractVector, trial_eos)
     energies = parse_total_energy.(outputs)
+    volumes = prase_volume.(outputs)
     eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
     return eos
 end # function finish
