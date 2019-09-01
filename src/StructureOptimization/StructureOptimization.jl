@@ -56,18 +56,6 @@ function write_input(
         write(io, to_qe(object, verbose = verbose))
     end
 end # function write_input
-function write_input(
-    inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
-    eos::EquationOfState,
-    pressures::AbstractVector{<:Real},
-    verbose::Bool = false
-)
-    length(inputs) == length(pressures) || throw(DimensionMismatch("The number of inputs should equal the number of pressures!"))
-    for (input, pressure) in zip(inputs, pressures)
-        write_input(input, template, eos, pressure, verbose)
-    end
-end # function write_input
 
 function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
     metadata = Dict(
