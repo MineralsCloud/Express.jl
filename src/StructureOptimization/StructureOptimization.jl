@@ -96,13 +96,15 @@ function prepare(
     pressures::AbstractVector,
     metadatafiles::AbstractVector
 )
+    @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     if template.control.calculation != "scf"
         @warn "The calculation type is $(template.control.calculation), not \"scf\"! We will set it for you."
         @set! template.control.calculation = "scf"
     end
-    write_input(inputs, template, trial_eos, pressures)
-    length(metadatafiles) == length(inputs) || throw(DimensionMismatch("The number of metadata files should equal the number of inputs!"))
+    for (input, pressure) in zip(inputs, pressures)
+        write_input(input, template, eos, pressure, verbose)
+    end
     for (metadata, input) in zip(metadatafiles, inputs)
         write_metadata(metadata, template, input)
     end
@@ -116,7 +118,7 @@ function prepare(
     pressures::AbstractVector,
     metadatafiles::AbstractVector
 )
-    length(new_inputs) == length(previous_outputs) == length(pressures) && throw(DimensionMismatch("The previous inputs, new inputs, the pressures to be applied, and the volumes of that must have the same length!"))
+    @assert length(new_inputs) == length(previous_outputs) == length(pressures) == length(metadatafiles) "The inputs, outputs, pressures and the metadata files must be the same size!"
     if template.control.calculation != "vc-relax"
         @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
         @set! template.control.calculation = "vc-relax"
@@ -125,7 +127,9 @@ function prepare(
     energies = parse_total_energy.(previous_outputs)
     volumes = prase_volume.(previous_outputs)
     eos = lsqfit(EnergyForm(), trial_eos, volumes, energies)
-    write_input(new_inputs, template, eos, pressures)
+    for (input, pressure) in zip(new_inputs, pressures)
+        write_input(input, template, eos, pressure, verbose)
+    end
     for (metadata, input) in zip(metadatafiles, inputs)
         write_metadata(metadata, template, input)
     end
