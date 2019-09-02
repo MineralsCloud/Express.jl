@@ -105,8 +105,8 @@ uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.1"
 
 [[EquationsOfState]]
-deps = ["InteractiveUtils", "IntervalRootFinding", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "StaticArrays"]
-git-tree-sha1 = "e43136fbb0314068361ca433e06f52c5dfdc2ae8"
+deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "Roots", "StaticArrays"]
+git-tree-sha1 = "030dacca64c397dcb0a887691ee9f7febe68a720"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -321,6 +321,12 @@ deps = ["BinaryProvider", "Libdl", "Random", "Statistics", "Test"]
 git-tree-sha1 = "9a6c758cdf73036c3239b0afbea790def1dabff9"
 uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
 version = "0.5.0"
+
+[[Roots]]
+deps = ["Printf"]
+git-tree-sha1 = "9cc4b586c71f9aea25312b94be8c195f119b0ec3"
+uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+version = "0.8.3"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
