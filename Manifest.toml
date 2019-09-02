@@ -164,6 +164,12 @@ git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
+[[Kaleido]]
+deps = ["Requires", "Setfield"]
+git-tree-sha1 = "31ec44b443069b53edd7b8a903462d2f32ea6255"
+uuid = "caafb194-7e8d-11e9-2724-d5981dd0806d"
+version = "0.1.0"
+
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
