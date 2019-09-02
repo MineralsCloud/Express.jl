@@ -27,12 +27,6 @@ git-tree-sha1 = "c7361ce8a2129f20b0e05a89f7070820cfed6648"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 version = "0.5.6"
 
-[[CRlibm]]
-deps = ["Libdl", "Test"]
-git-tree-sha1 = "805164abcd31facf3a7e5b7d803a0d16b23329bc"
-uuid = "96374032-68de-5a5b-8d9e-752f78720389"
-version = "0.7.1"
-
 [[CSTParser]]
 deps = ["Tokenize"]
 git-tree-sha1 = "c69698c3d4a7255bc1b4bc2afc09f59db910243b"
@@ -56,12 +50,6 @@ deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", 
 git-tree-sha1 = "84aa74986c5b9b898b0d1acaf3258741ee64754f"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.1.0"
-
-[[Conda]]
-deps = ["JSON", "VersionParsing"]
-git-tree-sha1 = "9a11d428dcdc425072af4aea19ab1e8c3e01c032"
-uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
-version = "1.3.0"
 
 [[DataAPI]]
 git-tree-sha1 = "8903f0219d3472543fc4b2f5ebaf675a07f817c0"
@@ -111,35 +99,12 @@ uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.1"
 
 [[EquationsOfState]]
-deps = ["InteractiveUtils", "IntervalRootFinding", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "StaticArrays"]
-git-tree-sha1 = "c169d864af1cf4089ea726bedd9d3c2b0e1a1308"
+deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "Roots", "StaticArrays"]
+git-tree-sha1 = "030dacca64c397dcb0a887691ee9f7febe68a720"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
-
-[[ErrorfreeArithmetic]]
-git-tree-sha1 = "a2b7d5a7962e5bfaab0e2e87c9cde7d3087f4e2c"
-uuid = "90fa49ef-747e-5e6f-a989-263ba693cf1a"
-version = "0.4.0"
-
-[[FastRounding]]
-deps = ["ErrorfreeArithmetic", "Test"]
-git-tree-sha1 = "224175e213fd4fe112db3eea05d66b308dc2bf6b"
-uuid = "fa42c844-2597-5d31-933b-ebd51ab2693f"
-version = "0.2.0"
-
-[[FilePaths]]
-deps = ["FilePathsBase", "MacroTools", "Reexport", "URIParser"]
-git-tree-sha1 = "191796576b7f69cfe66d63b3d66a2741783204eb"
-uuid = "8fc22ac5-c921-52a6-82fd-178b2807b824"
-version = "0.8.0"
-
-[[FilePathsBase]]
-deps = ["Dates", "LinearAlgebra", "Printf", "Test", "UUIDs"]
-git-tree-sha1 = "2ee1d999c462425e2f848524f732ed51bc1ab63a"
-uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
-version = "0.6.2"
 
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
@@ -158,18 +123,6 @@ version = "0.10.3"
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[IntervalArithmetic]]
-deps = ["CRlibm", "FastRounding", "LinearAlgebra", "Markdown", "RecipesBase", "SetRounding", "StaticArrays"]
-git-tree-sha1 = "f97d8d63c3f849b0f545062de4634bc9f100d8ec"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.16.1"
-
-[[IntervalRootFinding]]
-deps = ["ForwardDiff", "IntervalArithmetic", "LinearAlgebra", "Polynomials", "StaticArrays", "Test"]
-git-tree-sha1 = "ae84fdca524b195d144d8cb7eaee692206938f02"
-uuid = "d2bf35a9-74e0-55ec-b149-d360ff49b807"
-version = "0.4.0"
 
 [[IterTools]]
 git-tree-sha1 = "2ebe60d7343962966d1779a74a760f13217a6901"
@@ -269,9 +222,9 @@ version = "0.11.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "db2b35dedab3c0e46dc15996d170af07a5ab91c9"
+git-tree-sha1 = "ef0af6c8601db18c282d092ccbd2f01f3f0cd70b"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.6"
+version = "0.3.7"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -287,20 +240,6 @@ version = "0.5.2"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
-[[PyCall]]
-deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Pkg", "Serialization", "Statistics", "Test", "VersionParsing"]
-git-tree-sha1 = "6e5bac1b1faf3575731a6a5b76f638f2389561d3"
-uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-version = "1.91.2"
-
-[[PyFortran90Namelists]]
-deps = ["Conda", "Pkg", "PyCall"]
-git-tree-sha1 = "413259d9601b036ec7e7158ae6888e6586478bab"
-repo-rev = "master"
-repo-url = "https://github.com/singularitti/PyFortran90Namelists.jl.git"
-uuid = "e44308e6-bd5b-11e9-2850-49daf8f1ec40"
-version = "0.1.0"
-
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra", "Test"]
 git-tree-sha1 = "3ce467a8e76c6030d4c3786e7d3a73442017cdc0"
@@ -308,16 +247,16 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
-deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "IterTools", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
-git-tree-sha1 = "4d04ffcc078c52f03ac8f1e824033ea418c337a2"
+deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
+git-tree-sha1 = "9ceeec8d0a59953c5467980c6f40ad8e0582d5fb"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
-deps = ["Compat", "DataStructures", "FilePaths", "Fortran90Namelists", "Parameters", "PyFortran90Namelists", "QuantumESPRESSOBase", "Reexport"]
-git-tree-sha1 = "1b69dbc28be97c66498b89c8d11b886573733137"
+deps = ["Compat", "DataStructures", "Fortran90Namelists", "Parameters", "QuantumESPRESSOBase", "Reexport"]
+git-tree-sha1 = "158efb1e67f31912876a4399e9dd6bfbff207ea9"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -330,11 +269,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [[Random]]
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-
-[[RecipesBase]]
-git-tree-sha1 = "7bdce29bc9b2f5660a6e5e64d64d91ec941f6aa2"
-uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "0.7.0"
 
 [[Reexport]]
 deps = ["Pkg"]
@@ -354,17 +288,17 @@ git-tree-sha1 = "9a6c758cdf73036c3239b0afbea790def1dabff9"
 uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
 version = "0.5.0"
 
+[[Roots]]
+deps = ["Printf"]
+git-tree-sha1 = "9cc4b586c71f9aea25312b94be8c195f119b0ec3"
+uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+version = "0.8.3"
+
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
-
-[[SetRounding]]
-deps = ["Test"]
-git-tree-sha1 = "faca28c7937138d560ede5bfef2076d0cdf3584b"
-uuid = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
-version = "0.2.0"
 
 [[Setfield]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
@@ -450,9 +384,3 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
-
-[[VersionParsing]]
-deps = ["Compat"]
-git-tree-sha1 = "c9d5aa108588b978bd859554660c8a5c4f2f7669"
-uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
-version = "1.1.3"
