@@ -17,8 +17,6 @@ using EquationsOfState
 using EquationsOfState.Collections
 using EquationsOfState.NonlinearFitting
 using EquationsOfState.FindVolume
-using IntervalArithmetic
-using IntervalRootFinding
 import JSON
 using Kaleido: @batchlens
 using QuantumESPRESSOBase
