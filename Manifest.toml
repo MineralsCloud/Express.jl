@@ -27,12 +27,6 @@ git-tree-sha1 = "c7361ce8a2129f20b0e05a89f7070820cfed6648"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 version = "0.5.6"
 
-[[CRlibm]]
-deps = ["Libdl", "Test"]
-git-tree-sha1 = "805164abcd31facf3a7e5b7d803a0d16b23329bc"
-uuid = "96374032-68de-5a5b-8d9e-752f78720389"
-version = "0.7.1"
-
 [[CSTParser]]
 deps = ["Tokenize"]
 git-tree-sha1 = "c69698c3d4a7255bc1b4bc2afc09f59db910243b"
@@ -112,17 +106,6 @@ repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
 
-[[ErrorfreeArithmetic]]
-git-tree-sha1 = "a2b7d5a7962e5bfaab0e2e87c9cde7d3087f4e2c"
-uuid = "90fa49ef-747e-5e6f-a989-263ba693cf1a"
-version = "0.4.0"
-
-[[FastRounding]]
-deps = ["ErrorfreeArithmetic", "Test"]
-git-tree-sha1 = "224175e213fd4fe112db3eea05d66b308dc2bf6b"
-uuid = "fa42c844-2597-5d31-933b-ebd51ab2693f"
-version = "0.2.0"
-
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
 git-tree-sha1 = "5b4cf3e5ba15c9fb676dc36ccb953f3251a0d529"
@@ -140,18 +123,6 @@ version = "0.10.3"
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[IntervalArithmetic]]
-deps = ["CRlibm", "FastRounding", "LinearAlgebra", "Markdown", "RecipesBase", "SetRounding", "StaticArrays"]
-git-tree-sha1 = "f97d8d63c3f849b0f545062de4634bc9f100d8ec"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.16.1"
-
-[[IntervalRootFinding]]
-deps = ["ForwardDiff", "IntervalArithmetic", "LinearAlgebra", "Polynomials", "StaticArrays", "Test"]
-git-tree-sha1 = "ae84fdca524b195d144d8cb7eaee692206938f02"
-uuid = "d2bf35a9-74e0-55ec-b149-d360ff49b807"
-version = "0.4.0"
 
 [[IterTools]]
 git-tree-sha1 = "2ebe60d7343962966d1779a74a760f13217a6901"
@@ -299,11 +270,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
-[[RecipesBase]]
-git-tree-sha1 = "7bdce29bc9b2f5660a6e5e64d64d91ec941f6aa2"
-uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "0.7.0"
-
 [[Reexport]]
 deps = ["Pkg"]
 git-tree-sha1 = "7b1d07f411bc8ddb7977ec7f377b97b158514fe0"
@@ -333,12 +299,6 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
-
-[[SetRounding]]
-deps = ["Test"]
-git-tree-sha1 = "faca28c7937138d560ede5bfef2076d0cdf3584b"
-uuid = "3cc68bcd-71a2-5612-b932-767ffbe40ab0"
-version = "0.2.0"
 
 [[Setfield]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
