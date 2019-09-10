@@ -75,10 +75,8 @@ function prepare(
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     template = set_calculation(step, template)
     # Write input and metadata files
-    for (input, pressure) in zip(inputs, pressures)
+    for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
         write_input(input, template, eos, pressure, verbose)
-    end
-    for (metadata, input) in zip(metadatafiles, inputs)
         write_metadata(metadata, template, input)
     end
 end # function prepare
