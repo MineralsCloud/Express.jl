@@ -59,13 +59,13 @@ end # function write_input
 which_calculation(step::Step{1}) = "scf"
 which_calculation(step::Step{2}) = "vc-relax"
 
-function set_calculation!(step::Step, template::PWscfInput)
+function set_calculation(step::Step, template::PWscfInput)
     type = which_calculation(step)
     if template.control.calculation != calculation
         @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
     end
-    @set template.control.calculation = type
-end # function set_calculation!
+    @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
+end # function set_calculation
 
 function prepare(
     step::Step,
@@ -78,7 +78,7 @@ function prepare(
     # Checking parameters
     @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
-    template = set_calculation!(step, template)
+    template = set_calculation(step, template)
     # Write input and metadata files
     for (input, pressure) in zip(inputs, pressures)
         write_input(input, template, eos, pressure, verbose)
