@@ -21,12 +21,7 @@ import JSON
 using Kaleido: @batchlens
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
-using QuantumESPRESSOParsers.InputParsers
 using Setfield
-using SlurmWorkloadFileGenerator.Commands
-using SlurmWorkloadFileGenerator.SystemModules
-using SlurmWorkloadFileGenerator.Scriptify
-using SlurmWorkloadFileGenerator.Shells
 
 using Express
 using Express.SelfConsistentField: write_metadata
