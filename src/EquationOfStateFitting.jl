@@ -1,5 +1,5 @@
 """
-# module StructureOptimization
+# module EquationOfStateFitting
 
 
 
@@ -9,7 +9,7 @@
 julia>
 ```
 """
-module StructureOptimization
+module EquationOfStateFitting
 
 using LinearAlgebra
 

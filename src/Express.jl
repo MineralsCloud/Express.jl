@@ -1,6 +1,6 @@
 module Express
 
 include("prelude.jl")
-include("StructureOptimization.jl")
+include("EquationOfStateFitting.jl")
 
 end # module
