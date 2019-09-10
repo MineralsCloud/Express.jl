@@ -17,7 +17,6 @@ using EquationsOfState
 using EquationsOfState.Collections
 using EquationsOfState.NonlinearFitting
 using EquationsOfState.FindVolume
-import JSON
 using Kaleido: @batchlens
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf

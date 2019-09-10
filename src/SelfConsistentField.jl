@@ -11,6 +11,7 @@ julia>
 """
 module SelfConsistentField
 
+import JSON
 using QuantumESPRESSOBase.Inputs.PWscf
 
 export write_metadata
