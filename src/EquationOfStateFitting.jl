@@ -32,9 +32,10 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
     volume = findvolume(PressureForm(), eos, pressure, (0, 1000), Order8())
     alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens begin
-        _.system.celldm ∘ _[$1]
-        _.cell.press
+        _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
+        _.cell.press             # Get the `template`'s `cell.press` value
     end
+    # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
     set(template, lenses, (alat, pressure))
 end # function update_alat_press
 
@@ -45,15 +46,19 @@ function write_input(
     pressure::Real,
     verbose::Bool = false
 )
+    # Get a new `object` from the `template`, with its `alat` and `pressure` changed
     object = update_alat_press(template, eos, pressure)
+    # Write the `object` to a Quantum ESPRESSO input file
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
     end
 end # function write_input
 
+# This is a helper function and should not be exported
 which_calculation(step::Step{1}) = "scf"
 which_calculation(step::Step{2}) = "vc-relax"
 
+# This is a helper function and should not be exported
 function set_calculation(step::Step, template::PWscfInput)
     type = which_calculation(step)
     if template.control.calculation != calculation
