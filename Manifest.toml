@@ -100,7 +100,7 @@ version = "0.21.1"
 
 [[EquationsOfState]]
 deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "Roots", "StaticArrays"]
-git-tree-sha1 = "030dacca64c397dcb0a887691ee9f7febe68a720"
+git-tree-sha1 = "7efd9de6903f1b15de486311c585538f86f34764"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -108,7 +108,7 @@ version = "2.0.0"
 
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
-git-tree-sha1 = "5b4cf3e5ba15c9fb676dc36ccb953f3251a0d529"
+git-tree-sha1 = "fafcbccc55fb8f9dc79fee9de1fab1762c8b6684"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/Fortran90Namelists.jl.git"
 uuid = "8fb689aa-71ff-4044-8071-0cffc910b57d"
@@ -176,10 +176,9 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Missings]]
-deps = ["SparseArrays", "Test"]
-git-tree-sha1 = "f0719736664b4358aa9ec173077d4285775f8007"
+git-tree-sha1 = "29858ce6c8ae629cf2d733bffa329619a1c843d0"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "0.4.1"
+version = "0.4.2"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -248,15 +247,15 @@ version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
-git-tree-sha1 = "9ceeec8d0a59953c5467980c6f40ad8e0582d5fb"
+git-tree-sha1 = "7979ba01748854a74cc8c771f5897d58c82cd571"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
-deps = ["Compat", "DataStructures", "Fortran90Namelists", "Parameters", "QuantumESPRESSOBase", "Reexport"]
-git-tree-sha1 = "158efb1e67f31912876a4399e9dd6bfbff207ea9"
+deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
+git-tree-sha1 = "c70ece778552b8c7a240be7e9a43714eacb9c89c"
 repo-rev = "develop"
 repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
