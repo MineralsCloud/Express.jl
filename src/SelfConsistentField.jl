@@ -11,6 +11,8 @@ julia>
 """
 module SelfConsistentField
 
+using QuantumESPRESSOBase.Inputs.PWscf
+
 export write_metadata
 
 function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
