@@ -110,7 +110,7 @@ version = "2.0.0"
 deps = ["Compat", "IterTools", "Parameters"]
 git-tree-sha1 = "fafcbccc55fb8f9dc79fee9de1fab1762c8b6684"
 repo-rev = "develop"
-repo-url = "https://github.com/singularitti/Fortran90Namelists.jl.git"
+repo-url = "git@github.com:singularitti/Fortran90Namelists.jl.git"
 uuid = "8fb689aa-71ff-4044-8071-0cffc910b57d"
 version = "0.1.0"
 
@@ -249,7 +249,7 @@ version = "2.0.3"
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
 git-tree-sha1 = "7979ba01748854a74cc8c771f5897d58c82cd571"
 repo-rev = "develop"
-repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
+repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
@@ -257,7 +257,7 @@ version = "0.1.0"
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
 git-tree-sha1 = "c70ece778552b8c7a240be7e9a43714eacb9c89c"
 repo-rev = "develop"
-repo-url = "https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
+repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
 version = "0.1.0"
 
