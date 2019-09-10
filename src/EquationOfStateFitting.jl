@@ -56,8 +56,19 @@ function write_input(
     end
 end # function write_input
 
+which_calculation(step::Step{1}) = "scf"
+which_calculation(step::Step{2}) = "vc-relax"
+
+function set_calculation!(step::Step, template::PWscfInput)
+    type = which_calculation(step)
+    if template.control.calculation != calculation
+        @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
+    end
+    @set template.control.calculation = type
+end # function set_calculation!
+
 function prepare(
-    step::Step{1},
+    step::Step,
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     trial_eos::EquationOfState,
@@ -67,38 +78,10 @@ function prepare(
     # Checking parameters
     @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
-    if template.control.calculation != "scf"
-        @warn "The calculation type is $(template.control.calculation), not \"scf\"! We will set it for you."
-        @set! template.control.calculation = "scf"
-    end
+    template = set_calculation!(step, template)
     # Write input and metadata files
     for (input, pressure) in zip(inputs, pressures)
         write_input(input, template, eos, pressure, verbose)
-    end
-    for (metadata, input) in zip(metadatafiles, inputs)
-        write_metadata(metadata, template, input)
-    end
-end # function prepare
-function prepare(
-    step::Step{2},
-    new_inputs::AbstractVector{<:AbstractString},
-    previous_outputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
-    trial_eos::EquationOfState,
-    pressures::AbstractVector{<:Real},
-    metadatafiles::AbstractVector{<:AbstractString}
-)
-    # Checking parameters
-    @assert length(new_inputs) == length(previous_outputs) == length(pressures) ==
-            length(metadatafiles) "The inputs, outputs, pressures and the metadata files must be the same size!"
-    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
-    if template.control.calculation != "vc-relax"
-        @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
-        @set! template.control.calculation = "vc-relax"
-    end
-    # Write input and metadata files
-    for (input, pressure) in zip(new_inputs, pressures)
-        write_input(input, template, trial_eos, pressure, verbose)
     end
     for (metadata, input) in zip(metadatafiles, inputs)
         write_metadata(metadata, template, input)
