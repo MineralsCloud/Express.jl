@@ -107,7 +107,8 @@ function prepare(
     metadatafiles::AbstractVector{<:AbstractString}
 )
     # Checking parameters
-    @assert length(new_inputs) == length(previous_outputs) == length(pressures) == length(metadatafiles) "The inputs, outputs, pressures and the metadata files must be the same size!"
+    @assert length(new_inputs) == length(previous_outputs) == length(pressures) ==
+            length(metadatafiles) "The inputs, outputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     if template.control.calculation != "vc-relax"
         @warn "The calculation type is $(template.control.calculation), not \"vc-relax\"! We will set it for you."
