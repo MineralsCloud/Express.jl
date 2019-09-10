@@ -1,10 +1,6 @@
 module Express
 
-export Step
-
-struct Step{N} end
-Step(n) = Step{n}()
-
+include("prelude.jl")
 include("StructureOptimization.jl")
 
 end # module
