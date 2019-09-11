@@ -12,12 +12,14 @@ julia>
 module BandStructure
 
 using Distances: euclidean
+using QuantumESPRESSOBase.Cards.PWscf
+using Setfield
 using ShiftedArrays: circshift, lead
 
 using Express
 using Express.SelfConsistentField: write_metadata
 
-export generate_path
+export generate_path, update_kpoints
 
 abstract type PathType end
 struct CircularPath <: PathType end
@@ -88,5 +90,10 @@ function _generate_path(nodes, densities, ::NoncircularPath)
     end
     return path
 end # function _generate_path
+
+function update_kpoints(template::PWscfInput, path::AbstractVector{<:AbstractVector})
+    data = map(x -> SpecialKPoint(x, 1), path)
+    @set template.k_points = KPointsCard(crystal_b, data)
+end # function update_kpoints
 
 end
