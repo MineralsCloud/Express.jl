@@ -309,14 +309,6 @@ version = "0.3.4"
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
 uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
-[[SlurmWorkloadFileGenerator]]
-deps = ["Parameters"]
-git-tree-sha1 = "f0a171cc4b328a3cb9c7bec35d2172b0661ceb18"
-repo-rev = "master"
-repo-url = "git@github.com:singularitti/SlurmWorkloadFileGenerator.jl.git"
-uuid = "da235a08-baf4-11e9-2387-6f19a530ddff"
-version = "0.1.0"
-
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
