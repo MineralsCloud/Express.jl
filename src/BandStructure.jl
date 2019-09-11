@@ -23,6 +23,36 @@ abstract type PathType end
 struct CircularPath <: PathType end
 struct NoncircularPath <: PathType end
 
+"""
+    generate_path(nodes, densities = 100 * ones(Int, length(nodes)))
+
+Generate a reciprocal space path from each node.
+
+# Arguments
+- `nodes::AbstractVector{<:AbstractVector}`: a vector of 3-element vectors.
+- `densities::AbstractVector{<:Integer}`: the default value is a circular path.
+
+# Examples
+```jldoctest
+julia> nodes = [
+    [0.0, 0.0, 0.5],
+    [0.0, 0.0, 0.0],
+    [0.3333333333, 0.3333333333, 0.5],
+    [0.3333333333, 0.3333333333, -0.5],
+    [0.3333333333, 0.3333333333, 0.0],
+    [0.5, 0.0, 0.5],
+    [0.5, 0.0, 0.0]
+];
+
+julia> BandStructure.generate_path(nodes)  # Generate a circular path
+693-element Array{Any,1}:
+...
+
+julia> BandStructure.generate_path(nodes, 100 * ones(Int, length(nodes) - 1))  # Generate a noncircular path
+594-element Array{Any,1}:
+...
+```
+"""
 function generate_path(nodes::AbstractVector{<:AbstractVector}, densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)))
     if length(densities) == length(nodes)
         _generate_path(nodes, densities, CircularPath())
