@@ -23,9 +23,9 @@ using Express.SelfConsistentField: write_metadata
 
 export generate_path, update_kpoints, prepare
 
-abstract type PathType end
-struct CircularPath <: PathType end
-struct NoncircularPath <: PathType end
+abstract type PathStyle end
+struct CircularPath <: PathStyle end
+struct NoncircularPath <: PathStyle end
 
 """
     generate_path(nodes, densities = 100 * ones(Int, length(nodes)))
