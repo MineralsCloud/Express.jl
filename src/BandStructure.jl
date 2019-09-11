@@ -19,7 +19,7 @@ using ShiftedArrays: circshift, lead
 using Express
 using Express.SelfConsistentField: write_metadata
 
-export generate_path, update_kpoints
+export generate_path, update_kpoints, prepare
 
 abstract type PathType end
 struct CircularPath <: PathType end
@@ -102,5 +102,53 @@ function update_kpoints(template::PWscfInput, path::AbstractVector{<:AbstractVec
     data = map(x -> SpecialKPoint(x, 1), path)
     @set template.k_points = KPointsCard("crystal_b", data)
 end # function update_kpoints
+
+# This is a helper function and should not be exported
+which_calculation(step::Step{1}) = "nscf"
+which_calculation(step::Step{2}) = "bands"
+
+# This is a helper function and should not be exported
+function set_calculation(step::Step, template::PWscfInput)
+    type = which_calculation(step)
+    if template.control.calculation != calculation
+        @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
+    end
+    @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
+end # function set_calculation
+
+function prepare(
+    step::Step{1},
+    inputs::AbstractVector{<:AbstractString},
+    template::PWscfInput,
+    metadatafiles::AbstractVector{<:AbstractString}
+)
+    # Checking parameters
+    @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
+    template = set_calculation(step, template)
+    # Write input and metadata files
+    for (input, metadata) in zip(inputs, metadatafiles)
+        write_metadata(metadata, template, input)
+    end
+end # function prepare
+function prepare(
+    step::Step{2},
+    inputs::AbstractVector{<:AbstractString},
+    template::PWscfInput,
+    nodes::AbstractVector{<:AbstractVector},
+    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes))
+    metadatafiles::AbstractVector{<:AbstractString}
+)
+    # Checking parameters
+    @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
+    template = set_calculation(step, template)
+    template = update_kpoints(template, nodes, densities)
+    # Write input and metadata files
+    for (input, metadata) in zip(inputs, metadatafiles)
+        open(input, "r+") do io
+            write(io, to_qe(object))
+        end
+        write_metadata(metadata, template, input)
+    end
+end # function prepare
 
 end
