@@ -137,8 +137,8 @@ function prepare(
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     nodes::AbstractVector{<:AbstractVector},
-    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes))
-    metadatafiles::AbstractVector{<:AbstractString}
+    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)),
+    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs)
 )
     # Checking parameters
     @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
