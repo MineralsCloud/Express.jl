@@ -91,9 +91,16 @@ function _generate_path(nodes, densities, ::NoncircularPath)
     return path
 end # function _generate_path
 
+function update_kpoints(
+    template::PWscfInput,
+    nodes::AbstractVector{<:AbstractVector},
+    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes))
+)
+    update_kpoints(template, generate_path(nodes, densities))
+end # function update_kpoints
 function update_kpoints(template::PWscfInput, path::AbstractVector{<:AbstractVector})
     data = map(x -> SpecialKPoint(x, 1), path)
-    @set template.k_points = KPointsCard(crystal_b, data)
+    @set template.k_points = KPointsCard("crystal_b", data)
 end # function update_kpoints
 
 end
