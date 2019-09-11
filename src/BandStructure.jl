@@ -13,6 +13,7 @@ module BandStructure
 
 using Distances: euclidean
 using QuantumESPRESSOBase.Cards.PWscf
+using QuantumESPRESSOBase.Inputs.PWscf
 using Setfield
 using ShiftedArrays: circshift, lead
 
