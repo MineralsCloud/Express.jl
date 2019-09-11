@@ -4,7 +4,6 @@ authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
 
 [deps]
-Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
 EquationsOfState = "0438fec6-b81c-52d9-9651-d286848f50a8"
 Fortran90Namelists = "8fb689aa-71ff-4044-8071-0cffc910b57d"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
