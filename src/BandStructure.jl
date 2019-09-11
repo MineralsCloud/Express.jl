@@ -13,6 +13,7 @@ module BandStructure
 
 using Distances: euclidean
 using QuantumESPRESSOBase.Cards.PWscf
+using QuantumESPRESSOBase.Namelists.PWscf
 using QuantumESPRESSOBase.Inputs.PWscf
 using Setfield
 using ShiftedArrays: circshift, lead
@@ -151,5 +152,18 @@ function prepare(
         write_metadata(metadata, template, input)
     end
 end # function prepare
+function prepare(
+    step::Step{3},
+    inputs::AbstractVector{<:AbstractString},
+    template::BandsNamelist,
+    metadatafiles::AbstractVector{<:AbstractString}
+)
+    for (input, metadata) in zip(inputs, metadatafiles)
+        open(input, "r+") do io
+            write(io, to_qe(template))
+        end
+        write_metadata(metadata, template, input)
+    end
+end # function prepare
 
 end
