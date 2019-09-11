@@ -11,7 +11,6 @@ julia>
 """
 module BandStructure
 
-using Distances: euclidean
 using QuantumESPRESSOBase.Cards.PWscf
 using QuantumESPRESSOBase.Namelists.PWscf
 using QuantumESPRESSOBase.Inputs.PWscf
@@ -26,6 +25,9 @@ export generate_path, update_kpoints, prepare
 abstract type PathStyle end
 struct CircularPath <: PathStyle end
 struct NoncircularPath <: PathStyle end
+
+# This is a helper function and should not be exported
+euclidean(x, y) = sqrt(sum((x - y) .^ 2))
 
 """
     generate_path(nodes, densities = 100 * ones(Int, length(nodes)))
