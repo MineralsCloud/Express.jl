@@ -147,7 +147,7 @@ function prepare(
     # Write input and metadata files
     for (input, metadata) in zip(inputs, metadatafiles)
         open(input, "r+") do io
-            write(io, to_qe(object))
+            write(io, to_qe(template))
         end
         write_metadata(metadata, template, input)
     end
