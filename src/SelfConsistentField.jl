@@ -17,7 +17,7 @@ using QuantumESPRESSOBase.Inputs.PWscf
 export write_metadata
 
 function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
-    metadata = Dict(
+    metadata = Dict{String,Any}(
         "outdir" => object.control.outdir,
         "prefix" => object.control.prefix,
         "pseudo_dir" => object.control.pseudo_dir,
