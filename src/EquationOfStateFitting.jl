@@ -97,7 +97,7 @@ end # function finish
 # function workflow(args)
 #     prepare(Step(1), inputs, template, trial_eos, pressures, metadatafiles)
 #     trial_eos = finish(outputs, trial_eos)
-#     prepare(Step(2), inputs, previous_outputs, template, trial_eos, pressures, metadatafiles)
+#     prepare(Step(2), inputs, template, trial_eos, pressures, metadatafiles)
 #     return finish(outputs, trial_eos)
 # end # function workflow
 
