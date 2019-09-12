@@ -60,7 +60,7 @@ which_calculation(step::Step{2}) = "vc-relax"
 # This is a helper function and should not be exported
 function set_calculation(step::Step, template::PWscfInput)
     type = which_calculation(step)
-    if template.control.calculation != calculation
+    if template.control.calculation != type
         @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
     end
     @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
@@ -72,7 +72,8 @@ function prepare(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector{<:Real},
-    metadatafiles::AbstractVector{<:AbstractString}
+    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
+    verbose::Bool = false
 )
     # Checking parameters
     @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
@@ -80,7 +81,7 @@ function prepare(
     template = set_calculation(step, template)
     # Write input and metadata files
     for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
-        write_input(input, template, eos, pressure, verbose)
+        write_input(input, template, trial_eos, pressure, verbose)
         write_metadata(metadata, template, input)
     end
 end # function prepare
