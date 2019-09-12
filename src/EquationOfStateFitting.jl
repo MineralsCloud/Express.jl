@@ -88,8 +88,15 @@ function prepare(
 end # function prepare
 
 function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
-    energies = map(last ∘ read_total_energy, outputs)
-    volumes = map(det ∘ last ∘ read_cell_parameters, outputs)
+    energies = Float64[]
+    volumes = Float64[]
+    for output in outputs
+        open(output, "r") do io
+            s = read(io, String)
+            push!(energies, (last ∘ read_total_energy)(s))
+            push!(volumes, (det ∘ last ∘ read_cell_parameters)(s))
+        end
+    end
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
 end # function finish
 
