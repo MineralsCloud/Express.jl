@@ -20,6 +20,7 @@ using EquationsOfState.FindVolume
 using Kaleido: @batchlens
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
+using QuantumESPRESSOParsers.OutputParsers.PWscf
 using Setfield
 
 using Express
@@ -87,8 +88,8 @@ function prepare(
 end # function prepare
 
 function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
-    energies = parse_total_energy.(outputs)
-    volumes = prase_volume.(outputs)
+    energies = map(last ∘ read_total_energy, outputs)
+    volumes = map(det ∘ last ∘ read_cell_parameters, outputs)
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
 end # function finish
 
