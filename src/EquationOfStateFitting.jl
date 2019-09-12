@@ -93,6 +93,7 @@ function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOf
     for output in outputs
         open(output, "r") do io
             s = read(io, String)
+            isjobdone(s) || @warn "Job is not finished!"
             push!(energies, (last ∘ read_total_energy)(s))
             push!(volumes, (det ∘ last ∘ read_cell_parameters)(s))
         end
