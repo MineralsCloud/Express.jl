@@ -27,7 +27,7 @@ using Setfield: set, @lens
 using Express: Step
 using Express.SelfConsistentField: write_metadata
 
-export update_alat_press, write_input, prepare, finish
+export update_alat_press, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = findvolume(PressureForm(), eos, pressure, (0, 1000), Order8())
@@ -39,22 +39,6 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
     return set(template, lenses, (alat, pressure))
 end # function update_alat_press
-
-function write_input(
-    input::AbstractString,
-    template::PWscfInput,
-    eos::EquationOfState,
-    pressure::Real,
-    verbose::Bool = false
-)
-    # Get a new `object` from the `template`, with its `alat` and `pressure` changed
-    object = update_alat_press(template, eos, pressure)
-    # Write the `object` to a Quantum ESPRESSO input file
-    open(input, "r+") do io
-        write(io, to_qe(object, verbose = verbose))
-    end
-    return
-end # function write_input
 
 # This is a helper function and should not be exported
 _calculationof(step::Step{1}) = "scf"
@@ -85,7 +69,10 @@ function prepare(
     template = _set_calculation(step, template)
     # Write input and metadata files
     for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
-        write_input(input, template, trial_eos, pressure, verbose)
+        # Get a new `object` from the `template`, with its `alat` and `pressure` changed
+        object = update_alat_press(template, trial_eos, pressure)
+        # Write the `object` to a Quantum ESPRESSO input file
+        write(input, to_qe(object, verbose = verbose))
         write_metadata(metadata, template, input)
     end
     return
