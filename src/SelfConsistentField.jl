@@ -30,6 +30,7 @@ function write_metadata(file::AbstractString, input::AbstractString, object::PWs
         metadata["lkpoint_dir"] = metadata["outdir"] * "/" * metadata["prefix"] * ".save"
     end
     lowercase(splitext(file)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
+    ispath(file) || touch(file)
     open(file, "r+") do io
         JSON.print(io, metadata)
     end
