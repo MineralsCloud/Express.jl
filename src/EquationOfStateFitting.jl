@@ -54,6 +54,12 @@ function _set_calculation(step::Step, template::PWscfInput)
     return set(template, lens, type)  # Return a new `template` whose `control.calculation` is `type`
 end # function _set_calculation
 
+# This is a helper function and should not be exported
+function _validate(step::Step, template::PWscfInput)
+    template = _set_calculation(step, template)
+    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
+end # function _validate
+
 function prepare(
     step::Step,
     inputs::AbstractVector{<:AbstractString},
@@ -63,16 +69,14 @@ function prepare(
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
-    # Checking parameters
+    # Check parameters
     @assert(length(inputs) == length(pressures) == length(metadatafiles), "The inputs, pressures and the metadata files must be the same size!")
-    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
-    template = _set_calculation(step, template)
-    # Write input and metadata files
+    template = _validate(step, template)
+    # Write input and metadata
     for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
-        # Write the `object` to a Quantum ESPRESSO input file
-        write(input, to_qe(object, verbose = verbose))
+        write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
         write_metadata(metadata, template, input)
     end
     return
