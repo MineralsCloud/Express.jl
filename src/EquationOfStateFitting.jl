@@ -80,7 +80,7 @@ function prepare(
     verbose::Bool = false
 )
     # Checking parameters
-    @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
+    @assert(length(inputs) == length(pressures) == length(metadatafiles), "The inputs, pressures and the metadata files must be the same size!")
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     template = _set_calculation(step, template)
     # Write input and metadata files
@@ -97,7 +97,7 @@ function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOf
     for output in outputs
         open(output, "r") do io
             s = read(io, String)
-            isjobdone(s) || @warn "Job is not finished!"
+            isjobdone(s) || @warn("Job is not finished!")
             push!(energies, (last ∘ read_total_energy)(s))
             push!(volumes, (det ∘ last ∘ read_cell_parameters)(s))
         end
