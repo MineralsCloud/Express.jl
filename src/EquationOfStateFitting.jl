@@ -57,15 +57,15 @@ function write_input(
 end # function write_input
 
 # This is a helper function and should not be exported
-_which_calculation(step::Step{1}) = "scf"
-_which_calculation(step::Step{2}) = "vc-relax"
+_calculationof(step::Step{1}) = "scf"
+_calculationof(step::Step{2}) = "vc-relax"
 
 # This is a helper function and should not be exported
 function _set_calculation(step::Step, template::PWscfInput)
-    type = _which_calculation(step)
+    type = _calculationof(step)
     lens = @lens _.control.calculation
     if get(template, lens) != type
-        @warn "The calculation type is $(get(template, lens)), not \"$type\"! We will set it for you."
+        @warn("The calculation type of step $step should be \"$type\", not $(get(template, lens))! I will set it for you.")
     end
     return set(template, lens, type)  # Return a new `template` whose `control.calculation` is `type`
 end # function _set_calculation
