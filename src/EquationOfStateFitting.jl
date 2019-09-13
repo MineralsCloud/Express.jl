@@ -21,7 +21,7 @@ using Kaleido: @batchlens
 using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.OutputParsers.PWscf
-using Setfield
+using Setfield: set, @lens
 
 using Express
 using Express.SelfConsistentField: write_metadata
@@ -31,12 +31,12 @@ export update_alat_press, write_input, prepare, finish
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
     volume = findvolume(PressureForm(), eos, pressure, (0, 1000), Order8())
     alat = cbrt(volume / det(template.cell_parameters.data))
-    lenses = @batchlens begin
+    lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
-    end
+    end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    set(template, lenses, (alat, pressure))
+    return set(template, lenses, (alat, pressure))
 end # function update_alat_press
 
 function write_input(
@@ -52,20 +52,22 @@ function write_input(
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
     end
+    return
 end # function write_input
 
 # This is a helper function and should not be exported
-which_calculation(step::Step{1}) = "scf"
-which_calculation(step::Step{2}) = "vc-relax"
+_which_calculation(step::Step{1}) = "scf"
+_which_calculation(step::Step{2}) = "vc-relax"
 
 # This is a helper function and should not be exported
-function set_calculation(step::Step, template::PWscfInput)
-    type = which_calculation(step)
-    if template.control.calculation != type
-        @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
+function _set_calculation(step::Step, template::PWscfInput)
+    type = _which_calculation(step)
+    lens = @lens _.control.calculation
+    if get(template, lens) != type
+        @warn "The calculation type is $(get(template, lens)), not \"$type\"! We will set it for you."
     end
-    @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
-end # function set_calculation
+    return set(template, lens, type)  # Return a new `template` whose `control.calculation` is `type`
+end # function _set_calculation
 
 function prepare(
     step::Step,
@@ -79,12 +81,13 @@ function prepare(
     # Checking parameters
     @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
-    template = set_calculation(step, template)
+    template = _set_calculation(step, template)
     # Write input and metadata files
     for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
         write_input(input, template, trial_eos, pressure, verbose)
         write_metadata(metadata, template, input)
     end
+    return
 end # function prepare
 
 function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
