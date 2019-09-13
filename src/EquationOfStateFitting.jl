@@ -11,19 +11,20 @@ julia>
 """
 module EquationOfStateFitting
 
-using LinearAlgebra
+using LinearAlgebra: det
 
+using Compat: isnothing
 using EquationsOfState
-using EquationsOfState.Collections
-using EquationsOfState.NonlinearFitting
-using EquationsOfState.FindVolume
+using EquationsOfState.Collections: EquationOfState
+using EquationsOfState.NonlinearFitting: lsqfit
+using EquationsOfState.FindVolume: findvolume
 using Kaleido: @batchlens
-using QuantumESPRESSOBase
-using QuantumESPRESSOBase.Inputs.PWscf
-using QuantumESPRESSOParsers.OutputParsers.PWscf
+using QuantumESPRESSOBase: to_qe
+using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy, read_cell_parameters
 using Setfield: set, @lens
 
-using Express
+using Express: Step
 using Express.SelfConsistentField: write_metadata
 
 export update_alat_press, write_input, prepare, finish
