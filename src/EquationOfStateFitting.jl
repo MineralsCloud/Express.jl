@@ -73,11 +73,11 @@ function prepare(
     @assert(length(inputs) == length(pressures) == length(metadatafiles), "The inputs, pressures and the metadata files must be the same size!")
     template = _validate(step, template)
     # Write input and metadata
-    for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
+    for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
-        write_metadata(metadata, template, input)
+        write_metadata(metadatafile, template, input)
     end
     return
 end # function prepare
