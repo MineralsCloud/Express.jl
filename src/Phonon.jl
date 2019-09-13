@@ -44,7 +44,7 @@ function prepare(
         end
     end
     for (metadata, input) in zip(metadatafiles, inputs)
-        write_metadata(metadata, template, input)
+        write_metadata(metadata, input, template)
     end
 end # function prepare
 

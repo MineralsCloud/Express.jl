@@ -77,7 +77,7 @@ function prepare(
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
-        write_metadata(metadatafile, template, input)
+        write_metadata(metadatafile, input, template)
     end
     return
 end # function prepare

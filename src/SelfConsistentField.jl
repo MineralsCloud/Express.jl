@@ -12,11 +12,11 @@ julia>
 module SelfConsistentField
 
 import JSON
-using QuantumESPRESSOBase.Inputs.PWscf
+using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 
 export write_metadata
 
-function write_metadata(output::AbstractString, object::PWscfInput, input::AbstractString)
+function write_metadata(file::AbstractString, input::AbstractString, object::PWscfInput)
     metadata = Dict{String,Any}(
         "outdir" => object.control.outdir,
         "prefix" => object.control.prefix,
@@ -29,8 +29,8 @@ function write_metadata(output::AbstractString, object::PWscfInput, input::Abstr
     if object.control.lkpoint_dir
         metadata["lkpoint_dir"] = metadata["outdir"] * "/" * metadata["prefix"] * ".save"
     end
-    lowercase(splitext(output)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
-    open(output, "r+") do io
+    lowercase(splitext(file)[2]) != ".json" && error("The file to be dumped must be a JSON file!")
+    open(file, "r+") do io
         JSON.print(io, metadata)
     end
 end # function write_metadata

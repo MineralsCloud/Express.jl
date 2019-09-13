@@ -124,7 +124,7 @@ function prepare(
     template = set_calculation(step, template)
     # Write input and metadata files
     for (input, metadata) in zip(inputs, metadatafiles)
-        write_metadata(metadata, template, input)
+        write_metadata(metadata, input, template)
     end
 end # function prepare
 function prepare(
@@ -144,7 +144,7 @@ function prepare(
         open(input, "r+") do io
             write(io, to_qe(template))
         end
-        write_metadata(metadata, template, input)
+        write_metadata(metadata, input, template)
     end
 end # function prepare
 function prepare(
@@ -157,7 +157,7 @@ function prepare(
         open(input, "r+") do io
             write(io, to_qe(template))
         end
-        write_metadata(metadata, template, input)
+        write_metadata(metadata, input, template)
     end
 end # function prepare
 
