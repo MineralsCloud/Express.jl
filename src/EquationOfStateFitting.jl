@@ -22,14 +22,15 @@ using QuantumESPRESSOBase
 using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.OutputParsers.PWscf
 using Setfield
+using Roots
 
 using Express
 using Express.SelfConsistentField: write_metadata
 
 export update_alat_press, write_input, prepare, finish
 
-function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
-    volume = findvolume(PressureForm(), eos, pressure, (0, 1000), Order8())
+function update_alat_press(template::PWscfInput, trial_eos::EquationOfState, pressure::Real, volumedata::Real)
+    volume = findvolume(PressureForm(), trial_eos, pressure, (volumedata-1,volumedata+1), Order8())
     alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
@@ -44,10 +45,11 @@ function write_input(
     template::PWscfInput,
     eos::EquationOfState,
     pressure::Real,
+    volumedata::Real,
     verbose::Bool = false
 )
     # Get a new `object` from the `template`, with its `alat` and `pressure` changed
-    object = update_alat_press(template, eos, pressure)
+    object = update_alat_press(template, eos, pressure, volumedata)
     # Write the `object` to a Quantum ESPRESSO input file
     open(input, "r+") do io
         write(io, to_qe(object, verbose = verbose))
@@ -73,16 +75,17 @@ function prepare(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector{<:Real},
+    volumedatas::AbstractVector{<:Real},
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
     # Checking parameters
-    @assert length(inputs) == length(pressures) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
+    @assert length(inputs) == length(pressures) == length(volumedatas) == length(metadatafiles) "The inputs, pressures and the metadata files must be the same size!"
     isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     template = set_calculation(step, template)
     # Write input and metadata files
-    for (input, pressure, metadata) in zip(inputs, pressures, metadatafiles)
-        write_input(input, template, trial_eos, pressure, verbose)
+    for (input, pressure, volumedata, metadata) in zip(inputs, pressures, volumedatas, metadatafiles)
+        write_input(input, template, trial_eos, pressure, volumedata, verbose)
         write_metadata(metadata, template, input)
     end
 end # function prepare
