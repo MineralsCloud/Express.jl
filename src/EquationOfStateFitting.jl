@@ -21,7 +21,9 @@ using EquationsOfState.FindVolume: findvolume
 using Kaleido: @batchlens
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy, read_cell_parameters
+using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
+                                                  read_cell_parameters,
+                                                  read_head
 using Setfield: set, @lens
 
 using Express: Step
@@ -30,7 +32,7 @@ using Express.SelfConsistentField: write_metadata
 export update_alat_press, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
-    volume = findvolume(PressureForm(), eos, pressure, (0, 1000), Order8())
+    volume = findvolume(PressureForm(), eos, pressure, (1, eos.v0*1.3))
     alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
@@ -49,7 +51,9 @@ function _set_calculation(step::Step, template::PWscfInput)
     type = _calculationof(step)
     lens = @lens _.control.calculation
     if get(template, lens) != type
-        @warn("The calculation type of step $step should be \"$type\", not $(get(template, lens))! I will set it for you.")
+        @warn(
+            "The calculation type of step $step should be \"$type\", not $(get(template, lens))! I will set it for you."
+        )
     end
     return set(template, lens, type)  # Return a new `template` whose `control.calculation` is `type`
 end # function _set_calculation
@@ -66,11 +70,17 @@ function prepare(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector{<:Real},
-    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
+    metadatafiles::AbstractVector{<:AbstractString} = map(
+        x -> splitext(x)[1] * ".json",
+        inputs
+    ),
     verbose::Bool = false
 )
     # Check parameters
-    @assert(length(inputs) == length(pressures) == length(metadatafiles), "The inputs, pressures and the metadata files must be the same size!")
+    @assert(
+        length(inputs) == length(pressures) == length(metadatafiles),
+        "The inputs, pressures and the metadata files must be the same size!"
+    )
     template = _validate(step, template)
     # Write input and metadata
     for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
@@ -82,7 +92,27 @@ function prepare(
     return
 end # function prepare
 
-function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
+function finish(
+    ::Step{1},
+    outputs::AbstractVector{<:AbstractString},
+    trial_eos::EquationOfState
+)
+    energies = Float64[]
+    volumes = Float64[]
+    for output in outputs
+        open(output, "r") do io
+            s = read(io, String)
+            push!(energies, (last ∘ read_total_energy)(s))
+            push!(volumes, read_head(s)["unit-cell volume"])
+        end
+    end
+    return lsqfit(EnergyForm(), trial_eos, volumes, energies)
+end # function finish
+function finish(
+    ::Step{2},
+    outputs::AbstractVector{<:AbstractString},
+    trial_eos::EquationOfState
+)
     energies = Float64[]
     volumes = Float64[]
     for output in outputs

@@ -105,8 +105,8 @@ uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.1"
 
 [[EquationsOfState]]
-deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "Roots", "StaticArrays"]
-git-tree-sha1 = "7efd9de6903f1b15de486311c585538f86f34764"
+deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "Roots", "StaticArrays", "Statistics"]
+git-tree-sha1 = "7d6d898e2b3bb2331d28059de66fdf7df1bf7126"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -280,7 +280,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
-git-tree-sha1 = "91181fdf6189054159153785bd2ec537f50769de"
+git-tree-sha1 = "69b4136e5ae9dcd2e697098f871084b34029642f"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
