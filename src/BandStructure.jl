@@ -27,7 +27,7 @@ struct CircularPath <: PathStyle end
 struct NoncircularPath <: PathStyle end
 
 # This is a helper function and should not be exported
-euclidean(x, y) = sqrt(sum((x - y) .^ 2))
+euclidean(x, y) = sqrt(sum((x - y).^2))
 
 """
     generate_path(nodes, densities = 100 * ones(Int, length(nodes)))
@@ -113,11 +113,11 @@ function set_calculation(step::Step, template::PWscfInput)
     @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
 end # function set_calculation
 
-function prepare(
-    step::Step{1},
-    inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
-    metadatafiles::AbstractVector{<:AbstractString}
+function prepare(
+    step::Step{1},
+    inputs::AbstractVector{<:AbstractString},
+    template::PWscfInput,
+    metadatafiles::AbstractVector{<:AbstractString}
 )
     # Checking parameters
     @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
@@ -127,13 +127,16 @@ function prepare(
         write_metadata(metadata, input, template)
     end
 end # function prepare
-function prepare(
-    step::Step{2},
-    inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
+function prepare(
+    step::Step{2},
+    inputs::AbstractVector{<:AbstractString},
+    template::PWscfInput,
     nodes::AbstractVector{<:AbstractVector},
     densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)),
-    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs)
+    metadatafiles::AbstractVector{<:AbstractString} = map(
+        x -> splitext(x)[1] * ".json",
+        inputs
+    )
 )
     # Checking parameters
     @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
@@ -147,11 +150,11 @@ function prepare(
         write_metadata(metadata, input, template)
     end
 end # function prepare
-function prepare(
-    step::Step{3},
-    inputs::AbstractVector{<:AbstractString},
-    template::BandsNamelist,
-    metadatafiles::AbstractVector{<:AbstractString}
+function prepare(
+    step::Step{3},
+    inputs::AbstractVector{<:AbstractString},
+    template::BandsNamelist,
+    metadatafiles::AbstractVector{<:AbstractString}
 )
     for (input, metadata) in zip(inputs, metadatafiles)
         open(input, "r+") do io

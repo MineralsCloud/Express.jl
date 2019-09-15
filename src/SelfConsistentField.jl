@@ -24,7 +24,8 @@ function write_metadata(file::AbstractString, input::AbstractString, object::PWs
         "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
         "input" => input
     )
-    metadata["wfcdir"] = object.control.wf_collect ? metadata["outdir"] : object.control.wfcdir
+    metadata["wfcdir"] = object.control.wf_collect ? metadata["outdir"] :
+                         object.control.wfcdir
     metadata["wfc_namepattern"] = metadata["prefix"] * ".wfc"
     if object.control.lkpoint_dir
         metadata["lkpoint_dir"] = metadata["outdir"] * "/" * metadata["prefix"] * ".save"
