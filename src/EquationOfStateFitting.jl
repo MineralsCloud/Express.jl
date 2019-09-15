@@ -23,7 +23,8 @@ using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
                                                   read_cell_parameters,
-                                                  read_head
+                                                  read_head,
+                                                  isjobdone
 using Setfield: set, @lens
 
 using Express: Step
