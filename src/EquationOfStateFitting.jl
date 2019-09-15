@@ -32,7 +32,7 @@ using Express.SelfConsistentField: write_metadata
 export update_alat_press, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
-    volume = findvolume(PressureForm(), eos, pressure, (0, 1000), Order8())
+    volume = findvolume(PressureForm(), eos, pressure, (1, eos.v0*1.3))
     alat = cbrt(volume / det(template.cell_parameters.data))
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
