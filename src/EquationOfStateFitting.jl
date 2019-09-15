@@ -21,7 +21,7 @@ using EquationsOfState.FindVolume: findvolume
 using Kaleido: @batchlens
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy, read_cell_parameters
+using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy, read_cell_parameters, read_head
 using Setfield: set, @lens
 
 using Express: Step
@@ -82,7 +82,19 @@ function prepare(
     return
 end # function prepare
 
-function finish(outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
+function finish(::Step{1}, outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
+    energies = Float64[]
+    volumes = Float64[]
+    for output in outputs
+        open(output, "r") do io
+            s = read(io, String)
+            push!(energies, (last ∘ read_total_energy)(s))
+            push!(volumes, read_head(s)["unit-cell volume"])
+        end
+    end
+    return lsqfit(EnergyForm(), trial_eos, volumes, energies)
+end # function finish
+function finish(::Step{2}, outputs::AbstractVector{<:AbstractString}, trial_eos::EquationOfState)
     energies = Float64[]
     volumes = Float64[]
     for output in outputs
