@@ -12,9 +12,9 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSOBase.Inputs.PWscf
-using QuantumESPRESSOParsers.OutputParsers.PWscf
-using Setfield
+using QuantumESPRESSOBase: to_qe
+using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using Setfield: set
 
 import ..Step
 using ..SelfConsistentField: write_metadata
