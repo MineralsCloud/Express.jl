@@ -17,8 +17,8 @@ using QuantumESPRESSOBase.Inputs.PWscf
 using Setfield
 using ShiftedArrays: circshift, lead
 
-using Express
-using Express.SelfConsistentField: write_metadata
+import ..Step
+using ..SelfConsistentField: write_metadata
 
 export generate_path, update_kpoints, prepare
 

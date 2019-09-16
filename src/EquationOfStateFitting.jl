@@ -27,8 +27,8 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
                                                   isjobdone
 using Setfield: set, @lens
 
-using Express: Step
-using Express.SelfConsistentField: write_metadata
+import ..Step
+using ..SelfConsistentField: write_metadata
 
 export update_alat_press, prepare, finish
 

@@ -16,8 +16,8 @@ using QuantumESPRESSOBase.Inputs.PWscf
 using QuantumESPRESSOParsers.OutputParsers.PWscf
 using Setfield
 
-using Express
-using Express.SelfConsistentField: write_metadata
+import ..Step
+using ..SelfConsistentField: write_metadata
 
 export update_structure, prepare
 
