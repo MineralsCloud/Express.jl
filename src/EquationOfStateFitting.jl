@@ -19,6 +19,7 @@ using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.FindVolume: findvolume
 using Kaleido: @batchlens
+using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
@@ -44,27 +45,18 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-_calculationof(step::Step{1}) = "scf"
-_calculationof(step::Step{2}) = "vc-relax"
-
-# This is a helper function and should not be exported.
-function _set_calculation(step::Step, template::PWscfInput)
-    type = _calculationof(step)
-    lens = @lens _.control.calculation
-    if get(template, lens) != type
-        @warn(
-            "The calculation type of step $step should be \"$type\", not $(get(template, lens))! I will set it for you."
-        )
-    end
-    return set(template, lens, type)  # Return a new `template` whose `control.calculation` is `type`
-end # function _set_calculation
-
-# This is a helper function and should not be exported.
-function _validate(step::Step, template::PWscfInput)
-    template = _set_calculation(step, template)
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) :
-           template
-end # function _validate
+function _preset(step::Step{N}, template::PWscfInput) where {N}
+    control = @lens _.control
+    lenses = @batchlens(begin
+        control ∘ @lens _.calculation  # Get the `template`'s `control.calculation` value
+        control ∘ @lens _.verbosity    # Get the `template`'s `control.verbosity` value
+        control ∘ @lens _.tstress      # Get the `template`'s `control.tstress` value
+        control ∘ @lens _.tprnfor      # Get the `template`'s `control.tprnfor` value
+    end)
+    # Set the `template`'s values with...
+    template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
+    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
+end # function _preset
 
 function prepare(
     step::Step,
@@ -72,10 +64,7 @@ function prepare(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector{<:Real},
-    metadatafiles::AbstractVector{<:AbstractString} = map(
-        x -> splitext(x)[1] * ".json",
-        inputs
-    ),
+    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
     # Check parameters
@@ -83,7 +72,7 @@ function prepare(
         length(inputs) == length(pressures) == length(metadatafiles),
         "The inputs, pressures and the metadata files must be the same size!"
     )
-    template = _validate(step, template)
+    template = _preset(step, template)
     # Write input and metadata
     for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
@@ -95,34 +84,21 @@ function prepare(
 end # function prepare
 
 function finish(
-    ::Step{1},
+    ::Step{N},
     outputs::AbstractVector{<:AbstractString},
     trial_eos::EquationOfState
-)
-    energies = Float64[]
-    volumes = Float64[]
-    for output in outputs
-        open(output, "r") do io
-            s = read(io, String)
-            push!(energies, (last ∘ read_total_energy)(s))
-            push!(volumes, read_head(s)["unit-cell volume"])
-        end
-    end
-    return lsqfit(EnergyForm(), trial_eos, volumes, energies)
-end # function finish
-function finish(
-    ::Step{2},
-    outputs::AbstractVector{<:AbstractString},
-    trial_eos::EquationOfState
-)
-    energies = Float64[]
-    volumes = Float64[]
-    for output in outputs
+) where {N}
+    energies, volumes = zeros(length(outputs)), zeros(length(outputs))
+    for (i, output) in enumerate(outputs)
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            push!(energies, (last ∘ read_total_energy)(s))
-            push!(volumes, (det ∘ last ∘ read_cell_parameters)(s))
+            energies[i] = read_total_energy(s)[end]
+            volumes[i] = @match N begin
+                1 => read_head(s)["unit-cell volume"]
+                2 => read_cell_parameters(s)[end] |> det
+                _ => error("The step $N must be `1` or `2`!")
+            end
         end
     end
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
