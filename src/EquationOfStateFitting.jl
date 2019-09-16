@@ -64,10 +64,7 @@ function prepare(
     template::PWscfInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector{<:Real},
-    metadatafiles::AbstractVector{<:AbstractString} = map(
-        x -> splitext(x)[1] * ".json",
-        inputs
-    ),
+    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
     # Check parameters
@@ -96,10 +93,10 @@ function finish(
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = read_total_energy(s) |> last
+            energies[i] = read_total_energy(s)[end]
             volumes[i] = @match N begin
                 1 => read_head(s)["unit-cell volume"]
-                2 => read_cell_parameters(s) |> last |> det
+                2 => read_cell_parameters(s)[end] |> det
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
