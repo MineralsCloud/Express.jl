@@ -46,12 +46,12 @@ end # function update_alat_press
 # This is a helper function and should not be exported.
 function _preset(step::Step{N}, template::PWscfInput) where {N}
     control = @lens _.control
-    lenses = @batchlens(
+    lenses = @batchlens(begin
         control ∘ @lens _.calculation
         control ∘ @lens _.verbosity
         control ∘ @lens _.tstress
         control ∘ @lens _.tprnfor
-    )
+    end)
     template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
     return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
 end # function _preset
