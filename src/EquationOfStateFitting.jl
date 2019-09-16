@@ -44,26 +44,16 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-_calculationof(step::Step{1}) = "scf"
-_calculationof(step::Step{2}) = "vc-relax"
-
-# This is a helper function and should not be exported.
-function _set_calculation(step::Step, template::PWscfInput)
-    type = _calculationof(step)
-    lens = @lens _.control.calculation
-    if get(template, lens) != type
-        @warn(
-            "The calculation type of step $step should be \"$type\", not $(get(template, lens))! I will set it for you."
-        )
-    end
-    return set(template, lens, type)  # Return a new `template` whose `control.calculation` is `type`
-end # function _set_calculation
-
-# This is a helper function and should not be exported.
-function _validate(step::Step, template::PWscfInput)
-    template = _set_calculation(step, template)
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) :
-           template
+function _validate(step::Step{N}, template::PWscfInput) where {N}
+    control = @lens _.control
+    lenses = @batchlens(
+        control ∘ @lens _.calculation
+        control ∘ @lens _.verbosity
+        control ∘ @lens _.tstress
+        control ∘ @lens _.tprnfor
+    )
+    template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
+    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
 end # function _validate
 
 function prepare(
