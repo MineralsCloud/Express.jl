@@ -44,7 +44,7 @@ function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure:
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _validate(step::Step{N}, template::PWscfInput) where {N}
+function _preset(step::Step{N}, template::PWscfInput) where {N}
     control = @lens _.control
     lenses = @batchlens(
         control ∘ @lens _.calculation
@@ -54,7 +54,7 @@ function _validate(step::Step{N}, template::PWscfInput) where {N}
     )
     template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
     return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
-end # function _validate
+end # function _preset
 
 function prepare(
     step::Step,
@@ -73,7 +73,7 @@ function prepare(
         length(inputs) == length(pressures) == length(metadatafiles),
         "The inputs, pressures and the metadata files must be the same size!"
     )
-    template = _validate(step, template)
+    template = _preset(step, template)
     # Write input and metadata
     for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
