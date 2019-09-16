@@ -91,19 +91,17 @@ function finish(
     outputs::AbstractVector{<:AbstractString},
     trial_eos::EquationOfState
 ) where {N}
-    energies = Float64[]
-    volumes = Float64[]
-    for output in outputs
+    energies, volumes = zeros(length(outputs)), zeros(length(outputs))
+    for (i, output) in enumerate(outputs)
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            push!(energies, (last ∘ read_total_energy)(s))
-            volume = @match N begin
+            energies[i] = read_total_energy(s) |> last
+            volumes[i] = @match N begin
                 1 => read_head(s)["unit-cell volume"]
-                2 => (det ∘ last ∘ read_cell_parameters)(s)
+                2 => read_cell_parameters(s) |> last |> det
                 _ => error("The step $N must be `1` or `2`!")
             end
-            push!(volumes, volume)
         end
     end
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
