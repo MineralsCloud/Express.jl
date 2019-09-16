@@ -19,6 +19,7 @@ using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.FindVolume: findvolume
 using Kaleido: @batchlens
+using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
@@ -86,26 +87,10 @@ function prepare(
 end # function prepare
 
 function finish(
-    ::Step{1},
+    ::Step{N},
     outputs::AbstractVector{<:AbstractString},
     trial_eos::EquationOfState
-)
-    energies = Float64[]
-    volumes = Float64[]
-    for output in outputs
-        open(output, "r") do io
-            s = read(io, String)
-            push!(energies, (last ∘ read_total_energy)(s))
-            push!(volumes, read_head(s)["unit-cell volume"])
-        end
-    end
-    return lsqfit(EnergyForm(), trial_eos, volumes, energies)
-end # function finish
-function finish(
-    ::Step{2},
-    outputs::AbstractVector{<:AbstractString},
-    trial_eos::EquationOfState
-)
+) where {N}
     energies = Float64[]
     volumes = Float64[]
     for output in outputs
@@ -113,7 +98,12 @@ function finish(
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
             push!(energies, (last ∘ read_total_energy)(s))
-            push!(volumes, (det ∘ last ∘ read_cell_parameters)(s))
+            volume = @match N begin
+                1 => read_head(s)["unit-cell volume"]
+                2 => (det ∘ last ∘ read_cell_parameters)(s)
+                _ => error("The step $N must be `1` or `2`!")
+            end
+            push!(volumes, volume)
         end
     end
     return lsqfit(EnergyForm(), trial_eos, volumes, energies)
