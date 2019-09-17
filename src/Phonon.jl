@@ -79,7 +79,7 @@ function relay(from::PWscfInput, to::PhononInput)
 end # function relay
 function relay(from::PhononInput, to::Q2RInput)
     fildyn = @lens _.fildyn
-    return set(to, @lens _.q2r ∘ fildyn, get(@lens _.phonon ∘ fildyn))
+    return set(to, @lens _.q2r ∘ fildyn, get(from, @lens _.phonon ∘ fildyn))
 end # function relay
 function relay(from::Q2RInput, to::MatdynInput)
     q2r_lenses = @batchlens(begin
