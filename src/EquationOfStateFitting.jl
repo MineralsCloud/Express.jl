@@ -26,7 +26,7 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
                                                   read_cell_parameters,
                                                   read_head,
                                                   isjobdone
-using Setfield: set, @lens
+using Setfield: set
 
 import ..Step
 using ..SelfConsistentField: write_metadata
@@ -46,12 +46,11 @@ end # function update_alat_press
 
 # This is a helper function and should not be exported.
 function _preset(step::Step{N}, template::PWscfInput) where {N}
-    control = @lens _.control
     lenses = @batchlens(begin
-        control ∘ @lens _.calculation  # Get the `template`'s `control.calculation` value
-        control ∘ @lens _.verbosity    # Get the `template`'s `control.verbosity` value
-        control ∘ @lens _.tstress      # Get the `template`'s `control.tstress` value
-        control ∘ @lens _.tprnfor      # Get the `template`'s `control.tprnfor` value
+        _.control.calculation  # Get the `template`'s `control.calculation` value
+        _.control.verbosity    # Get the `template`'s `control.verbosity` value
+        _.control.tstress      # Get the `template`'s `control.tstress` value
+        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
