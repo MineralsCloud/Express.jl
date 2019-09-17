@@ -14,7 +14,8 @@ module Phonon
 using Kaleido: @batchlens
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: read_cell_parameters, read_atomic_positions
+using QuantumESPRESSOBase.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
+using QuantumESPRESSOParsers.OutputParsers.PWscf#: parse_cell_parameters, parse_atomic_positions
 using Setfield: get, set, @lens
 
 import ..Step
@@ -28,8 +29,8 @@ export update_structure, relay, prepare
 Read structure information from `output`, and update related fields of `template`.
 """
 function update_structure(output::AbstractString, template::PWscfInput)
-    cell_parameters = read_cell_parameters(output)
-    atomic_positions = read_atomic_positions(output)  # TODO: Implement `read_atomic_positions`
+    cell_parameters = parse_cell_parameters(output)
+    atomic_positions = parse_atomic_positions(output)  # TODO: Implement `read_atomic_positions`
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]
         _.atomic_positions
