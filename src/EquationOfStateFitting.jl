@@ -22,11 +22,11 @@ using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
-                                                  read_cell_parameters,
-                                                  read_head,
+using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
+                                                  parse_cell_parameters,
+                                                  parse_head,
                                                   isjobdone
-using Setfield: set, @lens
+using Setfield: set
 
 import ..Step
 using ..SelfConsistentField: write_metadata
@@ -46,12 +46,11 @@ end # function update_alat_press
 
 # This is a helper function and should not be exported.
 function _preset(step::Step{N}, template::PWscfInput) where {N}
-    control = @lens _.control
     lenses = @batchlens(begin
-        control ∘ @lens _.calculation  # Get the `template`'s `control.calculation` value
-        control ∘ @lens _.verbosity    # Get the `template`'s `control.verbosity` value
-        control ∘ @lens _.tstress      # Get the `template`'s `control.tstress` value
-        control ∘ @lens _.tprnfor      # Get the `template`'s `control.tprnfor` value
+        _.control.calculation  # Get the `template`'s `control.calculation` value
+        _.control.verbosity    # Get the `template`'s `control.verbosity` value
+        _.control.tstress      # Get the `template`'s `control.tstress` value
+        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
@@ -93,10 +92,10 @@ function finish(
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = read_total_energy(s)[end]
+            energies[i] = parse_total_energy(s)[end]
             volumes[i] = @match N begin
-                1 => read_head(s)["unit-cell volume"]
-                2 => read_cell_parameters(s)[end] |> det
+                1 => parse_head(s)["unit-cell volume"]
+                2 => parse_cell_parameters(s)[end] |> det
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
