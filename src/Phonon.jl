@@ -53,7 +53,7 @@ function _preset(template::PWscfInput)
 end # function _preset
 function _preset(template::PHononInput)
     lenses = @batchlens(begin
-        _.phonon.verbosity  # Get the `template`'s `phonon.calculation` value
+        _.inputph.verbosity  # Get the `template`'s `phonon.calculation` value
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, ("high",))
