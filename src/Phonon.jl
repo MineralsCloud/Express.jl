@@ -81,6 +81,21 @@ function relay(from::PhononInput, to::Q2RInput)
     fildyn = @lens _.fildyn
     return set(to, @lens _.q2r ∘ fildyn, get(@lens _.phonon ∘ fildyn))
 end # function relay
+function relay(from::Q2RInput, to::MatdynInput)
+    q2r_lenses = @batchlens(begin
+        _.q2r.fildyn
+        _.q2r.flfrc
+        _.q2r.loto_2d
+        _.q2r.zasr
+    end)
+    matdyn_lenses = @batchlens(begin
+        _.matdyn.fildyn
+        _.matdyn.flfrc
+        _.matdyn.loto_2d
+        _.matdyn.asr
+    end)
+    return set(to, matdyn_lenses, get(from, q2r_lenses))
+end # function relay
 
 """
     prepare(step::Step{1}, inputs, outputs, template, metadatafiles[, verbose::Bool = false])
