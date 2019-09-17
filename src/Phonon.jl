@@ -51,7 +51,11 @@ function _preset(template::PWscfInput)
     return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
 end # function _preset
 function _preset(template::PhononInput)
-    # TODO: Implement this
+    lenses = @batchlens(begin
+        _.phonon.verbosity  # Get the `template`'s `phonon.calculation` value
+    end)
+    # Set the `template`'s values with...
+    template = set(template, lenses, ("high",))
 end # function _preset
 
 # This is a helper function and should not be exported.
