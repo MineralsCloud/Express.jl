@@ -58,16 +58,15 @@ function _preset(template::PhononInput)
     template = set(template, lenses, ("high",))
 end # function _preset
 
-# This is a helper function and should not be exported.
 """
-    _inject_shared_info(ph::PhononInput, pw::PWscfInput)
+    relay(from::PWscfInput, to::PhononInput)
 
-Inject shared information from a `PWscfInput` to a `PhononInput`.
+Relay shared information from a `PWscfInput` to a `PhononInput`.
 
 A `PWscfInput` before a `PhononInput` has the information of `outdir` and `prefix`. They must keep the same in a
 phonon calculation.
 """
-function _inject_shared_info(ph::PhononInput, pw::PWscfInput)
+function relay(from::PWscfInput, to::PhononInput)
     pwlenses = @batchlens(begin
         _.control.outdir
         _.control.prefix
@@ -76,8 +75,8 @@ function _inject_shared_info(ph::PhononInput, pw::PWscfInput)
         _.phonon.outdir
         _.phonon.prefix
     end)
-    return set(ph, phlenses, get(pw, pwlenses))
-end # function _inject_shared_info
+    return set(from, phlenses, get(to, pwlenses))
+end # function relay
 
 """
     prepare(step::Step{1}, inputs, outputs, template, metadatafiles[, verbose::Bool = false])
@@ -131,7 +130,7 @@ function prepare(
         open(pwscf_input, "r") do io
             object = parse(PWscfInput, read(io, String))
         end
-        template = _inject_shared_info(template, object)
+        template = relay(template, object)
         write(phonon_input, template)
     end
 end # function prepare
