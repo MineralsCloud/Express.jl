@@ -15,12 +15,12 @@ using Kaleido: @batchlens
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 using QuantumESPRESSOParsers.OutputParsers.PWscf: read_cell_parameters, read_atomic_positions
-using Setfield: set
+using Setfield: get, set, @lens
 
 import ..Step
 using ..SelfConsistentField: write_metadata
 
-export update_structure, prepare
+export update_structure, relay, prepare
 
 """
     update_structure(output::AbstractString, template::PWscfInput)
@@ -76,6 +76,10 @@ function relay(from::PWscfInput, to::PhononInput)
         _.phonon.prefix
     end)
     return set(from, phlenses, get(to, pwlenses))
+end # function relay
+function relay(from::PhononInput, to::Q2RInput)
+    fildyn = @lens _.fildyn
+    return set(to, @lens _.q2r ∘ fildyn, get(@lens _.phonon ∘ fildyn))
 end # function relay
 
 """
