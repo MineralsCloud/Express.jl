@@ -198,5 +198,27 @@ function prepare(
     end
     return
 end # function prepare
+function prepare(
+    ::Step{4},
+    matdyn_inputs::AbstractVector{<:AbstractString},
+    q2r_inputs::AbstractVector{<:AbstractString},
+    template::MatdynInput,
+    verbose::Bool = false
+)
+    # Check parameters
+    @assert(
+        length(matdyn_inputs) == length(q2r_inputs),
+        "The q2r and the matdyn inputs files must have the same length!"
+    )
+    for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
+        open(q2r_input, "r") do io
+            object = parse(Q2RInput, read(io, String))
+        end
+        template = relay(object, template)
+        write(matdyn_input, template)
+    end
+    return
+end # function prepare
+# TODO: step 5, dynmat calculation
 
 end
