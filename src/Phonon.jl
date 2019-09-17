@@ -90,7 +90,7 @@ end # function relay
 
 Relay shared information from a `Q2RInput` to a `MatdynInput`.
 
-A `Q2RInput` before a `MatdynInput` has the information of `fildyn`, `flfrc` and `loto_2d`. They must keep the same 
+A `Q2RInput` before a `MatdynInput` has the information of `fildyn`, `flfrc` and `loto_2d`. They must keep the same
 in a matdyn calculation.
 """
 function relay(from::Q2RInput, to::MatdynInput)
@@ -107,7 +107,7 @@ end # function relay
 
 Relay shared information from a `PHononInput` to a `DynmatInput`.
 
-A `PHononInput` before a `DynmatInput` has the information of `asr`, `fildyn` and `amass`. They must keep the same 
+A `PHononInput` before a `DynmatInput` has the information of `asr`, `fildyn` and `amass`. They must keep the same
 in a dynmat calculation.
 """
 function relay(from::PHononInput, to::DynmatInput)
@@ -153,6 +153,7 @@ function prepare(
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
         write_metadata(metadatafile, input, template)
     end
+    return
 end # function prepare
 function prepare(
     ::Step{2},
@@ -174,6 +175,7 @@ function prepare(
         template = relay(object, template)
         write(phonon_input, template)
     end
+    return
 end # function prepare
 function prepare(
     ::Step{3},
@@ -194,6 +196,7 @@ function prepare(
         template = relay(object, template)
         write(q2r_input, template)
     end
+    return
 end # function prepare
 
 end
