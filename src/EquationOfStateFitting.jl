@@ -22,9 +22,9 @@ using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: read_total_energy,
-                                                  read_cell_parameters,
-                                                  read_head,
+using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
+                                                  parse_cell_parameters,
+                                                  parse_head,
                                                   isjobdone
 using Setfield: set
 
@@ -92,10 +92,10 @@ function finish(
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = read_total_energy(s)[end]
+            energies[i] = parse_total_energy(s)[end]
             volumes[i] = @match N begin
-                1 => read_head(s)["unit-cell volume"]
-                2 => read_cell_parameters(s)[end] |> det
+                1 => parse_head(s)["unit-cell volume"]
+                2 => parse_cell_parameters(s)[end] |> det
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
