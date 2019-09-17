@@ -51,6 +51,14 @@ function _preset(template::PWscfInput)
     template = set(template, lenses, ("scf", "high", true, true))
     return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
 end # function _preset
+function _preset(template::PhononInput)
+    # TODO: Implement this
+end # function _preset
+
+# This is a helper function and should not be exported.
+function _inject_shared_info(a::PhononInput, b::PWscfInput)
+    # TODO: Implement this
+end # function _inject_shared_info
 
 """
     prepare(step::Step{1}, inputs, outputs, template, metadatafiles[, verbose::Bool = false])
@@ -85,6 +93,27 @@ function prepare(
         object = update_structure(output, template)
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
         write_metadata(metadatafile, input, template)
+    end
+end # function prepare
+function prepare(
+    step::Step{2},
+    phonon_inputs::AbstractVector{<:AbstractString},
+    pwscf_inputs::AbstractVector{<:AbstractString},
+    template::PhononInput,
+    verbose::Bool = false
+)
+    # Check parameters
+    @assert(
+        length(phonon_inputs) == length(pwscf_inputs),
+        "The PWscf and the PHonon inputs files must have the same length!"
+    )
+    template = _preset(template)
+    for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
+        open(pwscf_input, "r") do io
+            object = parse(PWscfInput, read(io, String))
+        end
+        template = _inject_shared_info(template, object)
+        write(phonon_input, template)
     end
 end # function prepare
 
