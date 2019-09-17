@@ -72,8 +72,8 @@ function _inject_shared_info(a::PhononInput, b::PWscfInput)
         control ∘ @lens _.prefix
     end)
     newlenses = @batchlens(begin
-        outdir
-        prefix
+        _.phonon.outdir
+        _.phonon.prefix
     end)
     return set(a, newlenses, get(b, lenses))
 end # function _inject_shared_info
