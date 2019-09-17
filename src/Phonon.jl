@@ -67,47 +67,32 @@ A `PWscfInput` before a `PhononInput` has the information of `outdir` and `prefi
 phonon calculation.
 """
 function relay(from::PWscfInput, to::PhononInput)
-    pwlenses = @batchlens(begin
-        _.control.outdir
-        _.control.prefix
+    lenses = @batchlens(begin
+        _.outdir
+        _.prefix
     end)
-    phlenses = @batchlens(begin
-        _.phonon.outdir
-        _.phonon.prefix
-    end)
-    return set(from, phlenses, get(to, pwlenses))
+    return set(from, (@lens _.inputph) ∘ lenses, get(to, (@lens _.control) ∘ lenses))
 end # function relay
 function relay(from::PhononInput, to::Q2RInput)
     fildyn = @lens _.fildyn
-    return set(to, @lens _.q2r ∘ fildyn, get(from, @lens _.phonon ∘ fildyn))
+    return set(to, (@lens _.input) ∘ fildyn, get(from, (@lens _.inputph) ∘ fildyn))
 end # function relay
 function relay(from::Q2RInput, to::MatdynInput)
-    q2r_lenses = @batchlens(begin
-        _.q2r.fildyn
-        _.q2r.flfrc
-        _.q2r.loto_2d
-        _.q2r.zasr
+    lenses = @batchlens(begin
+        _.input.fildyn
+        _.input.flfrc
+        _.input.loto_2d
+        # TODO: zasr -> asr
     end)
-    matdyn_lenses = @batchlens(begin
-        _.matdyn.fildyn
-        _.matdyn.flfrc
-        _.matdyn.loto_2d
-        _.matdyn.asr
-    end)
-    return set(to, matdyn_lenses, get(from, q2r_lenses))
+    return set(to, lenses, get(from, lenses))
 end # function relay
 function relay(from::PhononInput, to::DynmatInput)
-    ph_lenses = @batchlens(begin
-        _.phonon.asr
-        _.phonon.fildyn
-        _.phonon.amass
+    lenses = @batchlens(begin
+        _.asr
+        _.fildyn
+        _.amass
     end)
-    dynmat_lenses = @batchlens(begin
-        _.phonon.asr
-        _.phonon.fildyn
-        _.phonon.amass
-    end)
-    return set(to, dynmat_lenses, get(from, ph_lenses))
+    return set(to, (@lens _.input) ∘ lenses, get(from, (@lens _.inputph) ∘ lenses))
 end # function relay
 
 """
@@ -125,7 +110,7 @@ Prepare input files of the first step of a phonon calculation.
 - `verbose::Bool = false`: control the format of input files, verbose or not.
 """
 function prepare(
-    step::Step{1},
+    ::Step{1},
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
@@ -146,7 +131,7 @@ function prepare(
     end
 end # function prepare
 function prepare(
-    step::Step{2},
+    ::Step{2},
     phonon_inputs::AbstractVector{<:AbstractString},
     pwscf_inputs::AbstractVector{<:AbstractString},
     template::PhononInput,
@@ -165,6 +150,14 @@ function prepare(
         template = relay(template, object)
         write(phonon_input, template)
     end
+end # function prepare
+function prepare(
+    ::Step{3},
+    q2r_inputs::AbstractVector{<:AbstractString},
+    phonon_outputs::AbstractVector{<:AbstractString},
+    verbose::Bool = false
+)
+    
 end # function prepare
 
 end
