@@ -40,12 +40,11 @@ end # function update_structure
 
 # This is a helper function and should not be exported.
 function _preset(template::PWscfInput)
-    control = @lens _.control
     lenses = @batchlens(begin
-        control ∘ @lens _.calculation  # Get the `template`'s `control.calculation` value
-        control ∘ @lens _.verbosity    # Get the `template`'s `control.verbosity` value
-        control ∘ @lens _.tstress      # Get the `template`'s `control.tstress` value
-        control ∘ @lens _.tprnfor      # Get the `template`'s `control.tprnfor` value
+        _.control.calculation  # Get the `template`'s `control.calculation` value
+        _.control.verbosity    # Get the `template`'s `control.verbosity` value
+        _.control.tstress      # Get the `template`'s `control.tstress` value
+        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, ("scf", "high", true, true))
@@ -66,10 +65,9 @@ phonon calculation.
 """
 function _inject_shared_info(a::PhononInput, b::PWscfInput)
     # TODO: Implement this
-    control = @lens _.control
     lenses = @batchlens(begin
-        control ∘ @lens _.outdir
-        control ∘ @lens _.prefix
+        _.control.outdir
+        _.control.prefix
     end)
     newlenses = @batchlens(begin
         _.phonon.outdir
