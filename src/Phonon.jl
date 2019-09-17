@@ -74,6 +74,11 @@ function prepare(
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
+    # Check parameters
+    @assert(
+        length(inputs) == length(outputs) == length(metadatafiles),
+        "The inputs, outputs and the metadata files must be the same length!"
+    )
     template = _preset(template)
     for (input, output, structure, metadatafile) in zip(inputs, outputs, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
