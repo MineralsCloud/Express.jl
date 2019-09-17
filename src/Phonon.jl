@@ -50,7 +50,7 @@ function _preset(template::PWscfInput)
     template = set(template, lenses, ("scf", "high", true, true))
     return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
 end # function _preset
-function _preset(template::PhononInput)
+function _preset(template::PHononInput)
     lenses = @batchlens(begin
         _.phonon.verbosity  # Get the `template`'s `phonon.calculation` value
     end)
@@ -59,21 +59,29 @@ function _preset(template::PhononInput)
 end # function _preset
 
 """
-    relay(from::PWscfInput, to::PhononInput)
+    relay(from::PWscfInput, to::PHononInput)
 
-Relay shared information from a `PWscfInput` to a `PhononInput`.
+Relay shared information from a `PWscfInput` to a `PHononInput`.
 
-A `PWscfInput` before a `PhononInput` has the information of `outdir` and `prefix`. They must keep the same in a
+A `PWscfInput` before a `PHononInput` has the information of `outdir` and `prefix`. They must keep the same in a
 phonon calculation.
 """
-function relay(from::PWscfInput, to::PhononInput)
+function relay(from::PWscfInput, to::PHononInput)
     lenses = @batchlens(begin
         _.outdir
         _.prefix
     end)
     return set(from, (@lens _.inputph) ∘ lenses, get(to, (@lens _.control) ∘ lenses))
 end # function relay
-function relay(from::PhononInput, to::Q2RInput)
+"""
+    relay(from::PHononInput, to::Q2RInput)
+
+Relay shared information from a `PWscfInput` to a `PHononInput`.
+
+A `PWscfInput` before a `PHononInput` has the information of `outdir` and `prefix`. They must keep the same in a
+phonon calculation.
+"""
+function relay(from::PHononInput, to::Q2RInput)
     fildyn = @lens _.fildyn
     return set(to, (@lens _.input) ∘ fildyn, get(from, (@lens _.inputph) ∘ fildyn))
 end # function relay
@@ -86,7 +94,7 @@ function relay(from::Q2RInput, to::MatdynInput)
     end)
     return set(to, lenses, get(from, lenses))
 end # function relay
-function relay(from::PhononInput, to::DynmatInput)
+function relay(from::PHononInput, to::DynmatInput)
     lenses = @batchlens(begin
         _.asr
         _.fildyn
@@ -134,7 +142,7 @@ function prepare(
     ::Step{2},
     phonon_inputs::AbstractVector{<:AbstractString},
     pwscf_inputs::AbstractVector{<:AbstractString},
-    template::PhononInput,
+    template::PHononInput,
     verbose::Bool = false
 )
     # Check parameters
