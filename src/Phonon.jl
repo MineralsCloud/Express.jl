@@ -56,8 +56,26 @@ function _preset(template::PhononInput)
 end # function _preset
 
 # This is a helper function and should not be exported.
+"""
+    _inject_shared_info(a::PhononInput, b::PWscfInput)
+
+Inject shared information from a `PWscfInput` to a `PhononInput`.
+
+A `PWscfInput` before a `PhononInput` has the information of `outdir` and `prefix`. They must keep the same in a
+phonon calculation.
+"""
 function _inject_shared_info(a::PhononInput, b::PWscfInput)
     # TODO: Implement this
+    control = @lens _.control
+    lenses = @batchlens(begin
+        control ∘ @lens _.outdir
+        control ∘ @lens _.prefix
+    end)
+    newlenses = @batchlens(begin
+        outdir
+        prefix
+    end)
+    return set(a, newlenses, get(b, lenses))
 end # function _inject_shared_info
 
 """
