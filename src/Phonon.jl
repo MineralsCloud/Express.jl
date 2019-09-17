@@ -96,6 +96,19 @@ function relay(from::Q2RInput, to::MatdynInput)
     end)
     return set(to, matdyn_lenses, get(from, q2r_lenses))
 end # function relay
+function relay(from::PhononInput, to::DynmatInput)
+    ph_lenses = @batchlens(begin
+        _.phonon.asr
+        _.phonon.fildyn
+        _.phonon.amass
+    end)
+    dynmat_lenses = @batchlens(begin
+        _.phonon.asr
+        _.phonon.fildyn
+        _.phonon.amass
+    end)
+    return set(to, dynmat_lenses, get(from, ph_lenses))
+end # function relay
 
 """
     prepare(step::Step{1}, inputs, outputs, template, metadatafiles[, verbose::Bool = false])
