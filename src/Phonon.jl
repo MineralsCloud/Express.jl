@@ -171,17 +171,29 @@ function prepare(
         open(pwscf_input, "r") do io
             object = parse(PWscfInput, read(io, String))
         end
-        template = relay(template, object)
+        template = relay(object, template)
         write(phonon_input, template)
     end
 end # function prepare
 function prepare(
     ::Step{3},
     q2r_inputs::AbstractVector{<:AbstractString},
-    phonon_outputs::AbstractVector{<:AbstractString},
+    phonon_inputs::AbstractVector{<:AbstractString},
+    template::Q2RInput,
     verbose::Bool = false
 )
-    
+    # Check parameters
+    @assert(
+        length(q2r_inputs) == length(phonon_inputs),
+        "The phonon and the q2r inputs files must have the same length!"
+    )
+    for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
+        open(phonon_input, "r") do io
+            object = parse(PHononInput, read(io, String))
+        end
+        template = relay(object, template)
+        write(q2r_input, template)
+    end
 end # function prepare
 
 end
