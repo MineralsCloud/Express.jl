@@ -76,15 +76,22 @@ end # function relay
 """
     relay(from::PHononInput, to::Q2RInput)
 
-Relay shared information from a `PWscfInput` to a `PHononInput`.
+Relay shared information from a `PHononInput` to a `Q2RInput`.
 
-A `PWscfInput` before a `PHononInput` has the information of `outdir` and `prefix`. They must keep the same in a
-phonon calculation.
+A `PHononInput` before a `Q2RInput` has the information of `fildyn`. It must keep the same in a q2r calculation.
 """
 function relay(from::PHononInput, to::Q2RInput)
     fildyn = @lens _.fildyn
     return set(to, (@lens _.input) ∘ fildyn, get(from, (@lens _.inputph) ∘ fildyn))
 end # function relay
+"""
+    relay(from::Q2RInput, to::MatdynInput)
+
+Relay shared information from a `Q2RInput` to a `MatdynInput`.
+
+A `Q2RInput` before a `MatdynInput` has the information of `fildyn`, `flfrc` and `loto_2d`. They must keep the same 
+in a matdyn calculation.
+"""
 function relay(from::Q2RInput, to::MatdynInput)
     lenses = @batchlens(begin
         _.input.fildyn
@@ -94,6 +101,14 @@ function relay(from::Q2RInput, to::MatdynInput)
     end)
     return set(to, lenses, get(from, lenses))
 end # function relay
+"""
+    relay(from::PHononInput, to::DynmatInput)
+
+Relay shared information from a `PHononInput` to a `DynmatInput`.
+
+A `PHononInput` before a `DynmatInput` has the information of `asr`, `fildyn` and `amass`. They must keep the same 
+in a dynmat calculation.
+"""
 function relay(from::PHononInput, to::DynmatInput)
     lenses = @batchlens(begin
         _.asr
