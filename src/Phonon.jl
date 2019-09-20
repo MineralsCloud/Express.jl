@@ -176,7 +176,7 @@ function prepare(
             parse(PWscfInput, read(io, String))
         end
         template = relay(object, template)
-        write(phonon_input, to_qe(template.inputph, verbose = verbose))
+        write(phonon_input, to_qe(template, verbose = verbose))
     end
     return
 end # function prepare
