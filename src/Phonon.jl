@@ -98,10 +98,8 @@ in a matdyn calculation.
 """
 function relay(from::Q2RInput, to::MatdynInput)
     lenses = @batchlens(begin
-        #_.input.fildyn
         _.input.flfrc
         _.input.loto_2d
-        # TODO: zasr -> asr
     end)
     return set(to, lenses, get(from, lenses))
 end # function relay
