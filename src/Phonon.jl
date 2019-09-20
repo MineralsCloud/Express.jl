@@ -113,7 +113,7 @@ in a dynmat calculation.
 """
 function relay(from::PHononInput, to::DynmatInput)
     lenses = @batchlens(begin
-        _.asr
+        #_.asr   #TODO
         _.fildyn
         _.amass
     end)
