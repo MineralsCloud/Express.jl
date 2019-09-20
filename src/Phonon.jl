@@ -15,11 +15,11 @@ using Kaleido: @batchlens
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 using QuantumESPRESSOBase.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf#: parse_cell_parameters, parse_atomic_positions
+using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_cell_parameters, parse_atomic_positions
 using Setfield: get, set, @lens
 
 import ..Step
-using ..SelfConsistentField: write_metadata
+using Express.SelfConsistentField: write_metadata
 
 export update_structure, relay, prepare
 
@@ -29,14 +29,17 @@ export update_structure, relay, prepare
 Read structure information from `output`, and update related fields of `template`.
 """
 function update_structure(output::AbstractString, template::PWscfInput)
-    cell_parameters = parse_cell_parameters(output)
-    atomic_positions = parse_atomic_positions(output)  # TODO: Implement `read_atomic_positions`
-    lenses = @batchlens(begin
-        _.system.celldm ∘ _[$1]
-        _.atomic_positions
-        _.cell_parameters
-    end)
-    return set(template, lenses, (1, atomic_positions, cell_parameters))
+    open(output, "r") do io
+        str = read(io, String)
+        cell_parameters = parse_cell_parameters(str)[end]
+        atomic_positions = parse_atomic_positions(str)[end] # TODO: Implement `read_atomic_positions`
+        lenses = @batchlens(begin
+            _.system.celldm ∘ _[$1]
+            _.atomic_positions
+            _.cell_parameters.data
+        end)
+        return set(template, lenses, (1, atomic_positions, cell_parameters))
+    end
 end # function update_structure
 
 # This is a helper function and should not be exported.
@@ -72,7 +75,7 @@ function relay(from::PWscfInput, to::PHononInput)
         _.outdir
         _.prefix
     end)
-    return set(from, (@lens _.inputph) ∘ lenses, get(to, (@lens _.control) ∘ lenses))
+    return set(to, (@lens _.inputph) ∘ lenses, get(from, (@lens _.control) ∘ lenses))
 end # function relay
 """
     relay(from::PHononInput, to::Q2RInput)
@@ -95,7 +98,7 @@ in a matdyn calculation.
 """
 function relay(from::Q2RInput, to::MatdynInput)
     lenses = @batchlens(begin
-        _.input.fildyn
+        #_.input.fildyn
         _.input.flfrc
         _.input.loto_2d
         # TODO: zasr -> asr
@@ -147,7 +150,7 @@ function prepare(
         "The inputs, outputs and the metadata files must be the same length!"
     )
     template = _preset(template)
-    for (input, output, structure, metadatafile) in zip(inputs, outputs, metadatafiles)
+    for (input, output, metadatafile) in zip(inputs, outputs, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
@@ -169,11 +172,11 @@ function prepare(
     )
     template = _preset(template)
     for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
-        open(pwscf_input, "r") do io
-            object = parse(PWscfInput, read(io, String))
+        object = open(pwscf_input, "r") do io
+            parse(PWscfInput, read(io, String))
         end
         template = relay(object, template)
-        write(phonon_input, template)
+        write(phonon_input, to_qe(template.inputph, verbose = verbose))
     end
     return
 end # function prepare
@@ -190,11 +193,11 @@ function prepare(
         "The phonon and the q2r inputs files must have the same length!"
     )
     for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
-        open(phonon_input, "r") do io
-            object = parse(PHononInput, read(io, String))
+        object = open(phonon_input, "r") do io
+            parse(PHononInput, read(io, String))
         end
         template = relay(object, template)
-        write(q2r_input, template)
+        write(q2r_input, to_qe(template, verbose = verbose))
     end
     return
 end # function prepare
@@ -211,14 +214,37 @@ function prepare(
         "The q2r and the matdyn inputs files must have the same length!"
     )
     for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
-        open(q2r_input, "r") do io
-            object = parse(Q2RInput, read(io, String))
+        object = open(q2r_input, "r") do io
+            parse(Q2RInput, read(io, String))
         end
         template = relay(object, template)
-        write(matdyn_input, template)
+        write(matdyn_input, to_qe(template, verbose = verbose))
     end
     return
 end # function prepare
-# TODO: step 5, dynmat calculation
+function prepare(
+    ::Step{5},
+    dynmat_inputs::AbstractVector{<:AbstractString},
+    phonon_inputs::AbstractVector{<:AbstractString},
+    template::DynmatInput,
+    verbose::Bool = false
+)
+    # Check parameters
+    @assert(
+        length(dynmat_inputs) == length(phonon_inputs),
+        "The dynmat and the phonon inputs files must have the same length!"
+    )
+    for (dynmat_input, phonon_input) in zip(dynmat_inputs, phonon_inputs)
+        object = open(phonon_input, "r") do io
+            parse(PHononInput, read(io, String))
+        end
+        template = relay(object, template)
+        write(dynmat_input, to_qe(template, verbose = verbose))
+    end
+    return
+end # function prepare
+
+
+
 
 end
