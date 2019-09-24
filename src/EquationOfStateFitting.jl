@@ -21,7 +21,7 @@ using EquationsOfState.FindVolume: findvolume
 using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
-using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput, autofill_cell_parameters
 using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_cell_parameters,
                                                   parse_head,
