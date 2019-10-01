@@ -20,7 +20,7 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
 using MLStyle: @match
-using QuantumESPRESSOBase: to_qe
+using QuantumESPRESSOBase: to_qe, option
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput, autofill_cell_parameters
 using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_cell_parameters,
@@ -28,6 +28,7 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   isjobdone
 using Setfield: set
 using Unitful: AbstractQuantity, ustrip, @u_str
+using UnitfulAstro
 using UnitfulAtomic
 
 import ..Step
@@ -38,16 +39,28 @@ export update_alat_press, prepare, finish
 function update_alat_press(
     template::PWscfInput,
     eos::EquationOfState,
-    pressure::Union{Real,AbstractQuantity},
+    pressure::AbstractQuantity,
 )
     volume = findvolume(PressureForm(), eos, pressure, (eps() * u"bohr^3", eos.v0 * 1.3))
-    alat = cbrt(ustrip(volume) / det(template.cell_parameters.data))
+    T = eltype(template.cell_parameters.data)
+    determinant = if T <: Real
+        @match option(template.cell_parameters) begin
+            "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
+            "angstrom" => det(template.cell_parameters.data) * u"angstrom^3"
+        end
+    elseif T <: AbstractQuantity
+        det(template.cell_parameters.data)
+    else
+        error("Unknown element type $T given in `CELL_PARAMETERS` card!")
+    end
+    # `det` and `cbrt` work with units.
+    alat = ustrip(u"bohr", cbrt(volume / determinant))
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, ustrip(pressure)))
+    return set(template, lenses, (alat, ustrip(u"kbar", pressure)))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
