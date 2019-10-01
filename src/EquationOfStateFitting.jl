@@ -17,31 +17,33 @@ using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
-using EquationsOfState.FindVolume: findvolume
+using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
-using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput, autofill_cell_parameters
 using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_cell_parameters,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
+using Unitful: AbstractQuantity, ustrip, @u_str
+using UnitfulAtomic
 
 import ..Step
 using ..SelfConsistentField: write_metadata
 
 export update_alat_press, prepare, finish
 
-function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Real)
-    volume = findvolume(PressureForm(), eos, pressure, (eps(), eos.v0 * 1.3))
-    alat = cbrt(volume / det(template.cell_parameters.data))
+function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Union{Real, AbstractQuantity})
+    volume = findvolume(PressureForm(), eos, pressure, (eps()*u"bohr^3", eos.v0*1.3))
+    alat = cbrt(ustrip(volume) / det(template.cell_parameters.data))
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, pressure))
+    return set(template, lenses, (alat, ustrip(pressure)))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
@@ -62,7 +64,7 @@ function prepare(
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector{<:Real},
+    pressures::AbstractVector{<:Union{Real, AbstractQuantity}},
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )

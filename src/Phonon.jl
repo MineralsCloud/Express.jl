@@ -14,6 +14,7 @@ module Phonon
 using Kaleido: @batchlens
 using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using QuantumESPRESSOBase.Inputs.PWscf: autofill_cell_parameters
 using QuantumESPRESSOBase.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
 using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_cell_parameters, parse_atomic_positions
 using Setfield: get, set, @lens
@@ -113,7 +114,7 @@ in a dynmat calculation.
 """
 function relay(from::PHononInput, to::DynmatInput)
     lenses = @batchlens(begin
-        _.asr
+        #_.asr   #TODO
         _.fildyn
         _.amass
     end)

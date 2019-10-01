@@ -108,7 +108,7 @@ which_calculation(step::Step{2}) = "bands"
 # This is a helper function and should not be exported
 function set_calculation(step::Step, template::PWscfInput)
     type = which_calculation(step)
-    if template.control.calculation != calculation
+    if template.control.calculation != type
         @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
     end
     @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
