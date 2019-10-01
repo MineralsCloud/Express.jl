@@ -28,7 +28,7 @@ struct CircularPath <: PathStyle end
 struct NoncircularPath <: PathStyle end
 
 # This is a helper function and should not be exported
-euclidean(x, y) = sqrt(sum((x - y).^2))
+euclidean(x, y) = sqrt(sum((x - y) .^ 2))
 
 """
     generate_path(nodes, densities = 100 * ones(Int, length(nodes)))
@@ -62,7 +62,7 @@ julia> BandStructure.generate_path(nodes, 100 * ones(Int, length(nodes) - 1))  #
 """
 function generate_path(
     nodes::AbstractVector{<:AbstractVector},
-    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes))
+    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)),
 )
     if length(densities) == length(nodes)
         _generate_path(nodes, densities, CircularPath())
@@ -118,7 +118,7 @@ function prepare(
     step::Step{1},
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
-    metadatafiles::AbstractVector{<:AbstractString}
+    metadatafiles::AbstractVector{<:AbstractString},
 )
     # Checking parameters
     @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
@@ -150,12 +150,12 @@ function prepare(
         end
         write_metadata(metadata, input, template)
     end
-end # function prepare
+end# function prepare
 function prepare(
     step::Step{3},
     inputs::AbstractVector{<:AbstractString},
     template::BandsNamelist,
-    metadatafiles::AbstractVector{<:AbstractString}
+    metadatafiles::AbstractVector{<:AbstractString},
 )
     for (input, metadata) in zip(inputs, metadatafiles)
         open(input, "r+") do io
