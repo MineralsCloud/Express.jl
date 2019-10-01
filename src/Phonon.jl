@@ -16,7 +16,8 @@ using QuantumESPRESSOBase: to_qe
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
 using QuantumESPRESSOBase.Inputs.PWscf: autofill_cell_parameters
 using QuantumESPRESSOBase.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_cell_parameters, parse_atomic_positions
+using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_cell_parameters,
+                                                  parse_atomic_positions
 using Setfield: get, set, @lens
 
 import ..Step
@@ -162,12 +163,12 @@ function prepare(
     phonon_inputs::AbstractVector{<:AbstractString},
     pwscf_inputs::AbstractVector{<:AbstractString},
     template::PHononInput,
-    verbose::Bool = false
+    verbose::Bool = false,
 )
     # Check parameters
     @assert(
         length(phonon_inputs) == length(pwscf_inputs),
-        "The PWscf and the PHonon inputs files must have the same length!"
+        "The PWscf and the PHonon inputs files must have the same length!",
     )
     template = _preset(template)
     for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
@@ -184,12 +185,12 @@ function prepare(
     q2r_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
     template::Q2RInput,
-    verbose::Bool = false
+    verbose::Bool = false,
 )
     # Check parameters
     @assert(
         length(q2r_inputs) == length(phonon_inputs),
-        "The phonon and the q2r inputs files must have the same length!"
+        "The phonon and the q2r inputs files must have the same length!",
     )
     for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
         object = open(phonon_input, "r") do io
@@ -205,12 +206,12 @@ function prepare(
     matdyn_inputs::AbstractVector{<:AbstractString},
     q2r_inputs::AbstractVector{<:AbstractString},
     template::MatdynInput,
-    verbose::Bool = false
+    verbose::Bool = false,
 )
     # Check parameters
     @assert(
         length(matdyn_inputs) == length(q2r_inputs),
-        "The q2r and the matdyn inputs files must have the same length!"
+        "The q2r and the matdyn inputs files must have the same length!",
     )
     for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
         object = open(q2r_input, "r") do io
@@ -226,12 +227,12 @@ function prepare(
     dynmat_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
     template::DynmatInput,
-    verbose::Bool = false
+    verbose::Bool = false,
 )
     # Check parameters
     @assert(
         length(dynmat_inputs) == length(phonon_inputs),
-        "The dynmat and the phonon inputs files must have the same length!"
+        "The dynmat and the phonon inputs files must have the same length!",
     )
     for (dynmat_input, phonon_input) in zip(dynmat_inputs, phonon_inputs)
         object = open(phonon_input, "r") do io

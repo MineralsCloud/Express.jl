@@ -35,8 +35,12 @@ using ..SelfConsistentField: write_metadata
 
 export update_alat_press, prepare, finish
 
-function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Union{Real, AbstractQuantity})
-    volume = findvolume(PressureForm(), eos, pressure, (eps()*u"bohr^3", eos.v0*1.3))
+function update_alat_press(
+    template::PWscfInput,
+    eos::EquationOfState,
+    pressure::Union{Real,AbstractQuantity},
+)
+    volume = findvolume(PressureForm(), eos, pressure, (eps() * u"bohr^3", eos.v0 * 1.3))
     alat = cbrt(ustrip(volume) / det(template.cell_parameters.data))
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
@@ -87,7 +91,7 @@ end # function prepare
 function finish(
     ::Step{N},
     outputs::AbstractVector{<:AbstractString},
-    trial_eos::EquationOfState
+    trial_eos::EquationOfState,
 ) where {N}
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)

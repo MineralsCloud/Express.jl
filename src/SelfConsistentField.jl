@@ -22,7 +22,7 @@ function write_metadata(file::AbstractString, input::AbstractString, object::PWs
         "prefix" => object.control.prefix,
         "pseudo_dir" => object.control.pseudo_dir,
         "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
-        "input" => input
+        "input" => input,
     )
     metadata["wfcdir"] = object.control.wf_collect ? metadata["outdir"] :
                          object.control.wfcdir
