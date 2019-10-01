@@ -415,3 +415,9 @@ deps = ["Unitful", "UnitfulAngles"]
 git-tree-sha1 = "900a89c70b80253b52791da65aa3d3b069757202"
 uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 version = "0.4.0"
+
+[[UnitfulAtomic]]
+deps = ["Unitful"]
+git-tree-sha1 = "2edb47dbda92ce8a91f53603041ffe7745427b01"
+uuid = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
+version = "0.3.0"
