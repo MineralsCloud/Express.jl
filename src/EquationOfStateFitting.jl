@@ -27,8 +27,8 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
-using Unitful: AbstractQuantity, ustrip
-import Unitful
+using Unitful: AbstractQuantity, ustrip, @u_str
+using UnitfulAtomic
 
 import ..Step
 using ..SelfConsistentField: write_metadata
@@ -36,7 +36,7 @@ using ..SelfConsistentField: write_metadata
 export update_alat_press, prepare, finish
 
 function update_alat_press(template::PWscfInput, eos::EquationOfState, pressure::Union{Real, AbstractQuantity})
-    volume = findvolume(PressureForm(), eos, pressure, eos.v0)
+    volume = findvolume(PressureForm(), eos, pressure, (eps()*u"bohr^3", eos.v0*1.3))
     alat = cbrt(ustrip(volume) / det(template.cell_parameters.data))
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
