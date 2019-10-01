@@ -17,7 +17,7 @@ using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
-using EquationsOfState.FindVolume: findvolume
+using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSOBase: to_qe
