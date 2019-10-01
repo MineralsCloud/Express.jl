@@ -58,9 +58,9 @@ version = "1.0.1"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "0809951a1774dc724da22d26e4289bbaab77809a"
+git-tree-sha1 = "517ce30aa57cdfae1ab444a7c0aef8bb86345bc2"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.0"
+version = "0.17.1"
 
 [[Dates]]
 deps = ["Printf"]
@@ -94,13 +94,13 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "baaf9e165ba8a2d11fb4fb3511782ee070ee3694"
+git-tree-sha1 = "b419fcf95ef9c8cf4d6610cd323890ad66d64240"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.21.1"
+version = "0.21.3"
 
 [[EquationsOfState]]
-deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Parameters", "Polynomials", "Roots", "StaticArrays", "Statistics"]
-git-tree-sha1 = "7d6d898e2b3bb2331d28059de66fdf7df1bf7126"
+deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Polynomials", "Roots", "Unitful", "UnitfulAstro"]
+git-tree-sha1 = "50dbad9b8b88c4c4ff69f1a5306ec90c35974292"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -137,9 +137,9 @@ version = "0.21.0"
 
 [[Kaleido]]
 deps = ["Requires", "Setfield"]
-git-tree-sha1 = "31ec44b443069b53edd7b8a903462d2f32ea6255"
+git-tree-sha1 = "395a8ecf554241433721f3f028a22ded13a5f7c2"
 uuid = "caafb194-7e8d-11e9-2724-d5981dd0806d"
-version = "0.1.0"
+version = "0.2.0"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -185,9 +185,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[NLSolversBase]]
 deps = ["Calculus", "DiffEqDiffTools", "DiffResults", "Distributed", "ForwardDiff"]
-git-tree-sha1 = "c430bd3f2dfcffc30688cf4a9cb61535e8d85f65"
+git-tree-sha1 = "f1b8ed89fa332f410cfc7c937682eb4d0b361521"
 uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
-version = "7.4.1"
+version = "7.5.0"
 
 [[NaNMath]]
 deps = ["Compat"]
@@ -252,7 +252,7 @@ version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
-git-tree-sha1 = "41450336cb45712cff28fda33db2688d59065498"
+git-tree-sha1 = "8db0990b684986ffc9f56115a8fb9659e181fbd5"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -260,7 +260,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
-git-tree-sha1 = "1c84492452fe6bd0d09383ba453a002ace18a1e2"
+git-tree-sha1 = "1a71c29f6fd067ae82410d216d2b0d0f0ceba361"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -316,10 +316,10 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[Setfield]]
-deps = ["InteractiveUtils", "MacroTools", "Test"]
-git-tree-sha1 = "bef11bb6030131bafbcaaf8a3df16b7a72be8b9c"
+deps = ["MacroTools"]
+git-tree-sha1 = "1d8d1e5ecae03c6fad643328a98c9adbda6d8eee"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
-version = "0.3.4"
+version = "0.4.0"
 
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -397,3 +397,21 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[Unitful]]
+deps = ["LinearAlgebra", "Random"]
+git-tree-sha1 = "92bdf0ccfa9612b167d0adaadef832a09971ceb0"
+uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
+version = "0.17.0"
+
+[[UnitfulAngles]]
+deps = ["Dates", "Test", "Unitful"]
+git-tree-sha1 = "5466c423087c73e505bd24d56fcf6f3a9c5e6f1a"
+uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
+version = "0.5.0"
+
+[[UnitfulAstro]]
+deps = ["Unitful", "UnitfulAngles"]
+git-tree-sha1 = "900a89c70b80253b52791da65aa3d3b069757202"
+uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
+version = "0.4.0"
