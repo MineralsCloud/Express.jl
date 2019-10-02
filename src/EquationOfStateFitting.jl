@@ -41,25 +41,25 @@ function update_alat_press(
     eos::EquationOfState,
     pressure::AbstractQuantity,
 )
-    volume = findvolume(PressureForm(), eos, pressure, (eps() * u"bohr^3", eos.v0 * 1.3))
+    volume = ustrip(u"bohr^3", findvolume(PressureForm(), eos, pressure, (eps() * u"bohr^3", eos.v0 * 1.3)))
     T = eltype(template.cell_parameters.data)
     determinant = if T <: Real
         # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
         @match option(template.cell_parameters) begin
             # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
             # So `"alat"` is equivalent to `"bohr"`.
-            "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
-            "angstrom" => det(template.cell_parameters.data) * u"angstrom^3"
+            "alat" || "bohr" => det(template.cell_parameters.data)
+            "angstrom" => ustrip(u"bohr^3", det(template.cell_parameters.data) * u"angstrom^3")
         end
     elseif T <: AbstractQuantity
         # If the `CellParametersCard` contains a matrix of quantities.
-        det(template.cell_parameters.data)  # `det` works with units.
+        ustrip(u"bohr^3", det(template.cell_parameters.data))  # `det` works with units.
     else
         error("Unknown element type $T given in `CELL_PARAMETERS` card!")
     end
     # `cbrt` works with units.
     # Convert `alat` in unit of "bohr", then strip the unit.
-    alat = ustrip(u"bohr", cbrt(volume / determinant))
+    alat = cbrt(volume / determinant)  # This is dimensionless
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
