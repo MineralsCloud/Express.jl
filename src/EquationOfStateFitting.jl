@@ -86,7 +86,7 @@ function prepare(
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector{<:Union{Real, AbstractQuantity}},
+    pressures::AbstractVector,
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
