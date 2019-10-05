@@ -36,36 +36,47 @@ using ..SelfConsistentField: write_metadata
 
 export update_alat_press, prepare, finish
 
+function _determinant(cell_parameters::CellParametersCard{T,<:AbstractMatrix{<:Real}}) where {T}
+    # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
+    @match option(cell_parameters) begin
+        # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
+        # So `"alat"` is equivalent to `"bohr"`.
+        "alat" || "bohr" => det(cell_parameters.data)
+        "angstrom" => ustrip(u"bohr^3", det(cell_parameters.data) * u"angstrom^3")
+    end
+end # function _determinant
+function _determinant(cell_parameters::CellParametersCard{T,<:AbstractMatrix{<:AbstractQuantity}}) where {T}
+    # If the `CellParametersCard` contains a matrix of quantities.
+    return ustrip(u"bohr^3", det(cell_parameters.data))  # `det` works with units.
+end # function _determinant
+
+function _findvolume(eos::EquationOfState, pressure::AbstractQuantity)
+    v0 = eps(float(eos.v0))
+    return ustrip(u"bohr^3", findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3)))
+end # function _findvolume
+function _findvolume(eos::EquationOfState, pressure::Real)
+    v0 = eps(float(eos.v0))
+    return findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3))
+end # function _findvolume
+
+_get_press(pressure::Real) = pressure
+_get_press(pressure::AbstractQuantity) = ustrip(u"kbar", pressure)
+
 function update_alat_press(
     template::PWscfInput,
     eos::EquationOfState,
-    pressure::AbstractQuantity,
+    pressure,
 )
-    volume = ustrip(u"bohr^3", findvolume(PressureForm(), eos, pressure, (eps() * u"bohr^3", eos.v0 * 1.3)))
-    T = eltype(template.cell_parameters.data)
-    determinant = if T <: Real
-        # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
-        @match option(template.cell_parameters) begin
-            # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
-            # So `"alat"` is equivalent to `"bohr"`.
-            "alat" || "bohr" => det(template.cell_parameters.data)
-            "angstrom" => ustrip(u"bohr^3", det(template.cell_parameters.data) * u"angstrom^3")
-        end
-    elseif T <: AbstractQuantity
-        # If the `CellParametersCard` contains a matrix of quantities.
-        ustrip(u"bohr^3", det(template.cell_parameters.data))  # `det` works with units.
-    else
-        error("Unknown element type $T given in `CELL_PARAMETERS` card!")
-    end
+    volume = _findvolume(eos, pressure)
+    determinant = _determinant(template.cell_parameters)
     # `cbrt` works with units.
-    # Convert `alat` in unit of "bohr", then strip the unit.
     alat = cbrt(volume / determinant)  # This is dimensionless
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, ustrip(u"kbar", pressure)))
+    return set(template, lenses, (alat, _get_press(pressure)))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
