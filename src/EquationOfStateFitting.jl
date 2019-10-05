@@ -36,39 +36,28 @@ using ..SelfConsistentField: write_metadata
 
 export update_alat_press, prepare, finish
 
-function _determinant(cell_parameters::CellParametersCard{T,<:AbstractMatrix{<:Real}}) where {T}
+function update_alat_press(
+    template::PWscfInput,
+    eos::EquationOfState,
+    pressure::AbstractQuantity,
+)
+    v0 = eps(float(eos.v0))
+    volume = findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
-    @match option(cell_parameters) begin
+    determinant = @match option(cell_parameters) begin
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
         "alat" || "bohr" => det(cell_parameters.data) * u"bohr^3"
         "angstrom" => uconvert(u"bohr^3", det(cell_parameters.data) * u"angstrom^3")
     end
-end # function _determinant
-function _determinant(cell_parameters::CellParametersCard{T,<:AbstractMatrix{<:AbstractQuantity}}) where {T}
-    # If the `CellParametersCard` contains a matrix of quantities.
-    return det(cell_parameters.data)  # `det` works with units.
-end # function _determinant
-
-_get_press(pressure::Real) = pressure
-_get_press(pressure::AbstractQuantity) = ustrip(u"kbar", pressure)
-
-function update_alat_press(
-    template::PWscfInput,
-    eos::EquationOfState,
-    pressure,
-)
-    v0 = eps(float(eos.v0))
-    volume = findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3))
-    determinant = det(template.cell_parameters.data)
-    # `cbrt` works with units. `ustrip` works with/without units.
-    alat = ustrip(cbrt(volume / determinant))  # This is dimensionless.
+    # `cbrt` works with units.
+    alat = ustrip(u"bohr", cbrt(volume / determinant))  # This is dimensionless.
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, _get_press(pressure)))
+    return set(template, lenses, (alat, ustrip(u"kbar", pressure)))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
