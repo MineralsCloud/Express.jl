@@ -27,7 +27,7 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
-using Unitful: AbstractQuantity, ustrip, @u_str
+using Unitful: AbstractQuantity, ustrip, uconvert, @u_str
 using UnitfulAstro
 using UnitfulAtomic
 
@@ -41,23 +41,14 @@ function _determinant(cell_parameters::CellParametersCard{T,<:AbstractMatrix{<:R
     @match option(cell_parameters) begin
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
-        "alat" || "bohr" => det(cell_parameters.data)
-        "angstrom" => ustrip(u"bohr^3", det(cell_parameters.data) * u"angstrom^3")
+        "alat" || "bohr" => det(cell_parameters.data) * u"bohr^3"
+        "angstrom" => uconvert(u"bohr^3", det(cell_parameters.data) * u"angstrom^3")
     end
 end # function _determinant
 function _determinant(cell_parameters::CellParametersCard{T,<:AbstractMatrix{<:AbstractQuantity}}) where {T}
     # If the `CellParametersCard` contains a matrix of quantities.
-    return ustrip(u"bohr^3", det(cell_parameters.data))  # `det` works with units.
+    return det(cell_parameters.data)  # `det` works with units.
 end # function _determinant
-
-function _findvolume(eos::EquationOfState, pressure::AbstractQuantity)
-    v0 = eps(float(eos.v0))
-    return ustrip(u"bohr^3", findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3)))
-end # function _findvolume
-function _findvolume(eos::EquationOfState, pressure::Real)
-    v0 = eps(float(eos.v0))
-    return findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3))
-end # function _findvolume
 
 _get_press(pressure::Real) = pressure
 _get_press(pressure::AbstractQuantity) = ustrip(u"kbar", pressure)
@@ -67,10 +58,11 @@ function update_alat_press(
     eos::EquationOfState,
     pressure,
 )
-    volume = _findvolume(eos, pressure)
-    determinant = _determinant(template.cell_parameters)
-    # `cbrt` works with units.
-    alat = cbrt(volume / determinant)  # This is dimensionless
+    v0 = eps(float(eos.v0))
+    volume = findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3))
+    determinant = det(template.cell_parameters.data)
+    # `cbrt` works with units. `ustrip` works with/without units.
+    alat = ustrip(cbrt(volume / determinant))  # This is dimensionless.
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
