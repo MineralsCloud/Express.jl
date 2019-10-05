@@ -49,7 +49,7 @@ function update_alat_press(
     determinant = @match option(template.cell_parameters) begin
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
-        "alat" || "bohr" => det(cell_parameters.data) * u"bohr^3"
+        "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
         "angstrom" => det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
     end
     # `cbrt` works with units.
