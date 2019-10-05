@@ -47,7 +47,9 @@ version = "0.2.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "84aa74986c5b9b898b0d1acaf3258741ee64754f"
+git-tree-sha1 = "3c3130d2f5ea1c40975c53ad667f58061964d8b4"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaLang/Compat.jl.git"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.1.0"
 
@@ -252,7 +254,7 @@ version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
-git-tree-sha1 = "8db0990b684986ffc9f56115a8fb9659e181fbd5"
+git-tree-sha1 = "fdf2febb91d37354890dfa1ae1fbbda7e9ac8d2f"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -415,3 +417,9 @@ deps = ["Unitful", "UnitfulAngles"]
 git-tree-sha1 = "900a89c70b80253b52791da65aa3d3b069757202"
 uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 version = "0.4.0"
+
+[[UnitfulAtomic]]
+deps = ["Unitful"]
+git-tree-sha1 = "2edb47dbda92ce8a91f53603041ffe7745427b01"
+uuid = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
+version = "0.3.0"

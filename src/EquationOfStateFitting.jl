@@ -20,14 +20,15 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
 using MLStyle: @match
-using QuantumESPRESSOBase: to_qe
+using QuantumESPRESSOBase: to_qe, option
 using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput, autofill_cell_parameters
 using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_cell_parameters,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
-using Unitful: AbstractQuantity, ustrip, @u_str
+using Unitful: AbstractQuantity, ustrip, NoUnits, @u_str
+using UnitfulAstro
 using UnitfulAtomic
 
 import ..Step
@@ -38,20 +39,32 @@ export update_alat_press, prepare, finish
 function update_alat_press(
     template::PWscfInput,
     eos::EquationOfState,
-    pressure::Union{Real,AbstractQuantity},
+    pressure::AbstractQuantity,
 )
-    volume = findvolume(PressureForm(), eos, pressure, (eps() * u"bohr^3", eos.v0 * 1.3))
-    alat = cbrt(ustrip(volume) / det(template.cell_parameters.data))
+    # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
+    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
+    v0 = float(eos.v0)
+    volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
+    # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
+    determinant = @match option(template.cell_parameters) begin
+        # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
+        # So `"alat"` is equivalent to `"bohr"`.
+        "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
+        "angstrom" => det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
+    end
+    # `cbrt` works with units.
+    alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
+        _.cell_parameters.option
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, ustrip(pressure)))
+    return set(template, lenses, (alat, ustrip(u"kbar", pressure), "alat"))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _preset(step::Step{N}, template::PWscfInput) where {N}
+function _boilerplate(step::Step{N}, template::PWscfInput) where {N}
     lenses = @batchlens(begin
         _.control.calculation  # Get the `template`'s `control.calculation` value
         _.control.verbosity    # Get the `template`'s `control.verbosity` value
@@ -59,16 +72,15 @@ function _preset(step::Step{N}, template::PWscfInput) where {N}
         _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
     end)
     # Set the `template`'s values with...
-    template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
-end # function _preset
+    return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
+end # function _boilerplate
 
 function prepare(
     step::Step,
     inputs::AbstractVector{<:AbstractString},
     template::PWscfInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector{<:Union{Real, AbstractQuantity}},
+    pressures::AbstractVector,
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
@@ -77,7 +89,7 @@ function prepare(
         length(inputs) == length(pressures) == length(metadatafiles),
         "The inputs, pressures and the metadata files must be the same size!"
     )
-    template = _preset(step, template)
+    template = _boilerplate(step, template)
     # Write input and metadata
     for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
