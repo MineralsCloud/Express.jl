@@ -64,7 +64,7 @@ function update_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _preset(step::Step{N}, template::PWscfInput) where {N}
+function _boilerplate(step::Step{N}, template::PWscfInput) where {N}
     lenses = @batchlens(begin
         _.control.calculation  # Get the `template`'s `control.calculation` value
         _.control.verbosity    # Get the `template`'s `control.verbosity` value
@@ -73,7 +73,7 @@ function _preset(step::Step{N}, template::PWscfInput) where {N}
     end)
     # Set the `template`'s values with...
     return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
-end # function _preset
+end # function _boilerplate
 
 function prepare(
     step::Step,
@@ -89,7 +89,7 @@ function prepare(
         length(inputs) == length(pressures) == length(metadatafiles),
         "The inputs, pressures and the metadata files must be the same size!"
     )
-    template = _preset(step, template)
+    template = _boilerplate(step, template)
     # Write input and metadata
     for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
