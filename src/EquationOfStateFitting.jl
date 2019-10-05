@@ -41,14 +41,15 @@ function update_alat_press(
     eos::EquationOfState,
     pressure::AbstractQuantity,
 )
-    v0 = eps(float(eos.v0))
-    volume = findvolume(PressureForm(), eos, pressure, (v0, v0 * 1.3))
+    # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
+    v0 = float(eos.v0)
+    volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
-    determinant = @match option(cell_parameters) begin
+    determinant = @match option(template.cell_parameters) begin
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
         "alat" || "bohr" => det(cell_parameters.data) * u"bohr^3"
-        "angstrom" => uconvert(u"bohr^3", det(cell_parameters.data) * u"angstrom^3")
+        "angstrom" => uconvert(u"bohr^3", det(template.cell_parameters.data) * u"angstrom^3")
     end
     # `cbrt` works with units.
     alat = ustrip(u"bohr", cbrt(volume / determinant))  # This is dimensionless.
