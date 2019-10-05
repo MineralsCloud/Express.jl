@@ -27,7 +27,7 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
-using Unitful: AbstractQuantity, ustrip, @u_str
+using Unitful: AbstractQuantity, ustrip, NoUnits, @u_str
 using UnitfulAstro
 using UnitfulAtomic
 
@@ -52,13 +52,14 @@ function update_alat_press(
         "angstrom" => det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
     end
     # `cbrt` works with units.
-    alat = ustrip(u"bohr", cbrt(volume / determinant))  # This is dimensionless.
+    alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
     lenses = @batchlens(begin
         _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
         _.cell.press             # Get the `template`'s `cell.press` value
+        _.cell_parameters.option
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, ustrip(u"kbar", pressure)))
+    return set(template, lenses, (alat, ustrip(u"kbar", pressure), "alat"))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
