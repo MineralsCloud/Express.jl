@@ -27,7 +27,7 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
-using Unitful: AbstractQuantity, ustrip, uconvert, @u_str
+using Unitful: AbstractQuantity, ustrip, @u_str
 using UnitfulAstro
 using UnitfulAtomic
 
@@ -49,7 +49,7 @@ function update_alat_press(
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
         "alat" || "bohr" => det(cell_parameters.data) * u"bohr^3"
-        "angstrom" => uconvert(u"bohr^3", det(template.cell_parameters.data) * u"angstrom^3")
+        "angstrom" => det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
     end
     # `cbrt` works with units.
     alat = ustrip(u"bohr", cbrt(volume / determinant))  # This is dimensionless.
