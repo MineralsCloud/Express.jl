@@ -42,6 +42,7 @@ function update_alat_press(
     pressure::AbstractQuantity,
 )
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
+    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
@@ -71,8 +72,7 @@ function _preset(step::Step{N}, template::PWscfInput) where {N}
         _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
     end)
     # Set the `template`'s values with...
-    template = set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
+    return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
 end # function _preset
 
 function prepare(
