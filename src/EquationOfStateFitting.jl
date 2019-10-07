@@ -55,12 +55,12 @@ function update_alat_press(
     # `cbrt` works with units.
     alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
     lenses = @batchlens(begin
-        _.system.celldm ∘ _[$1]  # Get the `template`'s `system.celldm[1]` value
-        _.cell.press             # Get the `template`'s `cell.press` value
+        _.system.celldm  # Get the `template`'s `system.celldm[1]` value
+        _.cell.press     # Get the `template`'s `cell.press` value
         _.cell_parameters.option
     end)
     # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
-    return set(template, lenses, (alat, ustrip(u"kbar", pressure), "alat"))
+    return set(template, lenses, ([alat], ustrip(u"kbar", pressure), "alat"))
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
