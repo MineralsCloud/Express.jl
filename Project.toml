@@ -16,7 +16,6 @@ QuantumESPRESSOParsers = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 ShiftedArrays = "1277b4bf-5013-50f5-be3d-901d8477a67a"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]

@@ -53,16 +53,21 @@ repo-url = "https://github.com/JuliaLang/Compat.jl.git"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.1.0"
 
+[[ConstructionBase]]
+git-tree-sha1 = "e3efe0a0f49dcd294c8c73e897b4fdf891f0fbd3"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "0.1.0"
+
 [[DataAPI]]
-git-tree-sha1 = "8903f0219d3472543fc4b2f5ebaf675a07f817c0"
+git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.0.1"
+version = "1.1.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "517ce30aa57cdfae1ab444a7c0aef8bb86345bc2"
+git-tree-sha1 = "f94423c68f2e47db0d6f626a26d4872266e0ec3d"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.1"
+version = "0.17.2"
 
 [[Dates]]
 deps = ["Printf"]
@@ -101,8 +106,8 @@ uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.3"
 
 [[EquationsOfState]]
-deps = ["InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Polynomials", "Roots", "Unitful", "UnitfulAstro"]
-git-tree-sha1 = "50dbad9b8b88c4c4ff69f1a5306ec90c35974292"
+deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Polynomials", "Roots", "Unitful"]
+git-tree-sha1 = "91198b7a2b8e60949c8cd568a10c9e7f13c96d68"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -178,9 +183,10 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Missings]]
-git-tree-sha1 = "29858ce6c8ae629cf2d733bffa329619a1c843d0"
+deps = ["DataAPI"]
+git-tree-sha1 = "de0a5ce9e5289f27df672ffabef4d1e5861247d5"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "0.4.2"
+version = "0.4.3"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -262,7 +268,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
-git-tree-sha1 = "1a71c29f6fd067ae82410d216d2b0d0f0ceba361"
+git-tree-sha1 = "689fdccb871efba4e88d6a6d733dadce54a6ded5"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -402,21 +408,11 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[Unitful]]
 deps = ["LinearAlgebra", "Random"]
-git-tree-sha1 = "92bdf0ccfa9612b167d0adaadef832a09971ceb0"
+git-tree-sha1 = "0e9ad8a9621a9e1ec48f7cb48a5d6ded9e2c68f3"
+repo-rev = "master"
+repo-url = "https://github.com/PainterQubits/Unitful.jl.git"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
 version = "0.17.0"
-
-[[UnitfulAngles]]
-deps = ["Dates", "Test", "Unitful"]
-git-tree-sha1 = "5466c423087c73e505bd24d56fcf6f3a9c5e6f1a"
-uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
-version = "0.5.0"
-
-[[UnitfulAstro]]
-deps = ["Unitful", "UnitfulAngles"]
-git-tree-sha1 = "900a89c70b80253b52791da65aa3d3b069757202"
-uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
-version = "0.4.0"
 
 [[UnitfulAtomic]]
 deps = ["Unitful"]
