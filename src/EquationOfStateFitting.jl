@@ -42,7 +42,9 @@ function update_alat_press(
     pressure::AbstractQuantity,
 )
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    isnothing(template.cell_parameters) && (template = autofill_cell_parameters(template))
+    if isnothing(template.cell_parameters)
+        template = autofill_cell_parameters(template)
+    end
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
@@ -55,11 +57,11 @@ function update_alat_press(
     # `cbrt` works with units.
     alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
     lenses = @batchlens(begin
-        _.system.celldm  # Get the `template`'s `system.celldm[1]` value
+        _.system.celldm  # Get the `template`'s `system.celldm` value
         _.cell.press     # Get the `template`'s `cell.press` value
         _.cell_parameters.option
     end)
-    # Set the `template`'s `system.celldm[1]` and `cell.press` values with `alat` and `pressure`
+    # Set the `template`'s `system.celldm` and `cell.press` values
     return set(template, lenses, ([alat], ustrip(u"kbar", pressure), "alat"))
 end # function update_alat_press
 
