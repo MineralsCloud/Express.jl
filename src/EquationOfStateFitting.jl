@@ -28,7 +28,6 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   isjobdone
 using Setfield: set
 using Unitful: AbstractQuantity, ustrip, NoUnits, @u_str
-using UnitfulAstro
 using UnitfulAtomic
 
 import ..Step
@@ -38,7 +37,7 @@ export update_alat_press, prepare, finish
 
 function update_alat_press(
     template::PWscfInput,
-    eos::EquationOfState,
+    eos::EquationOfState{<:AbstractQuantity},
     pressure::AbstractQuantity,
 )
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
