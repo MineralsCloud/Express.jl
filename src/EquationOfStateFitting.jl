@@ -105,7 +105,7 @@ end # function prepare
 function finish(
     ::Step{N},
     outputs::AbstractVector{<:AbstractString},
-    trial_eos::EquationOfState,
+    trial_eos::EquationOfState{<:AbstractQuantity},
 ) where {N}
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
@@ -115,12 +115,12 @@ function finish(
             energies[i] = parse_total_energy(s)[end]
             volumes[i] = @match N begin
                 1 => parse_head(s)["unit-cell volume"]
-                2 => parse_cell_parameters(s)[end] |> det
+                2 => det(parse_cell_parameters(s)[end])
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
     end
-    return lsqfit(EnergyForm(), trial_eos, volumes, energies)
+    return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
 end # function finish
 
 # This is what the web service does
