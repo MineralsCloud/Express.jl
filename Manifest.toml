@@ -268,7 +268,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
-git-tree-sha1 = "88196ac6dc13de0fca4a36c9731be84cea5210c3"
+git-tree-sha1 = "6c5093b8a5549012961a3eb6253a9207c4361b12"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -408,7 +408,7 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[Unitful]]
 deps = ["LinearAlgebra", "Random"]
-git-tree-sha1 = "0e9ad8a9621a9e1ec48f7cb48a5d6ded9e2c68f3"
+git-tree-sha1 = "2157b8c74f7d1234c3796b855477326e04658838"
 repo-rev = "master"
 repo-url = "https://github.com/PainterQubits/Unitful.jl.git"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
