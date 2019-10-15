@@ -41,10 +41,10 @@ function update_alat_press(
     eos::EquationOfState{<:AbstractQuantity},
     pressure::AbstractQuantity,
 )
-    # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     if isnothing(template.cell_parameters)
         template = autofill_cell_parameters(template)
     end
+    # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
