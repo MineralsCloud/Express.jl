@@ -27,7 +27,8 @@ using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_total_energy,
                                                   parse_head,
                                                   isjobdone
 using Setfield: set
-using Unitful: AbstractQuantity, ustrip, NoUnits, @u_str
+using Unitful
+using Unitful: AbstractQuantity
 using UnitfulAtomic
 
 import ..Step
