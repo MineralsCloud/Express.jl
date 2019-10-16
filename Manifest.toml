@@ -47,9 +47,7 @@ version = "0.2.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "f2f1fed1e18b2bee83e215b775649d006e32a9f7"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaLang/Compat.jl.git"
+git-tree-sha1 = "ed2c4abadf84c53d9e58510b5fc48912c2336fbb"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.2.0"
 
@@ -107,7 +105,7 @@ version = "0.21.3"
 
 [[EquationsOfState]]
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Polynomials", "Roots", "Unitful"]
-git-tree-sha1 = "9fb0c7f6e71aa3de71c67a2a18e027607c85eac0"
+git-tree-sha1 = "8397fbd8904ea1d61a204f8345085e135fb96b5e"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -260,7 +258,7 @@ version = "2.0.3"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "MLStyle", "Parameters", "Serialization", "Setfield"]
-git-tree-sha1 = "1c2dba94fd86fcf508f7c8116cdd49540d8237f8"
+git-tree-sha1 = "3d7e4399971c741b368b149ba585bc1da3a08cbf"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -268,7 +266,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "MLStyle", "Parameters", "QuantumESPRESSOBase"]
-git-tree-sha1 = "6c5093b8a5549012961a3eb6253a9207c4361b12"
+git-tree-sha1 = "79d0dfac6b18ba4db8c4c6d19463433252cb0c3e"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -408,7 +406,7 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[Unitful]]
 deps = ["LinearAlgebra", "Random"]
-git-tree-sha1 = "2157b8c74f7d1234c3796b855477326e04658838"
+git-tree-sha1 = "161092cff2e4ec6f22a458170dcb3ae4efad8352"
 repo-rev = "master"
 repo-url = "https://github.com/PainterQubits/Unitful.jl.git"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
