@@ -34,7 +34,7 @@ using UnitfulAtomic
 import ..Step
 using ..SelfConsistentField: write_metadata
 
-export update_alat_press, prepare, finish
+export update_alat_press, prepare, finish, submit, query
 
 function update_alat_press(
     template::PWscfInput,
@@ -122,6 +122,52 @@ function finish(
     end
     return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
 end # function finish
+
+mutable struct CalculationStatus{T}
+    io::AbstractDict{T,T}
+    pending::AbstractDict{T,T}
+    running::AbstractDict{T,T}
+    done::AbstractDict{T,T}
+end
+
+function communicate(cmd::Cmd)
+    out = Pipe()
+    err = Pipe()
+
+    process = run(pipeline(cmd, stdout = out, stderr = err), wait = false)
+    close(out.in)
+    close(err.in)
+
+    stdout = @async String(read(out))
+    stderr = @async String(read(err))
+    wait(process)
+    return (
+        stdout = fetch(stdout),
+        stderr = fetch(stderr),
+        code = process.exitcode
+    )
+end
+
+function submit(job::T) where {T<:AbstractString}
+    out, err, code = communicate(`sbatch --parsable $job > jobid`)
+    if code == 0
+        return out  # It is the job id.
+    else
+        error(err)
+    end
+end # function submit
+
+function query(jobid::AbstractString, account::AbstractString)
+    out, err, code = communicate(`squeue -A $account`)
+    if code != 0
+        error(err)
+    end
+    for line in split(out, '\n')
+        m = match(Regex(jobid), line)
+        !isnothing(m) && return strip(line)
+    end
+    return
+end # function query
 
 # This is what the web service does
 # function workflow(args)
