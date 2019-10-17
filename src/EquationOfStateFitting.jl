@@ -36,7 +36,7 @@ using UnitfulAtomic
 import ..Step
 using ..SelfConsistentField: write_metadata
 
-export update_alat_press, prepare, finish, submit, query, write_job
+export update_alat_press, prepare, finish, submit, query, write_job, isdone, checkjob
 
 function update_alat_press(
     template::PWscfInput,
@@ -185,8 +185,8 @@ function submit(job::T) where {T<:AbstractString}
     end
 end # function submit
 
-function query(jobid::AbstractString, account::AbstractString)
-    out, err, code = communicate(`squeue -A $account`)
+function query(jobid::AbstractString)
+    out, err, code = communicate(`squeue --job=$jobid`)
     if code != 0
         error(err)
     end
@@ -197,17 +197,17 @@ function query(jobid::AbstractString, account::AbstractString)
     return
 end # function query
 
-function isdone(jobid::AbstractString, account::AbstractString)
-    return isnothing(query(jobid, account)) ? true : false
+function isdone(jobid::AbstractString)
+    return isnothing(query(jobid)) ? true : false
 end # function isdone
 
-function checkjob(jobid::AbstractString, account::AbstractString, dt::Int = 10)
+function checkjob(jobid::AbstractString, dt::Int = 10)
     # From https://scls19fr.github.io/ExtensibleScheduler.jl/dev/getting_started/
-    function f(x, y, sch)
-        isdone(x, y) && ExtensibleScheduler.shutdown(sch)
+    function f(x, sch)
+        isdone(x) && ExtensibleScheduler.shutdown(sch)
     end
     sched = BlockingScheduler()
-    action = Action(f, jobid, account, sched)
+    action = Action(f, jobid, sched)
     trigger = Trigger(Second(dt), n = -1)  # Infinte loop until job is done
     add(sched, action, trigger)
     run(sched)
