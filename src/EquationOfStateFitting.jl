@@ -34,7 +34,7 @@ using UnitfulAtomic
 import ..Step
 using ..SelfConsistentField: write_metadata
 
-export update_alat_press, prepare, finish, submit, query
+export update_alat_press, prepare, finish, submit, query, write_job
 
 function update_alat_press(
     template::PWscfInput,
@@ -147,6 +147,32 @@ function communicate(cmd::Cmd)
         code = process.exitcode
     )
 end
+
+function write_job(filename::AbstractString, io::AbstractDict{T,T}, account::AbstractString) where {T<:AbstractString}
+    n = div(24, length(io))
+    array = join(["[\"$k\"]=\"$v\"" for (k, v) in io], " ")
+    s = """
+    #!/usr/bin/env bash
+
+    #SBATCH -A $account
+    #SBATCH -N 1
+    #SBATCH --tasks-per-node=24
+    #SBATCH -J job
+    #SBATCH --time=01:00:00
+
+    module load intel-parallel-studio/2017
+
+    declare -A array=($array)
+
+    for i in "\${!array[@]}"; do
+        mpirun -np $n pw.x -in "\$i" > "\${array[\$i]}" &
+        sleep 3
+    done
+    wait
+    """
+    write(filename, s)
+    return
+end # function write_job
 
 function submit(job::T) where {T<:AbstractString}
     out, err, code = communicate(`sbatch --parsable $job > jobid`)
