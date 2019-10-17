@@ -5,7 +5,9 @@ version = "0.1.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 EquationsOfState = "0438fec6-b81c-52d9-9651-d286848f50a8"
+ExtensibleScheduler = "6837a093-145e-5c9b-b5ad-3b557e31aa31"
 Fortran90Namelists = "8fb689aa-71ff-4044-8071-0cffc910b57d"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Kaleido = "caafb194-7e8d-11e9-2724-d5981dd0806d"
@@ -19,8 +21,8 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
-julia = "1"
 Compat = "2.2"
+julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

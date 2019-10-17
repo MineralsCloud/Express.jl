@@ -105,11 +105,23 @@ version = "0.21.3"
 
 [[EquationsOfState]]
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Polynomials", "Roots", "Unitful"]
-git-tree-sha1 = "8397fbd8904ea1d61a204f8345085e135fb96b5e"
+git-tree-sha1 = "abc16d9be0e9f1bbcde2f6c55d6ac8640e3a1952"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
+
+[[ExtensibleScheduler]]
+deps = ["DataStructures", "Dates", "Test", "TimeFrames", "TimeZones", "UUIDs"]
+git-tree-sha1 = "5230fac8ebbae92240c1a78a5def697905e17c97"
+uuid = "6837a093-145e-5c9b-b5ad-3b557e31aa31"
+version = "0.1.1"
+
+[[EzXML]]
+deps = ["BinaryProvider", "Libdl", "Printf"]
+git-tree-sha1 = "aed48d722e528bc634bd36a7d0e090fa2952a3c0"
+uuid = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
+version = "0.9.4"
 
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
@@ -188,6 +200,11 @@ version = "0.4.3"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[Mocking]]
+git-tree-sha1 = "bd2623f8b728af988d2afec53d611acb621f3bc4"
+uuid = "78c3b35d-d492-501b-9361-3d52fe80e533"
+version = "0.7.0"
 
 [[NLSolversBase]]
 deps = ["Calculus", "DiffEqDiffTools", "DiffResults", "Distributed", "ForwardDiff"]
@@ -286,10 +303,10 @@ uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 version = "0.7.0"
 
 [[RecursiveArrayTools]]
-deps = ["RecipesBase", "Requires", "StaticArrays", "Statistics", "Test"]
-git-tree-sha1 = "c8f4e17fc7113ef7243450a8bba79981542175b6"
+deps = ["ArrayInterface", "RecipesBase", "Requires", "StaticArrays", "Statistics"]
+git-tree-sha1 = "ca98c030a187586521fb72d396e14482365ef77f"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "0.18.6"
+version = "1.0.2"
 
 [[Reexport]]
 deps = ["Pkg"]
@@ -332,10 +349,10 @@ deps = ["Distributed", "Mmap", "Random", "Serialization"]
 uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
 [[ShiftedArrays]]
-deps = ["OffsetArrays", "RecursiveArrayTools", "Test"]
-git-tree-sha1 = "b1aa84666a23a31cebcdcb848e62428968789287"
+deps = ["OffsetArrays", "RecursiveArrayTools"]
+git-tree-sha1 = "72712360fa890177aca2ff9b0d86f7c0db3d5834"
 uuid = "1277b4bf-5013-50f5-be3d-901d8477a67a"
-version = "0.5.0"
+version = "0.5.1"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -358,9 +375,9 @@ version = "0.7.2"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "db23bbf50064c582b6f2b9b043c8e7e98ea8c0c6"
+git-tree-sha1 = "1085ffbf5fd48fdba64ef8e902ca429c4e1212d3"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.11.0"
+version = "0.11.1"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -385,6 +402,18 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[TimeFrames]]
+deps = ["Dates", "Test"]
+git-tree-sha1 = "168631df303a1b26c7d33db6a463f8a9da3a3fdf"
+uuid = "51948d2b-02eb-5b28-9840-c902cc6821c9"
+version = "0.2.0"
+
+[[TimeZones]]
+deps = ["Dates", "EzXML", "Mocking", "Printf", "Serialization", "Unicode"]
+git-tree-sha1 = "4d2d681e1dd715fdaa47d31a7208cead357bb357"
+uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
+version = "0.10.2"
 
 [[Tokenize]]
 git-tree-sha1 = "dfcdbbfb2d0370716c815cbd6f8a364efb6f42cf"
