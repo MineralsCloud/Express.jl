@@ -179,7 +179,7 @@ end # function write_job
 function submit(job::T) where {T<:AbstractString}
     out, err, code = communicate(`sbatch --parsable $job > jobid`)
     if code == 0
-        return out  # It is the job id.
+        return chomp(out)  # It is the job id.
     else
         error(err)
     end
@@ -203,9 +203,12 @@ end # function isdone
 
 function checkjob(jobid::AbstractString, account::AbstractString, dt::Int = 10)
     # From https://scls19fr.github.io/ExtensibleScheduler.jl/dev/getting_started/
+    function f(x, y, sch)
+        isdone(x, y) && ExtensibleScheduler.shutdown(sch)
+    end
     sched = BlockingScheduler()
-    action = Action((x, y, sch) -> isdone(x, y) && shutdown(sch), jobid, account, sched)
-    trigger = Trigger(Second(dt), n = 1)
+    action = Action(f, jobid, account, sched)
+    trigger = Trigger(Second(dt), n = -1)  # Infinte loop until job is done
     add(sched, action, trigger)
     run(sched)
 end # function overall
