@@ -13,11 +13,13 @@ module EquationOfStateFitting
 
 using LinearAlgebra: det
 
+using Dates: Second
 using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
+using ExtensibleScheduler
 using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSOBase: to_qe, option
@@ -195,12 +197,37 @@ function query(jobid::AbstractString, account::AbstractString)
     return
 end # function query
 
-# This is what the web service does
-# function workflow(args)
-#     prepare(Step(1), inputs, template, trial_eos, pressures, metadatafiles)
-#     trial_eos = finish(outputs, trial_eos)
-#     prepare(Step(2), inputs, template, trial_eos, pressures, metadatafiles)
-#     return finish(outputs, trial_eos)
+function isdone(jobid::AbstractString, account::AbstractString)
+    return isnothing(query(jobid, account)) ? true : false
+end # function isdone
+
+function checkjob(jobid::AbstractString, account::AbstractString, dt::Int = 10)
+    # From https://scls19fr.github.io/ExtensibleScheduler.jl/dev/getting_started/
+    sched = BlockingScheduler()
+    action = Action((x, y, sch) -> isdone(x, y) && shutdown(sch), jobid, account, sched)
+    trigger = Trigger(Second(dt), n = 1)
+    add(sched, action, trigger)
+    run(sched)
+end # function overall
+
+# function workflow(
+#     io::AbstractDict{T,T},
+#     template::PWscfInput,
+#     trial_eos::EquationOfState,
+#     pressures::AbstractVector,
+#     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", keys(io)),
+#     account::AbstractString,
+#     verbose::Bool = false
+# ) where {T<:AbstractString}
+#     prepare(Step(1), keys(io), template, trial_eos, pressures, metadatafiles)
+#     write_job("job.sh", io, account)
+#     jobid = submit("job.sh")
+#     isdone(jobid, account)
+#     trial_eos = finish(values(io), trial_eos)
+#     # prepare(Step(2), keys(io), template, trial_eos, pressures, metadatafiles)
+#     # write_job("job.sh", io, account)
+#     # jobid = submit("job.sh")
+#     # return finish(values(io), trial_eos)
 # end # function workflow
 
 end
