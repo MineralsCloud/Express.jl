@@ -12,12 +12,11 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSOBase: to_qe
-using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
-using QuantumESPRESSOBase.Inputs.PWscf: autofill_cell_parameters
-using QuantumESPRESSOBase.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
-using QuantumESPRESSOParsers.OutputParsers.PWscf: parse_cell_parameters,
-                                                  parse_atomic_positions
+using QuantumESPRESSO: to_qe
+using QuantumESPRESSO.Inputs.PWscf: PWscfInput
+using QuantumESPRESSO.Inputs.PWscf: autofill_cell_parameters
+using QuantumESPRESSO.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
+using QuantumESPRESSO.OutputParsers.PWscf: parse_cell_parameters, parse_atomic_positions
 using Setfield: get, set, @lens
 
 import ..Step

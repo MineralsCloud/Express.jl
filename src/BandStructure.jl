@@ -11,10 +11,10 @@ julia>
 """
 module BandStructure
 
-using QuantumESPRESSOBase: to_qe
-using QuantumESPRESSOBase.Cards.PWscf: SpecialKPoint, KPointsCard
-using QuantumESPRESSOBase.Namelists.PWscf: BandsNamelist
-using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using QuantumESPRESSO: to_qe
+using QuantumESPRESSO.Cards.PWscf: SpecialKPoint, KPointsCard
+using QuantumESPRESSO.Namelists.PWscf: BandsNamelist
+using QuantumESPRESSO.Inputs.PWscf: PWscfInput
 using Setfield: @set
 using ShiftedArrays: circshift, lead
 

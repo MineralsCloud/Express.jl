@@ -12,7 +12,7 @@ julia>
 module SelfConsistentField
 
 import JSON
-using QuantumESPRESSOBase.Inputs.PWscf: PWscfInput
+using QuantumESPRESSO.Inputs.PWscf: PWscfInput
 
 export write_metadata
 
