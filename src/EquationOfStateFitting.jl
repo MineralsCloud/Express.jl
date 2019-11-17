@@ -24,11 +24,12 @@ using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards: optionof
+using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf: Preamble,
                                      parse_electrons_energies,
-                                     parseall,
+                                     parselast,
                                      isjobdone
 using Setfield: set
 using Unitful
@@ -116,10 +117,10 @@ function finish(
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = parse_converged_energy(s)[end]
+            energies[i] = parse_electrons_energies(s, :combined)[end]
             volumes[i] = @match N begin
                 1 => parse(Preamble, s)["unit-cell volume"]
-                2 => det(parse_cell_parameters(s)[end])
+                2 => det(parselast(CellParametersCard, s)[end])
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
