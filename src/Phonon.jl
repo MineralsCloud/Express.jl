@@ -17,7 +17,7 @@ using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
-using QuantumESPRESSO.Outputs.PWscf: parseall
+using QuantumESPRESSO.Outputs.PWscf: parselast
 using Setfield: get, set, @lens
 
 import ..Step
@@ -33,8 +33,8 @@ Read structure information from `output`, and update related fields of `template
 function update_structure(output::AbstractString, template::PWInput)
     open(output, "r") do io
         str = read(io, String)
-        cell_parameters = parse_cell_parameters(str)[end]
-        atomic_positions = parse_atomic_positions(str)[end] # TODO: Implement `read_atomic_positions`
+        cell_parameters = parselast(CellParametersCard, str)
+        atomic_positions = parselast(AtomicPositionsCard, str)
         lenses = @batchlens(begin
             _.system.celldm ∘ _[$1]
             _.atomic_positions
