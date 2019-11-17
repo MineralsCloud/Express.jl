@@ -22,11 +22,13 @@ using EquationsOfState.Find: findvolume
 using ExtensibleScheduler
 using Kaleido: @batchlens
 using MLStyle: @match
-using QuantumESPRESSO: to_qe, optionof
-using QuantumESPRESSO.Inputs.PWscf: PWInput, autofill_cell_parameters
-using QuantumESPRESSO.Outputs.PWscf: PWPreamble,
-                                     parse_converged_energy,
-                                     parse_cell_parameters,
+using QuantumESPRESSO: to_qe
+using QuantumESPRESSO.Cards: optionof
+using QuantumESPRESSO.Inputs: autofill_cell_parameters
+using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Outputs.PWscf: Preamble,
+                                     parse_electrons_energies,
+                                     parseall,
                                      isjobdone
 using Setfield: set
 using Unitful
