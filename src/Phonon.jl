@@ -13,10 +13,11 @@ module Phonon
 
 using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe
+using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
+using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
-using QuantumESPRESSO.Inputs.PWscf: autofill_cell_parameters
-using QuantumESPRESSO.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
-using QuantumESPRESSO.Outputs.PWscf: parse_cell_parameters, parse_atomic_positions
+using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
+using QuantumESPRESSO.Outputs.PWscf: parseall
 using Setfield: get, set, @lens
 
 import ..Step
@@ -55,7 +56,7 @@ function _preset(template::PWInput)
     template = set(template, lenses, ("scf", "high", true, true))
     return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
 end # function _preset
-function _preset(template::PHononInput)
+function _preset(template::PhInput)
     lenses = @batchlens(begin
         _.inputph.verbosity  # Get the `template`'s `phonon.calculation` value
     end)
@@ -64,14 +65,14 @@ function _preset(template::PHononInput)
 end # function _preset
 
 """
-    relay(from::PWInput, to::PHononInput)
+    relay(from::PWInput, to::PhInput)
 
-Relay shared information from a `PWInput` to a `PHononInput`.
+Relay shared information from a `PWInput` to a `PhInput`.
 
-A `PWInput` before a `PHononInput` has the information of `outdir` and `prefix`. They must keep the same in a
+A `PWInput` before a `PhInput` has the information of `outdir` and `prefix`. They must keep the same in a
 phonon calculation.
 """
-function relay(from::PWInput, to::PHononInput)
+function relay(from::PWInput, to::PhInput)
     lenses = @batchlens(begin
         _.outdir
         _.prefix
@@ -79,25 +80,25 @@ function relay(from::PWInput, to::PHononInput)
     return set(to, (@lens _.inputph) ∘ lenses, get(from, (@lens _.control) ∘ lenses))
 end # function relay
 """
-    relay(from::PHononInput, to::Q2RInput)
+    relay(from::PhInput, to::Q2rInput)
 
-Relay shared information from a `PHononInput` to a `Q2RInput`.
+Relay shared information from a `PhInput` to a `Q2rInput`.
 
-A `PHononInput` before a `Q2RInput` has the information of `fildyn`. It must keep the same in a q2r calculation.
+A `PhInput` before a `Q2rInput` has the information of `fildyn`. It must keep the same in a q2r calculation.
 """
-function relay(from::PHononInput, to::Q2RInput)
+function relay(from::PhInput, to::Q2rInput)
     fildyn = @lens _.fildyn
     return set(to, (@lens _.input) ∘ fildyn, get(from, (@lens _.inputph) ∘ fildyn))
 end # function relay
 """
-    relay(from::Q2RInput, to::MatdynInput)
+    relay(from::Q2rInput, to::MatdynInput)
 
-Relay shared information from a `Q2RInput` to a `MatdynInput`.
+Relay shared information from a `Q2rInput` to a `MatdynInput`.
 
-A `Q2RInput` before a `MatdynInput` has the information of `fildyn`, `flfrc` and `loto_2d`. They must keep the same
+A `Q2rInput` before a `MatdynInput` has the information of `fildyn`, `flfrc` and `loto_2d`. They must keep the same
 in a matdyn calculation.
 """
-function relay(from::Q2RInput, to::MatdynInput)
+function relay(from::Q2rInput, to::MatdynInput)
     lenses = @batchlens(begin
         _.input.flfrc
         _.input.loto_2d
@@ -105,14 +106,14 @@ function relay(from::Q2RInput, to::MatdynInput)
     return set(to, lenses, get(from, lenses))
 end # function relay
 """
-    relay(from::PHononInput, to::DynmatInput)
+    relay(from::PhInput, to::DynmatInput)
 
-Relay shared information from a `PHononInput` to a `DynmatInput`.
+Relay shared information from a `PhInput` to a `DynmatInput`.
 
-A `PHononInput` before a `DynmatInput` has the information of `asr`, `fildyn` and `amass`. They must keep the same
+A `PhInput` before a `DynmatInput` has the information of `asr`, `fildyn` and `amass`. They must keep the same
 in a dynmat calculation.
 """
-function relay(from::PHononInput, to::DynmatInput)
+function relay(from::PhInput, to::DynmatInput)
     lenses = @batchlens(begin
         #_.asr   #TODO
         _.fildyn
@@ -161,7 +162,7 @@ function prepare(
     ::Step{2},
     phonon_inputs::AbstractVector{<:AbstractString},
     pwscf_inputs::AbstractVector{<:AbstractString},
-    template::PHononInput,
+    template::PhInput,
     verbose::Bool = false,
 )
     # Check parameters
@@ -183,7 +184,7 @@ function prepare(
     ::Step{3},
     q2r_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
-    template::Q2RInput,
+    template::Q2rInput,
     verbose::Bool = false,
 )
     # Check parameters
@@ -193,7 +194,7 @@ function prepare(
     )
     for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
         object = open(phonon_input, "r") do io
-            parse(PHononInput, read(io, String))
+            parse(PhInput, read(io, String))
         end
         template = relay(object, template)
         write(q2r_input, to_qe(template, verbose = verbose))
@@ -214,7 +215,7 @@ function prepare(
     )
     for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
         object = open(q2r_input, "r") do io
-            parse(Q2RInput, read(io, String))
+            parse(Q2rInput, read(io, String))
         end
         template = relay(object, template)
         write(matdyn_input, to_qe(template, verbose = verbose))
@@ -235,7 +236,7 @@ function prepare(
     )
     for (dynmat_input, phonon_input) in zip(dynmat_inputs, phonon_inputs)
         object = open(phonon_input, "r") do io
-            parse(PHononInput, read(io, String))
+            parse(PhInput, read(io, String))
         end
         template = relay(object, template)
         write(dynmat_input, to_qe(template, verbose = verbose))
