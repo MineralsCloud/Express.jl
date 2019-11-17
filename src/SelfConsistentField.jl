@@ -12,11 +12,11 @@ julia>
 module SelfConsistentField
 
 import JSON
-using QuantumESPRESSO.Inputs.PWscf: PWscfInput
+using QuantumESPRESSO.Inputs.PWscf: PWInput
 
 export write_metadata
 
-function write_metadata(file::AbstractString, input::AbstractString, object::PWscfInput)
+function write_metadata(file::AbstractString, input::AbstractString, object::PWInput)
     metadata = Dict{String,Any}(
         "outdir" => object.control.outdir,
         "prefix" => object.control.prefix,

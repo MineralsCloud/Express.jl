@@ -23,7 +23,7 @@ using ExtensibleScheduler
 using Kaleido: @batchlens
 using MLStyle: @match
 using QuantumESPRESSO: to_qe, optionof
-using QuantumESPRESSO.Inputs.PWscf: PWscfInput, autofill_cell_parameters
+using QuantumESPRESSO.Inputs.PWscf: PWInput, autofill_cell_parameters
 using QuantumESPRESSO.Outputs.PWscf: PWPreamble,
                                      parse_converged_energy,
                                      parse_cell_parameters,
@@ -39,7 +39,7 @@ using ..SelfConsistentField: write_metadata
 export update_alat_press, prepare, finish, submit, query, write_job, isdone, checkjob
 
 function update_alat_press(
-    template::PWscfInput,
+    template::PWInput,
     eos::EquationOfState{<:AbstractQuantity},
     pressure::AbstractQuantity,
 )
@@ -68,7 +68,7 @@ function update_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _boilerplate(step::Step{N}, template::PWscfInput) where {N}
+function _boilerplate(step::Step{N}, template::PWInput) where {N}
     lenses = @batchlens(begin
         _.control.calculation  # Get the `template`'s `control.calculation` value
         _.control.verbosity    # Get the `template`'s `control.verbosity` value
@@ -82,7 +82,7 @@ end # function _boilerplate
 function prepare(
     step::Step,
     inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
+    template::PWInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
@@ -215,7 +215,7 @@ end # function overall
 
 # function workflow(
 #     io::AbstractDict{T,T},
-#     template::PWscfInput,
+#     template::PWInput,
 #     trial_eos::EquationOfState,
 #     pressures::AbstractVector,
 #     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", keys(io)),

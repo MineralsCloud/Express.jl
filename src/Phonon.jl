@@ -13,7 +13,7 @@ module Phonon
 
 using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe
-using QuantumESPRESSO.Inputs.PWscf: PWscfInput
+using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PWscf: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PHonon: PHononInput, Q2RInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parse_cell_parameters, parse_atomic_positions
@@ -25,11 +25,11 @@ using Express.SelfConsistentField: write_metadata
 export update_structure, relay, prepare
 
 """
-    update_structure(output::AbstractString, template::PWscfInput)
+    update_structure(output::AbstractString, template::PWInput)
 
 Read structure information from `output`, and update related fields of `template`.
 """
-function update_structure(output::AbstractString, template::PWscfInput)
+function update_structure(output::AbstractString, template::PWInput)
     open(output, "r") do io
         str = read(io, String)
         cell_parameters = parse_cell_parameters(str)[end]
@@ -44,7 +44,7 @@ function update_structure(output::AbstractString, template::PWscfInput)
 end # function update_structure
 
 # This is a helper function and should not be exported.
-function _preset(template::PWscfInput)
+function _preset(template::PWInput)
     lenses = @batchlens(begin
         _.control.calculation  # Get the `template`'s `control.calculation` value
         _.control.verbosity    # Get the `template`'s `control.verbosity` value
@@ -64,14 +64,14 @@ function _preset(template::PHononInput)
 end # function _preset
 
 """
-    relay(from::PWscfInput, to::PHononInput)
+    relay(from::PWInput, to::PHononInput)
 
-Relay shared information from a `PWscfInput` to a `PHononInput`.
+Relay shared information from a `PWInput` to a `PHononInput`.
 
-A `PWscfInput` before a `PHononInput` has the information of `outdir` and `prefix`. They must keep the same in a
+A `PWInput` before a `PHononInput` has the information of `outdir` and `prefix`. They must keep the same in a
 phonon calculation.
 """
-function relay(from::PWscfInput, to::PHononInput)
+function relay(from::PWInput, to::PHononInput)
     lenses = @batchlens(begin
         _.outdir
         _.prefix
@@ -131,7 +131,7 @@ Prepare input files of the first step of a phonon calculation.
 - `inputs::AbstractVector{<:AbstractString}`: The input files of Quantum ESPRESSO of a phonon calculation. If not exist,
    they will be automatically created.
 - `outputs::AbstractVector{<:AbstractString}`: The output files of Quantum ESPRESSO of a vc-relax calculation.
-- `template::PWscfInput`:
+- `template::PWInput`:
 - `metadatafiles::AbstractVector{<:AbstractString}`:
 - `verbose::Bool = false`: control the format of input files, verbose or not.
 """
@@ -139,7 +139,7 @@ function prepare(
     ::Step{1},
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
+    template::PWInput,
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
     verbose::Bool = false
 )
@@ -172,7 +172,7 @@ function prepare(
     template = _preset(template)
     for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
         object = open(pwscf_input, "r") do io
-            parse(PWscfInput, read(io, String))
+            parse(PWInput, read(io, String))
         end
         template = relay(object, template)
         write(phonon_input, to_qe(template, verbose = verbose))
