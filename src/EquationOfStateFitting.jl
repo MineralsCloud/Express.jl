@@ -29,7 +29,7 @@ using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf: Preamble,
                                      parse_electrons_energies,
-                                     parselast,
+                                     parsefinal,
                                      isjobdone
 using Setfield: set
 using Unitful
@@ -120,7 +120,7 @@ function finish(
             energies[i] = parse_electrons_energies(s, :combined)[end]
             volumes[i] = @match N begin
                 1 => parse(Preamble, s)["unit-cell volume"]
-                2 => det(parselast(CellParametersCard, s)[end])
+                2 => det(parsefinal(CellParametersCard, s)[end])
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
