@@ -14,7 +14,7 @@ module BandStructure
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards.PWscf: SpecialKPoint, KPointsCard
 using QuantumESPRESSO.Namelists.PWscf: BandsNamelist
-using QuantumESPRESSO.Inputs.PWscf: PWscfInput
+using QuantumESPRESSO.Inputs.PWscf: PWInput
 using Setfield: @set
 using ShiftedArrays: circshift, lead
 
@@ -96,7 +96,7 @@ function _generate_path(nodes, densities, ::NoncircularPath)
     return path
 end # function _generate_path
 
-function update_kpoints(template::PWscfInput, path::AbstractVector{<:AbstractVector})
+function update_kpoints(template::PWInput, path::AbstractVector{<:AbstractVector})
     data = map(x -> SpecialKPoint(x, 1), path)
     @set template.k_points = KPointsCard("crystal_b", data)
 end # function update_kpoints
@@ -106,7 +106,7 @@ which_calculation(step::Step{1}) = "nscf"
 which_calculation(step::Step{2}) = "bands"
 
 # This is a helper function and should not be exported
-function set_calculation(step::Step, template::PWscfInput)
+function set_calculation(step::Step, template::PWInput)
     type = which_calculation(step)
     if template.control.calculation != type
         @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
@@ -117,7 +117,7 @@ end # function set_calculation
 function prepare(
     step::Step{1},
     inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
+    template::PWInput,
     metadatafiles::AbstractVector{<:AbstractString},
 )
     # Checking parameters
@@ -131,7 +131,7 @@ end # function prepare
 function prepare(
     step::Step{2},
     inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
+    template::PWInput,
     nodes::AbstractVector{<:AbstractVector},
     densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)),
     metadatafiles::AbstractVector{<:AbstractString} = map(

@@ -22,11 +22,14 @@ using EquationsOfState.Find: findvolume
 using ExtensibleScheduler
 using Kaleido: @batchlens
 using MLStyle: @match
-using QuantumESPRESSO: to_qe, optionof
-using QuantumESPRESSO.Inputs.PWscf: PWscfInput, autofill_cell_parameters
-using QuantumESPRESSO.Outputs.PWscf: PWPreamble,
-                                     parse_converged_energy,
-                                     parse_cell_parameters,
+using QuantumESPRESSO: to_qe
+using QuantumESPRESSO.Cards: optionof
+using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
+using QuantumESPRESSO.Inputs: autofill_cell_parameters
+using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Outputs.PWscf: Preamble,
+                                     parse_electrons_energies,
+                                     parsefinal,
                                      isjobdone
 using Setfield: set
 using Unitful
@@ -39,7 +42,7 @@ using ..SelfConsistentField: write_metadata
 export update_alat_press, prepare, finish, submit, query, write_job, isdone, checkjob
 
 function update_alat_press(
-    template::PWscfInput,
+    template::PWInput,
     eos::EquationOfState{<:AbstractQuantity},
     pressure::AbstractQuantity,
 )
@@ -50,7 +53,7 @@ function update_alat_press(
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
-    determinant = @match option(template.cell_parameters) begin
+    determinant = @match optionof(template.cell_parameters) begin
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
         "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
@@ -68,7 +71,7 @@ function update_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _boilerplate(step::Step{N}, template::PWscfInput) where {N}
+function _boilerplate(step::Step{N}, template::PWInput) where {N}
     lenses = @batchlens(begin
         _.control.calculation  # Get the `template`'s `control.calculation` value
         _.control.verbosity    # Get the `template`'s `control.verbosity` value
@@ -82,7 +85,7 @@ end # function _boilerplate
 function prepare(
     step::Step,
     inputs::AbstractVector{<:AbstractString},
-    template::PWscfInput,
+    template::PWInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
@@ -114,10 +117,10 @@ function finish(
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = parse_converged_energy(s)[end]
+            energies[i] = parse_electrons_energies(s, :combined)[end]
             volumes[i] = @match N begin
                 1 => parse(Preamble, s)["unit-cell volume"]
-                2 => det(parse_cell_parameters(s)[end])
+                2 => det(parsefinal(CellParametersCard, s)[end])
                 _ => error("The step $N must be `1` or `2`!")
             end
         end
@@ -215,7 +218,7 @@ end # function overall
 
 # function workflow(
 #     io::AbstractDict{T,T},
-#     template::PWscfInput,
+#     template::PWInput,
 #     trial_eos::EquationOfState,
 #     pressures::AbstractVector,
 #     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", keys(io)),

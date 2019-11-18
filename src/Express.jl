@@ -1,6 +1,10 @@
 module Express
 
-include("prelude.jl")
+export Step
+
+struct Step{N} end
+Step(n) = Step{n}()
+
 include("SelfConsistentField.jl")
 include("BandStructure.jl")
 include("EquationOfStateFitting.jl")
