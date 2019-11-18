@@ -53,7 +53,7 @@ function update_alat_press(
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
-    determinant = @match option(template.cell_parameters) begin
+    determinant = @match optionof(template.cell_parameters) begin
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
         "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
