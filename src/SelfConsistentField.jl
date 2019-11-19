@@ -21,7 +21,7 @@ function write_metadata(file::AbstractString, input::AbstractString, object::PWI
         "outdir" => object.control.outdir,
         "prefix" => object.control.prefix,
         "pseudo_dir" => object.control.pseudo_dir,
-        "pseudopotentials" => [getfield(x, :pseudopotential) for x in object.atomic_species.data],
+        "potentials" => [getfield(x, :potential) for x in object.atomic_species.data],
         "input" => input,
     )
     metadata["wfcdir"] = object.control.wf_collect ? metadata["outdir"] :
