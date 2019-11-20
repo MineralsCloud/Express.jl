@@ -12,16 +12,18 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
+using QuantumESPRESSO
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using Setfield: get, set, @lens
+using Setfield: get, set, @lens, @set
 
 import ..Step
 using Express.SelfConsistentField: write_metadata
+using Express. BandStructure: generate_path
 
 export update_structure, relay, prepare
 
