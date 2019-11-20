@@ -213,6 +213,7 @@ function prepare(
     verbose::Bool = false,
 )
     # Check parameters
+    nodes = AbstractVector[]
     @assert(
         length(matdyn_inputs) == length(q2r_inputs),
         "The q2r and the matdyn inputs files must have the same length!",
@@ -222,6 +223,18 @@ function prepare(
             parse(Q2rInput, read(io, String))
         end
         template = relay(object, template)
+        template = @set template.input.flfrq = replace(template.input.flfrc, ".fc" => ".freq")
+        if template.input.dos == true
+            template = @set template.input.fldos = replace(template.input.flfrc, ".fc" => ".dos")
+        end
+        if template.q_points.data[1].weight != 1
+            num_of_node = length(template.q_points.data)
+            map(x -> push!(nodes, template.q_points.data[x].coordinates), collect(1:1:num_of_node))
+            path = generate_path(nodes,)
+            data = QuantumESPRESSO.Cards.PHonon.SpecialQPoint[]
+            map(x -> push!(data, QuantumESPRESSO.Cards.PHonon.SpecialQPoint(x, 1)), path)
+            template = @set template.q_points = QuantumESPRESSO.Cards.PHonon.QPointsSpecsCard(data)
+        end
         write(matdyn_input, to_qe(template, verbose = verbose))
     end
     return
