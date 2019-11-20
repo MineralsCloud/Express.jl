@@ -12,16 +12,18 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
+using QuantumESPRESSO
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using Setfield: get, set, @lens
+using Setfield: get, set, @lens, @set
 
 import ..Step
 using Express.SelfConsistentField: write_metadata
+using Express. BandStructure: generate_path
 
 export update_structure, relay, prepare
 
@@ -176,6 +178,7 @@ function prepare(
             parse(PWInput, read(io, String))
         end
         template = relay(object, template)
+        template = @set template.inputph.fildyn = template.inputph.prefix
         write(phonon_input, to_qe(template, verbose = verbose))
     end
     return
@@ -197,6 +200,7 @@ function prepare(
             parse(PhInput, read(io, String))
         end
         template = relay(object, template)
+        template = @set template.input.flfrc = template.input.fildyn * ".fc"
         write(q2r_input, to_qe(template, verbose = verbose))
     end
     return
@@ -209,6 +213,7 @@ function prepare(
     verbose::Bool = false,
 )
     # Check parameters
+    nodes = AbstractVector[]
     @assert(
         length(matdyn_inputs) == length(q2r_inputs),
         "The q2r and the matdyn inputs files must have the same length!",
@@ -218,6 +223,18 @@ function prepare(
             parse(Q2rInput, read(io, String))
         end
         template = relay(object, template)
+        template = @set template.input.flfrq = replace(template.input.flfrc, ".fc" => ".freq")
+        if template.input.dos == true
+            template = @set template.input.fldos = replace(template.input.flfrc, ".fc" => ".dos")
+        end
+        if template.q_points.data[1].weight != 1
+            num_of_node = length(template.q_points.data)
+            map(x -> push!(nodes, template.q_points.data[x].coordinates), collect(1:1:num_of_node))
+            path = generate_path(nodes,)
+            data = QuantumESPRESSO.Cards.PHonon.SpecialQPoint[]
+            map(x -> push!(data, QuantumESPRESSO.Cards.PHonon.SpecialQPoint(x, 1)), path)
+            template = @set template.q_points = QuantumESPRESSO.Cards.PHonon.QPointsSpecsCard(data)
+        end
         write(matdyn_input, to_qe(template, verbose = verbose))
     end
     return
