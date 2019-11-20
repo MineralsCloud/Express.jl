@@ -38,7 +38,7 @@ function update_structure(output::AbstractString, template::PWInput)
         lenses = @batchlens(begin
             _.system.celldm ∘ _[$1]
             _.atomic_positions
-            _.cell_parameters.data
+            _.cell_parameters
         end)
         return set(template, lenses, (1, atomic_positions, cell_parameters))
     end
