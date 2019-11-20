@@ -178,6 +178,7 @@ function prepare(
             parse(PWInput, read(io, String))
         end
         template = relay(object, template)
+        template = @set template.inputph.fildyn = template.inputph.prefix
         write(phonon_input, to_qe(template, verbose = verbose))
     end
     return
