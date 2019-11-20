@@ -200,6 +200,7 @@ function prepare(
             parse(PhInput, read(io, String))
         end
         template = relay(object, template)
+        template = @set template.input.flfrc = template.input.fildyn * ".fc"
         write(q2r_input, to_qe(template, verbose = verbose))
     end
     return
