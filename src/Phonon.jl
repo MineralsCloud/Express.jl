@@ -23,7 +23,7 @@ using Setfield: get, set, @lens, @set
 
 import ..Step
 using Express.SelfConsistentField: write_metadata
-using Express. BandStructure: generate_path
+using Express.BandStructure: generate_path
 
 export update_structure, relay, prepare
 
