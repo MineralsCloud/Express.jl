@@ -19,7 +19,7 @@ using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using Setfield: get, set, @lens, @set
+using Setfield: get, set, @lens, @set!
 
 import ..Step
 using Express.SelfConsistentField: write_metadata
@@ -222,17 +222,12 @@ function prepare(
             parse(Q2rInput, read(io, String))
         end
         template = relay(object, template)
-        template = @set template.input.flfrq = replace(template.input.flfrc, ".fc" => ".freq")
-        if template.input.dos == true
-            template = @set template.input.fldos = replace(template.input.flfrc, ".fc" => ".dos")
-        end
-        if template.q_points.data[1].weight != 1
-            num_of_node = length(template.q_points.data)
-            map(x -> push!(nodes, template.q_points.data[x].coordinates), collect(1:1:num_of_node))
-            path = generate_path(nodes,)
-            data = SpecialQPoint[]
-            map(x -> push!(data, SpecialQPoint(x, 1)), path)
-            template = @set template.q_points = QPointsSpecsCard(data)
+        if isfile(template.input.flfrq)
+            @set! template.input.flfrq *= if template.input.dos == true  # Phonon DOS calculation
+                "_dos"  # Append extension `"_dos` to `template.input.flfrq`
+            else  # Phonon dispersion-relation calculation
+                "_disp"  # Append extension `"_disp` to `template.input.flfrq`
+            end
         end
         write(matdyn_input, to_qe(template, verbose = verbose))
     end
