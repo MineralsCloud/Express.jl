@@ -62,7 +62,7 @@ julia> BandStructure.generate_path(nodes, 100 * ones(Int, length(nodes) - 1))  #
 """
 function generate_path(
     nodes::AbstractVector{<:AbstractVector},
-    densities::AbstractVector{<:Integer} = 20 * ones(Int, length(nodes)),
+    densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)),
 )
     if length(densities) == length(nodes)
         _generate_path(nodes, densities, CircularPath())

@@ -12,18 +12,18 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSO
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
+using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using Setfield: get, set, @lens, @set
+using Setfield: get, set, @lens, @set!
 
 import ..Step
 using Express.SelfConsistentField: write_metadata
-using Express. BandStructure: generate_path
+using Express.BandStructure: generate_path
 
 export update_structure, relay, prepare
 
@@ -178,7 +178,6 @@ function prepare(
             parse(PWInput, read(io, String))
         end
         template = relay(object, template)
-        template = @set template.inputph.fildyn = template.inputph.prefix
         write(phonon_input, to_qe(template, verbose = verbose))
     end
     return
@@ -223,17 +222,12 @@ function prepare(
             parse(Q2rInput, read(io, String))
         end
         template = relay(object, template)
-        template = @set template.input.flfrq = replace(template.input.flfrc, ".fc" => ".freq")
-        if template.input.dos == true
-            template = @set template.input.fldos = replace(template.input.flfrc, ".fc" => ".dos")
-        end
-        if template.q_points.data[1].weight != 1
-            num_of_node = length(template.q_points.data)
-            map(x -> push!(nodes, template.q_points.data[x].coordinates), collect(1:1:num_of_node))
-            path = generate_path(nodes,)
-            data = QuantumESPRESSO.Cards.PHonon.SpecialQPoint[]
-            map(x -> push!(data, QuantumESPRESSO.Cards.PHonon.SpecialQPoint(x, 1)), path)
-            template = @set template.q_points = QuantumESPRESSO.Cards.PHonon.QPointsSpecsCard(data)
+        if isfile(template.input.flfrq)
+            @set! template.input.flfrq *= if template.input.dos == true  # Phonon DOS calculation
+                "_dos"  # Append extension `"_dos` to `template.input.flfrq`
+            else  # Phonon dispersion-relation calculation
+                "_disp"  # Append extension `"_disp` to `template.input.flfrq`
+            end
         end
         write(matdyn_input, to_qe(template, verbose = verbose))
     end
