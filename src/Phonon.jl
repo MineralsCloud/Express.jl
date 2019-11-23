@@ -12,9 +12,9 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSO
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
+using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
@@ -231,9 +231,9 @@ function prepare(
             num_of_node = length(template.q_points.data)
             map(x -> push!(nodes, template.q_points.data[x].coordinates), collect(1:1:num_of_node))
             path = generate_path(nodes,)
-            data = QuantumESPRESSO.Cards.PHonon.SpecialQPoint[]
-            map(x -> push!(data, QuantumESPRESSO.Cards.PHonon.SpecialQPoint(x, 1)), path)
-            template = @set template.q_points = QuantumESPRESSO.Cards.PHonon.QPointsSpecsCard(data)
+            data = SpecialQPoint[]
+            map(x -> push!(data, SpecialQPoint(x, 1)), path)
+            template = @set template.q_points = QPointsSpecsCard(data)
         end
         write(matdyn_input, to_qe(template, verbose = verbose))
     end
