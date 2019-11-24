@@ -69,10 +69,10 @@ end # function namelist_helper
 function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.SystemNamelist}
     print(terminal, c"Please input the Bravais lattice index `ibrav`: "r)
     ibrav = parse(Int, readline(terminal))
-    print(terminal, c"Please input a vector `celldm` 1-6: "r)
+    print(terminal, c"Please input a `celldm` 1-6 (separated by spaces): "r)
     celldm = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
     print(terminal, c"Please input the number of atoms in the unit cell `nat`: "r)
     nat = parse(Int, readline(terminal))
