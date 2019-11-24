@@ -10,6 +10,8 @@ using QuantumESPRESSO.Namelists.PWscf
 using Rematch: @match
 using Setfield: PropertyLens, set
 
+using ..Wizard: @c_str
+
 export namelist_helper
 
 function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
@@ -17,14 +19,14 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
         print(terminal, to_qe(nml))
         isdone = pairs((false, true))[request(
             terminal,
-            "We have generated an example `$(nameof(T))`. Want to change any field?",
+            c"We have generated an example `$(nameof(T))`. Want to change any field?"r,
             RadioMenu(["yes", "no"]),
         )]
         if !isdone
-            print(terminal, "Type your field name: ")
+            print(terminal, c"Type your field name: "r)
             field = strip(readline(terminal)) |> Symbol
             if hasfield(T, field)
-                print(terminal, "Type the value you want to set: ")
+                print(terminal, c"Type the value you want to set: "r)
                 nml = set(
                     nml,
                     PropertyLens{field}(),
@@ -32,7 +34,7 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
                 )
                 continue
             end
-            print(terminal, "Unknown field given! Try again!")
+            print(terminal, c"Unknown field given! Try again!"r)
         end
         break
     end
@@ -44,14 +46,17 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Contr
     restart_modes = pairs(("from_scratch", "restart"))
     calculation = calculations[request(
         terminal,
-        "What exact calculation do you want to run?",
+        c"What exact calculation do you want to run?"r,
         RadioMenu(collect(values(calculations))),
     )]
-    restart_mode =
-        restart_modes[request(terminal, "Starting from scratch?", RadioMenu(["yes", "no"]))]
-    print(terminal, "Convergence threshold on total energy (a.u): ")
+    restart_mode = restart_modes[request(
+        terminal,
+        c"Starting from scratch?"r,
+        RadioMenu(["yes", "no"]),
+    )]
+    print(terminal, c"Convergence threshold on total energy (a.u): "r)
     etot_conv_thr = parse(Float64, readline(terminal))
-    print(terminal, "Convergence threshold on forces (a.u): ")
+    print(terminal, c"Convergence threshold on forces (a.u): "r)
     forc_conv_thr = parse(Float64, readline(terminal))
     control = T(
         calculation = calculation,
@@ -62,25 +67,25 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Contr
     return setfield_helper(terminal, control)
 end # function namelist_helper
 function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.SystemNamelist}
-    print(terminal, "Please input the Bravais lattice index `ibrav`: ")
+    print(terminal, c"Please input the Bravais lattice index `ibrav`: "r)
     ibrav = parse(Int, readline(terminal))
-    print(terminal, "Please input a vector `celldm` 1-6: ")
+    print(terminal, c"Please input a vector `celldm` 1-6: "r)
     celldm = map(
         x -> parse(Float64, x),
         split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
     )
-    print(terminal, "Please input the number of atoms in the unit cell `nat`: ")
+    print(terminal, c"Please input the number of atoms in the unit cell `nat`: "r)
     nat = parse(Int, readline(terminal))
-    print(terminal, "Please input the number of types of atoms in the unit cell `ntyp`: ")
+    print(terminal, c"Please input the number of types of atoms in the unit cell `ntyp`: "r)
     ntyp = parse(Int, readline(terminal))
     print(
         terminal,
-        "Please input the kinetic energy cutoff (Ry) for wavefunctions `ecutwfc`: ",
+        c"Please input the kinetic energy cutoff (Ry) for wavefunctions `ecutwfc`: "r,
     )
     ecutwfc = parse(Float64, readline(terminal))
     print(
         terminal,
-        "Please input the Kinetic energy cutoff (Ry) for charge density `ecutrho`: ",
+        c"Please input the Kinetic energy cutoff (Ry) for charge density `ecutrho`: "r,
     )
     ecutrho = parse(Float64, readline(terminal))
     system = T(
