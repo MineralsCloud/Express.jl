@@ -10,5 +10,6 @@ function color_string(str::AbstractString, color::AbstractChar)
 end
 
 macro c_str(str, color = 'g')
+    @assert(length(color) == 1)
     return color_string(str, first(color))
 end # macro c_str
