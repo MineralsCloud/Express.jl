@@ -80,5 +80,43 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Syste
     )
     return setfield_helper(terminal, system)
 end # function namelist_helper
-
+function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.ElectronsNamelist}
+    print(terminal, "Please input the convergence threshold for selfconsistency `conv_thr`: ")
+    conv_thr = parse(Float64, readline(terminal))
+    print(terminal, "Please input the diagonalization method `diagonalization`: ")
+    diagonalization = readline(terminal)
+    electrons = T(
+        conv_thr = conv_thr,
+        diagonalization = diagonalization,
+    )
+    return setfield_helper(terminal, electrons)
+end # function namelist_helper
+function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsNamelist}
+    print(terminal, "Please input the type of ionic dynamics `ion_dynamics`: ")
+    ion_dynamics = readline(terminal)
+    print(terminal, "Please input the ions temperature `ion_temperature`: ")
+    ion_temperature = readline(terminal)
+    ions = T(
+        ion_dynamics = ion_dynamics,
+        ion_temperature = ion_temperature,
+    )
+    return setfield_helper(terminal, ions)
+end # function namelist_helper
+function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.CellNamelist}
+    print(terminal, "Please input the type of dynamics for the cell `cell_dynamics`: ")
+    cell_dynamics = readline(terminal)
+    print(terminal, "Please input the target pressure [KBar] in a variable-cell md or relaxation run `press`: ")
+    press = parse(Float64, readline(terminal))
+    print(terminal, "Please input the fictitious cell mass [amu] for variable-cell simulations `wmass`: ")
+    wmass = parse(Float64, readline(terminal))
+    print(terminal, "Please input the Convergence threshold on the pressure for variable cell `press_conv_thr`: ")
+    press_conv_thr = parse(Float64, readline(terminal))
+    cell = T(
+        cell_dynamics = cell_dynamics,
+        press = press,
+        wmass = wmass,
+        press_conv_thr = press_conv_thr,
+    )
+    return setfield_helper(terminal, cell)
+end # function namelist_helper
 end
