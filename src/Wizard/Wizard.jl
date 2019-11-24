@@ -9,6 +9,7 @@ using JLD2: jldopen
 using Parameters: @with_kw
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Namelists.PWscf
+using QuantumESPRESSO.Inputs.PWscf: PWInput
 using Rematch: @match
 using Setfield: PropertyLens, set
 
@@ -17,7 +18,7 @@ export run_wizard
 include("state.jl")
 include("Namelists/Namelists.jl")
 include("Inputs/Inputs.jl")
-using .Inputs: pwscf_helper
+using .Inputs: input_helper
 
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
 function run_wizard(state::Union{Nothing,WizardState} = nothing)
@@ -75,7 +76,7 @@ function step(::Val{1}, state::WizardState)
         ]),
     )
     @match choice begin
-        1 => pwscf_helper(terminal)
+        1 => input_helper(terminal, PWInput)
     end
 end # function step
 function step(::Val{2}, state::WizardState)
