@@ -23,18 +23,22 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
             RadioMenu(["yes", "no"]),
         )]
         if !isdone
-            print(terminal, c"Type your field name: "r)
-            field = strip(readline(terminal)) |> Symbol
-            if hasfield(T, field)
-                print(terminal, c"Type the value you want to set: "r)
-                nml = set(
-                    nml,
-                    PropertyLens{field}(),
-                    parse(fieldtype(T, field), readline(terminal)),
-                )
+            while true
+                print(terminal, c"Type your field name: "r)
+                field = strip(readline(terminal)) |> Symbol
+                if hasfield(T, field)
+                    print(terminal, c"Type the value you want to set: "r)
+                    nml = set(
+                        nml,
+                        PropertyLens{field}(),
+                        parse(fieldtype(T, field), readline(terminal)),
+                    )
+                    break
+                end
+                println(terminal, c"Unknown field given! Try again!"r)
                 continue
             end
-            print(terminal, c"Unknown field given! Try again!"r)
+            continue
         end
         break
     end
