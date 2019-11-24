@@ -70,10 +70,7 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Syste
     print(terminal, c"Please input the Bravais lattice index `ibrav`: "r)
     ibrav = parse(Int, readline(terminal))
     print(terminal, c"Please input a `celldm` 1-6 (separated by spaces): "r)
-    celldm = map(
-        x -> parse(Float64, x),
-        split(readline(terminal), " ", keepempty = false),
-    )
+    celldm = map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     print(terminal, c"Please input the number of atoms in the unit cell `nat`: "r)
     nat = parse(Int, readline(terminal))
     print(terminal, c"Please input the number of types of atoms in the unit cell `ntyp`: "r)
@@ -104,13 +101,13 @@ function namelist_helper(
 ) where {T<:PWscf.ElectronsNamelist}
     print(
         terminal,
-        "Please input the convergence threshold for selfconsistency `conv_thr`: ",
+        c"Please input the convergence threshold for selfconsistency `conv_thr`: "r,
     )
     conv_thr = parse(Float64, readline(terminal))
     diagonalizations = pairs(("david", "cg", "cg-serial", "david-serial"))
     diagonalization = diagonalizations[request(
         terminal,
-        "Please input the diagonalization method `diagonalization`: ",
+        c"Please input the diagonalization method `diagonalization`: "r,
         RadioMenu(collect(values(diagonalizations))),
     )]
     electrons = T(conv_thr = conv_thr, diagonalization = diagonalization)
@@ -121,7 +118,7 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsN
         pairs(("none", "bfgs", "damp", "verlet", "langevin", "langevin-smc", "beeman"))
     ion_dynamics = ion_dynamics_pool[request(
         terminal,
-        "Please input the type of ionic dynamics `ion_dynamics`: ",
+        c"Please input the type of ionic dynamics `ion_dynamics`: "r,
         RadioMenu(collect(values(ion_dynamics_pool))),
     )]
     ion_temperature_pool = (
@@ -136,7 +133,7 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsN
     )
     ion_temperature = ion_temperature_pool[request(
         terminal,
-        "Please input the ions temperature `ion_temperature`: ",
+        c"Please input the ions temperature `ion_temperature`: "r,
         RadioMenu(collect(values(ion_temperature_pool))),
     )]
     ions = T(ion_dynamics = ion_dynamics, ion_temperature = ion_temperature)
@@ -146,22 +143,22 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.CellN
     cell_dynamics_pool = pairs(("none", "sd", "damp-pr", "damp-w", "bfgs", "pr", "w"))
     cell_dynamics = cell_dynamics_pool[request(
         terminal,
-        "Please input the type of dynamics for the cell `cell_dynamics`: ",
+        c"Please input the type of dynamics for the cell `cell_dynamics`: "r,
         RadioMenu(collect(values(cell_dynamics_pool))),
     )]
     print(
         terminal,
-        "Please input the target pressure [KBar] in a variable-cell md or relaxation run `press`: ",
+        c"Please input the target pressure [KBar] in a variable-cell md or relaxation run `press`: "r,
     )
     press = parse(Float64, readline(terminal))
     print(
         terminal,
-        "Please input the fictitious cell mass [amu] for variable-cell simulations `wmass`: ",
+        c"Please input the fictitious cell mass [amu] for variable-cell simulations `wmass`: "r,
     )
     wmass = parse(Float64, readline(terminal))
     print(
         terminal,
-        "Please input the Convergence threshold on the pressure for variable cell `press_conv_thr`: ",
+        c"Please input the Convergence threshold on the pressure for variable cell `press_conv_thr`: "r,
     )
     press_conv_thr = parse(Float64, readline(terminal))
     cell = T(
