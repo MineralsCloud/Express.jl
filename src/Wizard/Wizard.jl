@@ -6,6 +6,7 @@ using REPL.TerminalMenus
 
 using Compat: isnothing
 using JLD2: jldopen
+using Parameters: @with_kw
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Namelists.PWscf
 using Rematch: @match

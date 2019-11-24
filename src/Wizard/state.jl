@@ -1,13 +1,19 @@
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
-Base.@kwdef mutable struct WizardState
+@with_kw mutable struct WizardState
     step::Int = 1
     ins::IO = stdin
     outs::IO = stdout
 end
 
+function serializeable_fields(::WizardState)
+    # We can't serialize TTY's, in general.
+    bad_fields = [:ins, :outs]
+    return [f for f in fieldnames(WizardState) if !(f in bad_fields)]
+end
+
 # Serialize a WizardState out into a JLD2 dictionary-like object
 function serialize(io, x::WizardState)
-    for field in fieldnames(typeof(x))
+    for field in serializeable_fields(x)
         io[string(field)] = getproperty(x, field)
     end
     # For non-serializable fields (such as `x.ins` and `x.outs`) we just recreate them in unserialize().
@@ -15,7 +21,7 @@ end
 
 function deserialize(io)
     x = WizardState()
-    for field in fieldnames(typeof(x))
+    for field in serializeable_fields(x)
         setproperty!(x, field, io[string(field)])
     end
     # Manually recreate `ins` and `outs`.  Note that this just sets them to their default values
