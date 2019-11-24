@@ -9,6 +9,7 @@ using JLD2: jldopen
 using Parameters: @with_kw
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Namelists.PWscf
+using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using Rematch: @match
 using Setfield: PropertyLens, set
@@ -75,6 +76,7 @@ function step(::Val{1}, state::WizardState)
     )
     @match choice begin
         1 => input_helper(terminal, PWInput)
+        2 => input_helper(terminal, PhInput)
     end
 end # function step
 function step(::Val{2}, state::WizardState)
