@@ -10,13 +10,13 @@ using QuantumESPRESSO.Namelists.PWscf
 using Rematch: @match
 using Setfield: PropertyLens, set
 
-using ..Wizard: @c_str
+using ..Wizard: color_string, @c_str
 
 export namelist_helper
 
 function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
     while true
-        print(terminal, to_qe(nml))
+        print(terminal, color_string(to_qe(nml), 'b'))
         isdone = pairs((false, true))[request(
             terminal,
             c"We have generated an example `$(nameof(T))`. Want to change/add any field?"r,
