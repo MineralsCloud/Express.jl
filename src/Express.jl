@@ -9,6 +9,6 @@ include("SelfConsistentField.jl")
 include("BandStructure.jl")
 include("EquationOfStateFitting.jl")
 include("Phonon.jl")
-include("Interactive.jl")
+include("Wizard/Wizard.jl")
 
 end # module

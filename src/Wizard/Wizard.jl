@@ -1,4 +1,4 @@
-module Interactive
+module Wizard
 
 using REPL
 using REPL.Terminals
