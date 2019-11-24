@@ -20,17 +20,17 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
         # It will continuously print until the user chooses `"no"`, i.e., he/she is satisfied.
         isdone = pairs((false, true))[request(
             terminal,
-            color_string("We have generated an example `$(nameof(T))`. Want to change/add any field?", 'r'),
+            color_string("We generate an example `$(nameof(T))`. Want to change/add any field?", 'r'),
             RadioMenu(["yes", "no"]),
         )]
         if !isdone
             while true
-                print(terminal, c"Type your field name: "r)
+                print(terminal, c"Type a field name: "r)
                 field = strip(readline(terminal)) |> Symbol
                 # Once a field successfully changes, go back to the above menu.
                 # The code will asks the user whether to change another field.
                 if hasfield(T, field)
-                    print(terminal, c"Type the value you want to set: "r)
+                    print(terminal, c"Type its value: "r)
                     nml = set(
                         nml,
                         PropertyLens{field}(),
@@ -38,7 +38,7 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
                     )
                     break
                 end
-                # If the field has a wrong name, go back to `"Type your field name: "`.
+                # If the field has a wrong name, go back to `"Type a field name: "`.
                 println(terminal, c"Unknown field given! Try again!"r)
                 continue
             end
