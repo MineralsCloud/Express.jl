@@ -174,38 +174,38 @@ end # function namelist_helper
 function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.PhNamelist}
     print(
         terminal, 
-        "Please input the atomic mass [amu] of each atomic type `amass`: ",
+        "Please input the atomic mass [amu] of each atomic type `amass` (separated by spaces): ",
     )
     amass = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
     epsil_pool = pairs((false, true))
     epsil = epsil_pool[request(
         terminal,
-        "Please input the epsil `epsil`: ",
-        RadioMenu(["false","true"]),
+        "Please select the `epsil`: ",
+        RadioMenu([false,true]),
     )]
     q_in_band_form_pool = pairs((false, true))
     q_in_band_form = q_in_band_form_pool[request(
         terminal,
-        "Please input the q_in_band_form `q_in_band_form`: ",
-        RadioMenu(["false","true"]),
+        "Please select the `q_in_band_form`: ",
+        RadioMenu([false,true]),
     )]
-    print(terminal, "Please input parameters of the Monkhorst-Pack grid `nq` 1-3 in vector: ")
+    print(terminal, "Please input parameters of the Monkhorst-Pack grid `nq` 1-3 (separated by spaces): ")
     nq1, nq2, nq3 = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
-    print(terminal, "Please input parameters of the Monkhorst-Pack grid `nk` 1-3 in vector: ")
+    print(terminal, "Please input parameters of the Monkhorst-Pack grid `nk` 1-3 (separated by spaces): ")
     nk1, nk2, nk3 = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
-    print(terminal, "Please input offset `k` 1-3 in vector: ")
+    print(terminal, "Please input offset `k` 1-3 (separated by spaces): ")
     k1, k2, k3 = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
     ph = T(
         amass = amass,
@@ -228,16 +228,16 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Q2rN
         terminal,
         "name of input dynamical matrices `fildyn`: ",
     )
-    fildyn = readline(terminal)
+    fildyn = strip(readline(terminal))
     print(
         terminal,
         "name of output force constants `flfrc`: ",
     )
-    flfrc = readline(terminal)
+    flfrc = strip(readline(terminal))
     zasr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     zasr = zasr_pool[request(
         terminal,
-        "Please input the type of Acoustic Sum Rules used for the Born effective charges `zasr`: ",
+        "Please input the type of acoustic sum rules used for the Born effective charges `zasr`: ",
         RadioMenu(collect(values(zasr_pool))),
     )]
     q2r = T(
@@ -251,62 +251,62 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Matd
     dos_pool = pairs((false, true))
     dos = dos_pool[request(
         terminal,
-        "Please input if calculate phonon Density of States `dos`: ",
-        RadioMenu(["false","true"]),
+        "Please select if calculate phonon density of states `dos`: ",
+        RadioMenu([false,true]),
     )]
     print(
         terminal,
         "Please input the energy step, in cm^(-1) `deltaE`: ",
     )
     deltaE = parse(Float64, readline(terminal))
-    print(terminal, "Please input uniform q-point grid for DOS calculation `nk` 1-3 in vector: ")
+    print(terminal, "Please input uniform q-point grid for DOS calculation `nk` 1-3 (separated by spaces): ")
     nk1, nk2, nk3 = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
     asr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     asr = asr_pool[request(
         terminal,
-        "Please input the type of Acoustic Sum Rule `asr`: ",
+        "Please input the type of acoustic sum rule `asr`: ",
         RadioMenu(collect(values(asr_pool))),
     )]
     print(
         terminal,
         "name of output force constants `flfrc`: ",
     )
-    flfrc = readline(terminal)
+    flfrc = strip(readline(terminal))
     print(
         terminal,
         "name of input dynamical matrices `fildyn`: ",
     )
-    fildyn = readline(terminal)
+    fildyn = strip(readline(terminal))
     print(
         terminal, 
-        "Please input the masses of atoms in the supercell (a.m.u.) `amass`: ",
+        "Please input the masses of atoms in the supercell (a.m.u.) `amass` (separated by spaces): ",
     )
     amass = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
     print(terminal, "Please input the number of atom types in the supercell `ntyp`: ")
     ntyp = parse(Int, readline(terminal))
     q_in_band_form_pool = pairs((false, true))
     q_in_band_form = q_in_band_form_pool[request(
         terminal,
-        "Please input the q_in_band_form `q_in_band_form`: ",
-        RadioMenu(["false","true"]),
+        "Please select the `q_in_band_form`: ",
+        RadioMenu([false,true]),
     )]
     q_in_cryst_coord_pool = pairs((false, true))
     q_in_cryst_coord = q_in_cryst_coord_pool[request(
         terminal,
-        "Please input the q_in_cryst_coord `q_in_cryst_coord`: ",
-        RadioMenu(["false","true"]),
+        "Please select the `q_in_cryst_coord`: ",
+        RadioMenu([false,true]),
     )]
     nosym_pool = pairs((false, true))
     nosym = nosym_pool[request(
         terminal,
-        "Please input if impose symmetry and time reversal `nosym`: ",
-        RadioMenu(["false","true"]),
+        "Please select if impose symmetry and time reversal `nosym`: ",
+        RadioMenu([false,true]),
     )]
     matdyn = T(
         dos = dos,
@@ -329,16 +329,16 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Dynm
     asr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     asr = asr_pool[request(
         terminal,
-        "Please input the type of Acoustic Sum Rule `asr`: ",
+        "Please select the type of acoustic sum rule `asr`: ",
         RadioMenu(collect(values(asr_pool))),
     )]
     print(
         terminal, 
-        "Please input mass for each atom type `amass`: ",
+        "Please input mass for each atom type `amass` (separated by spaces): ",
     )
     amass = map(
         x -> parse(Float64, x),
-        split(strip(readline(terminal), ['[', ']', '\n']), ",", keepempty = false),
+        split(readline(terminal), " ", keepempty = false),
     )
     dynmat = T(
         asr = asr,
