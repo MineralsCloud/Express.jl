@@ -46,7 +46,7 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
         save_last_wizard_state(state)
         if isa(err, InterruptException)
             msg = "\n\nWizard stopped, use run_wizard() to resume.\n\n"
-            printstyled(state.outs, msg, bold=true, color=:red)
+            printstyled(state.outs, msg, bold = true, color = :red)
         else
             bt = catch_backtrace()
             Base.showerror(stderr, err, bt)
@@ -67,20 +67,17 @@ end # function run_wizard
 step(i::Integer, state::WizardState) = step(Val(i), state)
 function step(::Val{1}, state::WizardState)
     terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
-    choice = request(terminal,
+    choice = request(
+        terminal,
         "What calculation do you want to run?",
-        RadioMenu([
-            "scf",
-            "phonon",
-            "CPMD",
-        ]),
+        RadioMenu(["scf", "phonon", "CPMD"]),
     )
     @match choice begin
         1 => input_helper(terminal, PWInput)
     end
 end # function step
 function step(::Val{2}, state::WizardState)
-    
+
 end # function step
 
 end
