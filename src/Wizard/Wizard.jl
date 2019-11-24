@@ -15,6 +15,7 @@ using Setfield: PropertyLens, set
 
 export run_wizard
 
+include("utils.jl")
 include("state.jl")
 include("Namelists/Namelists.jl")
 include("Inputs/Inputs.jl")
@@ -58,7 +59,7 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
     # We did it!
     save_last_wizard_state(state)
 
-    println(state.outs, "\nWizard Complete. Press any key to exit...")
+    println(state.outs, c"Wizard Complete. Press any key to exit..."g)
     read(state.ins, Char)
 
     return state
@@ -69,7 +70,7 @@ function step(::Val{1}, state::WizardState)
     terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
     choice = request(
         terminal,
-        "What calculation do you want to run?",
+        c"What calculation do you want to run?"r,
         RadioMenu(["scf", "phonon", "CPMD"]),
     )
     @match choice begin
