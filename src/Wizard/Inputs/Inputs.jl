@@ -21,7 +21,7 @@ function input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWInput}
     control = namelist_helper(terminal, PWscf.ControlNamelist)
     system = namelist_helper(terminal, PWscf.SystemNamelist)
     electrons = namelist_helper(terminal, PWscf.ElectronsNamelist)
-    ions = if control.calculation ∈ ("relax", "md", "vc-relax", "vc-md") 
+    ions = if control.calculation ∈ ("relax", "md", "vc-relax", "vc-md")
         namelist_helper(terminal, PWscf.IonsNamelist)
     else
         PWscf.IonsNamelist()
