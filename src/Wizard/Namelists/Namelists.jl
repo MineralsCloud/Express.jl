@@ -19,7 +19,7 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
         print(terminal, to_qe(nml))
         isdone = pairs((false, true))[request(
             terminal,
-            c"We have generated an example `$(nameof(T))`. Want to change any field?"r,
+            c"We have generated an example `$(nameof(T))`. Want to change/add any field?"r,
             RadioMenu(["yes", "no"]),
         )]
         if !isdone
