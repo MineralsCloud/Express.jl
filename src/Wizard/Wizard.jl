@@ -40,7 +40,7 @@ function load_last_wizard_state()
         end
 
         # Looks like we had an incomplete build; ask the user if they want to continue
-        if !(state.step in (:done, 1))
+        if !(state.step ∈ (0, 1))  # 0: end, 1: start
             terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
             choice = request(terminal,
                 "Would you like to resume the previous incomplete wizard run?",
