@@ -199,7 +199,6 @@ function prepare(
             parse(PhInput, read(io, String))
         end
         template = relay(object, template)
-        template = @set template.input.flfrc = template.input.fildyn * ".fc"
         write(q2r_input, to_qe(template, verbose = verbose))
     end
     return
@@ -212,7 +211,6 @@ function prepare(
     verbose::Bool = false,
 )
     # Check parameters
-    nodes = AbstractVector[]
     @assert(
         length(matdyn_inputs) == length(q2r_inputs),
         "The q2r and the matdyn inputs files must have the same length!",
