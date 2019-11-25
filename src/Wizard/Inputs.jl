@@ -57,13 +57,13 @@ function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PhInput
     ph = namelist_helper(terminal, PhNamelist)
 end
 function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:Q2rInput}
-    ph = namelist_helper(terminal, Q2rNamelist)
+    return Q2rInput(namelist_helper(terminal, Q2rNamelist))
 end
 function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:MatdynInput}
     ph = namelist_helper(terminal, MatdynNamelist)
 end
 function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:DynmatInput}
-    ph = namelist_helper(terminal, DynmatNamelist)
+    return DynmatInput(namelist_helper(terminal, DynmatNamelist))
 end
 
 end # module PHonon
