@@ -21,7 +21,7 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using ExtensibleScheduler
 using Kaleido: @batchlens
-using MLStyle: @match
+using Rematch: @match
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards: optionof
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
