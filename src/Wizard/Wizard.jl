@@ -19,8 +19,8 @@ export run_wizard
 
 include("utils.jl")
 include("state.jl")
-include("Namelists/Namelists.jl")
-include("Inputs/Inputs.jl")
+include("Namelists.jl")
+include("Inputs.jl")
 using .Inputs: input_helper
 
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
