@@ -205,7 +205,8 @@ module PHonon
 using REPL.Terminals: TTYTerminal
 using REPL.TerminalMenus: RadioMenu, request
 
-using QuantumESPRESSO.Namelists.PHonon
+using QuantumESPRESSO.Namelists.PHonon:
+    PhNamelist, Q2rNamelist, MatdynNamelist, DynmatNamelist
 
 using ...Wizard: @c_str
 using ..Namelists
