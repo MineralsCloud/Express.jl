@@ -31,13 +31,13 @@ function input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWInput}
     else
         PWscf.CellNamelist()
     end
-    # return T(
-    #     control,
-    #     system,
-    #     electrons = ElectronsNamelist(),
-    #     ions = IonsNamelist(),
-    #     cell = CellNamelist(),
-    # )
+    return T(
+        control,
+        system,
+        electrons = electrons,
+        ions = ions,
+        cell = cell,
+    )
 end # function input_helper
 function input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PhInput}
     ph = namelist_helper(terminal, PHonon.PhNamelist)
