@@ -20,7 +20,10 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
         # It will continuously print until the user chooses `"no"`, i.e., he/she is satisfied.
         isdone = pairs((false, true))[request(
             terminal,
-            color_string("We generate an example `$(nameof(T))`. Want to change/add any field?", 'r'),
+            color_string(
+                "We generate an example `$(nameof(T))`. Want to change/add any field?",
+                'r',
+            ),
             RadioMenu(["yes", "no"]),
         )]
         if !isdone
@@ -54,12 +57,16 @@ module PWscf
 using REPL.Terminals: TTYTerminal
 using REPL.TerminalMenus: RadioMenu, request
 
-using QuantumESPRESSO.Namelists.PWscf
+using QuantumESPRESSO.Namelists.PWscf:
+    ControlNamelist, SystemNamelist, ElectronsNamelist, IonsNamelist, CellNamelist
 
 using ...Wizard: @c_str
 using ..Namelists
 
-function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:ControlNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:ControlNamelist}
     calculations = pairs(("scf", "nscf", "bands", "relax", "md", "vc-relax", "vc-md"))
     restart_modes = pairs(("from_scratch", "restart"))
     calculation = calculations[request(
@@ -84,7 +91,10 @@ function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:C
     )
     return Namelists.setfield_helper(terminal, control)
 end # function namelist_helper
-function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:SystemNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:SystemNamelist}
     print(terminal, c"Please input the Bravais lattice index `ibrav`: "r)
     ibrav = parse(Int, readline(terminal))
     print(terminal, c"Please input a `celldm` 1-6 (separated by spaces): "r)
@@ -263,7 +273,10 @@ function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:Q
     q2r = T(fildyn = fildyn, flfrc = flfrc, zasr = zasr)
     return Namelists.setfield_helper(terminal, q2r)
 end # function namelist_helper
-function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:MatdynNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:MatdynNamelist}
     dos_pool = pairs((false, true))
     dos = dos_pool[request(
         terminal,
@@ -330,14 +343,20 @@ function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:M
     )
     return Namelists.setfield_helper(terminal, matdyn)
 end # function namelist_helper
-function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:DynmatNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:DynmatNamelist}
     asr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     asr = asr_pool[request(
         terminal,
         c"Please select the type of acoustic sum rule `asr`: "r,
         RadioMenu(collect(values(asr_pool))),
     )]
-    print(terminal, c"Please input mass for each atom type `amass` (separated by spaces): "r)
+    print(
+        terminal,
+        c"Please input mass for each atom type `amass` (separated by spaces): "r,
+    )
     amass = map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     dynmat = T(asr = asr, amass = amass)
     return Namelists.setfield_helper(terminal, dynmat)
