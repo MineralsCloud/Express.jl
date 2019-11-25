@@ -77,7 +77,7 @@ function _generate_path(nodes, densities, ::CircularPath)
     for (thisnode, nextnode, density) in zip(nodes, circshift(nodes, -1), densities)
         distance = euclidean(thisnode, nextnode)  # Compute Euclidean distance between two vectors
         step = (nextnode - thisnode) / distance
-        for x in range(0, stop = distance*(1-1/density), length = density)
+        for x in range(0, stop = distance * (1 - 1 / density), length = density)
             push!(path, thisnode + x * step)
         end
     end
