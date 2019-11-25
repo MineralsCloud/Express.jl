@@ -1,20 +1,19 @@
 module Namelists
 
-using REPL
-using REPL.Terminals
-using REPL.TerminalMenus
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
 
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Namelists: Namelist
-using QuantumESPRESSO.Namelists.PHonon
-using QuantumESPRESSO.Namelists.PWscf
-using Rematch: @match
 using Setfield: PropertyLens, set
 
 using ..Wizard: color_string, @c_str
 
 export namelist_helper
 
+function namelist_helper end
+
+# This is a helper function and should not be exported.
 function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
     while true
         print(terminal, color_string(to_qe(nml), 'b'))
@@ -50,7 +49,17 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
     return nml
 end # function change_field_helper
 
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.ControlNamelist}
+module PWscf
+
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
+
+using QuantumESPRESSO.Namelists.PWscf
+
+using ...Wizard: @c_str
+using ..Namelists
+
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:ControlNamelist}
     calculations = pairs(("scf", "nscf", "bands", "relax", "md", "vc-relax", "vc-md"))
     restart_modes = pairs(("from_scratch", "restart"))
     calculation = calculations[request(
@@ -73,9 +82,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Contr
         etot_conv_thr = etot_conv_thr,
         forc_conv_thr = forc_conv_thr,
     )
-    return setfield_helper(terminal, control)
+    return Namelists.setfield_helper(terminal, control)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.SystemNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:SystemNamelist}
     print(terminal, c"Please input the Bravais lattice index `ibrav`: "r)
     ibrav = parse(Int, readline(terminal))
     print(terminal, c"Please input a `celldm` 1-6 (separated by spaces): "r)
@@ -102,12 +111,12 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Syste
         ecutwfc = ecutwfc,
         ecutrho = ecutrho,
     )
-    return setfield_helper(terminal, system)
+    return Namelists.setfield_helper(terminal, system)
 end # function namelist_helper
-function namelist_helper(
+function Namelists.namelist_helper(
     terminal::TTYTerminal,
     ::Type{T},
-) where {T<:PWscf.ElectronsNamelist}
+) where {T<:ElectronsNamelist}
     print(
         terminal,
         c"Please input the convergence threshold for selfconsistency `conv_thr`: "r,
@@ -120,9 +129,9 @@ function namelist_helper(
         RadioMenu(collect(values(diagonalizations))),
     )]
     electrons = T(conv_thr = conv_thr, diagonalization = diagonalization)
-    return setfield_helper(terminal, electrons)
+    return Namelists.setfield_helper(terminal, electrons)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:IonsNamelist}
     ion_dynamics_pool =
         pairs(("none", "bfgs", "damp", "verlet", "langevin", "langevin-smc", "beeman"))
     ion_dynamics = ion_dynamics_pool[request(
@@ -146,9 +155,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsN
         RadioMenu(collect(values(ion_temperature_pool))),
     )]
     ions = T(ion_dynamics = ion_dynamics, ion_temperature = ion_temperature)
-    return setfield_helper(terminal, ions)
+    return Namelists.setfield_helper(terminal, ions)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.CellNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:CellNamelist}
     cell_dynamics_pool = pairs(("none", "sd", "damp-pr", "damp-w", "bfgs", "pr", "w"))
     cell_dynamics = cell_dynamics_pool[request(
         terminal,
@@ -176,10 +185,22 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.CellN
         wmass = wmass,
         press_conv_thr = press_conv_thr,
     )
-    return setfield_helper(terminal, cell)
+    return Namelists.setfield_helper(terminal, cell)
 end # function namelist_helper
 
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.PhNamelist}
+end # module PWscf
+
+module PHonon
+
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
+
+using QuantumESPRESSO.Namelists.PHonon
+
+using ...Wizard: @c_str
+using ..Namelists
+
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PhNamelist}
     print(
         terminal,
         c"Please input the atomic mass [amu] of each atomic type `amass` (separated by spaces): "r,
@@ -226,9 +247,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.PhNa
         k2 = k2,
         k3 = k3,
     )
-    return setfield_helper(terminal, ph)
+    return Namelists.setfield_helper(terminal, ph)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Q2rNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:Q2rNamelist}
     print(terminal, c"name of input dynamical matrices `fildyn`: "r)
     fildyn = strip(readline(terminal))
     print(terminal, c"name of output force constants `flfrc`: "r)
@@ -240,9 +261,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Q2rN
         RadioMenu(collect(values(zasr_pool))),
     )]
     q2r = T(fildyn = fildyn, flfrc = flfrc, zasr = zasr)
-    return setfield_helper(terminal, q2r)
+    return Namelists.setfield_helper(terminal, q2r)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.MatdynNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:MatdynNamelist}
     dos_pool = pairs((false, true))
     dos = dos_pool[request(
         terminal,
@@ -307,9 +328,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Matd
         q_in_cryst_coord = q_in_cryst_coord,
         nosym = nosym,
     )
-    return setfield_helper(terminal, matdyn)
+    return Namelists.setfield_helper(terminal, matdyn)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.DynmatNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:DynmatNamelist}
     asr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     asr = asr_pool[request(
         terminal,
@@ -319,6 +340,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Dynm
     print(terminal, c"Please input mass for each atom type `amass` (separated by spaces): "r)
     amass = map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     dynmat = T(asr = asr, amass = amass)
-    return setfield_helper(terminal, dynmat)
+    return Namelists.setfield_helper(terminal, dynmat)
 end # function namelist_helper
+
+end # module PHonon
+
 end
