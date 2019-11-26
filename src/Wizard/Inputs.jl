@@ -74,7 +74,6 @@ function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWInput
     end
     push!(fields, asfieldname(AtomicSpeciesCard) => AtomicSpeciesCard(AtomicSpecies[]))
     push!(fields, asfieldname(AtomicPositionsCard) => AtomicPositionsCard("alat", AtomicPosition[]))
-    push!(fields, asfieldname(CellParametersCard) => nothing)
     return T(; fields...)
 end # function input_helper
 
