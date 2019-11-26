@@ -9,6 +9,7 @@ module PWscf
 using REPL.Terminals: TTYTerminal
 using REPL.TerminalMenus: RadioMenu, request
 
+using QuantumESPRESSO: asfieldname
 using QuantumESPRESSO.Namelists.PWscf:
     ControlNamelist, SystemNamelist, ElectronsNamelist, IonsNamelist, CellNamelist
 using QuantumESPRESSO.Cards.PWscf: AtomicSpecies, AtomicSpeciesCard, AtomicPosition, AtomicPositionsCard, KPointsCard
@@ -16,34 +17,61 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 
 using ...Namelists: namelist_helper
 using ...Cards: card_helper
+using ...Wizard: @c_str
 using ..Inputs
 
 function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWInput}
-    control = namelist_helper(terminal, ControlNamelist)
-    system = namelist_helper(terminal, SystemNamelist)
-    electrons = namelist_helper(terminal, ElectronsNamelist)
-    ions = if control.calculation ∈ ("relax", "md", "vc-relax", "vc-md")
-        namelist_helper(terminal, IonsNamelist)
+    fields = Dict{Symbol,Any}()
+    for S in (ControlNamelist, SystemNamelist, ElectronsNamelist)
+        haserror = true
+        while haserror
+            try
+                push!(fields, asfieldname(S) => namelist_helper(terminal, S))
+                haserror = false
+            catch e
+                !isa(e, ArgumentError) && rethrow(e)
+                println(terminal, c"Something wrong happens, try again!"g)
+            end
+        end
+    end
+    if fields[:control].calculation ∈ ("relax", "md", "vc-relax", "vc-md")
+        haserror = true
+        while haserror
+            try
+                push!(fields, asfieldname(IonsNamelist) => namelist_helper(terminal, IonsNamelist))
+            catch e
+                !isa(e, ArgumentError) && rethrow(e)
+                println(terminal, c"Something wrong happens, try again!"g)
+            end
+        end
     else
         IonsNamelist()
     end
-    cell = if control.calculation ∈ ("vc-relax", "vc-md")
-        namelist_helper(terminal, CellNamelist)
+    if fields[:control].calculation ∈ ("vc-relax", "vc-md")
+        haserror = true
+        while haserror
+            try
+                push!(fields, asfieldname(CellNamelist) => namelist_helper(terminal, CellNamelist))
+            catch e
+                !isa(e, ArgumentError) && rethrow(e)
+                println(terminal, c"Something wrong happens, try again!"g)
+            end
+        end
     else
         CellNamelist()
     end
-    k_points = card_helper(terminal, KPointsCard)
-    return T(
-        control = control,
-        system = system,
-        electrons = electrons,
-        ions = ions,
-        cell = cell,
-        atomic_species = AtomicSpeciesCard(AtomicSpecies[]),
-        atomic_positions = AtomicPositionsCard("alat", AtomicPosition[]),
-        k_points = k_points,
-        cell_parameters = nothing,
-    )
+    haserror = true
+    while haserror
+        try
+            push!(fields, asfieldname(KPointsCard) => card_helper(terminal, KPointsCard))
+        catch e
+            !isa(e, ArgumentError) && rethrow(e)
+            println(terminal, c"Something wrong happens, try again!"g)
+        end
+    end
+    push!(fields, asfieldname(AtomicSpeciesCard) => AtomicSpeciesCard(AtomicSpecies[]))
+    push!(fields, asfieldname(AtomicPositionsCard) => AtomicPositionsCard("alat", AtomicPosition[]),)
+    return T(fields...)
 end # function input_helper
 
 end # module PWscf
