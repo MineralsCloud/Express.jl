@@ -121,8 +121,8 @@ uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.8"
 
 [[EquationsOfState]]
-deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "MLStyle", "Polynomials", "Roots", "Unitful"]
-git-tree-sha1 = "44038c7c48e8450db2545718d62efe0d85d8fe1a"
+deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "Polynomials", "Rematch", "Roots", "Unitful"]
+git-tree-sha1 = "24e1200b0269cdb6dbb28cd1de17c7143b17a8a6"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -226,11 +226,6 @@ git-tree-sha1 = "186c2afbdb3cd52191078cfc6176f7084ed9dfb7"
 uuid = "2fda8390-95c7-5789-9bda-21331edee243"
 version = "0.8.1"
 
-[[MLStyle]]
-git-tree-sha1 = "67f9a88611bc79f992aa705d9bbc833a2547dec7"
-uuid = "d8e11817-5142-5d16-987a-aa16d5891078"
-version = "0.3.1"
-
 [[MacroTools]]
 deps = ["Compat", "DataStructures", "Test"]
 git-tree-sha1 = "82921f0e3bde6aebb8e524efc20f4042373c0c06"
@@ -323,7 +318,7 @@ version = "2.1.1"
 
 [[QuantumESPRESSO]]
 deps = ["Fortran90Namelists", "ImportMacros", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "Reexport"]
-git-tree-sha1 = "55a0fb4edd1d15e2569b7da7f2dacd87b040ded6"
+git-tree-sha1 = "12cc3968866e4a8e735879bf49824d04ef88dc78"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -331,7 +326,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "LinearAlgebra", "Parameters", "Rematch", "Serialization", "Setfield"]
-git-tree-sha1 = "04011dba832e5f490b6419b8e3c21ed36fa04685"
+git-tree-sha1 = "a4a019138bad98a70f0fd0ed748ae2e1f5cbb55f"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
