@@ -34,11 +34,17 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
                 # The code will asks the user whether to change another field.
                 if hasfield(T, field)
                     print(terminal, c"Type its value: "r)
-                    nml = set(
-                        nml,
-                        PropertyLens{field}(),
-                        parse(fieldtype(T, field), readline(terminal)),
-                    )
+                    try
+                        nml = set(
+                            nml,
+                            PropertyLens{field}(),
+                            parse(fieldtype(T, field), readline(terminal)),
+                        )
+                    catch e
+                        !isa(e, AssertionError) && rethrow(e)
+                        println(terminal, c"A wrong value is given to! Try a new one!"g)
+                        continue
+                    end
                     break
                 end
                 # If the field has a wrong name, go back to `"Type a field name: "`.
