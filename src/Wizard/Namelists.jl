@@ -1,27 +1,29 @@
 module Namelists
 
-using REPL
-using REPL.Terminals
-using REPL.TerminalMenus
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
 
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Namelists: Namelist
-using QuantumESPRESSO.Namelists.PHonon
-using QuantumESPRESSO.Namelists.PWscf
-using Rematch: @match
 using Setfield: PropertyLens, set
 
 using ..Wizard: color_string, @c_str
 
 export namelist_helper
 
+function namelist_helper end
+
+# This is a helper function and should not be exported.
 function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
     while true
         print(terminal, color_string(to_qe(nml), 'b'))
         # It will continuously print until the user chooses `"no"`, i.e., he/she is satisfied.
         isdone = pairs((false, true))[request(
             terminal,
-            color_string("We generate an example `$(nameof(T))`. Want to change/add any field?", 'r'),
+            color_string(
+                "We generate an example `$(nameof(T))`. Want to change/add any field?",
+                'r',
+            ),
             RadioMenu(["yes", "no"]),
         )]
         if !isdone
@@ -50,7 +52,21 @@ function setfield_helper(terminal::TTYTerminal, nml::T) where {T<:Namelist}
     return nml
 end # function change_field_helper
 
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.ControlNamelist}
+module PWscf
+
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
+
+using QuantumESPRESSO.Namelists.PWscf:
+    ControlNamelist, SystemNamelist, ElectronsNamelist, IonsNamelist, CellNamelist
+
+using ...Wizard: @c_str
+using ..Namelists
+
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:ControlNamelist}
     calculations = pairs(("scf", "nscf", "bands", "relax", "md", "vc-relax", "vc-md"))
     restart_modes = pairs(("from_scratch", "restart"))
     calculation = calculations[request(
@@ -73,9 +89,12 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Contr
         etot_conv_thr = etot_conv_thr,
         forc_conv_thr = forc_conv_thr,
     )
-    return setfield_helper(terminal, control)
+    return Namelists.setfield_helper(terminal, control)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.SystemNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:SystemNamelist}
     print(terminal, c"Please input the Bravais lattice index `ibrav`: "r)
     ibrav = parse(Int, readline(terminal))
     print(terminal, c"Please input a `celldm` 1-6 (separated by spaces): "r)
@@ -102,12 +121,12 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.Syste
         ecutwfc = ecutwfc,
         ecutrho = ecutrho,
     )
-    return setfield_helper(terminal, system)
+    return Namelists.setfield_helper(terminal, system)
 end # function namelist_helper
-function namelist_helper(
+function Namelists.namelist_helper(
     terminal::TTYTerminal,
     ::Type{T},
-) where {T<:PWscf.ElectronsNamelist}
+) where {T<:ElectronsNamelist}
     print(
         terminal,
         c"Please input the convergence threshold for selfconsistency `conv_thr`: "r,
@@ -120,9 +139,9 @@ function namelist_helper(
         RadioMenu(collect(values(diagonalizations))),
     )]
     electrons = T(conv_thr = conv_thr, diagonalization = diagonalization)
-    return setfield_helper(terminal, electrons)
+    return Namelists.setfield_helper(terminal, electrons)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:IonsNamelist}
     ion_dynamics_pool =
         pairs(("none", "bfgs", "damp", "verlet", "langevin", "langevin-smc", "beeman"))
     ion_dynamics = ion_dynamics_pool[request(
@@ -146,9 +165,9 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.IonsN
         RadioMenu(collect(values(ion_temperature_pool))),
     )]
     ions = T(ion_dynamics = ion_dynamics, ion_temperature = ion_temperature)
-    return setfield_helper(terminal, ions)
+    return Namelists.setfield_helper(terminal, ions)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.CellNamelist}
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:CellNamelist}
     cell_dynamics_pool = pairs(("none", "sd", "damp-pr", "damp-w", "bfgs", "pr", "w"))
     cell_dynamics = cell_dynamics_pool[request(
         terminal,
@@ -176,40 +195,53 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.CellN
         wmass = wmass,
         press_conv_thr = press_conv_thr,
     )
-    return setfield_helper(terminal, cell)
+    return Namelists.setfield_helper(terminal, cell)
 end # function namelist_helper
 
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.PhNamelist}
+end # module PWscf
+
+module PHonon
+
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
+
+using QuantumESPRESSO.Namelists.PHonon:
+    PhNamelist, Q2rNamelist, MatdynNamelist, DynmatNamelist
+
+using ...Wizard: @c_str
+using ..Namelists
+
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PhNamelist}
     print(
         terminal,
-        "Please input the atomic mass [amu] of each atomic type `amass` (separated by spaces): ",
+        c"Please input the atomic mass [amu] of each atomic type `amass` (separated by spaces): "r,
     )
     amass = map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     epsil_pool = pairs((false, true))
     epsil = epsil_pool[request(
         terminal,
-        "Please select the `epsil`: ",
+        c"Please select the `epsil`: "r,
         RadioMenu([false, true]),
     )]
     q_in_band_form_pool = pairs((false, true))
     q_in_band_form = q_in_band_form_pool[request(
         terminal,
-        "Please select the `q_in_band_form`: ",
+        c"Please select the `q_in_band_form`: "r,
         RadioMenu([false, true]),
     )]
     print(
         terminal,
-        "Please input parameters of the Monkhorst-Pack grid `nq` 1-3 (separated by spaces): ",
+        c"Please input parameters of the Monkhorst-Pack grid `nq` 1-3 (separated by spaces): "r,
     )
     nq1, nq2, nq3 =
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     print(
         terminal,
-        "Please input parameters of the Monkhorst-Pack grid `nk` 1-3 (separated by spaces): ",
+        c"Please input parameters of the Monkhorst-Pack grid `nk` 1-3 (separated by spaces): "r,
     )
     nk1, nk2, nk3 =
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
-    print(terminal, "Please input offset `k` 1-3 (separated by spaces): ")
+    print(terminal, c"Please input offset `k` 1-3 (separated by spaces): "r)
     k1, k2, k3 =
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     ph = T(
@@ -226,70 +258,73 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.PhNa
         k2 = k2,
         k3 = k3,
     )
-    return setfield_helper(terminal, ph)
+    return Namelists.setfield_helper(terminal, ph)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Q2rNamelist}
-    print(terminal, "name of input dynamical matrices `fildyn`: ")
+function Namelists.namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:Q2rNamelist}
+    print(terminal, c"name of input dynamical matrices `fildyn`: "r)
     fildyn = strip(readline(terminal))
-    print(terminal, "name of output force constants `flfrc`: ")
+    print(terminal, c"name of output force constants `flfrc`: "r)
     flfrc = strip(readline(terminal))
     zasr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     zasr = zasr_pool[request(
         terminal,
-        "Please input the type of acoustic sum rules used for the Born effective charges `zasr`: ",
+        c"Please input the type of acoustic sum rules used for the Born effective charges `zasr`: "r,
         RadioMenu(collect(values(zasr_pool))),
     )]
     q2r = T(fildyn = fildyn, flfrc = flfrc, zasr = zasr)
-    return setfield_helper(terminal, q2r)
+    return Namelists.setfield_helper(terminal, q2r)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.MatdynNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:MatdynNamelist}
     dos_pool = pairs((false, true))
     dos = dos_pool[request(
         terminal,
-        "Please select if calculate phonon density of states `dos`: ",
+        c"Please select if calculate phonon density of states `dos`: "r,
         RadioMenu([false, true]),
     )]
-    print(terminal, "Please input the energy step, in cm^(-1) `deltaE`: ")
+    print(terminal, c"Please input the energy step, in cm^(-1) `deltaE`: "r)
     deltaE = parse(Float64, readline(terminal))
     print(
         terminal,
-        "Please input uniform q-point grid for DOS calculation `nk` 1-3 (separated by spaces): ",
+        c"Please input uniform q-point grid for DOS calculation `nk` 1-3 (separated by spaces): "r,
     )
     nk1, nk2, nk3 =
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     asr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     asr = asr_pool[request(
         terminal,
-        "Please input the type of acoustic sum rule `asr`: ",
+        c"Please input the type of acoustic sum rule `asr`: "r,
         RadioMenu(collect(values(asr_pool))),
     )]
-    print(terminal, "name of output force constants `flfrc`: ")
+    print(terminal, c"name of output force constants `flfrc`: "r)
     flfrc = strip(readline(terminal))
-    print(terminal, "name of input dynamical matrices `fildyn`: ")
+    print(terminal, c"name of input dynamical matrices `fildyn`: "r)
     fildyn = strip(readline(terminal))
     print(
         terminal,
-        "Please input the masses of atoms in the supercell (a.m.u.) `amass` (separated by spaces): ",
+        c"Please input the masses of atoms in the supercell (a.m.u.) `amass` (separated by spaces): "r,
     )
     amass = map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
-    print(terminal, "Please input the number of atom types in the supercell `ntyp`: ")
+    print(terminal, c"Please input the number of atom types in the supercell `ntyp`: "r)
     ntyp = parse(Int, readline(terminal))
     q_in_band_form_pool = pairs((false, true))
     q_in_band_form = q_in_band_form_pool[request(
         terminal,
-        "Please select the `q_in_band_form`: ",
+        c"Please select the `q_in_band_form`: "r,
         RadioMenu([false, true]),
     )]
     q_in_cryst_coord_pool = pairs((false, true))
     q_in_cryst_coord = q_in_cryst_coord_pool[request(
         terminal,
-        "Please select the `q_in_cryst_coord`: ",
+        c"Please select the `q_in_cryst_coord`: "r,
         RadioMenu([false, true]),
     )]
     nosym_pool = pairs((false, true))
     nosym = nosym_pool[request(
         terminal,
-        "Please select if impose symmetry and time reversal `nosym`: ",
+        c"Please select if impose symmetry and time reversal `nosym`: "r,
         RadioMenu([false, true]),
     )]
     matdyn = T(
@@ -307,18 +342,27 @@ function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.Matd
         q_in_cryst_coord = q_in_cryst_coord,
         nosym = nosym,
     )
-    return setfield_helper(terminal, matdyn)
+    return Namelists.setfield_helper(terminal, matdyn)
 end # function namelist_helper
-function namelist_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PHonon.DynmatNamelist}
+function Namelists.namelist_helper(
+    terminal::TTYTerminal,
+    ::Type{T},
+) where {T<:DynmatNamelist}
     asr_pool = pairs(("no", "simple", "crystal", "one-dim", "zero-dim"))
     asr = asr_pool[request(
         terminal,
-        "Please select the type of acoustic sum rule `asr`: ",
+        c"Please select the type of acoustic sum rule `asr`: "r,
         RadioMenu(collect(values(asr_pool))),
     )]
-    print(terminal, "Please input mass for each atom type `amass` (separated by spaces): ")
+    print(
+        terminal,
+        c"Please input mass for each atom type `amass` (separated by spaces): "r,
+    )
     amass = map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     dynmat = T(asr = asr, amass = amass)
-    return setfield_helper(terminal, dynmat)
+    return Namelists.setfield_helper(terminal, dynmat)
 end # function namelist_helper
+
+end # module PHonon
+
 end
