@@ -11,9 +11,11 @@ using REPL.TerminalMenus: RadioMenu, request
 
 using QuantumESPRESSO.Namelists.PWscf:
     ControlNamelist, SystemNamelist, ElectronsNamelist, IonsNamelist, CellNamelist
+using QuantumESPRESSO.Cards.PWscf: AtomicSpecies, AtomicSpeciesCard, AtomicPosition, AtomicPositionsCard, KPointsCard
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 
 using ...Namelists: namelist_helper
+using ...Cards: card_helper
 using ..Inputs
 
 function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWInput}
@@ -30,12 +32,17 @@ function Inputs.input_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWInput
     else
         CellNamelist()
     end
+    k_points = card_helper(terminal, KPointsCard)
     return T(
-        control,
-        system,
+        control = control,
+        system = system,
         electrons = electrons,
         ions = ions,
         cell = cell,
+        atomic_species = AtomicSpeciesCard(AtomicSpecies[]),
+        atomic_positions = AtomicPositionsCard("alat", AtomicPosition[]),
+        k_points = k_points,
+        cell_parameters = nothing,
     )
 end # function input_helper
 

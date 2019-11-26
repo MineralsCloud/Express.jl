@@ -14,7 +14,7 @@ using QuantumESPRESSO.Cards.PWscf: GammaPoint, MonkhorstPackGrid, KPointsCard
 using ...Wizard: @c_str
 using ..Cards
 
-function Cards.card_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.KPointsCard}
+function Cards.card_helper(terminal::TTYTerminal, ::Type{T}) where {T<:KPointsCard}
     kpt_style = request(
         terminal,
         c"What k-point style do you want?"r,
