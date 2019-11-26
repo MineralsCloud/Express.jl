@@ -71,19 +71,25 @@ end # function run_wizard
 step(i::Integer, state::WizardState) = step(Val(i), state)
 function step(::Val{1}, state::WizardState)
     terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
-    choice = request(
+    state.choice = request(
         terminal,
         c"What calculation do you want to run?"r,
         RadioMenu(["scf", "phonon", "CPMD"]),
     )
-    @match choice begin
+    push!(state.results, @match state.choice begin
         1 => input_helper(terminal, PWInput)
         2 => input_helper(terminal, PhInput)
         # 3 => input_helper(terminal, CPInput)
-    end
+    end)
 end # function step
 function step(::Val{2}, state::WizardState)
-
+    terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
+    @match state.results[1] begin
+        x::PWInput => @match x.control.calculation begin
+                "vc-relax" => 1
+            end
+        x::PhInput => 2
+    end
 end # function step
 
 end
