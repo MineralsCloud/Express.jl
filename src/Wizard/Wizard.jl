@@ -17,6 +17,11 @@ using Setfield: PropertyLens, set
 
 export run_wizard
 
+abstract type QuantumESPRESSOCalculation end
+struct PWscfCalculation <: QuantumESPRESSOCalculation end
+struct PHononCalculation <: QuantumESPRESSOCalculation end
+struct CPCalculation <: QuantumESPRESSOCalculation end
+
 include("utils.jl")
 include("state.jl")
 include("Namelists.jl")
@@ -68,28 +73,24 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
     return state
 end # function run_wizard
 
+input_type(::PWscfCalculation) = PWInput
+input_type(::PHononCalculation) = PhInput
+input_type(::CPCalculation) = CPInput
+
 step(i::Integer, state::WizardState) = step(Val(i), state)
 function step(::Val{1}, state::WizardState)
     terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
-    state.choice = request(
-        terminal,
-        c"What calculation do you want to run?"r,
-        RadioMenu(["scf", "phonon", "CPMD"]),
-    )
-    push!(state.results, @match state.choice begin
-        1 => input_helper(terminal, PWInput)
-        2 => input_helper(terminal, PhInput)
-        # 3 => input_helper(terminal, CPInput)
-    end)
+    state.calculation =
+        pairs((PWscfCalculation(), PHononCalculation(), CPCalculation()))[request(
+            terminal,
+            c"What calculation do you want to run?"r,
+            RadioMenu(["scf", "phonon", "CPMD"]),
+        )]
+    push!(state.results, input_helper(terminal, input_type(state.calculation)))
 end # function step
 function step(::Val{2}, state::WizardState)
     terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
-    @match state.results[1] begin
-        x::PWInput => @match x.control.calculation begin
-                "vc-relax" => 1
-            end
-        x::PhInput => 2
-    end
+
 end # function step
 
 end
