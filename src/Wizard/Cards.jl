@@ -1,17 +1,20 @@
 module Cards
 
-using REPL
-using REPL.Terminals
-using REPL.TerminalMenus
+export card_helper
 
-using QuantumESPRESSO: to_qe
+function card_helper end
+
+module PWscf
+
+using REPL.Terminals: TTYTerminal
+using REPL.TerminalMenus: RadioMenu, request
+
 using QuantumESPRESSO.Cards.PWscf: GammaPoint, MonkhorstPackGrid, KPointsCard
-using Rematch: @match
-using Setfield: PropertyLens, set
 
-using ..Wizard: @c_str
+using ...Wizard: @c_str
+using ..Cards
 
-function card_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.KPointsCard}
+function Cards.card_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.KPointsCard}
     kpt_style = request(
         terminal,
         c"What k-point style do you want?"r,
@@ -27,5 +30,7 @@ function card_helper(terminal::TTYTerminal, ::Type{T}) where {T<:PWscf.KPointsCa
         return KPointsCard("automatic", MonkhorstPackGrid(grid, offsets))
     end
 end # function card_helper
+
+end # module PWscf
 
 end

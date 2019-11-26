@@ -20,6 +20,7 @@ export run_wizard
 include("utils.jl")
 include("state.jl")
 include("Namelists.jl")
+include("Cards.jl")
 include("Inputs.jl")
 using .Inputs: input_helper
 
