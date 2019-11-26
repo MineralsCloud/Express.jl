@@ -1,6 +1,8 @@
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
 @with_kw mutable struct WizardState
     step::Int = 1
+    choice::Int = 1
+    results::Vector = []
     ins::IO = stdin
     outs::IO = stdout
 end
