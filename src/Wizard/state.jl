@@ -3,13 +3,13 @@
     step::Int = 1
     calculation::QuantumESPRESSOCalculation = PWscfCalculation()
     results::Vector = []
-    ins::IO = stdin
-    outs::IO = stdout
+    in::IO = stdin
+    out::IO = stdout
 end
 
 function serializeable_fields(::WizardState)
     # We can't serialize TTY's, in general.
-    bad_fields = [:ins, :outs]
+    bad_fields = [:in, :out]
     return [f for f in fieldnames(WizardState) if !(f in bad_fields)]
 end
 
@@ -27,8 +27,8 @@ function deserialize(io)
         setproperty!(x, field, io[string(field)])
     end
     # Manually recreate `ins` and `outs`.  Note that this just sets them to their default values
-    x.ins = stdin
-    x.outs = stdout
+    x.in = stdin
+    x.out = stdout
     return x
 end
 
