@@ -5,6 +5,7 @@ using REPL.Terminals
 using REPL.TerminalMenus
 
 using Compat: isnothing
+using EquationsOfState.Collections
 using JLD2: jldopen
 using Parameters: @with_kw
 using QuantumESPRESSO: to_qe
@@ -15,7 +16,14 @@ using QuantumESPRESSO.Inputs.CP: CPInput
 using Rematch: @match
 using Setfield: PropertyLens, set
 
+using ..EquationOfStateFitting: update_alat_press
+
 export run_wizard
+
+abstract type QuantumESPRESSOCalculation end
+struct PWscfCalculation <: QuantumESPRESSOCalculation end
+struct PHononCalculation <: QuantumESPRESSOCalculation end
+struct CPCalculation <: QuantumESPRESSOCalculation end
 
 include("utils.jl")
 include("state.jl")
@@ -50,11 +58,11 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
         save_last_wizard_state(state)
         if isa(err, InterruptException)
             msg = "\n\nWizard stopped, use run_wizard() to resume.\n\n"
-            printstyled(state.outs, msg, bold = true, color = :red)
+            printstyled(state.out, msg, bold = true, color = :red)
         else
             bt = catch_backtrace()
             Base.showerror(stderr, err, bt)
-            println(state.outs, "\n")
+            println(state.out, "\n")
         end
         return state
     end
@@ -62,28 +70,57 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
     # We did it!
     save_last_wizard_state(state)
 
-    println(state.outs, c"Wizard Complete. Press any key to exit..."g)
-    read(state.ins, Char)
+    println(state.out, c"Wizard Complete. Press any key to exit..."g)
+    read(state.in, Char)
 
     return state
 end # function run_wizard
 
+input_type(::PWscfCalculation) = PWInput
+input_type(::PHononCalculation) = PhInput
+input_type(::CPCalculation) = CPInput
+
 step(i::Integer, state::WizardState) = step(Val(i), state)
 function step(::Val{1}, state::WizardState)
-    terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
-    choice = request(
+    terminal = TTYTerminal("xterm", state.in, state.out, state.out)
+    calculation = pairs((PWscfCalculation(), PHononCalculation(), CPCalculation()))[request(
         terminal,
         c"What calculation do you want to run?"r,
         RadioMenu(["scf", "phonon", "CPMD"]),
-    )
-    @match choice begin
-        1 => input_helper(terminal, PWInput)
-        2 => input_helper(terminal, PhInput)
-        # 3 => input_helper(terminal, CPInput)
-    end
+    )]
+    state.result = input_helper(terminal, input_type(calculation))
+    return state
 end # function step
 function step(::Val{2}, state::WizardState)
-
+    return step(Val(2), state, PWscfCalculation())
+end # function step
+function step(::Val{2}, state::WizardState, ::PWscfCalculation)
+    terminal = TTYTerminal("xterm", state.in, state.out, state.out)
+    eos_symb = Symbol(request(
+        terminal,
+        c"What EOS do you want to use for fitting?"r,
+        RadioMenu([
+            "Murnaghan",
+            "BirchMurnaghan2nd",
+            "BirchMurnaghan3rd",
+            "BirchMurnaghan4th",
+            "PoirierTarantola2nd",
+            "PoirierTarantola3rd",
+            "PoirierTarantola4th",
+            "Vinet",
+        ]),
+    ))
+    println(terminal, c"Please input parameters for this EOS (separated by spaces):"r)
+    eos = eval(eos_symb)(map(
+        x -> parse(Float64, x),
+        split(readline(terminal), " ", keepempty = false),
+    ))
+    println(terminal, c"Please input pressures you want to test on (separated by spaces):"r)
+    pressures =
+        map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
+    inputs_from_template =
+        [update_alat_press(state.result, eos, pressure) for pressure in pressures]
+    
 end # function step
 
 end

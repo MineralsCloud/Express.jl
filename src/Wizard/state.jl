@@ -1,13 +1,14 @@
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
 @with_kw mutable struct WizardState
     step::Int = 1
-    ins::IO = stdin
-    outs::IO = stdout
+    result
+    in::IO = stdin
+    out::IO = stdout
 end
 
 function serializeable_fields(::WizardState)
     # We can't serialize TTY's, in general.
-    bad_fields = [:ins, :outs]
+    bad_fields = [:in, :out]
     return [f for f in fieldnames(WizardState) if !(f in bad_fields)]
 end
 
@@ -16,7 +17,7 @@ function serialize(io, x::WizardState)
     for field in serializeable_fields(x)
         io[string(field)] = getproperty(x, field)
     end
-    # For non-serializable fields (such as `x.ins` and `x.outs`) we just recreate them in unserialize().
+    # For non-serializable fields (such as `x.in` and `x.out`) we just recreate them in unserialize().
 end
 
 function deserialize(io)
@@ -25,8 +26,8 @@ function deserialize(io)
         setproperty!(x, field, io[string(field)])
     end
     # Manually recreate `ins` and `outs`.  Note that this just sets them to their default values
-    x.ins = stdin
-    x.outs = stdout
+    x.in = stdin
+    x.out = stdout
     return x
 end
 
@@ -56,7 +57,7 @@ function load_last_wizard_state()
 
         # Looks like we had an incomplete build; ask the user if they want to continue
         if !(state.step ∈ (0, 1))  # 0: end, 1: start
-            terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
+            terminal = TTYTerminal("xterm", state.in, state.out, state.out)
             choice = request(
                 terminal,
                 "Would you like to resume the previous incomplete wizard run?",
