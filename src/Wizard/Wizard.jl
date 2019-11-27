@@ -55,11 +55,11 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
         save_last_wizard_state(state)
         if isa(err, InterruptException)
             msg = "\n\nWizard stopped, use run_wizard() to resume.\n\n"
-            printstyled(state.outs, msg, bold = true, color = :red)
+            printstyled(state.out, msg, bold = true, color = :red)
         else
             bt = catch_backtrace()
             Base.showerror(stderr, err, bt)
-            println(state.outs, "\n")
+            println(state.out, "\n")
         end
         return state
     end
@@ -67,8 +67,8 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
     # We did it!
     save_last_wizard_state(state)
 
-    println(state.outs, c"Wizard Complete. Press any key to exit..."g)
-    read(state.ins, Char)
+    println(state.out, c"Wizard Complete. Press any key to exit..."g)
+    read(state.in, Char)
 
     return state
 end # function run_wizard
@@ -79,7 +79,7 @@ input_type(::CPCalculation) = CPInput
 
 step(i::Integer, state::WizardState) = step(Val(i), state)
 function step(::Val{1}, state::WizardState)
-    terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
+    terminal = TTYTerminal("xterm", state.in, state.out, state.out)
     state.calculation =
         pairs((PWscfCalculation(), PHononCalculation(), CPCalculation()))[request(
             terminal,
@@ -89,7 +89,7 @@ function step(::Val{1}, state::WizardState)
     push!(state.results, input_helper(terminal, input_type(state.calculation)))
 end # function step
 function step(::Val{2}, state::WizardState)
-    terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
+    terminal = TTYTerminal("xterm", state.in, state.out, state.out)
 
 end # function step
 
