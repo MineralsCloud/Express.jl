@@ -18,7 +18,7 @@ function serialize(io, x::WizardState)
     for field in serializeable_fields(x)
         io[string(field)] = getproperty(x, field)
     end
-    # For non-serializable fields (such as `x.ins` and `x.outs`) we just recreate them in unserialize().
+    # For non-serializable fields (such as `x.in` and `x.out`) we just recreate them in unserialize().
 end
 
 function deserialize(io)
@@ -58,7 +58,7 @@ function load_last_wizard_state()
 
         # Looks like we had an incomplete build; ask the user if they want to continue
         if !(state.step ∈ (0, 1))  # 0: end, 1: start
-            terminal = TTYTerminal("xterm", state.ins, state.outs, state.outs)
+            terminal = TTYTerminal("xterm", state.in, state.out, state.out)
             choice = request(
                 terminal,
                 "Would you like to resume the previous incomplete wizard run?",
