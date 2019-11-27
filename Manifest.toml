@@ -122,7 +122,7 @@ version = "0.21.9"
 
 [[EquationsOfState]]
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "Polynomials", "Rematch", "Roots", "Unitful"]
-git-tree-sha1 = "c68ce7ff017c997172a30039610c8b7bd3e912de"
+git-tree-sha1 = "63ba2a7ccacfe786c0cd9e61a2112308fd276880"
 repo-rev = "develop"
 repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -297,9 +297,9 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Polynomials]]
 deps = ["LinearAlgebra", "RecipesBase"]
-git-tree-sha1 = "ae71c2329790af97b7682b11241b3609e4d48626"
+git-tree-sha1 = "f7c0c07e82798aef542d60a6e6e85e39f4590750"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
-version = "0.6.0"
+version = "0.5.3"
 
 [[PooledArrays]]
 git-tree-sha1 = "6e8c38927cb6e9ae144f7277c753714861b27d14"
@@ -498,11 +498,9 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[Unitful]]
 deps = ["ConstructionBase", "LinearAlgebra", "Random"]
-git-tree-sha1 = "13b91f516c91bbc953819cd4deb169c39d098843"
-repo-rev = "master"
-repo-url = "https://github.com/PainterQubits/Unitful.jl.git"
+git-tree-sha1 = "c1ba76e3ca74a838e221e69b0ff8429226c5826a"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "0.17.0"
+version = "0.18.0"
 
 [[UnitfulAtomic]]
 deps = ["Unitful"]
