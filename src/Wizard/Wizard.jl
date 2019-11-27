@@ -5,6 +5,7 @@ using REPL.Terminals
 using REPL.TerminalMenus
 
 using Compat: isnothing
+using EquationsOfState.Collections
 using JLD2: jldopen
 using Parameters: @with_kw
 using QuantumESPRESSO: to_qe
@@ -14,6 +15,8 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.CP: CPInput
 using Rematch: @match
 using Setfield: PropertyLens, set
+
+using ..EquationOfStateFitting: update_alat_press
 
 export run_wizard
 
@@ -80,17 +83,44 @@ input_type(::CPCalculation) = CPInput
 step(i::Integer, state::WizardState) = step(Val(i), state)
 function step(::Val{1}, state::WizardState)
     terminal = TTYTerminal("xterm", state.in, state.out, state.out)
-    state.calculation =
-        pairs((PWscfCalculation(), PHononCalculation(), CPCalculation()))[request(
-            terminal,
-            c"What calculation do you want to run?"r,
-            RadioMenu(["scf", "phonon", "CPMD"]),
-        )]
-    push!(state.results, input_helper(terminal, input_type(state.calculation)))
+    calculation = pairs((PWscfCalculation(), PHononCalculation(), CPCalculation()))[request(
+        terminal,
+        c"What calculation do you want to run?"r,
+        RadioMenu(["scf", "phonon", "CPMD"]),
+    )]
+    state.result = input_helper(terminal, input_type(calculation))
+    return state
 end # function step
 function step(::Val{2}, state::WizardState)
+    return step(Val(2), state, PWscfCalculation())
+end # function step
+function step(::Val{2}, state::WizardState, ::PWscfCalculation)
     terminal = TTYTerminal("xterm", state.in, state.out, state.out)
-
+    eos_symb = Symbol(request(
+        terminal,
+        c"What EOS do you want to use for fitting?"r,
+        RadioMenu([
+            "Murnaghan",
+            "BirchMurnaghan2nd",
+            "BirchMurnaghan3rd",
+            "BirchMurnaghan4th",
+            "PoirierTarantola2nd",
+            "PoirierTarantola3rd",
+            "PoirierTarantola4th",
+            "Vinet",
+        ]),
+    ))
+    println(terminal, c"Please input parameters for this EOS (separated by spaces):"r)
+    eos = eval(eos_symb)(map(
+        x -> parse(Float64, x),
+        split(readline(terminal), " ", keepempty = false),
+    ))
+    println(terminal, c"Please input pressures you want to test on (separated by spaces):"r)
+    pressures =
+        map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
+    inputs_from_template =
+        [update_alat_press(state.result, eos, pressure) for pressure in pressures]
+    
 end # function step
 
 end
