@@ -6,12 +6,6 @@ git-tree-sha1 = "07a2c077bdd4b6d23a40342a8a108e2ee5e58ab6"
 uuid = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 version = "0.3.1"
 
-[[ArrayInterface]]
-deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "981354dab938901c2b607a213e62d9defa50b698"
-uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "1.2.1"
-
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
@@ -62,6 +56,11 @@ git-tree-sha1 = "a2a6a5fea4d6f730ec4c18a76d27ec10e8ec1c50"
 uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 version = "1.0.0"
 
+[[Crayons]]
+git-tree-sha1 = "cb7a62895da739fe5bb43f1a26d4292baf4b3dc0"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.0.1"
+
 [[DataAPI]]
 git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
@@ -93,10 +92,10 @@ deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqDiffTools]]
-deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "81edfb3a8b55154772bb6080b5db40868e1778ed"
+deps = ["LinearAlgebra", "SparseArrays", "StaticArrays"]
+git-tree-sha1 = "b992345a39b4d9681342ae795a8dacc100730182"
 uuid = "01453d9d-ee7c-5054-8395-0335cb756afa"
-version = "1.4.0"
+version = "0.14.0"
 
 [[DiffResults]]
 deps = ["Compat", "StaticArrays"]
@@ -124,7 +123,7 @@ version = "0.21.9"
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "Polynomials", "Rematch", "Roots", "Unitful"]
 git-tree-sha1 = "63ba2a7ccacfe786c0cd9e61a2112308fd276880"
 repo-rev = "develop"
-repo-url = "https://github.com/singularitti/EquationsOfState.jl.git"
+repo-url = "git@github.com:MineralsCloud/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
 
@@ -156,9 +155,9 @@ version = "0.1.0"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "NaNMath", "Random", "SpecialFunctions", "StaticArrays"]
-git-tree-sha1 = "4407e7b76999eca2646abdb68203bd4302476168"
+git-tree-sha1 = "da46ac97b17793eba44ff366dc6cb70f1238a738"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "0.10.6"
+version = "0.10.7"
 
 [[Future]]
 deps = ["Random"]
@@ -330,6 +329,14 @@ git-tree-sha1 = "4a6e142c564f3d15810668a2aca981eca8c4a22d"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
+version = "0.1.0"
+
+[[QuantumESPRESSOHelpers]]
+deps = ["Crayons", "Fortran90Namelists", "QuantumESPRESSOBase", "REPL", "Setfield"]
+git-tree-sha1 = "a16e611387dec3016ee50b140bb0ac751ac39569"
+repo-rev = "master"
+repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git"
+uuid = "a9fedd91-8596-4386-96ec-8925d33acc95"
 version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
