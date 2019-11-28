@@ -66,7 +66,7 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
     # We did it!
     save_last_wizard_state(state)
 
-    println(state.out, c"Wizard Complete. Press any key to exit..."g)
+    println(state.out, GREEN_FG("Wizard Complete. Press any key to exit..."))
     read(state.in, Char)
 
     return state
