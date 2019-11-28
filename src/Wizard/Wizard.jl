@@ -5,6 +5,7 @@ using REPL.Terminals
 using REPL.TerminalMenus
 
 using Compat: isnothing
+using Crayons.Box: GREEN_FG
 using EquationsOfState.Collections
 using JLD2: jldopen
 using Parameters: @with_kw
@@ -80,7 +81,7 @@ function step(::Val{1}, state::WizardState)
     terminal = TTYTerminal("xterm", state.in, state.out, state.out)
     calculation = pairs((PWscfCalculation(), PHononCalculation(), CPCalculation()))[request(
         terminal,
-        c"What calculation do you want to run?"r,
+        GREEN_FG("What calculation do you want to run?") |> string,
         RadioMenu(["scf", "phonon", "CPMD"]),
     )]
     state.result = input_helper(terminal, input_type(calculation))
@@ -93,7 +94,7 @@ function step(::Val{2}, state::WizardState, ::PWscfCalculation)
     terminal = TTYTerminal("xterm", state.in, state.out, state.out)
     eos_symb = Symbol(request(
         terminal,
-        c"What EOS do you want to use for fitting?"r,
+        GREEN_FG("What EOS do you want to use for fitting?") |> string,
         RadioMenu([
             "Murnaghan",
             "BirchMurnaghan2nd",
@@ -105,12 +106,12 @@ function step(::Val{2}, state::WizardState, ::PWscfCalculation)
             "Vinet",
         ]),
     ))
-    println(terminal, c"Please input parameters for this EOS (separated by spaces):"r)
+    println(terminal, GREEN_FG("Please input parameters for this EOS (separated by spaces):") |> string)
     eos = eval(eos_symb)(map(
         x -> parse(Float64, x),
         split(readline(terminal), " ", keepempty = false),
     ))
-    println(terminal, c"Please input pressures you want to test on (separated by spaces):"r)
+    println(terminal, GREEN_FG("Please input pressures you want to test on (separated by spaces):") |> string)
     pressures =
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     inputs_from_template =
