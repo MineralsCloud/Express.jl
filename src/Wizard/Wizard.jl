@@ -25,12 +25,7 @@ struct PWscfCalculation <: QuantumESPRESSOCalculation end
 struct PHononCalculation <: QuantumESPRESSOCalculation end
 struct CPCalculation <: QuantumESPRESSOCalculation end
 
-include("utils.jl")
 include("state.jl")
-include("Namelists.jl")
-include("Cards.jl")
-include("Inputs.jl")
-using .Inputs: input_helper
 
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
 function run_wizard(state::Union{Nothing,WizardState} = nothing)
@@ -120,7 +115,7 @@ function step(::Val{2}, state::WizardState, ::PWscfCalculation)
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     inputs_from_template =
         [update_alat_press(state.result, eos, pressure) for pressure in pressures]
-    
+
 end # function step
 
 end
