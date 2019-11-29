@@ -19,7 +19,6 @@ using Parameters: @with_kw
 end
 
 struct SubJob
-    parent::Job
     worker_id::Int
     ref::Future
 end
@@ -36,12 +35,12 @@ function generate_cmd(quotient::Int, exec::String, in::String, out::String)
     return `mpirun -np $quotient $exec -i $in > $out`
 end # function generate_cmd
 
-function distribute_process(job::Job, worker_ids = workers())
+function distribute_process(cmd::Cmd, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     subjobs = Vector{SubJob}(undef, length(worker_ids))
     for (i, id) in enumerate(worker_ids)
-        subjobs[i] = SubJob(job, id, @spawnat id run(job.action))
+        subjobs[i] = SubJob(id, @spawnat id run(cmd))
     end
     return subjobs
 end # function distribute_process
