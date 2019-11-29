@@ -18,16 +18,20 @@ using Parameters: @with_kw
     directives::Dict = Dict{String,Any}()
 end
 
+struct SubJob
+    parent::Job
+    worker_id::Int
+    ref::Future
+end
+
 function distribute_process(manager::ClusterManager, job::Job, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    futures = Vector{Future}(undef, length(worker_ids))
+    subjobs = Vector{SubJob}(undef, length(worker_ids))
     for (i, id) in enumerate(worker_ids)
-        @async begin
-            futures[i] = @spawnat id run(job.action)
-        end
+        subjobs[i] = SubJob(job, id, @spawnat id run(job.action))
     end
-    return futures
+    return subjobs
 end # function distribute_process
 
 end
