@@ -33,7 +33,7 @@ function nprocs_per_subjob(total_num::Int, nsubjob::Int)
 end # function nprocs_per_subjob
 
 function generate_cmd(quotient::Int, exec::String, in::String, out::String)
-    return `mpirun -np $quotient $exec -in $in -out $out`
+    return `mpirun -np $quotient $exec -i $in > $out`
 end # function generate_cmd
 
 function distribute_process(job::Job, worker_ids = workers())
