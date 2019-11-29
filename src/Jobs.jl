@@ -1,7 +1,6 @@
 module Jobs
 
-export Job,
-    distribute_process
+export Job, SubJob, distribute_process, isjobdone
 
 using Dates: DateTime, now
 using Distributed
@@ -33,5 +32,9 @@ function distribute_process(manager::ClusterManager, job::Job, worker_ids = work
     end
     return subjobs
 end # function distribute_process
+
+function isjobdone(subjobs::AbstractArray{SubJob})
+    return all(map(isready, subjobs))
+end # function isjobdone
 
 end
