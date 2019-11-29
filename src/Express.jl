@@ -5,6 +5,7 @@ export Step
 struct Step{N} end
 Step(n) = Step{n}()
 
+include("Jobs.jl")
 include("SelfConsistentField.jl")
 include("BandStructure.jl")
 include("EquationOfStateFitting.jl")

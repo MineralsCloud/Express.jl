@@ -1,5 +1,8 @@
 module Jobs
 
+export Job,
+    distribute_process
+
 using Dates: DateTime, now
 using Distributed
 
@@ -15,15 +18,14 @@ using Parameters: @with_kw
     directives::Dict = Dict{String,Any}()
 end
 
-function submit(manager::ClusterManager, job::Job)
+function distribute_process(manager::ClusterManager, job::Job, worker_ids::Integer = workers())
+    # mpirun -np $n pw.x -in $in -out $out
     addprocs(manager, job.directives...)
-    job_ids = Int[]
-    for i in workers()
-        push!(job_ids, fetch(@spawnat i run(``)))
+    futures = Future[]
+    for id in worker_ids
+        push!(futures, @spawnat(id, run(job.action)))
     end
-    for i in workers()
-        rmprocs(i)
-    end
+    return futures
 end # function submit
 
 end
