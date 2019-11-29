@@ -9,6 +9,10 @@ using Distributed
 using ClusterManagers
 using Parameters: @with_kw
 
+using Express
+
+execof(::PWscfCalculation{T}) where {T} = replace(T, "_" => "-") * ".x"
+
 @with_kw struct Job
     id::String
     action::Cmd
@@ -31,14 +35,21 @@ function nprocs_per_subjob(total_num::Int, nsubjob::Int)
     return quotient
 end # function nprocs_per_subjob
 
-function generate_cmd(quotient::Int, exec::String, in::String, out::String)
+function generate_cmd(np::Int, exec::String, in::String, out::String)
     return `mpirun -np $quotient $exec -i $in > $out`
 end # function generate_cmd
+
+function mpirun(np::Int, exec::String, in::String, out::String)
+    cmd = generate_cmd(np, exec, in, out)
+    run(cmd)
+    return out
+end # function mpirun
 
 function distribute_process(cmd::Cmd, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    subjobs = Vector{SubJob}(undef, length(worker_ids))
+    np = length(worker_ids)
+    subjobs = Vector{SubJob}(undef, np)
     for (i, id) in enumerate(worker_ids)
         subjobs[i] = SubJob(id, @spawnat id run(cmd))
     end
