@@ -1,6 +1,7 @@
 module Jobs
 
-export Job, SubJob, distribute_process, isjobdone, fetch_results
+export Job, SubJob
+export nprocs_per_subjob, generate_cmd, distribute_process, isjobdone, fetch_results
 
 using Dates: DateTime, now
 using Distributed
@@ -23,7 +24,19 @@ struct SubJob
     ref::Future
 end
 
-function distribute_process(manager::ClusterManager, job::Job, worker_ids = workers())
+function nprocs_per_subjob(total_num::Int, nsubjob::Int)
+    quotient, remainder = divrem(total_num, nsubjob)
+    if remainder != 0
+        @warn("The processes are not fully balanced! Consider the number of subjobs!")
+    end
+    return quotient
+end # function nprocs_per_subjob
+
+function generate_cmd(quotient::Int, exec::String, in::String, out::String)
+    return `mpirun -np $quotient $exec -in $in -out $out`
+end # function generate_cmd
+
+function distribute_process(job::Job, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     subjobs = Vector{SubJob}(undef, length(worker_ids))
