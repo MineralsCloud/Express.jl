@@ -39,12 +39,6 @@ function generate_cmd(np::Int, exec::String, in::String, out::String)
     return `mpirun -np $quotient $exec -i $in > $out`
 end # function generate_cmd
 
-function mpirun(np::Int, exec::String, in::String, out::String)
-    cmd = generate_cmd(np, exec, in, out)
-    run(cmd)
-    return out
-end # function mpirun
-
 function distribute_process(cmd::Cmd, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
