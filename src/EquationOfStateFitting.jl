@@ -153,32 +153,6 @@ function communicate(cmd::Cmd)
     )
 end
 
-function write_job(filename::AbstractString, io::AbstractDict{T,T}, account::AbstractString) where {T<:AbstractString}
-    n = div(24, length(io))
-    array = join(["[\"$k\"]=\"$v\"" for (k, v) in io], " ")
-    s = """
-    #!/usr/bin/env bash
-
-    #SBATCH -A $account
-    #SBATCH -N 1
-    #SBATCH --tasks-per-node=24
-    #SBATCH -J job
-    #SBATCH --time=01:00:00
-
-    module load intel-parallel-studio/2017
-
-    declare -A array=($array)
-
-    for i in "\${!array[@]}"; do
-        mpirun -np $n pw.x -in "\$i" > "\${array[\$i]}" &
-        sleep 3
-    done
-    wait
-    """
-    write(filename, s)
-    return
-end # function write_job
-
 function submit(job::T) where {T<:AbstractString}
     out, err, code = communicate(`sbatch --parsable $job > jobid`)
     if code == 0
@@ -187,34 +161,6 @@ function submit(job::T) where {T<:AbstractString}
         error(err)
     end
 end # function submit
-
-function query(jobid::AbstractString)
-    out, err, code = communicate(`squeue --job=$jobid`)
-    if code != 0
-        error(err)
-    end
-    for line in split(out, '\n')
-        m = match(Regex(jobid), line)
-        !isnothing(m) && return strip(line)
-    end
-    return
-end # function query
-
-function isdone(jobid::AbstractString)
-    return isnothing(query(jobid)) ? true : false
-end # function isdone
-
-function checkjob(jobid::AbstractString, dt::Int = 10)
-    # From https://scls19fr.github.io/ExtensibleScheduler.jl/dev/getting_started/
-    function f(x, sch)
-        isdone(x) && ExtensibleScheduler.shutdown(sch)
-    end
-    sched = BlockingScheduler()
-    action = Action(f, jobid, sched)
-    trigger = Trigger(Second(dt), n = -1)  # Infinte loop until job is done
-    add(sched, action, trigger)
-    run(sched)
-end # function overall
 
 # function workflow(
 #     io::AbstractDict{T,T},
