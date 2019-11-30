@@ -33,18 +33,17 @@ using QuantumESPRESSO.Outputs.PWscf: Preamble,
                                      isjobdone
 using Setfield: set
 using Unitful
-using Unitful: AbstractQuantity
 using UnitfulAtomic
 
 import ..Step
 using ..SelfConsistentField: write_metadata
 
-export update_alat_press, prepare, finish, submit, query, write_job, isdone, checkjob
+export update_alat_press, prepare, finish, submit
 
 function update_alat_press(
     template::PWInput,
-    eos::EquationOfState{<:AbstractQuantity},
-    pressure::AbstractQuantity,
+    eos::EquationOfState{<:Unitful.AbstractQuantity},
+    pressure::Unitful.AbstractQuantity,
 )
     if isnothing(template.cell_parameters)
         template = autofill_cell_parameters(template)
@@ -110,7 +109,7 @@ end # function prepare
 function finish(
     ::Step{N},
     outputs::AbstractVector{<:AbstractString},
-    trial_eos::EquationOfState{<:AbstractQuantity},
+    trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
 ) where {N}
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
