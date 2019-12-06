@@ -47,7 +47,7 @@ function update_alat_press(
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
-    determinant = cell_volume(template) * u"bohr^3"
+    determinant = cell_volume(template.cell_parameters) * u"bohr^3"
     # `cbrt` works with units.
     alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
     lenses = @batchlens(begin
