@@ -21,7 +21,6 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using ExtensibleScheduler
 using Kaleido: @batchlens
-using Rematch: @match
 using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards: optionof
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
@@ -52,11 +51,15 @@ function update_alat_press(
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     # If the `CellParametersCard` contains a matrix of plain numbers (no unit).
-    determinant = @match optionof(template.cell_parameters) begin
+    option = optionof(template.cell_parameters)
+    determinant = if option ∈ ("alat", "bohr")
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
-        "alat" || "bohr" => det(template.cell_parameters.data) * u"bohr^3"
-        "angstrom" => det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
+        det(template.cell_parameters.data) * u"bohr^3"
+    elseif option == "angstrom"
+        det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
+    else  # This should never happen actually.
+        error("unknown option $option in a `CellParametersCard`!")
     end
     # `cbrt` works with units.
     alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
@@ -117,10 +120,12 @@ function finish(
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
             energies[i] = parse_electrons_energies(s, :combined)[end]
-            volumes[i] = @match N begin
-                1 => parse(Preamble, s)["unit-cell volume"]
-                2 => det(parsefinal(CellParametersCard, s)[end])
-                _ => error("The step $N must be `1` or `2`!")
+            volumes[i]= if N == 1
+                parse(Preamble, s)["unit-cell volume"]
+            elseif N == 2
+                det(parsefinal(CellParametersCard, s)[end])
+            else
+                error("The step $N must be `1` or `2`!")
             end
         end
     end
