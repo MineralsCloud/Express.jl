@@ -63,7 +63,8 @@ function _preset(template::PWInput)
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, ("scf", "high", true, true))
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) : template
+    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) :
+           template
 end # function _preset
 function _preset(template::PhInput)
     lenses = @batchlens(begin
@@ -150,8 +151,11 @@ function prepare(
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
     template::PWInput,
-    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
-    verbose::Bool = false
+    metadatafiles::AbstractVector{<:AbstractString} = map(
+        x -> splitext(x)[1] * ".json",
+        inputs,
+    ),
+    verbose::Bool = false,
 )
     # Check parameters
     @assert(

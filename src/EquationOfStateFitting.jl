@@ -25,10 +25,8 @@ using QuantumESPRESSO: to_qe, cell_volume
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
-using QuantumESPRESSO.Outputs.PWscf: Preamble,
-                                     parse_electrons_energies,
-                                     parsefinal,
-                                     isjobdone
+using QuantumESPRESSO.Outputs.PWscf:
+    Preamble, parse_electrons_energies, parsefinal, isjobdone
 using Setfield: set
 using Unitful
 using UnitfulAtomic
@@ -79,8 +77,11 @@ function prepare(
     template::PWInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
-    metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", inputs),
-    verbose::Bool = false
+    metadatafiles::AbstractVector{<:AbstractString} = map(
+        x -> splitext(x)[1] * ".json",
+        inputs,
+    ),
+    verbose::Bool = false,
 )
     # Check parameters
     @assert(
@@ -109,7 +110,7 @@ function finish(
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
             energies[i] = parse_electrons_energies(s, :combined)[end]
-            volumes[i]= if N == 1
+            volumes[i] = if N == 1
                 parse(Preamble, s)["unit-cell volume"]
             elseif N == 2
                 det(parsefinal(CellParametersCard, s)[end])
@@ -139,11 +140,7 @@ function communicate(cmd::Cmd)
     stdout = @async String(read(out))
     stderr = @async String(read(err))
     wait(process)
-    return (
-        stdout = fetch(stdout),
-        stderr = fetch(stderr),
-        code = process.exitcode
-    )
+    return (stdout = fetch(stdout), stderr = fetch(stderr), code = process.exitcode)
 end
 
 function submit(job::T) where {T<:AbstractString}
