@@ -347,7 +347,7 @@ version = "2.2.0"
 
 [[QuantumESPRESSO]]
 deps = ["Fortran90Namelists", "ImportMacros", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "Reexport"]
-git-tree-sha1 = "4324848ccae722c6a3312b728f81469323525308"
+git-tree-sha1 = "041cb6c42a444e135ead5ecd9ef355db51dbf60f"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -355,7 +355,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "DataStructures", "Fortran90Namelists", "JSON", "LinearAlgebra", "Parameters", "Rematch", "Serialization", "Setfield"]
-git-tree-sha1 = "5858571433f38eb2307d28df7655dba99946bdda"
+git-tree-sha1 = "b790ab4e32b3ee6cbec93f19fdd36c424c028b42"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
