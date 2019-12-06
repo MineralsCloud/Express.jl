@@ -35,14 +35,21 @@ Read structure information from `output`, and update related fields of `template
 function update_structure(output::AbstractString, template::PWInput)
     open(output, "r") do io
         str = read(io, String)
-        cell_parameters = parsefinal(CellParametersCard, str)
+        # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option.
+        # Convert it to "bohr" by default
+        cell_parameters = option_convert("bohr", parsefinal(CellParametersCard, str))
         atomic_positions = parsefinal(AtomicPositionsCard, str)
         lenses = @batchlens(begin
+            _.system.ibrav
             _.system.celldm ∘ _[$1]
             _.atomic_positions
             _.cell_parameters
         end)
-        return set(template, lenses, (1, atomic_positions, cell_parameters))
+        return set(
+            template,
+            lenses,
+            (0, 1, atomic_positions, CellParametersCard("alat", cell_parameters.data)),
+        )
     end
 end # function update_structure
 
