@@ -13,7 +13,7 @@ module Phonon
 
 using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe
-using QuantumESPRESSO.Cards
+using QuantumESPRESSO.Cards: option_convert
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
