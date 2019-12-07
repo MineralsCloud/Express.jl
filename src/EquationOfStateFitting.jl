@@ -109,7 +109,7 @@ function finish(
         open(output, "r") do io
             s = read(io, String)
             isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = parse_electrons_energies(s, :combined)[end]
+            energies[i] = parse_electrons_energies(s, :converged).ε[end]
             volumes[i] = if N == 1
                 parse(Preamble, s)["unit-cell volume"]
             elseif N == 2
