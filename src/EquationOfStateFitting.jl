@@ -49,6 +49,7 @@ function update_alat_press(
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
     option = optionof(template.cell_parameters)
+    # Please do not change this logic, see https://github.com/MineralsCloud/Express.jl/pull/38.
     determinant = if option ∈ ("alat", "bohr")
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
         # So `"alat"` is equivalent to `"bohr"`.
