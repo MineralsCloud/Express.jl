@@ -45,8 +45,7 @@ end # function nprocs_per_subjob
 function distribute_process(cmd::MpiCmd, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    np = length(worker_ids)
-    subjobs = Vector{SubJob}(undef, np)
+    subjobs = Vector{SubJob}(undef, nworkers())
     for (i, id) in enumerate(worker_ids)
         subjobs[i] = SubJob(id, @spawnat id run(`$cmd`))
     end
