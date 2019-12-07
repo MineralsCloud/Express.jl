@@ -21,7 +21,7 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using ExtensibleScheduler
 using Kaleido: @batchlens
-using QuantumESPRESSO: to_qe
+using QuantumESPRESSO: to_qe, cell_volume
 using QuantumESPRESSO.Cards: optionof
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
@@ -124,7 +124,7 @@ function finish(
             volumes[i] = if N == 1
                 parse(Preamble, s).omega
             elseif N == 2
-                det(parsefinal(CellParametersCard, s)[end])
+                cell_volume(parsefinal(CellParametersCard, s))
             else
                 error("The step $N must be `1` or `2`!")
             end
