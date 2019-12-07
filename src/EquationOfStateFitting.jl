@@ -111,7 +111,7 @@ function finish(
             isjobdone(s) || @warn("Job is not finished!")
             energies[i] = parse_electrons_energies(s, :converged).ε[end]
             volumes[i] = if N == 1
-                parse(Preamble, s)["unit-cell volume"]
+                parse(Preamble, s).omega
             elseif N == 2
                 det(parsefinal(CellParametersCard, s)[end])
             else
