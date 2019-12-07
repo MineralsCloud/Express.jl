@@ -23,7 +23,6 @@ using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using Setfield: get, set, @lens, @set!
 
 import ..Step
-using Express.SelfConsistentField: write_metadata
 using Express.BandStructure: generate_path
 
 export update_structure, relay, prepare
@@ -134,7 +133,7 @@ function relay(from::PhInput, to::DynmatInput)
 end # function relay
 
 """
-    prepare(step::Step{1}, inputs, outputs, template, metadatafiles[, verbose::Bool = false])
+    prepare(step::Step{1}, inputs, outputs, template[, verbose::Bool = false])
 
 Prepare input files of the first step of a phonon calculation.
 
@@ -144,7 +143,6 @@ Prepare input files of the first step of a phonon calculation.
    they will be automatically created.
 - `outputs::AbstractVector{<:AbstractString}`: The output files of Quantum ESPRESSO of a vc-relax calculation.
 - `template::PWInput`:
-- `metadatafiles::AbstractVector{<:AbstractString}`:
 - `verbose::Bool = false`: control the format of input files, verbose or not.
 """
 function prepare(
@@ -152,23 +150,18 @@ function prepare(
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
     template::PWInput,
-    metadatafiles::AbstractVector{<:AbstractString} = map(
-        x -> splitext(x)[1] * ".json",
-        inputs,
-    ),
     verbose::Bool = false,
 )
     # Check parameters
     @assert(
-        length(inputs) == length(outputs) == length(metadatafiles),
-        "The inputs, outputs and the metadata files must be the same length!"
+        length(inputs) == length(outputs),
+        "The inputs, outputs must be the same length!"
     )
     template = _preset(template)
-    for (input, output, metadatafile) in zip(inputs, outputs, metadatafiles)
+    for (input, output) in zip(inputs, outputs)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
-        write_metadata(metadatafile, input, template)
     end
     return
 end # function prepare

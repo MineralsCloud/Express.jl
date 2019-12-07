@@ -33,7 +33,6 @@ using Unitful
 using UnitfulAtomic
 
 import ..Step
-using ..SelfConsistentField: write_metadata
 
 export update_alat_press, prepare, finish, submit
 
@@ -88,24 +87,18 @@ function prepare(
     template::PWInput,
     trial_eos::EquationOfState,
     pressures::AbstractVector,
-    metadatafiles::AbstractVector{<:AbstractString} = map(
-        x -> splitext(x)[1] * ".json",
-        inputs,
-    ),
     verbose::Bool = false,
 )
     # Check parameters
     @assert(
-        length(inputs) == length(pressures) == length(metadatafiles),
-        "The inputs, pressures and the metadata files must be the same size!"
+        length(inputs) == length(pressures),
+        "The inputs, and pressures must be the same size!"
     )
     template = _boilerplate(step, template)
-    # Write input and metadata
-    for (input, pressure, metadatafile) in zip(inputs, pressures, metadatafiles)
+    for (input, pressure) in zip(inputs, pressures)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
-        write_metadata(metadatafile, input, template)
     end
     return
 end # function prepare
@@ -168,16 +161,15 @@ end # function submit
 #     template::PWInput,
 #     trial_eos::EquationOfState,
 #     pressures::AbstractVector,
-#     metadatafiles::AbstractVector{<:AbstractString} = map(x -> splitext(x)[1] * ".json", keys(io)),
 #     account::AbstractString,
 #     verbose::Bool = false
 # ) where {T<:AbstractString}
-#     prepare(Step(1), keys(io), template, trial_eos, pressures, metadatafiles)
+#     prepare(Step(1), keys(io), template, trial_eos, pressures)
 #     write_job("job.sh", io, account)
 #     jobid = submit("job.sh")
 #     isdone(jobid, account)
 #     trial_eos = finish(values(io), trial_eos)
-#     # prepare(Step(2), keys(io), template, trial_eos, pressures, metadatafiles)
+#     # prepare(Step(2), keys(io), template, trial_eos, pressures)
 #     # write_job("job.sh", io, account)
 #     # jobid = submit("job.sh")
 #     # return finish(values(io), trial_eos)
