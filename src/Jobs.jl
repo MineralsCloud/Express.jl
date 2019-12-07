@@ -1,17 +1,24 @@
 module Jobs
 
-export Job, SubJob
-export nprocs_per_subjob, generate_cmd, distribute_process, isjobdone, fetch_results
-
 using Dates: DateTime, now
 using Distributed
 
 using ClusterManagers
 using Parameters: @with_kw
 
+using QuantumESPRESSOBase.CLI: QuantumESPRESSOCmd
+
 using Express
 
-execof(::PWscfCalculation{T}) where {T} = replace(T, "_" => "-") * ".x"
+export MpiCmd, Job, SubJob
+export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
+
+struct MpiCmd
+    exec::String
+    np::Int
+    subcmd::QuantumESPRESSOCmd
+    out::String
+end
 
 @with_kw struct Job
     id::String
@@ -35,17 +42,13 @@ function nprocs_per_subjob(total_num::Int, nsubjob::Int)
     return quotient
 end # function nprocs_per_subjob
 
-function generate_cmd(np::Int, exec::String, in::String, out::String)
-    return `mpirun -np $quotient $exec -i $in > $out`
-end # function generate_cmd
-
-function distribute_process(cmd::Cmd, worker_ids = workers())
+function distribute_process(cmd::MpiCmd, worker_ids = workers())
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     np = length(worker_ids)
     subjobs = Vector{SubJob}(undef, np)
     for (i, id) in enumerate(worker_ids)
-        subjobs[i] = SubJob(id, @spawnat id run(cmd))
+        subjobs[i] = SubJob(id, @spawnat id run(`$cmd`))
     end
     return subjobs
 end # function distribute_process
@@ -59,5 +62,7 @@ function fetch_results(subjobs::AbstractArray{SubJob})
         isready(x.ref) ? fetch(x.ref) : nothing
     end
 end # function fetch_results
+
+Base.string(cmd::MpiCmd) = "$(cmd.exec) -np $(cmd.np) $(string(cmd.subcmd)) > $(cmd.out)"
 
 end
