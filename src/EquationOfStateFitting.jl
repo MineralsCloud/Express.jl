@@ -126,36 +126,6 @@ function finish(
     return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
 end # function finish
 
-mutable struct CalculationStatus{T}
-    io::AbstractDict{T,T}
-    pending::AbstractDict{T,T}
-    running::AbstractDict{T,T}
-    done::AbstractDict{T,T}
-end
-
-function communicate(cmd::Cmd)
-    out = Pipe()
-    err = Pipe()
-
-    process = run(pipeline(cmd, stdout = out, stderr = err), wait = false)
-    close(out.in)
-    close(err.in)
-
-    stdout = @async String(read(out))
-    stderr = @async String(read(err))
-    wait(process)
-    return (stdout = fetch(stdout), stderr = fetch(stderr), code = process.exitcode)
-end
-
-function submit(job::T) where {T<:AbstractString}
-    out, err, code = communicate(`sbatch --parsable $job > jobid`)
-    if code == 0
-        return chomp(out)  # It is the job id.
-    else
-        error(err)
-    end
-end # function submit
-
 # function workflow(
 #     io::AbstractDict{T,T},
 #     template::PWInput,
