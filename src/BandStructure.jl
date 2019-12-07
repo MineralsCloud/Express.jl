@@ -19,7 +19,6 @@ using Setfield: @set
 using ShiftedArrays: circshift, lead
 
 import ..Step
-using ..SelfConsistentField: write_metadata
 
 export generate_path, update_kpoints, prepare
 
@@ -118,15 +117,9 @@ function prepare(
     step::Step{1},
     inputs::AbstractVector{<:AbstractString},
     template::PWInput,
-    metadatafiles::AbstractVector{<:AbstractString},
 )
     # Checking parameters
-    @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
     template = set_calculation(step, template)
-    # Write input and metadata files
-    for (input, metadata) in zip(inputs, metadatafiles)
-        write_metadata(metadata, input, template)
-    end
 end # function prepare
 function prepare(
     step::Step{2},
@@ -134,34 +127,25 @@ function prepare(
     template::PWInput,
     nodes::AbstractVector{<:AbstractVector},
     densities::AbstractVector{<:Integer} = 100 * ones(Int, length(nodes)),
-    metadatafiles::AbstractVector{<:AbstractString} = map(
-        x -> splitext(x)[1] * ".json",
-        inputs
-    )
 )
     # Checking parameters
-    @assert length(inputs) == length(metadatafiles) "The inputs and the metadata files must be the same size!"
     template = set_calculation(step, template)
     template = update_kpoints(template, generate_path(nodes, densities))
-    # Write input and metadata files
-    for (input, metadata) in zip(inputs, metadatafiles)
+    for input in inputs
         open(input, "r+") do io
             write(io, to_qe(template))
         end
-        write_metadata(metadata, input, template)
     end
 end# function prepare
 function prepare(
     step::Step{3},
     inputs::AbstractVector{<:AbstractString},
     template::BandsNamelist,
-    metadatafiles::AbstractVector{<:AbstractString},
 )
-    for (input, metadata) in zip(inputs, metadatafiles)
+    for input in inputs
         open(input, "r+") do io
             write(io, to_qe(template))
         end
-        write_metadata(metadata, input, template)
     end
 end # function prepare
 
