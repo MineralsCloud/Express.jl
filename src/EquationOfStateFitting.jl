@@ -22,6 +22,7 @@ using EquationsOfState.Find: findvolume
 using ExtensibleScheduler
 using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe, cell_volume
+using QuantumESPRESSO.Cards: optionof
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
@@ -47,7 +48,16 @@ function update_alat_press(
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
-    determinant = cell_volume(template.cell_parameters) * u"bohr^3"
+    option = optionof(template.cell_parameters)
+    determinant = if option ∈ ("alat", "bohr")
+        # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
+        # So `"alat"` is equivalent to `"bohr"`.
+        det(template.cell_parameters.data) * u"bohr^3"
+    elseif option == "angstrom"
+        det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
+    else  # This should never happen actually.
+        error("unknown option $option in a `CellParametersCard`!")
+    end
     # `cbrt` works with units.
     alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
     lenses = @batchlens(begin
