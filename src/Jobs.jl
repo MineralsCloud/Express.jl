@@ -18,7 +18,6 @@ struct MpiCmd
     exec::String
     np::Int
     subcmd::CLI.QuantumESPRESSOCmd
-    out::String
 end
 
 @with_kw struct Job
@@ -64,6 +63,6 @@ function fetch_results(subjobs::AbstractArray{SubJob})
     end
 end # function fetch_results
 
-CLI.commandify(cmd::MpiCmd) = `$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd)) > $(cmd.out)`
+CLI.commandify(cmd::MpiCmd) = `$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`
 
 end
