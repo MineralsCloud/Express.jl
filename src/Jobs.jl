@@ -6,7 +6,7 @@ using Distributed
 using ClusterManagers
 using Parameters: @with_kw
 
-using QuantumESPRESSOBase.CLI: QuantumESPRESSOCmd
+using QuantumESPRESSOBase.CLI
 
 using Express
 
@@ -16,7 +16,7 @@ export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 struct MpiCmd
     exec::String
     np::Int
-    subcmd::QuantumESPRESSOCmd
+    subcmd::CLI.QuantumESPRESSOCmd
     out::String
 end
 
@@ -47,7 +47,7 @@ function distribute_process(cmd::MpiCmd, worker_ids = workers())
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     subjobs = Vector{SubJob}(undef, nworkers())
     for (i, id) in enumerate(worker_ids)
-        subjobs[i] = SubJob(id, @spawnat id run(`$cmd`))
+        subjobs[i] = SubJob(id, @spawnat id run(commandify(cmd)))
     end
     return subjobs
 end # function distribute_process
@@ -62,6 +62,6 @@ function fetch_results(subjobs::AbstractArray{SubJob})
     end
 end # function fetch_results
 
-Base.string(cmd::MpiCmd) = "$(cmd.exec) -np $(cmd.np) $(string(cmd.subcmd)) > $(cmd.out)"
+CLI.commandify(cmd::MpiCmd) = pipeline(`$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`, stdout = cmd.out)
 
 end
