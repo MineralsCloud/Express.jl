@@ -14,10 +14,15 @@ using Express
 export MpiCmd
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
-@with_kw struct MpiCmd
+@with_kw struct MpiCmd <: Base.AbstractCmd
     exec::String = "mpirun"
     np::Int
     subcmd::CLI.QuantumESPRESSOCmd
+    env::Base.EnvDict = ENV
+    stdin = nothing
+    stdout = nothing
+    stderr = nothing
+    append::Bool = false
 end
 
 function nprocs_per_subjob(total_num::Int, nsubjob::Int)
@@ -49,6 +54,12 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-CLI.commandify(cmd::MpiCmd) = `$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`
+Base.Cmd(cmd::MpiCmd) = pipeline(
+    Cmd(`$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`, env = ENV),
+    cmd.stdin,
+    cmd.stdout,
+    cmd.stderr,
+    cmd.append,
+)
 
 end
