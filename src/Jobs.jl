@@ -14,8 +14,8 @@ using Express
 export MpiCmd, Job, SubJob
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
-struct MpiCmd
-    exec::String
+@with_kw struct MpiCmd
+    exec::String = "mpirun"
     np::Int
     subcmd::CLI.QuantumESPRESSOCmd
 end
