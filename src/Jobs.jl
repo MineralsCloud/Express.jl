@@ -39,7 +39,7 @@ function distribute_process(cmd::MpiCmd, worker_ids = workers())
     refs = Vector{Future}(undef, nworkers())
     @set! cmd.np = nprocs_per_subjob(cmd.np, length(worker_ids))
     for (i, id) in enumerate(worker_ids)
-        refs[i] = @spawnat id run(commandify(cmd))
+        refs[i] = @spawnat id run(Cmd(cmd), wait = false)
     end
     return refs
 end # function distribute_process
