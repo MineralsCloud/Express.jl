@@ -11,22 +11,13 @@ using QuantumESPRESSOBase.CLI
 
 using Express
 
-export MpiCmd, Job
+export MpiCmd
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
 @with_kw struct MpiCmd
     exec::String = "mpirun"
     np::Int
     subcmd::CLI.QuantumESPRESSOCmd
-end
-
-@with_kw struct Job
-    id::String
-    action::Cmd
-    name::String = ""
-    priority::Int = 0
-    time_created::DateTime = now()
-    directives::Dict = Dict{String,Any}()
 end
 
 function nprocs_per_subjob(total_num::Int, nsubjob::Int)
