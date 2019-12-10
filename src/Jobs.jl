@@ -42,7 +42,7 @@ function distribute_process(
     if size(cmds) != size(ids)
         throw(DimensionMismatch("`cmds` has different size than `ids`!"))
     end
-    refs = similar(ids, element_type = Future)
+    refs = similar(ids, Future)
     for (i, id) in enumerate(ids)
         refs[i] = @spawnat id run(Cmd(cmds), wait = false)
     end
