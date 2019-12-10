@@ -28,11 +28,13 @@ using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using Setfield: set
+using QuantumESPRESSOBase.CLI: PWCmd
+using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
 
 import ..Step
+using Express.Jobs: MpiCmd, nprocs_per_subjob, distribute_process
 
 export update_alat_press, prepare, finish, submit
 
@@ -102,6 +104,26 @@ function prepare(
     end
     return
 end # function prepare
+
+function submit(
+    inputs::AbstractVector{<:AbstractString},
+    outputs::AbstractVector{<:AbstractString},
+    np::Int,
+    cmdtepmlate::MpiCmd,
+    ids::AbstractVector{<:Integer} = workers(),
+)
+    each = nprocs_per_subjob(np, length(inputs))
+    if isnothing(cmdtepmlate)
+        cmdtepmlate = MpiCmd(np = each, subcmd = PWCmd(inp = inputs[1]))
+    end
+    cmds = fill(cmdtepmlate, size(inputs))
+    for (input, output, cmd) in zip(inputs, outputs, cmds)
+        @set! cmd.np = each
+        @set! cmd.subcmd = PWCmd(inp = input)
+        @set! cmd.stdout = output
+    end
+    return distribute_process(cmds, ids)
+end # function submit
 
 function finish(
     ::Step{N},
