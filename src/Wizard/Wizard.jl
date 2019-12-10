@@ -83,7 +83,7 @@ function step(::Val{1}, state::WizardState)
         GREEN_FG("What calculation do you want to run?") |> string,
         RadioMenu(["scf", "phonon", "CPMD"]),
     )]
-    state.result = input_helper(terminal, input_type(calculation))
+    state.result = input_builder(terminal, input_type(calculation))
     return state
 end # function step
 function step(::Val{2}, state::WizardState)
