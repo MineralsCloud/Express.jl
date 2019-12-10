@@ -11,27 +11,18 @@ using QuantumESPRESSOBase.CLI
 
 using Express
 
-export MpiCmd, Job, SubJob
+export MpiCmd
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
-struct MpiCmd
-    exec::String
+@with_kw struct MpiCmd <: Base.AbstractCmd
+    exec::String = "mpirun"
     np::Int
     subcmd::CLI.QuantumESPRESSOCmd
-end
-
-@with_kw struct Job
-    id::String
-    action::Cmd
-    name::String = ""
-    priority::Int = 0
-    time_created::DateTime = now()
-    directives::Dict = Dict{String,Any}()
-end
-
-struct SubJob
-    worker_id::Int
-    ref::Future
+    env::Base.EnvDict = ENV
+    stdin = nothing
+    stdout = nothing
+    stderr = nothing
+    append::Bool = false
 end
 
 function nprocs_per_subjob(total_num::Int, nsubjob::Int)
@@ -42,27 +33,38 @@ function nprocs_per_subjob(total_num::Int, nsubjob::Int)
     return quotient
 end # function nprocs_per_subjob
 
-function distribute_process(cmd::MpiCmd, worker_ids = workers())
+function distribute_process(
+    cmds::AbstractArray{T},
+    ids::AbstractArray{<:Integer} = workers(),
+) where {T<:MpiCmd}
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    subjobs = Vector{SubJob}(undef, nworkers())
-    @set! cmd.np = nprocs_per_subjob(cmd.np, length(worker_ids))
-    for (i, id) in enumerate(worker_ids)
-        subjobs[i] = SubJob(id, @spawnat id run(commandify(cmd)))
+    if size(cmds) != size(ids)
+        throw(DimensionMismatch("`cmds` has different size than `ids`!"))
     end
-    return subjobs
+    refs = similar(ids, element_type = Future)
+    for (i, id) in enumerate(ids)
+        refs[i] = @spawnat id run(Cmd(cmds), wait = false)
+    end
+    return refs
 end # function distribute_process
 
-function isjobdone(subjobs::AbstractArray{SubJob})
-    return all(map(x -> isready(x.ref), subjobs))
+function isjobdone(refs::AbstractArray{Future})
+    return all(map(x -> isready(x), refs))
 end # function isjobdone
 
-function fetch_results(subjobs::AbstractArray{SubJob})
-    return map(subjobs) do x
-        isready(x.ref) ? fetch(x.ref) : nothing
+function fetch_results(refs::AbstractArray{Future})
+    return map(refs) do x
+        isready(x) ? fetch(x) : nothing
     end
 end # function fetch_results
 
-CLI.commandify(cmd::MpiCmd) = `$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`
+Base.Cmd(cmd::MpiCmd) = pipeline(
+    Cmd(`$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`, env = ENV),
+    cmd.stdin,
+    cmd.stdout,
+    cmd.stderr,
+    cmd.append,
+)
 
 end
