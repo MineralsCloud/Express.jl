@@ -14,6 +14,7 @@ using QuantumESPRESSO.Namelists.PWscf
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.CP: CPInput
+using QuantumESPRESSOHelpers.Inputs: input_builder
 using Setfield: PropertyLens, set
 
 using ..EquationOfStateFitting: update_alat_press
