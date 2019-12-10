@@ -352,10 +352,10 @@ deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[QuadGK]]
-deps = ["DataStructures", "LinearAlgebra", "Polynomials"]
-git-tree-sha1 = "8ed19b72f601a1c9717d36c0a39d6541e3642c59"
+deps = ["DataStructures", "LinearAlgebra"]
+git-tree-sha1 = "b954eaa7c605b3aba2ecda8c12d8e7b2cac45fdd"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.2.0"
+version = "2.3.0"
 
 [[QuantumESPRESSO]]
 deps = ["Fortran90Namelists", "ImportMacros", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "Reexport"]
@@ -374,8 +374,8 @@ uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
 [[QuantumESPRESSOHelpers]]
-deps = ["Crayons", "Fortran90Namelists", "PrettyTables", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "REPL", "Setfield"]
-git-tree-sha1 = "62ab8b4111aecbbdb84ff3da1a1d499ddd203379"
+deps = ["Crayons", "Fortran90Namelists", "Parameters", "PrettyTables", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "REPL", "Setfield"]
+git-tree-sha1 = "c328f3d2fda04da036a22167ce3226f3f40d6653"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git"
 uuid = "a9fedd91-8596-4386-96ec-8925d33acc95"
