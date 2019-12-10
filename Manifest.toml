@@ -375,7 +375,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOHelpers]]
 deps = ["Crayons", "Fortran90Namelists", "PrettyTables", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "REPL", "Setfield"]
-git-tree-sha1 = "3c7becd688be6ec793d68196bd60b2c984aa2eec"
+git-tree-sha1 = "62ab8b4111aecbbdb84ff3da1a1d499ddd203379"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git"
 uuid = "a9fedd91-8596-4386-96ec-8925d33acc95"
