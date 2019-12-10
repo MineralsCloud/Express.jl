@@ -163,6 +163,12 @@ git-tree-sha1 = "1a9fe4e1323f38de0ba4da49eafd15b25ec62298"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
 version = "0.8.2"
 
+[[Formatting]]
+deps = ["Printf"]
+git-tree-sha1 = "a0c901c29c0e7c763342751c0a94211d56c0de5c"
+uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
+version = "0.4.1"
+
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
 git-tree-sha1 = "da7d0139dc45ec616b70068e022a243cfcab95d8"
@@ -335,6 +341,12 @@ git-tree-sha1 = "6e8c38927cb6e9ae144f7277c753714861b27d14"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
 version = "0.5.2"
 
+[[PrettyTables]]
+deps = ["Crayons", "Formatting", "Parameters", "Reexport", "Tables"]
+git-tree-sha1 = "52ac60dae0fb9665546531e1ff62729013f49239"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "0.7.0"
+
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -362,8 +374,8 @@ uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
 [[QuantumESPRESSOHelpers]]
-deps = ["Crayons", "Fortran90Namelists", "QuantumESPRESSOBase", "REPL", "Setfield"]
-git-tree-sha1 = "a16e611387dec3016ee50b140bb0ac751ac39569"
+deps = ["Crayons", "Fortran90Namelists", "PrettyTables", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "REPL", "Setfield"]
+git-tree-sha1 = "3c7becd688be6ec793d68196bd60b2c984aa2eec"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git"
 uuid = "a9fedd91-8596-4386-96ec-8925d33acc95"
