@@ -40,9 +40,9 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
         while state.step != 0
             if state.step == 1
                 step(1, state)
-                state.step = 2
-            elseif state.step == 2
-                step(2, state)
+            #     state.step = 2
+            # elseif state.step == 2
+            #     step(2, state)
                 state.step = 0  # End step
             end
 
