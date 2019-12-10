@@ -33,13 +33,18 @@ function nprocs_per_subjob(total_num::Int, nsubjob::Int)
     return quotient
 end # function nprocs_per_subjob
 
-function distribute_process(cmd::MpiCmd, worker_ids = workers())
+function distribute_process(
+    cmds::AbstractArray{T},
+    ids::AbstractArray{<:Integer} = workers(),
+) where {T<:MpiCmd}
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    refs = Vector{Future}(undef, nworkers())
-    @set! cmd.np = nprocs_per_subjob(cmd.np, length(worker_ids))
-    for (i, id) in enumerate(worker_ids)
-        refs[i] = @spawnat id run(Cmd(cmd), wait = false)
+    if size(cmds) != size(ids)
+        throw(DimensionMismatch("`cmds` has different size than `ids`!"))
+    end
+    refs = similar(ids, element_type = Future)
+    for (i, id) in enumerate(ids)
+        refs[i] = @spawnat id run(Cmd(cmds), wait = false)
     end
     return refs
 end # function distribute_process
