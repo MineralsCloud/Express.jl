@@ -1,7 +1,7 @@
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
 @with_kw mutable struct WizardState
     step::Int = 1
-    result
+    result = nothing
     in::IO = stdin
     out::IO = stdout
 end
