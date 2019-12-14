@@ -60,7 +60,7 @@ function fetch_results(refs::AbstractArray{Future})
 end # function fetch_results
 
 Base.Cmd(cmd::MpiCmd) = pipeline(
-    Cmd(`$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`, env = ENV),
+    Cmd(`$(cmd.exec) -np $(cmd.np) $(Cmd(cmd.subcmd))`, env = ENV),
     cmd.stdin,
     cmd.stdout,
     cmd.stderr,
