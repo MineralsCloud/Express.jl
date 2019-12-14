@@ -55,7 +55,13 @@ end # function isjobdone
 
 function fetch_results(refs::AbstractArray{Future})
     return map(refs) do x
-        isready(x) ? fetch(x) : nothing
+        if isready(x)
+            try
+                fetch(x)
+            catch e
+                e
+            end
+        end
     end
 end # function fetch_results
 
