@@ -29,7 +29,7 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using Setfield: set, @set!
+using Setfield: set, @lens
 using Unitful
 using UnitfulAtomic
 
@@ -109,18 +109,18 @@ function submit(
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
     np::Int,
-    cmdtepmlate::MpiCmd,
+    cmdtemplate::MpiCmd,
     ids::AbstractVector{<:Integer} = workers(),
 )
     each = nprocs_per_subjob(np, length(inputs))
-    if isnothing(cmdtepmlate)
-        cmdtepmlate = MpiCmd(np = each, subcmd = PWCmd(inp = inputs[1]))
+    if isnothing(cmdtemplate)
+        cmdtemplate = MpiCmd(np = each, subcmd = PWCmd(inp = inputs[1]))
     end
-    cmds = fill(cmdtepmlate, size(inputs))
-    for (input, output, cmd) in zip(inputs, outputs, cmds)
-        @set! cmd.np = each
-        @set! cmd.subcmd = PWCmd(inp = input)
-        @set! cmd.stdout = output
+    cmds = fill(cmdtemplate, size(inputs))
+    for (i, (input, output)) in enumerate(zip(inputs, outputs))
+        cmds[i] = set(cmds[i], @lens(_.np), each)
+        cmds[i] = set(cmds[i], @lens(_.subcmd), PWCmd(inp = input))
+        cmds[i] = set(cmds[i], @lens(_.stdout), output)
     end
     return distribute_process(cmds, ids)
 end # function submit
