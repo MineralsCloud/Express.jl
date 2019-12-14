@@ -44,13 +44,13 @@ function distribute_process(
     end
     refs = similar(ids, Future)
     for (i, id) in enumerate(ids)
-        refs[i] = @spawnat id run(Cmd(cmds), wait = false)
+        refs[i] = @spawnat id run(Cmd(cmds[i]), wait = false)
     end
     return refs
 end # function distribute_process
 
 function isjobdone(refs::AbstractArray{Future})
-    return all(map(x -> isready(x), refs))
+    return all(map(isready, refs))
 end # function isjobdone
 
 function fetch_results(refs::AbstractArray{Future})
@@ -60,11 +60,11 @@ function fetch_results(refs::AbstractArray{Future})
 end # function fetch_results
 
 Base.Cmd(cmd::MpiCmd) = pipeline(
-    Cmd(`$(cmd.exec) -np $(cmd.np) $(commandify(cmd.subcmd))`, env = ENV),
-    cmd.stdin,
-    cmd.stdout,
-    cmd.stderr,
-    cmd.append,
+    Cmd(`$(cmd.exec) -np $(cmd.np) $(Cmd(cmd.subcmd))`, env = ENV),
+    stdin = cmd.stdin,
+    stdout = cmd.stdout,
+    stderr = cmd.stderr,
+    append = cmd.append,
 )
 
 end
