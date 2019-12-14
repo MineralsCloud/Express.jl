@@ -61,10 +61,10 @@ end # function fetch_results
 
 Base.Cmd(cmd::MpiCmd) = pipeline(
     Cmd(`$(cmd.exec) -np $(cmd.np) $(Cmd(cmd.subcmd))`, env = ENV),
-    cmd.stdin,
-    cmd.stdout,
-    cmd.stderr,
-    cmd.append,
+    stdin = cmd.stdin,
+    stdout = cmd.stdout,
+    stderr = cmd.stderr,
+    append = cmd.append,
 )
 
 end
