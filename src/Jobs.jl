@@ -44,7 +44,7 @@ function distribute_process(
     end
     refs = similar(ids, Future)
     for (i, id) in enumerate(ids)
-        refs[i] = @spawnat id run(Cmd(cmds), wait = false)
+        refs[i] = @spawnat id run(Cmd(cmds[i]), wait = false)
     end
     return refs
 end # function distribute_process
