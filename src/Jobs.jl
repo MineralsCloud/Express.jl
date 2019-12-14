@@ -50,7 +50,7 @@ function distribute_process(
 end # function distribute_process
 
 function isjobdone(refs::AbstractArray{Future})
-    return all(map(x -> isready(x), refs))
+    return all(map(isready, refs))
 end # function isjobdone
 
 function fetch_results(refs::AbstractArray{Future})
