@@ -34,7 +34,7 @@ using Unitful
 using UnitfulAtomic
 
 import ..Step
-using Express.Jobs: MpiCmd, nprocs_per_subjob, distribute_process
+using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
 
 export update_alat_press, prepare, finish, submit
 
@@ -147,24 +147,5 @@ function finish(
     end
     return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
 end # function finish
-
-# function workflow(
-#     io::AbstractDict{T,T},
-#     template::PWInput,
-#     trial_eos::EquationOfState,
-#     pressures::AbstractVector,
-#     account::AbstractString,
-#     verbose::Bool = false
-# ) where {T<:AbstractString}
-#     prepare(Step(1), keys(io), template, trial_eos, pressures)
-#     write_job("job.sh", io, account)
-#     jobid = submit("job.sh")
-#     isdone(jobid, account)
-#     trial_eos = finish(values(io), trial_eos)
-#     # prepare(Step(2), keys(io), template, trial_eos, pressures)
-#     # write_job("job.sh", io, account)
-#     # jobid = submit("job.sh")
-#     # return finish(values(io), trial_eos)
-# end # function workflow
 
 end
