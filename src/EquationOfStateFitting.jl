@@ -13,13 +13,12 @@ module EquationOfStateFitting
 
 using LinearAlgebra: det
 
-using Dates: Second
+using Distributed: workers
 using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using ExtensibleScheduler
 using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe, cell_volume
 using QuantumESPRESSO.Cards: optionof
@@ -36,7 +35,7 @@ using UnitfulAtomic
 import ..Step
 using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
 
-export update_alat_press, prepare, finish, submit
+export update_alat_press, preprocess, postprocess, submit
 
 function update_alat_press(
     template::PWInput,
@@ -83,27 +82,27 @@ function _boilerplate(step::Step{N}, template::PWInput) where {N}
     return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
 end # function _boilerplate
 
-function prepare(
+function preprocess(
     step::Step,
-    inputs::AbstractVector{<:AbstractString},
+    inputs::AbstractArray{<:AbstractString},
     template::PWInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector,
+    pressures::AbstractArray,
     verbose::Bool = false,
 )
-    # Check parameters
     @assert(
-        length(inputs) == length(pressures),
-        "The inputs, and pressures must be the same size!"
-    )
+        size(inputs) == size(pressures),
+        "The `inputs` and `pressures` must be of the same size!"
+    )  # `zip` does not guarantee they are of the same size, must check explicitly.
     template = _boilerplate(step, template)
     for (input, pressure) in zip(inputs, pressures)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
+        # `write` will create a file if it doesn't exist.
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
     return
-end # function prepare
+end # function preprocess
 
 function submit(
     inputs::AbstractVector{<:AbstractString},
@@ -125,7 +124,7 @@ function submit(
     return distribute_process(cmds, ids)
 end # function submit
 
-function finish(
+function postprocess(
     ::Step{N},
     outputs::AbstractVector{<:AbstractString},
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
@@ -146,6 +145,6 @@ function finish(
         end
     end
     return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
-end # function finish
+end # function postprocess
 
 end

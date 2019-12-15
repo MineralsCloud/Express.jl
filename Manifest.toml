@@ -139,18 +139,6 @@ repo-url = "git@github.com:MineralsCloud/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "2.0.0"
 
-[[ExtensibleScheduler]]
-deps = ["DataStructures", "Dates", "Test", "TimeFrames", "TimeZones", "UUIDs"]
-git-tree-sha1 = "5230fac8ebbae92240c1a78a5def697905e17c97"
-uuid = "6837a093-145e-5c9b-b5ad-3b557e31aa31"
-version = "0.1.1"
-
-[[EzXML]]
-deps = ["BinaryProvider", "Libdl", "Printf"]
-git-tree-sha1 = "469de9cb996a9c03f31905619ff3c33e905711f3"
-uuid = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
-version = "0.9.5"
-
 [[FileIO]]
 deps = ["Pkg"]
 git-tree-sha1 = "80c17c711c41416eb0ac68347dc036be68b37682"
@@ -267,11 +255,6 @@ version = "0.4.3"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
-
-[[Mocking]]
-git-tree-sha1 = "bd2623f8b728af988d2afec53d611acb621f3bc4"
-uuid = "78c3b35d-d492-501b-9361-3d52fe80e533"
-version = "0.7.0"
 
 [[NLSolversBase]]
 deps = ["Calculus", "DiffEqDiffTools", "DiffResults", "Distributed", "ForwardDiff"]
@@ -513,18 +496,6 @@ version = "0.2.11"
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[[TimeFrames]]
-deps = ["Dates", "Test"]
-git-tree-sha1 = "168631df303a1b26c7d33db6a463f8a9da3a3fdf"
-uuid = "51948d2b-02eb-5b28-9840-c902cc6821c9"
-version = "0.2.0"
-
-[[TimeZones]]
-deps = ["Dates", "EzXML", "Mocking", "Printf", "Serialization", "Unicode"]
-git-tree-sha1 = "29c7ae3f50f291358043e21db47b3e1a516df891"
-uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
-version = "0.10.3"
 
 [[TranscodingStreams]]
 deps = ["Random", "Test"]

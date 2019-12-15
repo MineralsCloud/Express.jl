@@ -1,6 +1,5 @@
 module Jobs
 
-using Dates: DateTime, now
 using Distributed
 
 using ClusterManagers
