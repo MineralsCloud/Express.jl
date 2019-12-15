@@ -90,15 +90,15 @@ function preprocess(
     pressures::AbstractArray,
     verbose::Bool = false,
 )
-    # Check parameters
     @assert(
         size(inputs) == size(pressures),
         "The `inputs` and `pressures` must be of the same size!"
-    )
+    )  # `zip` does not guarantee they are of the same size, must check explicitly.
     template = _boilerplate(step, template)
     for (input, pressure) in zip(inputs, pressures)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
+        # `write` will create a file if it doesn't exist.
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
     return
