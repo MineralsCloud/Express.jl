@@ -84,16 +84,16 @@ end # function _boilerplate
 
 function preprocess(
     step::Step,
-    inputs::AbstractVector{<:AbstractString},
+    inputs::AbstractArray{<:AbstractString},
     template::PWInput,
     trial_eos::EquationOfState,
-    pressures::AbstractVector,
+    pressures::AbstractArray,
     verbose::Bool = false,
 )
     # Check parameters
     @assert(
-        length(inputs) == length(pressures),
-        "The inputs, and pressures must be the same size!"
+        size(inputs) == size(pressures),
+        "The `inputs` and `pressures` must be of the same size!"
     )
     template = _boilerplate(step, template)
     for (input, pressure) in zip(inputs, pressures)
