@@ -28,7 +28,7 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using Setfield: set, @lens
+using Setfield: set
 using Unitful
 using UnitfulAtomic
 
@@ -107,21 +107,24 @@ function preprocess(
 end # function preprocess
 
 function submit(
-    inputs::AbstractVector{<:AbstractString},
-    outputs::AbstractVector{<:AbstractString},
+    inputs::AbstractArray{<:AbstractString},
+    outputs::AbstractArray{<:AbstractString},
     np::Int,
-    cmdtemplate::MpiExec,
-    ids::AbstractVector{<:Integer} = workers(),
+    template::MpiExec = MpiExec(n = 1, subcmd = PWCmd(inp = "")),
+    ids::AbstractArray{<:Integer} = workers(),
 )
-    each = nprocs_per_subjob(np, length(inputs))
-    if isnothing(cmdtemplate)
-        cmdtemplate = MpiExec(np = each, subcmd = PWCmd(inp = inputs[1]))
-    end
-    cmds = fill(cmdtemplate, size(inputs))
+    @assert(
+        size(inputs) == size(outputs),
+        "The `inputs` and `outputs` must be of the same size!"
+    )  # `zip` does not guarantee they are of the same size, must check explicitly.
+    n = nprocs_per_subjob(np, length(inputs))
+    cmds = similar(inputs, Base.AbstractCmd)
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
-        cmds[i] = set(cmds[i], @lens(_.np), each)
-        cmds[i] = set(cmds[i], @lens(_.subcmd), PWCmd(inp = input))
-        cmds[i] = set(cmds[i], @lens(_.stdout), output)
+        lenses = @batchlens(begin
+            _.n
+            _.subcmd
+        end)
+        cmds[i] = pipeline(set(cmds[i], lenses, (n, PWCmd(inp = input))), stdout = output)
     end
     return distribute_process(cmds, ids)
 end # function submit
