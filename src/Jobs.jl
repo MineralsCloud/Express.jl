@@ -52,10 +52,10 @@ function distribute_process(
     ids::AbstractArray{<:Integer} = workers(),
 ) where {T<:MpiExec}
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    if size(cmds) != size(ids)
-        throw(DimensionMismatch("`cmds` has different size than `ids`!"))
+    if length(cmds) != length(ids)  # The size of them can be different, but not length.
+        throw(DimensionMismatch("`cmds` has different length than `ids`!"))
     end
-    refs = similar(ids, Future)
+    refs = similar(cmds, Future)  # It can be of different size than `ids`!
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
         refs[i] = @spawnat id run(Cmd(cmd), wait = true)  # TODO: Must wait?
     end
