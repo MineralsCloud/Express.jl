@@ -113,7 +113,7 @@ function submit(
     ids::AbstractArray{<:Integer} = workers(),
 )
     if size(inputs) != size(outputs)
-        throw(DimensionMismatch("inputs` and `outputs` must be of the same size!"))
+        throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
     n = nprocs_per_subjob(np, length(inputs))
     cmds = similar(inputs, Base.AbstractCmd)
