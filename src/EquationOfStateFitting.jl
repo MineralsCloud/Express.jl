@@ -36,7 +36,7 @@ using UnitfulAtomic
 import ..Step
 using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
 
-export update_alat_press, preprocess, finish, submit
+export update_alat_press, preprocess, postprocess, submit
 
 function update_alat_press(
     template::PWInput,
@@ -103,7 +103,7 @@ function preprocess(
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
     return
-end # function prepare
+end # function preprocess
 
 function submit(
     inputs::AbstractVector{<:AbstractString},
@@ -125,7 +125,7 @@ function submit(
     return distribute_process(cmds, ids)
 end # function submit
 
-function finish(
+function postprocess(
     ::Step{N},
     outputs::AbstractVector{<:AbstractString},
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
@@ -146,6 +146,6 @@ function finish(
         end
     end
     return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
-end # function finish
+end # function postprocess
 
 end
