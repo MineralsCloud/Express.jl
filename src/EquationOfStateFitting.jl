@@ -95,13 +95,15 @@ function preprocess(
         "The `inputs` and `pressures` must be of the same size!"
     )  # `zip` does not guarantee they are of the same size, must check explicitly.
     template = _boilerplate(step, template)
-    for (input, pressure) in zip(inputs, pressures)
-        # Get a new `object` from the `template`, with its `alat` and `pressure` changed
+    objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
+    for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
+        # Create a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
         # `write` will create a file if it doesn't exist.
+        objects[i] = object
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
-    return
+    return objects
 end # function preprocess
 
 function submit(
