@@ -13,7 +13,6 @@ module EquationOfStateFitting
 
 using LinearAlgebra: det
 
-using Dates: Second
 using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
