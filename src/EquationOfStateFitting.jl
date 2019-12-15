@@ -120,9 +120,9 @@ function submit(
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
         lenses = @batchlens(begin
             _.n
-            _.subcmd
+            _.subcmd.inp
         end)
-        cmds[i] = pipeline(set(cmds[i], lenses, (n, PWCmd(inp = input))), stdout = output)
+        cmds[i] = pipeline(set(cmds[i], lenses, (n, input)), stdout = output)
     end
     return distribute_process(cmds, ids)
 end # function submit
