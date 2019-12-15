@@ -14,14 +14,25 @@ export MpiExec
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
 @with_kw struct MpiExec <: Base.AbstractCmd
-    exec::String = "mpirun"
-    np::Int
-    subcmd::CLI.QuantumESPRESSOCmd
-    env::Base.EnvDict = ENV
-    stdin = nothing
-    stdout = nothing
-    stderr = nothing
-    append::Bool = false
+    # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
+    "The path to the executable, defaults to \"mpiexec\""
+    which::String = "mpiexec"
+    "Specify the number of processes to use"
+    n::Int
+    "Name of host on which to run processes"
+    host::String = ""
+    "Pick hosts with this architecture type"
+    arch::String = ""
+    "`cd` to this one before running executable"
+    wdir::String = ""
+    "Use this to find the executable"
+    path::Vector{String} = []
+    "Implementation-defined specification file"
+    file::String = ""
+    configfile::String = ""
+    subcmd::Base.AbstractCmd
+    "Set environment variables to use when running the command, defaults to `ENV`"
+    env::Base.EnvDict = ENV  # FIXME: What is this type?
 end
 
 struct BagOfTasks{T<:AbstractArray}
@@ -76,12 +87,7 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.Cmd(cmd::MpiExec) = pipeline(
-    Cmd(`$(cmd.exec) -np $(cmd.np) $(Cmd(cmd.subcmd))`, env = ENV),
-    stdin = cmd.stdin,
-    stdout = cmd.stdout,
-    stderr = cmd.stderr,
-    append = cmd.append,
-)
+Base.Cmd(cmd::MpiExec) =
+    Cmd(`$(cmd.which) -np $(cmd.n) $(Cmd(cmd.subcmd))`, env = ENV, dir = cmd.wdir)
 
 end
