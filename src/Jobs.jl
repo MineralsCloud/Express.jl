@@ -51,14 +51,13 @@ function distribute_process(
     cmds::AbstractArray{T},
     ids::AbstractArray{<:Integer} = workers(),
 ) where {T<:MpiExec}
-    # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     if size(cmds) != size(ids)
         throw(DimensionMismatch("`cmds` has different size than `ids`!"))
     end
     refs = similar(ids, Future)
-    for (i, id) in enumerate(ids)
-        refs[i] = @spawnat id run(Cmd(cmds[i]), wait = true)
+    for (i, (cmd, id)) in enumerate(zip(cmds, ids))
+        refs[i] = @spawnat id run(Cmd(cmd), wait = true)  # TODO: Must wait?
     end
     return refs
 end # function distribute_process
@@ -87,7 +86,6 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.Cmd(cmd::MpiExec) =
-    Cmd(`$(cmd.which) -np $(cmd.n) $(Cmd(cmd.subcmd))`, env = ENV, dir = cmd.wdir)
+Base.Cmd(cmd::MpiExec) = Cmd(`$(cmd.which) -np $(cmd.n) $(Cmd(cmd.subcmd))`, env = ENV, dir = cmd.wdir)
 
 end
