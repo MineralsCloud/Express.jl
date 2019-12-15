@@ -34,7 +34,7 @@ using Unitful
 using UnitfulAtomic
 
 import ..Step
-using Express.Jobs: MpiCmd, nprocs_per_subjob, distribute_process
+using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
 
 export update_alat_press, prepare, finish, submit
 
