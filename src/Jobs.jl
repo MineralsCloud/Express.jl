@@ -10,10 +10,10 @@ using QuantumESPRESSOBase.CLI
 
 using Express
 
-export MpiCmd
+export MpiExec
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
-@with_kw struct MpiCmd <: Base.AbstractCmd
+@with_kw struct MpiExec <: Base.AbstractCmd
     exec::String = "mpirun"
     np::Int
     subcmd::CLI.QuantumESPRESSOCmd
@@ -39,7 +39,7 @@ end # function nprocs_per_subjob
 function distribute_process(
     cmds::AbstractArray{T},
     ids::AbstractArray{<:Integer} = workers(),
-) where {T<:MpiCmd}
+) where {T<:MpiExec}
     # mpirun -np $n pw.x -in $in -out $out
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     if size(cmds) != size(ids)
@@ -76,7 +76,7 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.Cmd(cmd::MpiCmd) = pipeline(
+Base.Cmd(cmd::MpiExec) = pipeline(
     Cmd(`$(cmd.exec) -np $(cmd.np) $(Cmd(cmd.subcmd))`, env = ENV),
     stdin = cmd.stdin,
     stdout = cmd.stdout,

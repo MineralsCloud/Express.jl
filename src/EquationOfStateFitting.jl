@@ -33,7 +33,7 @@ using Unitful
 using UnitfulAtomic
 
 import ..Step
-using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
+using ..Jobs: MpiExec, nprocs_per_subjob, distribute_process
 
 export update_alat_press, preprocess, postprocess, submit
 
@@ -110,12 +110,12 @@ function submit(
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
     np::Int,
-    cmdtemplate::MpiCmd,
+    cmdtemplate::MpiExec,
     ids::AbstractVector{<:Integer} = workers(),
 )
     each = nprocs_per_subjob(np, length(inputs))
     if isnothing(cmdtemplate)
-        cmdtemplate = MpiCmd(np = each, subcmd = PWCmd(inp = inputs[1]))
+        cmdtemplate = MpiExec(np = each, subcmd = PWCmd(inp = inputs[1]))
     end
     cmds = fill(cmdtemplate, size(inputs))
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
