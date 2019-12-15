@@ -24,6 +24,10 @@ export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
     append::Bool = false
 end
 
+struct BagOfTasks{T<:AbstractArray}
+    tasks::T
+end
+
 function nprocs_per_subjob(total_num::Int, nsubjob::Int)
     quotient, remainder = divrem(total_num, nsubjob)
     if remainder != 0
@@ -51,6 +55,14 @@ end # function distribute_process
 function isjobdone(refs::AbstractArray{Future})
     return all(map(isready, refs))
 end # function isjobdone
+
+function subjobs_running(refs::AbstractArray{Future})
+    return filter(!isready, refs)
+end # function monitor
+
+function subjobs_exited(refs::AbstractArray{Future})
+    return map(fetch, filter(isready, refs))
+end # function subjobs_exited
 
 function fetch_results(refs::AbstractArray{Future})
     return map(refs) do x
