@@ -90,10 +90,9 @@ function preprocess(
     pressures::AbstractArray,
     verbose::Bool = false,
 )
-    @assert(
-        size(inputs) == size(pressures),
-        "The `inputs` and `pressures` must be of the same size!"
-    )  # `zip` does not guarantee they are of the same size, must check explicitly.
+    if size(inputs) != size(pressures)
+        throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
+    end  # `zip` does not guarantee they are of the same size, must check explicitly.
     template = _boilerplate(step, template)
     objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
     for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
@@ -113,10 +112,9 @@ function submit(
     template::MpiExec = MpiExec(n = 1, subcmd = PWCmd(inp = "")),
     ids::AbstractArray{<:Integer} = workers(),
 )
-    @assert(
-        size(inputs) == size(outputs),
-        "The `inputs` and `outputs` must be of the same size!"
-    )  # `zip` does not guarantee they are of the same size, must check explicitly.
+    if size(inputs) != size(outputs)
+        throw(DimensionMismatch("inputs` and `outputs` must be of the same size!"))
+    end  # `zip` does not guarantee they are of the same size, must check explicitly.
     n = nprocs_per_subjob(np, length(inputs))
     cmds = similar(inputs, Base.AbstractCmd)
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
