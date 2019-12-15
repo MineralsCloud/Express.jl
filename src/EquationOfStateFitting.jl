@@ -36,7 +36,7 @@ using UnitfulAtomic
 import ..Step
 using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
 
-export update_alat_press, prepare, finish, submit
+export update_alat_press, preprocess, finish, submit
 
 function update_alat_press(
     template::PWInput,
@@ -83,7 +83,7 @@ function _boilerplate(step::Step{N}, template::PWInput) where {N}
     return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
 end # function _boilerplate
 
-function prepare(
+function preprocess(
     step::Step,
     inputs::AbstractVector{<:AbstractString},
     template::PWInput,
