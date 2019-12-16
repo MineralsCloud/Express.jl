@@ -55,14 +55,8 @@ end # function update_structure
 
 # This is a helper function and should not be exported.
 function _preset(template::PWInput)
-    lenses = @batchlens(begin
-        _.control.calculation  # Get the `template`'s `control.calculation` value
-        _.control.verbosity    # Get the `template`'s `control.verbosity` value
-        _.control.tstress      # Get the `template`'s `control.tstress` value
-        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
-    end)
-    # Set the `template`'s values with...
-    template = set(template, lenses, ("scf", "high", true, true))
+    @set! template.control = batchset(VerbositySetter(:high), template.control)
+    @set! template.control.calculation = "scf"
     return batchset(CellParametersSetter(), template)
 end # function _preset
 function _preset(template::PhInput)
