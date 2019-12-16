@@ -28,7 +28,8 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using Setfield: set
+using QuantumESPRESSOBase.Setters: VerbositySetter, batchset
+using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
 
@@ -72,14 +73,9 @@ end # function update_alat_press
 
 # This is a helper function and should not be exported.
 function _boilerplate(step::Step{N}, template::PWInput) where {N}
-    lenses = @batchlens(begin
-        _.control.calculation  # Get the `template`'s `control.calculation` value
-        _.control.verbosity    # Get the `template`'s `control.verbosity` value
-        _.control.tstress      # Get the `template`'s `control.tstress` value
-        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
-    end)
-    # Set the `template`'s values with...
-    return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
+    @set! template.control = batchset(VerbositySetter(:high), template.control)
+    @set! template.control.calculation = N == 1 ? "scf" : "vc-relax"
+    return template
 end # function _boilerplate
 
 function preprocess(
