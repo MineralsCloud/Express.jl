@@ -159,7 +159,7 @@ version = "0.4.1"
 
 [[Fortran90Namelists]]
 deps = ["Compat", "IterTools", "Parameters"]
-git-tree-sha1 = "da7d0139dc45ec616b70068e022a243cfcab95d8"
+git-tree-sha1 = "31b65b20e68f1d09c9c05e641711720e3b991b39"
 repo-rev = "develop"
 repo-url = "git@github.com:singularitti/Fortran90Namelists.jl.git"
 uuid = "8fb689aa-71ff-4044-8071-0cffc910b57d"
@@ -349,8 +349,8 @@ uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
-deps = ["Compat", "DataStructures", "Fortran90Namelists", "LinearAlgebra", "Parameters", "Setfield"]
-git-tree-sha1 = "1ffca302674de9ac5133fb23f89aba882a91bb78"
+deps = ["Compat", "ConstructionBase", "Fortran90Namelists", "LinearAlgebra", "OrderedCollections", "Parameters", "Setfield", "Unitful", "UnitfulAtomic"]
+git-tree-sha1 = "cd51dfb491f5709934abf1972c6acd9b1d4fe2e1"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
