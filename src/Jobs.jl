@@ -10,18 +10,33 @@ using QuantumESPRESSOBase.CLI
 
 using Express
 
-export MpiCmd
+export MpiExec
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
-@with_kw struct MpiCmd <: Base.AbstractCmd
-    exec::String = "mpirun"
-    np::Int
-    subcmd::CLI.QuantumESPRESSOCmd
-    env::Base.EnvDict = ENV
-    stdin = nothing
-    stdout = nothing
-    stderr = nothing
-    append::Bool = false
+@with_kw struct MpiExec <: Base.AbstractCmd
+    # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
+    "The path to the executable, defaults to \"mpiexec\""
+    which::String = "mpiexec"
+    "Specify the number of processes to use"
+    n::Int
+    "Name of host on which to run processes"
+    host::String = ""
+    "Pick hosts with this architecture type"
+    arch::String = ""
+    "`cd` to this one before running executable"
+    wdir::String = ""
+    "Use this to find the executable"
+    path::Vector{String} = []
+    "Implementation-defined specification file"
+    file::String = ""
+    configfile::String = ""
+    subcmd::Base.AbstractCmd
+    "Set environment variables to use when running the command, defaults to `ENV`"
+    env::Base.EnvDict = ENV  # FIXME: What is this type?
+end
+
+struct BagOfTasks{T<:AbstractArray}
+    tasks::T
 end
 
 function nprocs_per_subjob(total_num::Int, nsubjob::Int)
@@ -35,15 +50,14 @@ end # function nprocs_per_subjob
 function distribute_process(
     cmds::AbstractArray{T},
     ids::AbstractArray{<:Integer} = workers(),
-) where {T<:MpiCmd}
-    # mpirun -np $n pw.x -in $in -out $out
+) where {T<:MpiExec}
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    if size(cmds) != size(ids)
-        throw(DimensionMismatch("`cmds` has different size than `ids`!"))
+    if length(cmds) != length(ids)  # The size of them can be different, but not length.
+        throw(DimensionMismatch("`cmds` has different length than `ids`!"))
     end
-    refs = similar(ids, Future)
-    for (i, id) in enumerate(ids)
-        refs[i] = @spawnat id run(Cmd(cmds[i]), wait = true)
+    refs = similar(cmds, Future)  # It can be of different size than `ids`!
+    for (i, (cmd, id)) in enumerate(zip(cmds, ids))
+        refs[i] = @spawnat id run(Cmd(cmd), wait = true)  # TODO: Must wait?
     end
     return refs
 end # function distribute_process
@@ -51,6 +65,14 @@ end # function distribute_process
 function isjobdone(refs::AbstractArray{Future})
     return all(map(isready, refs))
 end # function isjobdone
+
+function subjobs_running(refs::AbstractArray{Future})
+    return filter(!isready, refs)
+end # function monitor
+
+function subjobs_exited(refs::AbstractArray{Future})
+    return map(fetch, filter(isready, refs))
+end # function subjobs_exited
 
 function fetch_results(refs::AbstractArray{Future})
     return map(refs) do x
@@ -64,12 +86,6 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.Cmd(cmd::MpiCmd) = pipeline(
-    Cmd(`$(cmd.exec) -np $(cmd.np) $(Cmd(cmd.subcmd))`, env = ENV),
-    stdin = cmd.stdin,
-    stdout = cmd.stdout,
-    stderr = cmd.stderr,
-    append = cmd.append,
-)
+Base.Cmd(cmd::MpiExec) = Cmd(`$(cmd.which) -np $(cmd.n) $(Cmd(cmd.subcmd))`, env = ENV, dir = cmd.wdir)
 
 end

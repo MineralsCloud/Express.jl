@@ -28,12 +28,12 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using Setfield: set, @lens
+using Setfield: set
 using Unitful
 using UnitfulAtomic
 
 import ..Step
-using ..Jobs: MpiCmd, nprocs_per_subjob, distribute_process
+using ..Jobs: MpiExec, nprocs_per_subjob, distribute_process
 
 export update_alat_press, preprocess, postprocess, submit
 
@@ -90,36 +90,39 @@ function preprocess(
     pressures::AbstractArray,
     verbose::Bool = false,
 )
-    @assert(
-        size(inputs) == size(pressures),
-        "The `inputs` and `pressures` must be of the same size!"
-    )  # `zip` does not guarantee they are of the same size, must check explicitly.
+    if size(inputs) != size(pressures)
+        throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
+    end  # `zip` does not guarantee they are of the same size, must check explicitly.
     template = _boilerplate(step, template)
-    for (input, pressure) in zip(inputs, pressures)
-        # Get a new `object` from the `template`, with its `alat` and `pressure` changed
+    objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
+    for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
+        # Create a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_alat_press(template, trial_eos, pressure)
         # `write` will create a file if it doesn't exist.
+        objects[i] = object
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
-    return
+    return objects
 end # function preprocess
 
 function submit(
-    inputs::AbstractVector{<:AbstractString},
-    outputs::AbstractVector{<:AbstractString},
+    inputs::AbstractArray{<:AbstractString},
+    outputs::AbstractArray{<:AbstractString},
     np::Int,
-    cmdtemplate::MpiCmd,
-    ids::AbstractVector{<:Integer} = workers(),
+    template::MpiExec = MpiExec(n = 1, subcmd = PWCmd(inp = "")),
+    ids::AbstractArray{<:Integer} = workers(),
 )
-    each = nprocs_per_subjob(np, length(inputs))
-    if isnothing(cmdtemplate)
-        cmdtemplate = MpiCmd(np = each, subcmd = PWCmd(inp = inputs[1]))
-    end
-    cmds = fill(cmdtemplate, size(inputs))
+    if size(inputs) != size(outputs)
+        throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
+    end  # `zip` does not guarantee they are of the same size, must check explicitly.
+    n = nprocs_per_subjob(np, length(inputs))
+    cmds = similar(inputs, Base.AbstractCmd)
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
-        cmds[i] = set(cmds[i], @lens(_.np), each)
-        cmds[i] = set(cmds[i], @lens(_.subcmd), PWCmd(inp = input))
-        cmds[i] = set(cmds[i], @lens(_.stdout), output)
+        lenses = @batchlens(begin
+            _.n
+            _.subcmd.inp
+        end)
+        cmds[i] = pipeline(set(cmds[i], lenses, (n, input)), stdout = output)
     end
     return distribute_process(cmds, ids)
 end # function submit
