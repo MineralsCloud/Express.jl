@@ -16,10 +16,10 @@ using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards: option_convert
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
-using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
+using QuantumESPRESSOBase.Setters: CellParametersSetter, batchset
 using Setfield: get, set, @lens, @set!
 
 import ..Step
@@ -63,8 +63,7 @@ function _preset(template::PWInput)
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, ("scf", "high", true, true))
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) :
-           template
+    return batchset(CellParametersSetter(), template)
 end # function _preset
 function _preset(template::PhInput)
     lenses = @batchlens(begin
