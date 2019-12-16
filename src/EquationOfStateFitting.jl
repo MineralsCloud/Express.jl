@@ -23,12 +23,11 @@ using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe, cell_volume
 using QuantumESPRESSO.Cards: optionof
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
-using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using QuantumESPRESSOBase.Setters: VerbositySetter, batchset
+using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter, batchset
 using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
@@ -44,7 +43,7 @@ function update_alat_press(
     pressure::Unitful.AbstractQuantity,
 )
     if isnothing(template.cell_parameters)
-        template = autofill_cell_parameters(template)
+        template = batchset(CellParametersSetter(), template)
     end
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
