@@ -71,11 +71,11 @@ function update_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _boilerplate(step::Step{N}, template::PWInput) where {N}
+function _preset(step::Step{N}, template::PWInput) where {N}
     @set! template.control = batchset(VerbositySetter(:high), template.control)
     @set! template.control.calculation = N == 1 ? "scf" : "vc-relax"
     return template
-end # function _boilerplate
+end # function _preset
 
 function preprocess(
     step::Step,
@@ -88,7 +88,7 @@ function preprocess(
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-    template = _boilerplate(step, template)
+    template = _preset(step, template)
     objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
     for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
         # Create a new `object` from the `template`, with its `alat` and `pressure` changed
