@@ -57,7 +57,7 @@ function distribute_process(
     end
     refs = similar(cmds, Future)  # It can be of different size than `ids`!
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
-        refs[i] = @spawnat id run(Cmd(cmd), wait = true)  # TODO: Must wait?
+        refs[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
     end
     return refs
 end # function distribute_process
@@ -86,6 +86,6 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.Cmd(cmd::MpiExec) = Cmd(`$(cmd.which) -np $(cmd.n) $(Cmd(cmd.subcmd))`, env = ENV, dir = cmd.wdir)
+Base.convert(::Type{Cmd}, cmd::MpiExec) = Cmd(`$(cmd.which) -np $(cmd.n) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
 
 end
