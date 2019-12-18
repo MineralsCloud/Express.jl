@@ -86,6 +86,17 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.convert(::Type{Cmd}, cmd::MpiExec) = Cmd(`$(cmd.which) -np $(cmd.n) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
+function Base.convert(::Type{Cmd}, cmd::MpiExec)
+    options = String[]
+    for f in fieldnames(typeof(cmd))[3:end]  # Join options
+        v = getfield(cmd, f)
+        if !iszero(v)
+            push!(options, string(" -", f, ' ', v))
+        else
+            push!(options, "")
+        end
+    end
+    return Cmd(`$(cmd.which) -np $(cmd.n) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
+end # function Base.convert
 
 end
