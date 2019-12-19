@@ -1,29 +1,29 @@
-# Documentation: http://docs.travis-ci.com/user/languages/julia/
+# Documentation: http://docs.travis-ci.com/user/languages/julia
 language: julia
+notifications:
+  email: false
+julia:
+  - 1.0
+  - 1.3
+  - nightly
 os:
   - linux
   - osx
-julia:
-  - 1.0
-  - nightly
-matrix:
+  - windows
+arch:
+  - x64
+jobs:
+  fast_finish: true
   allow_failures:
     - julia: nightly
-  fast_finish: true
-notifications:
-  email: false
-  slack:
-    secure: ll/X87xcMQC/qByoZ1esZDaqKoJb4lTlNAx0mppKCjK1Z5AAWMDpmWFvUGddKgG40p2ytJC1AgfLOHbCVfC32lXtBt/uv2QmRrfprW7BNMXDR/pd2/8mfmAO+Z2bruqe/LmaSsoekSxvnqxg9bClbxTHQTOL8rS+Uou3WAa1JC3bKHt9o6dIu6Czbiu7Onr8mKvph82XZHu9YLnXdjtN3GBcoQl/+u6wlsa2q7yHRHaAdpxf2z5aHk5jdhuyqcK8YuBDZeoUOymI+IRTu3XqrRYOyM9aKNqQKPdIJTFAQk1gfB43ILHqODvucSz/VmNbcj3m5JCCrw0xsNhT6/d0go2zxlXBcbERlAH7qjtpyPlIvO5t8fZj9Wva9Nzuczwch/77caIa6hdjrYgxs4XC+Uw14hg4c3/dmwDrdl66ljCBQlsQt4ANXiembebtuxEw4fXTNhWlYrUP115npaAOFmHxtaplJ7mM7IC1W/f2lHWVkmOr2iZHH30xBO4LqAUTj9oSWbkdBhpJODJvxPvDVE0FCUF/PN1vhIqMLK/8rVz9y6UDk6KBhe5IUrqHsqY0uTMjIkaZlGJ8n1MYX37xl2i0PxJyvgF0Il1UiOeDLPyVMYgOpBHfTeURR5cLiyrFFej8YAqXAvkROl6l4vxw0B3Jy4em/M5H2LTQ9OSxMF0=
 after_success:
-  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
-# jobs:
-#   include:
-#     - stage: Documentation
-#       julia: 1.0
-#       script: julia --project=docs -e '
-#           using Pkg;
-#           Pkg.develop(PackageSpec(path=pwd()));
-#           Pkg.instantiate();
-#           include("docs/make.jl");'
-#       after_success: skip
+  - julia -e '
+      using Pkg;
+      Pkg.add("Coverage");
+      using Coverage;
+      Codecov.submit(process_folder());'
+  - julia -e '
+      using Pkg;
+      Pkg.add("Coverage");
+      using Coverage;
+      Coveralls.submit(process_folder());'
