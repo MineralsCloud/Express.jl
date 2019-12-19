@@ -104,7 +104,7 @@ function submit(
     inputs::AbstractArray{<:AbstractString},
     outputs::AbstractArray{<:AbstractString},
     np::Int,
-    template::MpiExec = MpiExec(n = 1, subcmd = PWCmd(inp = "")),
+    template::MpiExec = MpiExec(n = 1, cmd = PWCmd(inp = "")),
     ids::AbstractArray{<:Integer} = workers(),
 )
     if size(inputs) != size(outputs)
@@ -115,7 +115,7 @@ function submit(
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
         lenses = @batchlens(begin
             _.n
-            _.subcmd.inp
+            _.cmd.inp
         end)
         cmds[i] = pipeline(set(cmds[i], lenses, (n, input)), stdout = output)
     end

@@ -27,7 +27,7 @@ export nprocs_task, distribute_process, isjobdone, fetch_results, jobstatus
     "Implementation-defined specification file"
     file::String = ""
     configfile::String = ""
-    subcmd::Base.AbstractCmd
+    cmd::Base.AbstractCmd
     "Set environment variables to use when running the command, defaults to `ENV`"
     env::Base.EnvDict = ENV  # FIXME: What is this type?
 end
@@ -112,7 +112,7 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     #     end
     # end
     return Cmd(
-        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.subcmd))`,
+        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.cmd))`,
         env = cmd.env,
         dir = cmd.wdir,
     )
