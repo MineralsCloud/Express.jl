@@ -1,15 +1,19 @@
-using Documenter, Express
+using Express
+using Documenter
 
 makedocs(;
     modules=[Express],
-    format=Documenter.HTML(),
+    authors="Qi Zhang <singularitti@outlook.com>",
+    repo="https://github.com/MineralsCloud/Express.jl/blob/{commit}{path}#L{line}",
+    sitename="Express.jl",
+    format=Documenter.HTML(;
+        prettyurls=get(ENV, "CI", "false") == "true",
+        canonical="https://MineralsCloud.github.io/Express.jl",
+        assets=String[],
+    ),
     pages=[
         "Home" => "index.md",
     ],
-    repo="https://github.com/MineralsCloud/Express.jl/blob/{commit}{path}#L{line}",
-    sitename="Express.jl",
-    authors="Qi Zhang <singularitti@outlook.com>",
-    assets=String[],
 )
 
 deploydocs(;
