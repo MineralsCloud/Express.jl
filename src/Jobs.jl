@@ -8,7 +8,7 @@ using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
 export MpiExec, BagOfTasks, TaskStatus
-export nprocs_task, distribute_process, isjobdone, fetch_results
+export nprocs_task, distribute_process, isjobdone, fetch_results, jobstatus
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -79,6 +79,15 @@ end # function tasks_running
 function tasks_exited(bag::BagOfTasks)
     return map(fetch, filter(isready, bag.tasks))
 end # function subjobs_exited
+
+function jobstatus(bag::BagOfTasks)
+    map(bag) do task
+        if isready(task)
+            return success(fetch(task)) ? TaskStatus(:succeeded) : TaskStatus(:failed)
+        end
+        return isempty(task) ? TaskStatus(:pending) : TaskStatus(:running)
+    end
+end # function jobstatus
 
 function fetch_results(bag::BagOfTasks)
     return map(bag) do x
