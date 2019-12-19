@@ -52,11 +52,11 @@ function distribute_process(
     if length(cmds) != length(ids)  # The size of them can be different, but not length.
         throw(DimensionMismatch("`cmds` has different length than `ids`!"))
     end
-    refs = similar(cmds, Future)  # It can be of different size than `ids`!
+    promises = similar(cmds, Future)  # It can be of different size than `ids`!
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
-        refs[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
+        promises[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
     end
-    return BagOfTasks(refs)
+    return BagOfTasks(promises)
 end # function distribute_process
 
 function isjobdone(bag::BagOfTasks)
