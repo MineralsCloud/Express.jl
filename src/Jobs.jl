@@ -93,7 +93,7 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     #         push!(options, "")
     #     end
     # end
-    return Cmd(`$(cmd.which) -np $(cmd.n) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
+    return Cmd(`$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
 end # function Base.convert
 
 end
