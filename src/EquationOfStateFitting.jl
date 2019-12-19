@@ -33,7 +33,7 @@ using Unitful
 using UnitfulAtomic
 
 import ..Step
-using ..Jobs: MpiExec, nprocs_per_subjob, distribute_process
+using ..Jobs: MpiExec, nprocs_task, distribute_process
 
 export update_alat_press, preprocess, postprocess, submit
 
@@ -110,7 +110,7 @@ function submit(
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-    n = nprocs_per_subjob(np, length(inputs))
+    n = nprocs_task(np, length(inputs))
     cmds = similar(inputs, Base.AbstractCmd)
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
         lenses = @batchlens(begin

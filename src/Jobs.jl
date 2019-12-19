@@ -8,7 +8,7 @@ using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
 export MpiExec, BagOfTasks
-export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
+export nprocs_task, distribute_process, isjobdone, fetch_results
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -36,13 +36,13 @@ struct BagOfTasks{T<:AbstractArray}
     tasks::T
 end
 
-function nprocs_per_subjob(total_num::Int, nsubjob::Int)
+function nprocs_task(total_num::Int, nsubjob::Int)
     quotient, remainder = divrem(total_num, nsubjob)
     if remainder != 0
         @warn("The processes are not fully balanced! Consider the number of subjobs!")
     end
     return quotient
-end # function nprocs_per_subjob
+end # function nprocs_task
 
 function distribute_process(
     cmds::AbstractArray{T},
@@ -63,11 +63,11 @@ function isjobdone(bag::BagOfTasks)
     return all(map(isready, bag.tasks))
 end # function isjobdone
 
-function subjobs_running(bag::BagOfTasks)
+function tasks_running(bag::BagOfTasks)
     return filter(!isready, bag.tasks)
-end # function monitor
+end # function tasks_running
 
-function subjobs_exited(bag::BagOfTasks)
+function tasks_exited(bag::BagOfTasks)
     return map(fetch, filter(isready, bag.tasks))
 end # function subjobs_exited
 
