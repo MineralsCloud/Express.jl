@@ -4,13 +4,10 @@ using Distributed
 
 using ClusterManagers
 using Parameters: @with_kw
+using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-using QuantumESPRESSOBase.CLI
-
-using Express
-
-export MpiExec
+export MpiExec, BagOfTasks
 export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
 
 @with_kw struct MpiExec <: Base.AbstractCmd
@@ -59,23 +56,23 @@ function distribute_process(
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
         refs[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
     end
-    return refs
+    return BagOfTasks(refs)
 end # function distribute_process
 
-function isjobdone(refs::AbstractArray{Future})
-    return all(map(isready, refs))
+function isjobdone(bag::BagOfTasks)
+    return all(map(isready, bag.tasks))
 end # function isjobdone
 
-function subjobs_running(refs::AbstractArray{Future})
-    return filter(!isready, refs)
+function subjobs_running(bag::BagOfTasks)
+    return filter(!isready, bag.tasks)
 end # function monitor
 
-function subjobs_exited(refs::AbstractArray{Future})
-    return map(fetch, filter(isready, refs))
+function subjobs_exited(bag::BagOfTasks)
+    return map(fetch, filter(isready, bag.tasks))
 end # function subjobs_exited
 
-function fetch_results(refs::AbstractArray{Future})
-    return map(refs) do x
+function fetch_results(bag::BagOfTasks)
+    return map(bag) do x
         if isready(x)
             try
                 fetch(x)
