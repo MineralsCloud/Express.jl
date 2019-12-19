@@ -4,14 +4,11 @@ using Distributed
 
 using ClusterManagers
 using Parameters: @with_kw
+using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-using QuantumESPRESSOBase.CLI
-
-using Express
-
-export MpiExec
-export nprocs_per_subjob, distribute_process, isjobdone, fetch_results
+export MpiExec, BagOfTasks
+export nprocs_task, distribute_process, isjobdone, fetch_results
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -39,13 +36,13 @@ struct BagOfTasks{T<:AbstractArray}
     tasks::T
 end
 
-function nprocs_per_subjob(total_num::Int, nsubjob::Int)
+function nprocs_task(total_num::Int, nsubjob::Int)
     quotient, remainder = divrem(total_num, nsubjob)
     if remainder != 0
         @warn("The processes are not fully balanced! Consider the number of subjobs!")
     end
     return quotient
-end # function nprocs_per_subjob
+end # function nprocs_task
 
 function distribute_process(
     cmds::AbstractArray{T},
@@ -55,27 +52,27 @@ function distribute_process(
     if length(cmds) != length(ids)  # The size of them can be different, but not length.
         throw(DimensionMismatch("`cmds` has different length than `ids`!"))
     end
-    refs = similar(cmds, Future)  # It can be of different size than `ids`!
+    promises = similar(cmds, Future)  # It can be of different size than `ids`!
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
-        refs[i] = @spawnat id run(Cmd(cmd), wait = true)  # TODO: Must wait?
+        promises[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
     end
-    return refs
+    return BagOfTasks(promises)
 end # function distribute_process
 
-function isjobdone(refs::AbstractArray{Future})
-    return all(map(isready, refs))
+function isjobdone(bag::BagOfTasks)
+    return all(map(isready, bag.tasks))
 end # function isjobdone
 
-function subjobs_running(refs::AbstractArray{Future})
-    return filter(!isready, refs)
-end # function monitor
+function tasks_running(bag::BagOfTasks)
+    return filter(!isready, bag.tasks)
+end # function tasks_running
 
-function subjobs_exited(refs::AbstractArray{Future})
-    return map(fetch, filter(isready, refs))
+function tasks_exited(bag::BagOfTasks)
+    return map(fetch, filter(isready, bag.tasks))
 end # function subjobs_exited
 
-function fetch_results(refs::AbstractArray{Future})
-    return map(refs) do x
+function fetch_results(bag::BagOfTasks)
+    return map(bag) do x
         if isready(x)
             try
                 fetch(x)
@@ -86,6 +83,17 @@ function fetch_results(refs::AbstractArray{Future})
     end
 end # function fetch_results
 
-Base.Cmd(cmd::MpiExec) = Cmd(`$(cmd.which) -np $(cmd.n) $(Cmd(cmd.subcmd))`, env = ENV, dir = cmd.wdir)
+function Base.convert(::Type{Cmd}, cmd::MpiExec)
+    options = String[]
+    for f in fieldnames(typeof(cmd))[3:end]  # Join options
+        v = getfield(cmd, f)
+        if !iszero(v)
+            push!(options, string(" -", f, ' ', v))
+        else
+            push!(options, "")
+        end
+    end
+    return Cmd(`$(cmd.which) -np $(cmd.n) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
+end # function Base.convert
 
 end
