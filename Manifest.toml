@@ -133,7 +133,7 @@ version = "0.21.11"
 
 [[EquationsOfState]]
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "Polynomials", "Rematch", "Roots", "Unitful"]
-git-tree-sha1 = "48c22c05d802ace02843dd140045f7fa441200e6"
+git-tree-sha1 = "b2cd9f3755b08e6d3bec1c1d143784059f06cae8"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
