@@ -7,8 +7,8 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, BagOfTasks
-export nprocs_task, distribute_process, isjobdone, fetch_results
+export MpiExec, BagOfTasks, TaskStatus
+export nprocs_task, distribute_process, isjobdone, fetch_results, jobstatus
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -27,10 +27,19 @@ export nprocs_task, distribute_process, isjobdone, fetch_results
     "Implementation-defined specification file"
     file::String = ""
     configfile::String = ""
-    subcmd::Base.AbstractCmd
+    cmd::Base.AbstractCmd
     "Set environment variables to use when running the command, defaults to `ENV`"
-    env::Base.EnvDict = ENV  # FIXME: What is this type?
+    env = ENV
 end
+
+struct TaskStatus{T}
+    function TaskStatus{T}() where {T}
+        T ∈ (:pending, :running, :succeeded, :failed) ||
+        throw(ArgumentError("the task status should be one of `:pending`, `:running`, `:succeeded`, `:failed`!"))
+        return new()
+    end # function TaskStatus
+end
+TaskStatus(T) = TaskStatus{T}()
 
 struct BagOfTasks{T<:AbstractArray}
     tasks::T
@@ -71,6 +80,15 @@ function tasks_exited(bag::BagOfTasks)
     return map(fetch, filter(isready, bag.tasks))
 end # function subjobs_exited
 
+function jobstatus(bag::BagOfTasks)
+    map(bag) do task
+        if isready(task)
+            return success(fetch(task)) ? TaskStatus(:succeeded) : TaskStatus(:failed)
+        end
+        return isempty(task) ? TaskStatus(:pending) : TaskStatus(:running)
+    end
+end # function jobstatus
+
 function fetch_results(bag::BagOfTasks)
     return map(bag) do x
         if isready(x)
@@ -93,7 +111,11 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     #         push!(options, "")
     #     end
     # end
-    return Cmd(`$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
+    return Cmd(
+        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.cmd))`,
+        env = cmd.env,
+        dir = cmd.wdir,
+    )
 end # function Base.convert
 
 end
