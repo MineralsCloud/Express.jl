@@ -7,7 +7,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, BagOfTasks
+export MpiExec, BagOfTasks, TaskStatus
 export nprocs_task, distribute_process, isjobdone, fetch_results
 
 @with_kw struct MpiExec <: Base.AbstractCmd
@@ -31,6 +31,15 @@ export nprocs_task, distribute_process, isjobdone, fetch_results
     "Set environment variables to use when running the command, defaults to `ENV`"
     env::Base.EnvDict = ENV  # FIXME: What is this type?
 end
+
+struct TaskStatus{T}
+    function TaskStatus{T}() where {T}
+        T ∈ (:pending, :running, :succeeded, :failed) ||
+        throw(ArgumentError("the task status should be one of `:pending`, `:running`, `:succeeded`, `:failed`!"))
+        return new()
+    end # function TaskStatus
+end
+TaskStatus(T) = TaskStatus{T}()
 
 struct BagOfTasks{T<:AbstractArray}
     tasks::T
@@ -93,7 +102,11 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     #         push!(options, "")
     #     end
     # end
-    return Cmd(`$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.subcmd))`, env = cmd.env, dir = cmd.wdir)
+    return Cmd(
+        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.subcmd))`,
+        env = cmd.env,
+        dir = cmd.wdir,
+    )
 end # function Base.convert
 
 end
