@@ -110,16 +110,16 @@ uuid = "01453d9d-ee7c-5054-8395-0335cb756afa"
 version = "1.6.0"
 
 [[DiffResults]]
-deps = ["Compat", "StaticArrays"]
-git-tree-sha1 = "34a4a1e8be7bc99bc9c611b895b5baf37a80584c"
+deps = ["StaticArrays"]
+git-tree-sha1 = "b5b37c47c5cee040a47d02cf65144ab7c5d8aef6"
 uuid = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
-version = "0.0.4"
+version = "1.0.1"
 
 [[DiffRules]]
 deps = ["NaNMath", "Random", "SpecialFunctions"]
-git-tree-sha1 = "f734b5f6bc9c909027ef99f6d91d5d9e4b111eed"
+git-tree-sha1 = "10dca52cf6d4a62d82528262921daf63b99704a2"
 uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
-version = "0.1.0"
+version = "1.0.0"
 
 [[Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -133,7 +133,7 @@ version = "0.21.11"
 
 [[EquationsOfState]]
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "Polynomials", "Rematch", "Roots", "Unitful"]
-git-tree-sha1 = "c4961bcf4c263ffc0827027cd47b2203a088dcbe"
+git-tree-sha1 = "b2cd9f3755b08e6d3bec1c1d143784059f06cae8"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/EquationsOfState.jl.git"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -167,9 +167,9 @@ version = "0.1.0"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "NaNMath", "Random", "SpecialFunctions", "StaticArrays"]
-git-tree-sha1 = "da46ac97b17793eba44ff366dc6cb70f1238a738"
+git-tree-sha1 = "840700059391d36e2498d89c2e82c08f261f2a2a"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "0.10.7"
+version = "0.10.8"
 
 [[Future]]
 deps = ["Random"]
@@ -350,7 +350,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "ConstructionBase", "Fortran90Namelists", "LinearAlgebra", "OrderedCollections", "Parameters", "Setfield", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "cd51dfb491f5709934abf1972c6acd9b1d4fe2e1"
+git-tree-sha1 = "381627b8490aa28ac0cb322d35b3201ade289525"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -423,9 +423,9 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[Setfield]]
 deps = ["ConstructionBase", "Future", "MacroTools", "Requires"]
-git-tree-sha1 = "161fc4aaee52eabf584d9506d2143d83f60411c2"
+git-tree-sha1 = "ed5045722fcdacf263a90fb9eb9f258598ccebac"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
-version = "0.5.3"
+version = "0.5.4"
 
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -473,9 +473,9 @@ version = "0.32.0"
 
 [[StatsFuns]]
 deps = ["Rmath", "SpecialFunctions"]
-git-tree-sha1 = "938f2520e6c093aaf5a7e7c38489e03c27a8c136"
+git-tree-sha1 = "79982835d2ff3970685cb704500909c94189bde9"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "0.9.2"
+version = "0.9.3"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]

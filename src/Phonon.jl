@@ -16,10 +16,10 @@ using QuantumESPRESSO: to_qe
 using QuantumESPRESSO.Cards: option_convert
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
-using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
+using QuantumESPRESSOBase.Setters: CellParametersSetter, batchset
 using Setfield: get, set, @lens, @set!
 
 import ..Step
@@ -55,16 +55,9 @@ end # function update_structure
 
 # This is a helper function and should not be exported.
 function _preset(template::PWInput)
-    lenses = @batchlens(begin
-        _.control.calculation  # Get the `template`'s `control.calculation` value
-        _.control.verbosity    # Get the `template`'s `control.verbosity` value
-        _.control.tstress      # Get the `template`'s `control.tstress` value
-        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
-    end)
-    # Set the `template`'s values with...
-    template = set(template, lenses, ("scf", "high", true, true))
-    return isnothing(template.cell_parameters) ? autofill_cell_parameters(template) :
-           template
+    @set! template.control = batchset(VerbositySetter(:high), template.control)
+    @set! template.control.calculation = "scf"
+    return batchset(CellParametersSetter(), template)
 end # function _preset
 function _preset(template::PhInput)
     lenses = @batchlens(begin

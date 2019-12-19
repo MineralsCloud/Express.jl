@@ -23,17 +23,17 @@ using Kaleido: @batchlens
 using QuantumESPRESSO: to_qe, cell_volume
 using QuantumESPRESSO.Cards: optionof
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
-using QuantumESPRESSO.Inputs: autofill_cell_parameters
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using Setfield: set
+using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter, batchset
+using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
 
 import ..Step
-using ..Jobs: MpiExec, nprocs_per_subjob, distribute_process
+using ..Jobs: MpiExec, nprocs_task, distribute_process
 
 export update_alat_press, preprocess, postprocess, submit
 
@@ -43,7 +43,7 @@ function update_alat_press(
     pressure::Unitful.AbstractQuantity,
 )
     if isnothing(template.cell_parameters)
-        template = autofill_cell_parameters(template)
+        template = batchset(CellParametersSetter(), template)
     end
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
@@ -71,16 +71,11 @@ function update_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _boilerplate(step::Step{N}, template::PWInput) where {N}
-    lenses = @batchlens(begin
-        _.control.calculation  # Get the `template`'s `control.calculation` value
-        _.control.verbosity    # Get the `template`'s `control.verbosity` value
-        _.control.tstress      # Get the `template`'s `control.tstress` value
-        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
-    end)
-    # Set the `template`'s values with...
-    return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
-end # function _boilerplate
+function _preset(step::Step{N}, template::PWInput) where {N}
+    @set! template.control = batchset(VerbositySetter(:high), template.control)
+    @set! template.control.calculation = N == 1 ? "scf" : "vc-relax"
+    return template
+end # function _preset
 
 function preprocess(
     step::Step,
@@ -93,7 +88,7 @@ function preprocess(
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-    template = _boilerplate(step, template)
+    template = _preset(step, template)
     objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
     for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
         # Create a new `object` from the `template`, with its `alat` and `pressure` changed
@@ -109,18 +104,18 @@ function submit(
     inputs::AbstractArray{<:AbstractString},
     outputs::AbstractArray{<:AbstractString},
     np::Int,
-    template::MpiExec = MpiExec(n = 1, subcmd = PWCmd(inp = "")),
+    template::MpiExec = MpiExec(n = 1, cmd = PWCmd(inp = "")),
     ids::AbstractArray{<:Integer} = workers(),
 )
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-    n = nprocs_per_subjob(np, length(inputs))
+    n = nprocs_task(np, length(inputs))
     cmds = similar(inputs, Base.AbstractCmd)
     for (i, (input, output)) in enumerate(zip(inputs, outputs))
         lenses = @batchlens(begin
             _.n
-            _.subcmd.inp
+            _.cmd.inp
         end)
         cmds[i] = pipeline(set(cmds[i], lenses, (n, input)), stdout = output)
     end
