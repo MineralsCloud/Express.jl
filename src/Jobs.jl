@@ -29,7 +29,7 @@ export nprocs_task, distribute_process, isjobdone, fetch_results, jobstatus
     configfile::String = ""
     cmd::Base.AbstractCmd
     "Set environment variables to use when running the command, defaults to `ENV`"
-    env::Base.EnvDict = ENV  # FIXME: What is this type?
+    env = ENV
 end
 
 struct TaskStatus{T}
