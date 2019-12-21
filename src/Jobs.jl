@@ -81,7 +81,7 @@ function tasks_exited(bag::BagOfTasks)
 end # function subjobs_exited
 
 function jobstatus(bag::BagOfTasks)
-    map(bag) do task
+    map(bag.tasks) do task
         if isready(task)
             return success(fetch(task)) ? TaskStatus(:succeeded) : TaskStatus(:failed)
         end
