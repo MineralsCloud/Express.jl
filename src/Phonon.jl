@@ -25,7 +25,7 @@ using Setfield: get, set, @lens, @set!
 import ..Step
 using Express.BandStructure: generate_path
 
-export update_structure, relay, prepare
+export update_structure, relay, preprocess
 
 """
     update_structure(output::AbstractString, template::PWInput)
@@ -126,7 +126,7 @@ function relay(from::PhInput, to::DynmatInput)
 end # function relay
 
 """
-    prepare(step::Step{1}, inputs, outputs, template[, verbose::Bool = false])
+    preprocess(step::Step{1}, inputs, outputs, template[, verbose::Bool = false])
 
 Prepare input files of the first step of a phonon calculation.
 
@@ -138,7 +138,7 @@ Prepare input files of the first step of a phonon calculation.
 - `template::PWInput`:
 - `verbose::Bool = false`: control the format of input files, verbose or not.
 """
-function prepare(
+function preprocess(
     ::Step{1},
     inputs::AbstractVector{<:AbstractString},
     outputs::AbstractVector{<:AbstractString},
@@ -157,8 +157,8 @@ function prepare(
         write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
     return
-end # function prepare
-function prepare(
+end # function preprocess
+function preprocess(
     ::Step{2},
     phonon_inputs::AbstractVector{<:AbstractString},
     pwscf_inputs::AbstractVector{<:AbstractString},
@@ -179,8 +179,8 @@ function prepare(
         write(phonon_input, to_qe(template, verbose = verbose))
     end
     return
-end # function prepare
-function prepare(
+end # function preprocess
+function preprocess(
     ::Step{3},
     q2r_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
@@ -200,8 +200,8 @@ function prepare(
         write(q2r_input, to_qe(template, verbose = verbose))
     end
     return
-end # function prepare
-function prepare(
+end # function preprocess
+function preprocess(
     ::Step{4},
     matdyn_inputs::AbstractVector{<:AbstractString},
     q2r_inputs::AbstractVector{<:AbstractString},
@@ -228,8 +228,8 @@ function prepare(
         write(matdyn_input, to_qe(template, verbose = verbose))
     end
     return
-end # function prepare
-function prepare(
+end # function preprocess
+function preprocess(
     ::Step{5},
     dynmat_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
@@ -249,7 +249,7 @@ function prepare(
         write(dynmat_input, to_qe(template, verbose = verbose))
     end
     return
-end # function prepare
+end # function preprocess
 
 #???
 
