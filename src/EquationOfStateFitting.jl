@@ -117,7 +117,7 @@ function submit(
             _.n
             _.cmd.inp
         end)
-        cmds[i] = pipeline(set(template, lenses, (n, input)), stdout = output)
+        cmds[i] = pipeline(convert(Cmd, set(template, lenses, (n, input))), stdout = output)
     end
     return distribute_process(cmds, ids)
 end # function submit

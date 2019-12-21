@@ -61,7 +61,7 @@ function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} =
     end
     promises = similar(cmds, Future)  # It can be of different size than `ids`!
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
-        promises[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
+        promises[i] = @spawnat id run(cmd, wait = true)  # TODO: Must wait?
     end
     return BagOfTasks(promises)
 end # function distribute_process
