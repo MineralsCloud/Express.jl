@@ -54,9 +54,9 @@ function nprocs_task(total_num::Int, nsubjob::Int)
 end # function nprocs_task
 
 function distribute_process(
-    cmds::AbstractArray{T},
+    cmds::AbstractArray,
     ids::AbstractArray{<:Integer} = workers(),
-) where {T<:MpiExec}
+)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     if length(cmds) != length(ids)  # The size of them can be different, but not length.
         throw(DimensionMismatch("`cmds` has different length than `ids`!"))
