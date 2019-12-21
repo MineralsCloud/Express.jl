@@ -11,9 +11,9 @@ julia>
 """
 module EquationOfStateFitting
 
+using Distributed: workers
 using LinearAlgebra: det
 
-using Distributed: workers
 using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
