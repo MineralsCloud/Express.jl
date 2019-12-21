@@ -8,7 +8,8 @@ using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
 export MpiExec, BagOfTasks, TaskStatus
-export nprocs_task, distribute_process, isjobdone, fetch_results, jobstatus
+export nprocs_task,
+    distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -53,17 +54,14 @@ function nprocs_task(total_num::Int, nsubjob::Int)
     return quotient
 end # function nprocs_task
 
-function distribute_process(
-    cmds::AbstractArray{T},
-    ids::AbstractArray{<:Integer} = workers(),
-) where {T<:MpiExec}
+function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} = workers())
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     if length(cmds) != length(ids)  # The size of them can be different, but not length.
         throw(DimensionMismatch("`cmds` has different length than `ids`!"))
     end
     promises = similar(cmds, Future)  # It can be of different size than `ids`!
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
-        promises[i] = @spawnat id run(convert(Cmd, cmd), wait = true)  # TODO: Must wait?
+        promises[i] = @spawnat id run(cmd, wait = true)  # TODO: Must wait?
     end
     return BagOfTasks(promises)
 end # function distribute_process
@@ -77,13 +75,18 @@ function tasks_running(bag::BagOfTasks)
 end # function tasks_running
 
 function tasks_exited(bag::BagOfTasks)
-    return map(fetch, filter(isready, bag.tasks))
+    return filter(isready, bag.tasks)
 end # function subjobs_exited
 
 function jobstatus(bag::BagOfTasks)
-    map(bag) do task
+    map(bag.tasks) do task
         if isready(task)
-            return success(fetch(task)) ? TaskStatus(:succeeded) : TaskStatus(:failed)
+            try 
+                ref = fetch(task)
+                return success(ref) ? TaskStatus(:succeeded) : TaskStatus(:failed)
+            catch e
+                return TaskStatus(:failed)
+            end
         end
         return isempty(task) ? TaskStatus(:pending) : TaskStatus(:running)
     end
