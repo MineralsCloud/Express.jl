@@ -75,7 +75,7 @@ function tasks_running(bag::BagOfTasks)
 end # function tasks_running
 
 function tasks_exited(bag::BagOfTasks)
-    return map(fetch, filter(isready, bag.tasks))
+    return filter(isready, bag.tasks)
 end # function subjobs_exited
 
 function jobstatus(bag::BagOfTasks)
