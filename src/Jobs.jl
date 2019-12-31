@@ -81,7 +81,7 @@ end # function subjobs_exited
 function jobstatus(bag::BagOfTasks)
     map(bag.tasks) do task
         if isready(task)
-            try 
+            try
                 ref = fetch(task)
                 return success(ref) ? TaskStatus(:succeeded) : TaskStatus(:failed)
             catch e

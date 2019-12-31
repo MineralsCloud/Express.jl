@@ -113,11 +113,7 @@ function set_calculation(step::Step, template::PWInput)
     @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
 end # function set_calculation
 
-function prepare(
-    step::Step{1},
-    inputs::AbstractVector{<:AbstractString},
-    template::PWInput,
-)
+function prepare(step::Step{1}, inputs::AbstractVector{<:AbstractString}, template::PWInput)
     # Checking parameters
     template = set_calculation(step, template)
 end # function prepare
