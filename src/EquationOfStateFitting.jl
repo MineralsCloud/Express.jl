@@ -11,9 +11,9 @@ julia>
 """
 module EquationOfStateFitting
 
+using Distributed: workers
 using LinearAlgebra: det
 
-using Distributed: workers
 using Compat: isnothing
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
@@ -35,7 +35,7 @@ using UnitfulAtomic
 import ..Step
 using ..Jobs: MpiExec, nprocs_task, distribute_process
 
-export update_alat_press, preprocess, postprocess, submit
+export update_alat_press, preprocess, postprocess, fire
 
 function update_alat_press(
     template::PWInput,
@@ -100,7 +100,7 @@ function preprocess(
     return objects
 end # function preprocess
 
-function submit(
+function fire(
     inputs::AbstractArray{<:AbstractString},
     outputs::AbstractArray{<:AbstractString},
     np::Int,
@@ -120,7 +120,7 @@ function submit(
         cmds[i] = pipeline(convert(Cmd, set(template, lenses, (n, input))), stdout = output)
     end
     return distribute_process(cmds, ids)
-end # function submit
+end # function fire
 
 function postprocess(
     ::Step{N},
