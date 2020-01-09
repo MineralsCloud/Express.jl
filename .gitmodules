@@ -1,0 +1,8 @@
+[submodule "QuantumESPRESSO.jl"]
+	path = QuantumESPRESSO.jl
+	url = git@github.com:MineralsCloud/QuantumESPRESSO.jl.git
+	branch = master
+[submodule "QuantumESPRESSOHelpers.jl"]
+	path = QuantumESPRESSOHelpers.jl
+	url = git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git
+	branch = develop
