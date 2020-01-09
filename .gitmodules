@@ -14,3 +14,7 @@
 	path = QuantumESPRESSOBase.jl
 	url = git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git
 	branch = develop
+[submodule "QuantumESPRESSOParsers.jl"]
+	path = QuantumESPRESSOParsers.jl
+	url = git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git
+	branch = develop
