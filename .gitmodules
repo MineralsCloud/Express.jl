@@ -10,3 +10,7 @@
 	path = Fortran90Namelists.jl
 	url = git@github.com:singularitti/Fortran90Namelists.jl.git
 	branch = develop
+[submodule "QuantumESPRESSOBase.jl"]
+	path = QuantumESPRESSOBase.jl
+	url = git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git
+	branch = develop
