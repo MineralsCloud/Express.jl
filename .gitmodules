@@ -6,3 +6,7 @@
 	path = QuantumESPRESSOHelpers.jl
 	url = git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git
 	branch = develop
+[submodule "Fortran90Namelists.jl"]
+	path = Fortran90Namelists.jl
+	url = git@github.com:singularitti/Fortran90Namelists.jl.git
+	branch = develop
