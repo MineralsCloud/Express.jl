@@ -274,9 +274,9 @@ version = "0.3.3"
 
 [[OpenBLAS_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "27f7e3187464eef76b4b7784b79fe10cb302c75c"
+git-tree-sha1 = "3a6e5767e8ae022871c19162cc3ecd80748bd3dc"
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.7+3"
+version = "0.3.7+4"
 
 [[OpenSpecFun_jll]]
 deps = ["Libdl", "Pkg"]
@@ -355,8 +355,8 @@ uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
-deps = ["AutoHashEquals", "Compat", "ConstructionBase", "Fortran90Namelists", "LinearAlgebra", "OrderedCollections", "Parameters", "Setfield", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "f289c5524d69966f4858bec2e421e952a9bb93a8"
+deps = ["AutoHashEquals", "Compat", "ConstructionBase", "Formatting", "Fortran90Namelists", "LinearAlgebra", "OrderedCollections", "Parameters", "Setfield", "Unitful", "UnitfulAtomic"]
+git-tree-sha1 = "4dbcebb15a5b68cf73861cfcf8c9858f5d4f44af"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -372,7 +372,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataFrames", "DataStructures", "Fortran90Namelists", "Parameters", "QuantumESPRESSOBase", "Rematch"]
-git-tree-sha1 = "052a34cb30ca45b0f8acf9213540ef2541b2ba30"
+git-tree-sha1 = "5cce90c53aadb9f5c72c16dcfa4d7bb5ee9dc753"
 repo-rev = "develop"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
