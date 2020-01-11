@@ -14,7 +14,7 @@ include("Jobs.jl")
 include("SelfConsistentField.jl")
 include("BandStructure.jl")
 include("EquationOfStateFitting.jl")
-include("Phonon.jl")
+# include("Phonon.jl")
 include("Wizard/Wizard.jl")
 
 end # module
