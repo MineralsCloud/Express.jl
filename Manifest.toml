@@ -152,9 +152,9 @@ version = "1.2.1"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "1a9fe4e1323f38de0ba4da49eafd15b25ec62298"
+git-tree-sha1 = "fec413d4fc547992eb62a5c544cedb6d7853c1f5"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.8.2"
+version = "0.8.4"
 
 [[Formatting]]
 deps = ["Printf"]
@@ -356,7 +356,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["AutoHashEquals", "Compat", "Formatting", "Fortran90Namelists", "Kaleido", "LinearAlgebra", "OrderedCollections", "Parameters", "Setfield", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "457c9fe2dd40a65827c86ac3f8187e60028532ea"
+git-tree-sha1 = "bfef0da8769225f5303e83a7a8ac5275a22dd1a8"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
