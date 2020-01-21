@@ -92,15 +92,19 @@ function jobstatus(bag::AbstractVector{Future})
 end # function jobstatus
 
 function fetch_results(bag::AbstractVector)
-    return map(bag) do x
-        if isready(x)
+    ids, results = Vector{Int}(undef, length(bag)), Vector{Any}(undef, length(bag))
+    for (i, task) in enumerate(bag)
+        ids[i] = task.where
+        if isready(task)
             try
-                fetch(x)
+                results[i] = fetch(task)
             catch e
-                e
+                results[i] = e
             end
         end
+        results[i] = nothing
     end
+    return ids, results
 end # function fetch_results
 
 function Base.convert(::Type{Cmd}, cmd::MpiExec)
