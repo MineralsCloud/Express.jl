@@ -117,4 +117,6 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     )
 end # function Base.convert
 
+Base.show(io::IO, ::TaskStatus{T}) where {T} = print(io, "$T")
+
 end
