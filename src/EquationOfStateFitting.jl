@@ -27,7 +27,7 @@ using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
-using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter, batchset
+using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
@@ -43,7 +43,7 @@ function update_alat_press(
     pressure::Unitful.AbstractQuantity,
 )
     if isnothing(template.cell_parameters)
-        template = batchset(CellParametersSetter(), template)
+        template = set(template, CellParametersSetter())
     end
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
@@ -72,9 +72,14 @@ end # function update_alat_press
 
 # This is a helper function and should not be exported.
 function _preset(step::Step{N}, template::PWInput) where {N}
-    @set! template.control = batchset(VerbositySetter(:high), template.control)
-    @set! template.control.calculation = N == 1 ? "scf" : "vc-relax"
-    return template
+    lenses = @batchlens(begin
+        _.control.calculation  # Get the `template`'s `control.calculation` value
+        _.control.verbosity    # Get the `template`'s `control.verbosity` value
+        _.control.tstress      # Get the `template`'s `control.tstress` value
+        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
+    end)
+    # Set the `template`'s values with...
+    return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
 end # function _preset
 
 function preprocess(

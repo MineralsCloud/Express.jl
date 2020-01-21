@@ -40,9 +40,9 @@ version = "0.5.1"
 
 [[CategoricalArrays]]
 deps = ["Compat", "DataAPI", "Future", "JSON", "Missings", "Printf", "Reexport", "Statistics", "Unicode"]
-git-tree-sha1 = "7c4419347d724a057b5a550078f8ff4cdfdeedf6"
+git-tree-sha1 = "23d7324164c89638c18f6d7f90d972fa9c4fa9fb"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.7.6"
+version = "0.7.7"
 
 [[ClusterManagers]]
 deps = ["Distributed", "Sockets"]
@@ -91,9 +91,9 @@ version = "0.20.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "f784254f428fb8fd7ac15982e5862a38a44523d3"
+git-tree-sha1 = "b7720de347734f4716d1815b00ce5664ed6bbfd4"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.7"
+version = "0.17.9"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -132,9 +132,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "d188577fb30465c6506918a7dd3b853a09b562e8"
+git-tree-sha1 = "71a3f1ae1fca9ed876edfbc2079d7b7c27e2e3d5"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.22.1"
+version = "0.22.3"
 
 [[EquationsOfState]]
 deps = ["ConstructionBase", "InteractiveUtils", "LinearAlgebra", "LsqFit", "Polynomials", "Rematch", "Roots", "Unitful"]
@@ -172,9 +172,9 @@ version = "0.1.0"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "NaNMath", "Random", "SpecialFunctions", "StaticArrays"]
-git-tree-sha1 = "840700059391d36e2498d89c2e82c08f261f2a2a"
+git-tree-sha1 = "88b082d492be6b63f967b6c96b352e25ced1a34c"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "0.10.8"
+version = "0.10.9"
 
 [[Future]]
 deps = ["Random"]
@@ -219,9 +219,9 @@ version = "0.21.0"
 
 [[Kaleido]]
 deps = ["Requires", "Setfield"]
-git-tree-sha1 = "69916ca791071ef145cd858a92140533aed341ce"
+git-tree-sha1 = "03278ffa67aa7581f92c2461901f1d56cd96027c"
 uuid = "caafb194-7e8d-11e9-2724-d5981dd0806d"
-version = "0.2.2"
+version = "0.2.4"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -340,6 +340,14 @@ version = "0.8.0"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[Pseudopotentials]]
+deps = ["DataFrames", "JLD2", "JSON", "Parameters", "REPL"]
+git-tree-sha1 = "ed1c0db3acf6d213fad2ec68da347af1073bf31a"
+repo-rev = "master"
+repo-url = "git@github.com:MineralsCloud/Pseudopotentials.jl.git"
+uuid = "1b2dc2e6-48aa-4f00-b8f4-19d1a71d7a0e"
+version = "0.1.0"
+
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
 git-tree-sha1 = "dc84e810393cfc6294248c9032a9cdacc14a3db4"
@@ -355,24 +363,24 @@ uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
-deps = ["AutoHashEquals", "Compat", "Formatting", "Fortran90Namelists", "Kaleido", "LinearAlgebra", "OrderedCollections", "Parameters", "Setfield", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "bfef0da8769225f5303e83a7a8ac5275a22dd1a8"
+deps = ["AutoHashEquals", "Compat", "Formatting", "Kaleido", "LinearAlgebra", "OrderedCollections", "Parameters", "Pseudopotentials", "Setfield", "Unitful", "UnitfulAtomic"]
+git-tree-sha1 = "76891891bec3b1752f4445ce9874bb3a9d735578"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
 [[QuantumESPRESSOHelpers]]
-deps = ["Crayons", "Fortran90Namelists", "Parameters", "PrettyTables", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "REPL", "Setfield"]
-git-tree-sha1 = "3dfec09b973f8c66dc2c884faebad32b1cb3e911"
+deps = ["Crayons", "Fortran90Namelists", "Parameters", "PrettyTables", "Pseudopotentials", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "REPL", "Setfield"]
+git-tree-sha1 = "49dbcf65aa28c8232e0c3fda0a27a579df05beca"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOHelpers.jl.git"
 uuid = "a9fedd91-8596-4386-96ec-8925d33acc95"
 version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
-deps = ["Compat", "DataFrames", "DataStructures", "Fortran90Namelists", "Parameters", "QuantumESPRESSOBase", "Rematch"]
-git-tree-sha1 = "207e7917309630a69a8e01e83d0e9a3b34bfa2c2"
+deps = ["Compat", "DataFrames", "DataStructures", "Fortran90Namelists", "Parameters", "Pseudopotentials", "QuantumESPRESSOBase"]
+git-tree-sha1 = "55421961999e6c851c46d385598c2237c5f4aa24"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -429,9 +437,9 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[Setfield]]
 deps = ["ConstructionBase", "Future", "MacroTools", "Requires"]
-git-tree-sha1 = "ed5045722fcdacf263a90fb9eb9f258598ccebac"
+git-tree-sha1 = "7a151f918819326a6003dba451dabe65f8c0f6fb"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
-version = "0.5.4"
+version = "0.6.0"
 
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
