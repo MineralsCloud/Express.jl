@@ -74,18 +74,21 @@ function tasks_exited(bag::AbstractVector)
     return filter(isready, bag)
 end # function subjobs_exited
 
-function jobstatus(bag::AbstractVector)
-    map(bag) do task
+function jobstatus(bag::AbstractVector{Future})
+    ids, status = Vector{Int}(undef, length(bag)), Vector{TaskStatus}(undef, length(bag))
+    for (i, task) in enumerate(bag)
+        ids[i] = task.where
         if isready(task)
             try
                 ref = fetch(task)
-                return success(ref) ? TaskStatus(:succeeded) : TaskStatus(:failed)
+                status[i] = success(ref) ? TaskStatus(:succeeded) : TaskStatus(:failed)
             catch e
-                return TaskStatus(:failed)
+                status[i] = TaskStatus(:failed)
             end
         end
-        return TaskStatus(:running)
+        status[i] = TaskStatus(:running)
     end
+    return ids, status
 end # function jobstatus
 
 function fetch_results(bag::AbstractVector)
