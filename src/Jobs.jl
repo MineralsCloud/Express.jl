@@ -7,7 +7,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, BagOfTasks, TaskStatus
+export MpiExec, TaskStatus
 export nprocs_task,
     distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
 
@@ -42,10 +42,6 @@ struct TaskStatus{T}
 end
 TaskStatus(T) = TaskStatus{T}()
 
-struct BagOfTasks{T<:AbstractArray}
-    tasks::T
-end
-
 function nprocs_task(total_num::Int, nsubjob::Int)
     quotient, remainder = divrem(total_num, nsubjob)
     if remainder != 0
@@ -63,23 +59,23 @@ function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} =
     for (i, (cmd, id)) in enumerate(zip(cmds, ids))
         promises[i] = @spawnat id run(cmd, wait = true)  # TODO: Must wait?
     end
-    return BagOfTasks(promises)
+    return promises
 end # function distribute_process
 
-function isjobdone(bag::BagOfTasks)
+function isjobdone(bag::AbstractVector)
     return all(map(isready, bag.tasks))
 end # function isjobdone
 
-function tasks_running(bag::BagOfTasks)
+function tasks_running(bag::AbstractVector)
     return filter(!isready, bag.tasks)
 end # function tasks_running
 
-function tasks_exited(bag::BagOfTasks)
+function tasks_exited(bag::AbstractVector)
     return filter(isready, bag.tasks)
 end # function subjobs_exited
 
-function jobstatus(bag::BagOfTasks)
-    map(bag.tasks) do task
+function jobstatus(bag::AbstractVector)
+    map(bag) do task
         if isready(task)
             try
                 ref = fetch(task)
@@ -92,8 +88,8 @@ function jobstatus(bag::BagOfTasks)
     end
 end # function jobstatus
 
-function fetch_results(bag::BagOfTasks)
-    return map(bag.tasks) do x
+function fetch_results(bag::AbstractVector)
+    return map(bag) do x
         if isready(x)
             try
                 fetch(x)
