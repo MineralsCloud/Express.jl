@@ -93,7 +93,7 @@ function jobstatus(bag::BagOfTasks)
 end # function jobstatus
 
 function fetch_results(bag::BagOfTasks)
-    return map(bag) do x
+    return map(bag.tasks) do x
         if isready(x)
             try
                 fetch(x)
