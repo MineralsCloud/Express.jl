@@ -84,7 +84,7 @@ function jobstatus(bag::AbstractVector)
                 return TaskStatus(:failed)
             end
         end
-        return isempty(task) ? TaskStatus(:pending) : TaskStatus(:running)
+        return TaskStatus(:running)
     end
 end # function jobstatus
 
