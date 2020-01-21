@@ -63,15 +63,15 @@ function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} =
 end # function distribute_process
 
 function isjobdone(bag::AbstractVector)
-    return all(map(isready, bag.tasks))
+    return all(map(isready, bag))
 end # function isjobdone
 
 function tasks_running(bag::AbstractVector)
-    return filter(!isready, bag.tasks)
+    return filter(!isready, bag)
 end # function tasks_running
 
 function tasks_exited(bag::AbstractVector)
-    return filter(isready, bag.tasks)
+    return filter(isready, bag)
 end # function subjobs_exited
 
 function jobstatus(bag::AbstractVector)
