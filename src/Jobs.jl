@@ -34,7 +34,6 @@ export nprocs_task,
 end
 
 @enum JobStatus begin
-    PENDING
     RUNNING
     EXITED
 end
