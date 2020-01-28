@@ -9,7 +9,13 @@ using Setfield: @set!
 
 export MpiExec, JobStatus, JobResult
 export nprocs_task,
-    distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus, jobresult
+    distribute_process,
+    isjobdone,
+    tasks_running,
+    tasks_exited,
+    fetch_results,
+    jobstatus,
+    jobresult
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -89,7 +95,8 @@ function jobstatus(bag::AbstractVector{Future})
 end # function jobstatus
 
 function jobresult(bag::AbstractVector{Future})
-    ids, results = Vector{Int}(undef, length(bag)), Vector{Union{JobResult,Nothing}}(undef, length(bag))
+    ids, results = Vector{Int}(undef, length(bag)),
+    Vector{Union{JobResult,Nothing}}(undef, length(bag))
     for (i, task) in enumerate(bag)
         ids[i] = task.where
         results[i] = isready(task) ? EXITED : RUNNING
