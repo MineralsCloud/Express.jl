@@ -7,7 +7,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, TaskStatus, PENDING, RUNNING, EXITED
+export MpiExec, JobStatus, PENDING, RUNNING, EXITED
 export nprocs_task,
     distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
 
@@ -33,7 +33,7 @@ export nprocs_task,
     env = ENV
 end
 
-@enum TaskStatus begin
+@enum JobStatus begin
     PENDING
     RUNNING
     EXITED
@@ -72,18 +72,18 @@ function tasks_exited(bag::AbstractVector)
 end # function subjobs_exited
 
 function jobstatus(bag::AbstractVector{Future})
-    ids, status = Vector{Int}(undef, length(bag)), Vector{TaskStatus}(undef, length(bag))
+    ids, status = Vector{Int}(undef, length(bag)), Vector{JobStatus}(undef, length(bag))
     for (i, task) in enumerate(bag)
         ids[i] = task.where
         if isready(task)
             try
                 ref = fetch(task)
-                status[i] = success(ref) ? TaskStatus(:succeeded) : TaskStatus(:failed)
+                status[i] = success(ref) ? JobStatus(:succeeded) : JobStatus(:failed)
             catch e
-                status[i] = TaskStatus(:failed)
+                status[i] = JobStatus(:failed)
             end
         end
-        status[i] = TaskStatus(:running)
+        status[i] = JobStatus(:running)
     end
     return ids, status
 end # function jobstatus
