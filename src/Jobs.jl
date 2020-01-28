@@ -7,7 +7,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, JobStatus, PENDING, RUNNING, EXITED
+export MpiExec, JobStatus
 export nprocs_task,
     distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
 
