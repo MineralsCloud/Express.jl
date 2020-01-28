@@ -7,7 +7,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, JobStatus
+export MpiExec, JobStatus, JobResult
 export nprocs_task,
     distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
 
@@ -37,6 +37,11 @@ end
     PENDING
     RUNNING
     EXITED
+end
+
+@enum JobResult begin
+    SUCCEEDED
+    FAILED
 end
 
 function nprocs_task(total_num::Int, nsubjob::Int)
