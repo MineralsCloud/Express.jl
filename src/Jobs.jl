@@ -7,7 +7,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, TaskStatus
+export MpiExec, TaskStatus, PENDING, RUNNING, EXITED
 export nprocs_task,
     distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
 
@@ -33,14 +33,11 @@ export nprocs_task,
     env = ENV
 end
 
-struct TaskStatus{T}
-    function TaskStatus{T}() where {T}
-        T ∈ (:pending, :running, :succeeded, :failed) ||
-        throw(ArgumentError("the task status should be one of `:pending`, `:running`, `:succeeded`, `:failed`!"))
-        return new()
-    end # function TaskStatus
+@enum TaskStatus begin
+    PENDING
+    RUNNING
+    EXITED
 end
-TaskStatus(T) = TaskStatus{T}()
 
 function nprocs_task(total_num::Int, nsubjob::Int)
     quotient, remainder = divrem(total_num, nsubjob)
@@ -123,7 +120,5 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
         dir = cmd.wdir,
     )
 end # function Base.convert
-
-Base.show(io::IO, ::TaskStatus{T}) where {T} = print(io, "$T")
 
 end
