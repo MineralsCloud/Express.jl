@@ -9,7 +9,7 @@ using Setfield: @set!
 
 export MpiExec, JobStatus, JobResult
 export nprocs_task,
-    distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
+    distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus, jobresult
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -79,18 +79,32 @@ function jobstatus(bag::AbstractVector{Future})
     ids, status = Vector{Int}(undef, length(bag)), Vector{JobStatus}(undef, length(bag))
     for (i, task) in enumerate(bag)
         ids[i] = task.where
+        status[i] = isready(task) ? EXITED : RUNNING
         if isready(task)
-            try
-                ref = fetch(task)
-                status[i] = success(ref) ? SUCCEEDED : FAILED
-            catch e
-                status[i] = FAILED
-            end
+            status[i] = EXITED
         end
         status[i] = RUNNING
     end
     return ids, status
 end # function jobstatus
+
+function jobresult(bag::AbstractVector{Future})
+    ids, results = Vector{Int}(undef, length(bag)), Vector{Union{JobResult,Nothing}}(undef, length(bag))
+    for (i, task) in enumerate(bag)
+        ids[i] = task.where
+        results[i] = isready(task) ? EXITED : RUNNING
+        if isready(task)
+            try
+                ref = fetch(task)
+                results[i] = success(ref) ? SUCCEEDED : FAILED
+            catch e
+                results[i] = FAILED
+            end
+        end
+        results[i] = nothing
+    end
+    return ids, results
+end # function jobresult
 
 function fetch_results(bag::AbstractVector)
     ids, results = Vector{Int}(undef, length(bag)), Vector{Any}(undef, length(bag))
