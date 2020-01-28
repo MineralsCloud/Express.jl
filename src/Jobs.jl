@@ -7,9 +7,15 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, TaskStatus
+export MpiExec, JobStatus, JobResult
 export nprocs_task,
-    distribute_process, isjobdone, tasks_running, tasks_exited, fetch_results, jobstatus
+    distribute_process,
+    isjobdone,
+    tasks_running,
+    tasks_exited,
+    fetch_results,
+    jobstatus,
+    jobresult
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
@@ -33,14 +39,15 @@ export nprocs_task,
     env = ENV
 end
 
-struct TaskStatus{T}
-    function TaskStatus{T}() where {T}
-        T ∈ (:pending, :running, :succeeded, :failed) ||
-        throw(ArgumentError("the task status should be one of `:pending`, `:running`, `:succeeded`, `:failed`!"))
-        return new()
-    end # function TaskStatus
+@enum JobStatus begin
+    RUNNING
+    EXITED
 end
-TaskStatus(T) = TaskStatus{T}()
+
+@enum JobResult begin
+    SUCCEEDED
+    FAILED
+end
 
 function nprocs_task(total_num::Int, nsubjob::Int)
     quotient, remainder = divrem(total_num, nsubjob)
@@ -75,21 +82,36 @@ function tasks_exited(bag::AbstractVector)
 end # function subjobs_exited
 
 function jobstatus(bag::AbstractVector{Future})
-    ids, status = Vector{Int}(undef, length(bag)), Vector{TaskStatus}(undef, length(bag))
+    ids, status = Vector{Int}(undef, length(bag)), Vector{JobStatus}(undef, length(bag))
     for (i, task) in enumerate(bag)
         ids[i] = task.where
+        status[i] = isready(task) ? EXITED : RUNNING
         if isready(task)
-            try
-                ref = fetch(task)
-                status[i] = success(ref) ? TaskStatus(:succeeded) : TaskStatus(:failed)
-            catch e
-                status[i] = TaskStatus(:failed)
-            end
+            status[i] = EXITED
         end
-        status[i] = TaskStatus(:running)
+        status[i] = RUNNING
     end
     return ids, status
 end # function jobstatus
+
+function jobresult(bag::AbstractVector{Future})
+    ids, results = Vector{Int}(undef, length(bag)),
+    Vector{Union{JobResult,Nothing}}(undef, length(bag))
+    for (i, task) in enumerate(bag)
+        ids[i] = task.where
+        results[i] = isready(task) ? EXITED : RUNNING
+        if isready(task)
+            try
+                ref = fetch(task)
+                results[i] = success(ref) ? SUCCEEDED : FAILED
+            catch e
+                results[i] = FAILED
+            end
+        end
+        results[i] = nothing
+    end
+    return ids, results
+end # function jobresult
 
 function fetch_results(bag::AbstractVector)
     ids, results = Vector{Int}(undef, length(bag)), Vector{Any}(undef, length(bag))
@@ -123,7 +145,5 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
         dir = cmd.wdir,
     )
 end # function Base.convert
-
-Base.show(io::IO, ::TaskStatus{T}) where {T} = print(io, "$T")
 
 end
