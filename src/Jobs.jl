@@ -83,12 +83,12 @@ function jobstatus(bag::AbstractVector{Future})
         if isready(task)
             try
                 ref = fetch(task)
-                status[i] = success(ref) ? JobStatus(:succeeded) : JobStatus(:failed)
+                status[i] = success(ref) ? SUCCEEDED : FAILED
             catch e
-                status[i] = JobStatus(:failed)
+                status[i] = FAILED
             end
         end
-        status[i] = JobStatus(:running)
+        status[i] = RUNNING
     end
     return ids, status
 end # function jobstatus
