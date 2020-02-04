@@ -8,7 +8,7 @@ using Parameters: @with_kw
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, DockerCmd, JobStatus, JobResult
+export MpiExec, DockerExec, JobStatus, JobResult
 export nprocs_task,
     distribute_process,
     isjobdone,
@@ -18,7 +18,7 @@ export nprocs_task,
     jobstatus,
     jobresult
 
-@with_kw struct DockerCmd{:exec}
+@with_kw struct DockerExec
     which::String = "docker"
     container::String
     cmd::Base.AbstractCmd
@@ -158,7 +158,7 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
         dir = cmd.wdir,
     )
 end # function Base.convert
-function Base.convert(::Type{Cmd}, cmd::DockerCmd{:exec})
+function Base.convert(::Type{Cmd}, cmd::DockerExec)
     options = String[]
     # for f in fieldnames(typeof(cmd))[3:end]  # Join options
     #     v = getfield(cmd, f)
