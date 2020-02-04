@@ -158,5 +158,21 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
         dir = cmd.wdir,
     )
 end # function Base.convert
+function Base.convert(::Type{Cmd}, cmd::DockerCmd{:exec})
+    options = String[]
+    # for f in fieldnames(typeof(cmd))[3:end]  # Join options
+    #     v = getfield(cmd, f)
+    #     if !iszero(v)
+    #         push!(options, string(" -", f, ' ', v))
+    #     else
+    #         push!(options, "")
+    #     end
+    # end
+    return Cmd(
+        `$(cmd.which) exec $(options...) $(cmd.container) $(convert(Cmd, cmd.cmd))`,
+        env = cmd.env,
+        dir = cmd.workdir,
+    )
+end # function Base.convert
 
 end
