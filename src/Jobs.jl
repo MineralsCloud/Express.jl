@@ -27,7 +27,7 @@ export nprocs_task,
     interactive::Bool = false
     tty::IO = stdin
     user::UInt64 = 0
-    workdir::String = ""
+    workdir::String = pwd()
 end
 
 @with_kw struct MpiExec <: Base.AbstractCmd
@@ -41,7 +41,7 @@ end
     "Pick hosts with this architecture type"
     arch::String = ""
     "`cd` to this one before running executable"
-    wdir::String = ""
+    wdir::String = pwd()
     "Use this to find the executable"
     path::Vector{String} = []
     "Implementation-defined specification file"
