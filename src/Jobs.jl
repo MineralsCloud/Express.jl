@@ -1,6 +1,7 @@
 module Jobs
 
 using Distributed
+using REPL.Terminals: AbstractTerminal
 
 using ClusterManagers
 using Parameters: @with_kw
@@ -16,6 +17,18 @@ export nprocs_task,
     fetch_results,
     jobstatus,
     jobresult
+
+@with_kw struct DockerCmd{:exec}
+    which::String = "docker"
+    container::String
+    cmd::Base.AbstractCmd
+    detach::Bool = false
+    env::Base.EnvDict = ENV
+    interactive::Bool = false
+    tty::IO = stdin
+    user::UInt64 = 0
+    workdir::String = ""
+end
 
 @with_kw struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
