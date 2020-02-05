@@ -52,7 +52,7 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     #     end
     # end
     return Cmd(
-        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.cmd))`,
+        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.cmd).exec)`,
         env = cmd.env,
         dir = cmd.wdir,
     )
@@ -68,7 +68,7 @@ function Base.convert(::Type{Cmd}, cmd::DockerExec)
     #     end
     # end
     return Cmd(
-        `$(cmd.which) exec $(options...) $(cmd.container) $(convert(Cmd, cmd.cmd))`,
+        `$(cmd.which) exec $(options...) $(cmd.container) $(convert(Cmd, cmd.cmd).exec)`,
         env = cmd.env,
         dir = cmd.workdir,
     )
