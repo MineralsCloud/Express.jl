@@ -4,7 +4,7 @@ using Distributed
 using REPL.Terminals: AbstractTerminal
 
 using ClusterManagers
-using Parameters: @with_kw
+using Parameters: @with_kw_noshow
 using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
@@ -18,7 +18,7 @@ export nprocs_task,
     jobstatus,
     jobresult
 
-@with_kw struct DockerExec
+@with_kw_noshow struct DockerExec <: Base.AbstractCmd
     which::String = "docker"
     container::String
     cmd::Base.AbstractCmd
@@ -30,7 +30,7 @@ export nprocs_task,
     workdir::String = pwd()
 end
 
-@with_kw struct MpiExec <: Base.AbstractCmd
+@with_kw_noshow struct MpiExec <: Base.AbstractCmd
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
     "The path to the executable, defaults to \"mpiexec\""
     which::String = "mpiexec"
