@@ -10,6 +10,7 @@ struct PWscfCalculation{T} <: QuantumESPRESSOCalculation end
 struct PHononCalculation{T} <: QuantumESPRESSOCalculation end
 struct CPCalculation{T} <: QuantumESPRESSOCalculation end
 
+include("CLI.jl")
 include("Jobs.jl")
 include("SelfConsistentField.jl")
 include("BandStructure.jl")

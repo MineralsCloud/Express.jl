@@ -2,12 +2,9 @@ module Jobs
 
 using Distributed
 
-using ClusterManagers
-using Parameters: @with_kw
-using QuantumESPRESSOBase.CLI: PWCmd
 using Setfield: @set!
 
-export MpiExec, JobStatus, JobResult
+export JobStatus, JobResult
 export nprocs_task,
     distribute_process,
     isjobdone,
@@ -16,28 +13,6 @@ export nprocs_task,
     fetch_results,
     jobstatus,
     jobresult
-
-@with_kw struct MpiExec <: Base.AbstractCmd
-    # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
-    "The path to the executable, defaults to \"mpiexec\""
-    which::String = "mpiexec"
-    "Specify the number of processes to use"
-    n::Int
-    "Name of host on which to run processes"
-    host::String = ""
-    "Pick hosts with this architecture type"
-    arch::String = ""
-    "`cd` to this one before running executable"
-    wdir::String = ""
-    "Use this to find the executable"
-    path::Vector{String} = []
-    "Implementation-defined specification file"
-    file::String = ""
-    configfile::String = ""
-    cmd::Base.AbstractCmd
-    "Set environment variables to use when running the command, defaults to `ENV`"
-    env = ENV
-end
 
 @enum JobStatus begin
     RUNNING
@@ -128,22 +103,5 @@ function fetch_results(bag::AbstractVector)
     end
     return ids, results
 end # function fetch_results
-
-function Base.convert(::Type{Cmd}, cmd::MpiExec)
-    options = String[]
-    # for f in fieldnames(typeof(cmd))[3:end]  # Join options
-    #     v = getfield(cmd, f)
-    #     if !iszero(v)
-    #         push!(options, string(" -", f, ' ', v))
-    #     else
-    #         push!(options, "")
-    #     end
-    # end
-    return Cmd(
-        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.cmd))`,
-        env = cmd.env,
-        dir = cmd.wdir,
-    )
-end # function Base.convert
 
 end

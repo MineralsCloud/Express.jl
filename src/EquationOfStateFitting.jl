@@ -33,7 +33,8 @@ using Unitful
 using UnitfulAtomic
 
 import ..Step
-using ..Jobs: MpiExec, nprocs_task, distribute_process
+using ..CLI: MpiExec
+using ..Jobs: nprocs_task, distribute_process
 
 export update_alat_press, preprocess, postprocess, fire
 
