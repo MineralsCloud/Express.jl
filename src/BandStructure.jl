@@ -11,10 +11,8 @@ julia>
 """
 module BandStructure
 
-using QuantumESPRESSO: to_qe
-using QuantumESPRESSO.Cards.PWscf: SpecialKPoint, KPointsCard
-using QuantumESPRESSO.Namelists.PWscf: BandsNamelist
-using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Inputs: qestring
+using QuantumESPRESSO.Inputs.PWscf: SpecialKPoint, KPointsCard, BandsNamelist, PWInput
 using Setfield: @set
 using ShiftedArrays: circshift, lead
 
@@ -129,7 +127,7 @@ function prepare(
     template = update_kpoints(template, generate_path(nodes, densities))
     for input in inputs
         open(input, "r+") do io
-            write(io, to_qe(template))
+            write(io, qestring(template))
         end
     end
 end# function prepare
@@ -140,7 +138,7 @@ function prepare(
 )
     for input in inputs
         open(input, "r+") do io
-            write(io, to_qe(template))
+            write(io, qestring(template))
         end
     end
 end # function prepare

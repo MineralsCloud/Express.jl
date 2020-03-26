@@ -9,10 +9,9 @@ using Crayons.Box: GREEN_FG
 using EquationsOfState.Collections
 using JLD2: jldopen
 using Parameters: @with_kw
-using QuantumESPRESSO: to_qe
-using QuantumESPRESSO.Namelists.PWscf
-using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
+using QuantumESPRESSO.Inputs: qestring
 using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Inputs.PHonon: Q2rInput, DynmatInput
 using QuantumESPRESSO.Inputs.CP: CPInput
 using QuantumESPRESSOHelpers.Inputs: input_builder
 using Setfield: PropertyLens, set
