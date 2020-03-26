@@ -12,7 +12,7 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSO: to_qe
+using QuantumESPRESSO: qestring
 using QuantumESPRESSO.Cards: option_convert
 using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
 using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
@@ -154,7 +154,7 @@ function preprocess(
     for (input, output) in zip(inputs, outputs)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
-        write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
+        write(input, qestring(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
     return
 end # function preprocess
@@ -176,7 +176,7 @@ function preprocess(
             parse(PWInput, read(io, String))
         end
         template = relay(object, template)
-        write(phonon_input, to_qe(template, verbose = verbose))
+        write(phonon_input, qestring(template, verbose = verbose))
     end
     return
 end # function preprocess
@@ -197,7 +197,7 @@ function preprocess(
             parse(PhInput, read(io, String))
         end
         template = relay(object, template)
-        write(q2r_input, to_qe(template, verbose = verbose))
+        write(q2r_input, qestring(template, verbose = verbose))
     end
     return
 end # function preprocess
@@ -225,7 +225,7 @@ function preprocess(
                 "_disp"  # Append extension `"_disp` to `template.input.flfrq`
             end
         end
-        write(matdyn_input, to_qe(template, verbose = verbose))
+        write(matdyn_input, qestring(template, verbose = verbose))
     end
     return
 end # function preprocess
@@ -246,7 +246,7 @@ function preprocess(
             parse(PhInput, read(io, String))
         end
         template = relay(object, template)
-        write(dynmat_input, to_qe(template, verbose = verbose))
+        write(dynmat_input, qestring(template, verbose = verbose))
     end
     return
 end # function preprocess

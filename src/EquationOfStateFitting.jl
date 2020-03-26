@@ -20,10 +20,7 @@ using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
-using QuantumESPRESSO: to_qe, cell_volume
-using QuantumESPRESSO.Cards: optionof
-using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
-using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput, getoption, qestring, cellvolume
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
@@ -49,7 +46,7 @@ function update_alat_press(
     # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     v0 = float(eos.v0)
     volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
-    option = optionof(template.cell_parameters)
+    option = getoption(template.cell_parameters)
     # Please do not change this logic, see https://github.com/MineralsCloud/Express.jl/pull/38.
     determinant = if option ∈ ("alat", "bohr")
         # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
@@ -101,7 +98,7 @@ function preprocess(
         object = update_alat_press(template, trial_eos, pressure)
         # `write` will create a file if it doesn't exist.
         objects[i] = object
-        write(input, to_qe(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
+        write(input, qestring(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
     end
     return objects
 end # function preprocess
@@ -142,7 +139,7 @@ function postprocess(
             volumes[i] = if N == 1
                 parse(Preamble, s).omega
             elseif N == 2
-                cell_volume(parsefinal(CellParametersCard, s))
+                cellvolume(parsefinal(CellParametersCard, s))
             else
                 error("The step $N must be `1` or `2`!")
             end
