@@ -11,18 +11,19 @@ julia>
 """
 module EquationOfStateFitting
 
-using Distributed: workers
-using LinearAlgebra: det
-
 using Compat: isnothing
+using Crystallography: cellvolume
+using Distributed: workers
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput, getoption, qestring, cellvolume
-using QuantumESPRESSO.Outputs.PWscf:
-    Preamble, parse_electrons_energies, parsefinal, isjobdone
+using LinearAlgebra: det
+using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
+using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
+using QuantumESPRESSO.Outputs: OutputFile
+using QuantumESPRESSO.Outputs.PWscf: Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
 using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set, @set!

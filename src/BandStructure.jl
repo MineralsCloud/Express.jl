@@ -11,7 +11,7 @@ julia>
 """
 module BandStructure
 
-using QuantumESPRESSO.Inputs: qestring
+using QuantumESPRESSO.Inputs: InputFile
 using QuantumESPRESSO.Inputs.PWscf: SpecialKPoint, KPointsCard, BandsNamelist, PWInput
 using Setfield: @set
 using ShiftedArrays: circshift, lead

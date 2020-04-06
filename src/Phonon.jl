@@ -12,18 +12,17 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSO: qestring
-using QuantumESPRESSO.Cards: option_convert
-using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
-using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
-using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Inputs: InputFile, optconvert, qestring
+using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
+# using QuantumESPRESSO.Inputs.PHonon: SpecialQPoint, QPointsSpecsCard
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
+using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using QuantumESPRESSOBase.Setters: CellParametersSetter, batchset
 using Setfield: get, set, @lens, @set!
 
 import ..Step
-using Express.BandStructure: generate_path
+using ..BandStructure: generate_path
 
 export update_structure, relay, preprocess
 
