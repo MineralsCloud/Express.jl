@@ -126,9 +126,7 @@ function prepare(
     template = set_calculation(step, template)
     template = update_kpoints(template, generate_path(nodes, densities))
     for input in inputs
-        open(input, "r+") do io
-            write(io, qestring(template))
-        end
+        write(InputFile(input), template)
     end
 end# function prepare
 function prepare(
@@ -137,9 +135,7 @@ function prepare(
     template::BandsNamelist,
 )
     for input in inputs
-        open(input, "r+") do io
-            write(io, qestring(template))
-        end
+        write(InputFile(input), template)
     end
 end # function prepare
 
