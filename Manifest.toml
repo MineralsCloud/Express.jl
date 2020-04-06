@@ -187,11 +187,6 @@ version = "0.10.10"
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
-[[ImportMacros]]
-git-tree-sha1 = "eff7860136dd9e88a67f34eb07e990bbb7a3788a"
-uuid = "92a963f6-6b1d-11e9-1d6c-8d25856e017b"
-version = "1.0.0"
-
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -378,8 +373,8 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.3.1"
 
 [[QuantumESPRESSO]]
-deps = ["Crystallography", "ImportMacros", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "Reexport"]
-git-tree-sha1 = "04db27e865f4f5c859aee85257f7f94329865d5a"
+deps = ["Crystallography", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "QuantumESPRESSOParsers", "Reexport"]
+git-tree-sha1 = "159f20c0a5539f42d4c44d36f82cd6f877fbba3d"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -423,10 +418,11 @@ uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 version = "1.0.0"
 
 [[Reexport]]
-deps = ["Pkg"]
-git-tree-sha1 = "7b1d07f411bc8ddb7977ec7f377b97b158514fe0"
+git-tree-sha1 = "3c2cb8d4320b2094d29f804b147845073d57a559"
+repo-rev = "master"
+repo-url = "https://github.com/simonster/Reexport.jl.git"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
-version = "0.2.0"
+version = "0.2.0+"
 
 [[Rematch]]
 deps = ["Compat", "MacroTools"]
