@@ -11,18 +11,19 @@ julia>
 """
 module EquationOfStateFitting
 
-using Distributed: workers
-using LinearAlgebra: det
-
 using Compat: isnothing
+using Crystallography: cellvolume
+using Distributed: workers
 using EquationsOfState
 using EquationsOfState.Collections: EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput, getoption, qestring, cellvolume
-using QuantumESPRESSO.Outputs.PWscf:
-    Preamble, parse_electrons_energies, parsefinal, isjobdone
+using LinearAlgebra: det
+using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
+using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
+using QuantumESPRESSO.Outputs: OutputFile
+using QuantumESPRESSO.Outputs.PWscf: Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
 using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set, @set!
@@ -98,7 +99,7 @@ function preprocess(
         object = update_alat_press(template, trial_eos, pressure)
         # `write` will create a file if it doesn't exist.
         objects[i] = object
-        write(input, qestring(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
+        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
     end
     return objects
 end # function preprocess
@@ -132,17 +133,15 @@ function postprocess(
 ) where {N}
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
-        open(output, "r") do io
-            s = read(io, String)
-            isjobdone(s) || @warn("Job is not finished!")
-            energies[i] = parse_electrons_energies(s, :converged).ε[end]
-            volumes[i] = if N == 1
-                parse(Preamble, s).omega
-            elseif N == 2
-                cellvolume(parsefinal(CellParametersCard, s))
-            else
-                error("The step $N must be `1` or `2`!")
-            end
+        s = read(OutputFile(output))
+        isjobdone(s) || @warn("Job is not finished!")
+        energies[i] = parse_electrons_energies(s, :converged).ε[end]
+        volumes[i] = if N == 1
+            parse(Preamble, s).omega
+        elseif N == 2
+            cellvolume(parsefinal(CellParametersCard, s))
+        else
+            error("The step $N must be `1` or `2`!")
         end
     end
     return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")

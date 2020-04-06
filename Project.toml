@@ -4,7 +4,6 @@ authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
 
 [deps]
-ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 Crayons = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 Crystallography = "3bff3928-7a76-11e9-2089-d112443085a5"
@@ -21,6 +20,7 @@ QuantumESPRESSOBase = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 QuantumESPRESSOHelpers = "a9fedd91-8596-4386-96ec-8925d33acc95"
 QuantumESPRESSOParsers = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 ShiftedArrays = "1277b4bf-5013-50f5-be3d-901d8477a67a"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"

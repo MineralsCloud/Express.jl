@@ -1,7 +1,6 @@
 module Jobs
 
 using Distributed
-
 using Setfield: @set!
 
 export JobStatus, JobResult

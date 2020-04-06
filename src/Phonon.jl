@@ -12,18 +12,17 @@ julia>
 module Phonon
 
 using Kaleido: @batchlens
-using QuantumESPRESSO: qestring
-using QuantumESPRESSO.Cards: option_convert
-using QuantumESPRESSO.Cards.PWscf: AtomicPositionsCard, CellParametersCard
-using QuantumESPRESSO.Cards.PHonon: SpecialQPoint, QPointsSpecsCard
-using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Inputs: InputFile, optconvert, qestring
+using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
+# using QuantumESPRESSO.Inputs.PHonon: SpecialQPoint, QPointsSpecsCard
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
+using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using QuantumESPRESSOBase.Setters: CellParametersSetter, batchset
 using Setfield: get, set, @lens, @set!
 
 import ..Step
-using Express.BandStructure: generate_path
+using ..BandStructure: generate_path
 
 export update_structure, relay, preprocess
 
@@ -33,24 +32,22 @@ export update_structure, relay, preprocess
 Read structure information from `output`, and update related fields of `template`.
 """
 function update_structure(output::AbstractString, template::PWInput)
-    open(output, "r") do io
-        str = read(io, String)
-        # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option.
-        # Convert it to "bohr" by default
-        cell_parameters = option_convert("bohr", parsefinal(CellParametersCard, str))
-        atomic_positions = parsefinal(AtomicPositionsCard, str)
-        lenses = @batchlens(begin
-            _.system.ibrav
-            _.system.celldm ∘ _[$1]
-            _.atomic_positions
-            _.cell_parameters
-        end)
-        return set(
-            template,
-            lenses,
-            (0, 1, atomic_positions, CellParametersCard("alat", cell_parameters.data)),
-        )
-    end
+    str = read(OutputFile(output))
+    # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option.
+    # Convert it to "bohr" by default
+    cell_parameters = optconvert("bohr", parsefinal(CellParametersCard, str))
+    atomic_positions = parsefinal(AtomicPositionsCard, str)
+    lenses = @batchlens(begin
+        _.system.ibrav
+        _.system.celldm ∘ _[$1]
+        _.atomic_positions
+        _.cell_parameters
+    end)
+    return set(
+        template,
+        lenses,
+        (0, 1, atomic_positions, CellParametersCard("alat", cell_parameters.data)),
+    )
 end # function update_structure
 
 # This is a helper function and should not be exported.
@@ -154,7 +151,7 @@ function preprocess(
     for (input, output) in zip(inputs, outputs)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
-        write(input, qestring(object, verbose = verbose))  # Write the `object` to a Quantum ESPRESSO input file
+        write(InputFile(input), object)
     end
     return
 end # function preprocess
@@ -172,11 +169,8 @@ function preprocess(
     )
     template = _preset(template)
     for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
-        object = open(pwscf_input, "r") do io
-            parse(PWInput, read(io, String))
-        end
-        template = relay(object, template)
-        write(phonon_input, qestring(template, verbose = verbose))
+        object = parse(PWInput, read(InputFile(pwscf_input)))
+        write(InputFile(phonon_input), relay(object, template))
     end
     return
 end # function preprocess
@@ -193,11 +187,8 @@ function preprocess(
         "The phonon and the q2r inputs files must have the same length!",
     )
     for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
-        object = open(phonon_input, "r") do io
-            parse(PhInput, read(io, String))
-        end
-        template = relay(object, template)
-        write(q2r_input, qestring(template, verbose = verbose))
+        object = parse(PhInput, read(InputFile(phonon_input)))
+        write(InputFile(q2r_input), relay(object, template))
     end
     return
 end # function preprocess
@@ -214,9 +205,7 @@ function preprocess(
         "The q2r and the matdyn inputs files must have the same length!",
     )
     for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
-        object = open(q2r_input, "r") do io
-            parse(Q2rInput, read(io, String))
-        end
+        object = parse(Q2rInput, read(InputFile(q2r_input)))
         template = relay(object, template)
         if isfile(template.input.flfrq)
             @set! template.input.flfrq *= if template.input.dos == true  # Phonon DOS calculation
@@ -225,7 +214,7 @@ function preprocess(
                 "_disp"  # Append extension `"_disp` to `template.input.flfrq`
             end
         end
-        write(matdyn_input, qestring(template, verbose = verbose))
+        write(InputFile(matdyn_input), template)
     end
     return
 end # function preprocess
@@ -242,11 +231,8 @@ function preprocess(
         "The dynmat and the phonon inputs files must have the same length!",
     )
     for (dynmat_input, phonon_input) in zip(dynmat_inputs, phonon_inputs)
-        object = open(phonon_input, "r") do io
-            parse(PhInput, read(io, String))
-        end
-        template = relay(object, template)
-        write(dynmat_input, qestring(template, verbose = verbose))
+        object = parse(PhInput, read(InputFile(phonon_input)))
+        write(InputFile(dynmat_input), relay(object, template))
     end
     return
 end # function preprocess
