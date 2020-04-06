@@ -33,12 +33,6 @@ git-tree-sha1 = "23d7324164c89638c18f6d7f90d972fa9c4fa9fb"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 version = "0.7.7"
 
-[[ClusterManagers]]
-deps = ["Distributed", "Sockets"]
-git-tree-sha1 = "60a1c6dc3278910716fcf87eb602968fdf72e44d"
-uuid = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
-version = "0.3.2"
-
 [[CodecZlib]]
 deps = ["BinaryProvider", "Libdl", "TranscodingStreams"]
 git-tree-sha1 = "05916673a2627dd91b4969ff8ba6941bc85a960e"
