@@ -33,7 +33,10 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export update_alat_press, preprocess, postprocess, fire
+export parse_template, update_alat_press, preprocess, postprocess, fire
+
+parse_template(str::AbstractString) = parse(PWInput, str)
+parse_template(file::InputFile) = parse(PWInput, read(file))
 
 function update_alat_press(
     template::PWInput,
