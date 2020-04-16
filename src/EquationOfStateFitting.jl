@@ -14,8 +14,7 @@ module EquationOfStateFitting
 using Compat: isnothing
 using Crystallography: cellvolume
 using Distributed: workers
-using EquationsOfState
-using EquationsOfState.Collections: EquationOfState
+using EquationsOfState.Collections: EquationOfState, PressureForm, EnergyForm
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
@@ -44,29 +43,14 @@ function update_alat_press(
     if isnothing(template.cell_parameters)
         template = set(template, CellParametersSetter())
     end
-    # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    v0 = float(eos.v0)
-    volume = findvolume(PressureForm(), eos, pressure, (eps(v0), 1.3v0))
-    option = getoption(template.cell_parameters)
-    # Please do not change this logic, see https://github.com/MineralsCloud/Express.jl/pull/38.
-    determinant = if option ∈ ("alat", "bohr")
-        # `alat` uses relative values WRT `celldm`, which uses "bohr" as unit.
-        # So `"alat"` is equivalent to `"bohr"`.
-        det(template.cell_parameters.data) * u"bohr^3"
-    elseif option == "angstrom"
-        det(template.cell_parameters.data) * u"angstrom^3" |> u"bohr^3"
-    else  # This should never happen actually.
-        error("unknown option $option in a `CellParametersCard`!")
-    end
-    # `cbrt` works with units.
-    alat = cbrt(volume / determinant) |> NoUnits  # This is dimensionless.
+    volume = findvolume(eos(PressureForm()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
+    alat = cbrt(volume / cellvolume(template) * u"bohr^3") |> NoUnits  # This is dimensionless and `cbrt` works with units.
     lenses = @batchlens(begin
         _.system.celldm  # Get the `template`'s `system.celldm` value
         _.cell.press     # Get the `template`'s `cell.press` value
         _.cell_parameters.option
     end)
-    # Set the `template`'s `system.celldm` and `cell.press` values
-    return set(template, lenses, ([alat], ustrip(u"kbar", pressure), "alat"))
+    return set(template, lenses, ([alat], ustrip(u"kbar", pressure), "alat"))  # Set the `template`'s `system.celldm` and `cell.press` values
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
@@ -144,7 +128,7 @@ function postprocess(
             error("The step $N must be `1` or `2`!")
         end
     end
-    return lsqfit(EnergyForm(), trial_eos, volumes .* u"bohr^3", energies .* u"Ry")
+    return lsqfit(trial_eos(EnergyForm()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
 
 end
