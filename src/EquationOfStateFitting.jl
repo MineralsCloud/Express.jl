@@ -12,9 +12,9 @@ julia>
 module EquationOfStateFitting
 
 using Compat: isnothing
-using Crystallography: cellvolume
+using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
-using EquationsOfState.Collections: EquationOfState, PressureForm, EnergyForm
+using EquationsOfState.Collections: EquationOfState, Pressure, Energy
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Kaleido: @batchlens
@@ -33,7 +33,10 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export update_alat_press, preprocess, postprocess, fire
+export parse_template, update_alat_press, preprocess, postprocess, fire
+
+parse_template(str::AbstractString) = parse(PWInput, str)
+parse_template(file::InputFile) = parse(PWInput, read(file))
 
 function update_alat_press(
     template::PWInput,
@@ -43,7 +46,7 @@ function update_alat_press(
     if isnothing(template.cell_parameters)
         template = set(template, CellParametersSetter())
     end
-    volume = findvolume(eos(PressureForm()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
+    volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     alat = cbrt(volume / cellvolume(template) * u"bohr^3") |> NoUnits  # This is dimensionless and `cbrt` works with units.
     lenses = @batchlens(begin
         _.system.celldm  # Get the `template`'s `system.celldm` value
@@ -128,7 +131,7 @@ function postprocess(
             error("The step $N must be `1` or `2`!")
         end
     end
-    return lsqfit(trial_eos(EnergyForm()), volumes .* u"bohr^3", energies .* u"Ry")
+    return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
 
 end
