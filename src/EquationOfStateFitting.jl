@@ -12,6 +12,7 @@ julia>
 module EquationOfStateFitting
 
 using Compat: isnothing
+using ConstructionBase: setproperties
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
 using EquationsOfState.Collections: EquationOfState, Pressure, Energy
@@ -33,12 +34,12 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export parse_template, update_alat_press, preprocess, postprocess, fire
+export parse_template, set_alat_press, preprocess, postprocess, fire
 
 parse_template(str::AbstractString) = parse(PWInput, str)
 parse_template(file::InputFile) = parse(PWInput, read(file))
 
-function update_alat_press(
+function set_alat_press(
     template::PWInput,
     eos::EquationOfState{<:Unitful.AbstractQuantity},
     pressure::Unitful.AbstractQuantity,
@@ -48,25 +49,20 @@ function update_alat_press(
     end
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     alat = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    lenses = @batchlens(begin
-        _.system.celldm  # Get the `template`'s `system.celldm` value
-        _.cell.press     # Get the `template`'s `cell.press` value
-        _.cell_parameters.option
-    end)
-    return set(template, lenses, ([alat], ustrip(u"kbar", pressure), "alat"))  # Set the `template`'s `system.celldm` and `cell.press` values
+    return setproperties(template,
+        system = setproperties(template.system, celldm = [alat]),
+        cell = setproperties(template.cell, press = ustrip(u"kbar", pressure)),
+        cell_parameters = setproperties(template.cell_parameters, "alat")
+    )
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-function _preset(step::Step{N}, template::PWInput) where {N}
-    lenses = @batchlens(begin
-        _.control.calculation  # Get the `template`'s `control.calculation` value
-        _.control.verbosity    # Get the `template`'s `control.verbosity` value
-        _.control.tstress      # Get the `template`'s `control.tstress` value
-        _.control.tprnfor      # Get the `template`'s `control.tprnfor` value
-    end)
-    # Set the `template`'s values with...
-    return set(template, lenses, (N == 1 ? "scf" : "vc-relax", "high", true, true))
-end # function _preset
+_preset(step::Step{N}, template::PWInput) where {N} = setproperties(template.control,
+        calculation = N == 1 ? "scf" : "vc-relax",
+        verbosity = "high",
+        tstress = true,
+        tprnfor = true
+    )
 
 function preprocess(
     step::Step,
@@ -83,7 +79,7 @@ function preprocess(
     objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
     for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
         # Create a new `object` from the `template`, with its `alat` and `pressure` changed
-        object = update_alat_press(template, trial_eos, pressure)
+        object = set_alat_press(template, trial_eos, pressure)
         # `write` will create a file if it doesn't exist.
         objects[i] = object
         write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
