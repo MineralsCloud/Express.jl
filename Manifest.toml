@@ -83,7 +83,7 @@ version = "4.0.1"
 deps = ["CoordinateTransformations", "EponymTuples", "LibSymspg", "LinearAlgebra", "ShiftedArrays", "StaticArrays", "Unitful"]
 git-tree-sha1 = "d735f9f95e0de2e31d7b5cfe5307d538d0bce49e"
 repo-rev = "master"
-repo-url = "https://github.com/singularitti/Crystallography.jl.git"
+repo-url = "git@github.com:MineralsCloud/Crystallography.jl.git"
 uuid = "3bff3928-7a76-11e9-2089-d112443085a5"
 version = "0.1.0"
 
@@ -201,10 +201,10 @@ deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[Intervals]]
-deps = ["Dates", "Printf", "TimeZones"]
-git-tree-sha1 = "30bce135cd5856edc91f146e3b7e60d736bd067b"
+deps = ["Dates", "Printf", "RecipesBase", "TimeZones"]
+git-tree-sha1 = "5e9938f4dff72e5ed4c0f7fbe34b204cbabcf43a"
 uuid = "d8418881-c3e1-53bb-8760-2df7ec849ed5"
-version = "1.0.0"
+version = "1.1.0"
 
 [[InvertedIndices]]
 deps = ["Test"]
@@ -401,7 +401,7 @@ version = "2.3.1"
 
 [[QuantumESPRESSO]]
 deps = ["Crystallography", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "76c662df3061dd40b093f0b74d0c3068dbff16c6"
+git-tree-sha1 = "1142d2f1b4eb3c5740a086171b15c0ee3ce74430"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -425,7 +425,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "Crystallography", "DataFrames", "DataStructures", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
-git-tree-sha1 = "e2c26db052f6adaaf83d9afd4c7899a249ddbaef"
+git-tree-sha1 = "a8616c44694df7be6eb05c0b8a3245fbb7c917f8"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -563,10 +563,10 @@ deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[TimeZones]]
-deps = ["Dates", "EzXML", "Mocking", "Printf", "Serialization", "Unicode"]
-git-tree-sha1 = "f60a33649ef8380bafe6be7d1af1eeb8a3a3ea92"
+deps = ["Dates", "EzXML", "Mocking", "Printf", "RecipesBase", "Serialization", "Unicode"]
+git-tree-sha1 = "0f070959511602e90ac4a8fa1799746c95cc3c19"
 uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
-version = "1.0.1"
+version = "1.1.0"
 
 [[TranscodingStreams]]
 deps = ["Random", "Test"]
