@@ -53,7 +53,7 @@ function set_alat_press(
         template,
         system = setproperties(template.system, celldm = [alat]),
         cell = setproperties(template.cell, press = ustrip(u"kbar", pressure)),
-        cell_parameters = setproperties(template.cell_parameters, "alat"),
+        cell_parameters = setproperties(template.cell_parameters, option = "alat"),
     )
 end # function update_alat_press
 
