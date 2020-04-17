@@ -11,6 +11,7 @@ julia>
 """
 module Phonon
 
+using ConstructionBase: setproperties
 using Kaleido: @batchlens
 using QuantumESPRESSO.Inputs: InputFile, optconvert, qestring
 using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
@@ -33,20 +34,14 @@ Read structure information from `output`, and update related fields of `template
 """
 function update_structure(output::AbstractString, template::PWInput)
     str = read(OutputFile(output))
-    # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option.
-    # Convert it to "bohr" by default
-    cell_parameters = optconvert("bohr", parsefinal(CellParametersCard, str))
-    atomic_positions = parsefinal(AtomicPositionsCard, str)
-    lenses = @batchlens(begin
-        _.system.ibrav
-        _.system.celldm ∘ _[$1]
-        _.atomic_positions
-        _.cell_parameters
-    end)
-    return set(
+    return setproperties(
         template,
-        lenses,
-        (0, 1, atomic_positions, CellParametersCard("alat", cell_parameters.data)),
+        system = setproperties(template.system, ibrav = 0, celldm = [1]),
+        atomic_positions = parsefinal(AtomicPositionsCard, str),
+        cell_parameters = CellParametersCard(
+            "alat",
+            optconvert("bohr", parsefinal(CellParametersCard, str)).data,
+        ), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
     )
 end # function update_structure
 

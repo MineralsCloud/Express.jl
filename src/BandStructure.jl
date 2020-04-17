@@ -11,16 +11,16 @@ julia>
 """
 module BandStructure
 
+using ConstructionBase: setproperties
 using Crystallography.Symmetry: genpath
 using QuantumESPRESSO.Inputs: InputFile
 using QuantumESPRESSO.Inputs.PWscf: SpecialKPoint, KPointsCard, BandsNamelist, PWInput
-using Setfield: @set
 
 import ..Step
 
 function update_kpoints(template::PWInput, path::AbstractVector{<:AbstractVector})
     data = map(x -> SpecialKPoint(x, 1), path)
-    @set template.k_points = KPointsCard("crystal_b", data)
+    return setproperties(template, k_points = KPointsCard("crystal_b", data))
 end # function update_kpoints
 
 # This is a helper function and should not be exported
@@ -29,11 +29,8 @@ which_calculation(step::Step{2}) = "bands"
 
 # This is a helper function and should not be exported
 function set_calculation(step::Step, template::PWInput)
-    type = which_calculation(step)
-    if template.control.calculation != type
-        @warn "The calculation type is $(template.control.calculation), not \"$type\"! We will set it for you."
-    end
-    @set template.control.calculation = type  # Return a new `template` with its `control.calculation` to be `type`
+    @warn "We will set the calculation type to be \"$type\" for you."
+    return setproperties(template, setproperties(template.control, calculation = which_calculation(step)))
 end # function set_calculation
 
 function prepare(step::Step{1}, inputs::AbstractVector{<:AbstractString}, template::PWInput)
