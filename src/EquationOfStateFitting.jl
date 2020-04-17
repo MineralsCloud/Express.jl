@@ -18,7 +18,6 @@ using Distributed: workers
 using EquationsOfState.Collections: EquationOfState, Pressure, Energy
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using Kaleido: @batchlens
 using LinearAlgebra: det
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
 using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
@@ -27,7 +26,7 @@ using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
 using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
-using Setfield: set, @set!
+using Setfield: set
 using Unitful
 using UnitfulAtomic
 
