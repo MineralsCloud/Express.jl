@@ -23,7 +23,8 @@ using LinearAlgebra: det
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
 using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
 using QuantumESPRESSO.Outputs: OutputFile
-using QuantumESPRESSO.Outputs.PWscf: Preamble, parse_electrons_energies, parsefinal, isjobdone
+using QuantumESPRESSO.Outputs.PWscf:
+    Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSOBase.CLI: PWCmd
 using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set, @set!
@@ -49,20 +50,22 @@ function set_alat_press(
     end
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     alat = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    return setproperties(template,
+    return setproperties(
+        template,
         system = setproperties(template.system, celldm = [alat]),
         cell = setproperties(template.cell, press = ustrip(u"kbar", pressure)),
-        cell_parameters = setproperties(template.cell_parameters, "alat")
+        cell_parameters = setproperties(template.cell_parameters, "alat"),
     )
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-_preset(step::Step{N}, template::PWInput) where {N} = setproperties(template.control,
-        calculation = N == 1 ? "scf" : "vc-relax",
-        verbosity = "high",
-        tstress = true,
-        tprnfor = true
-    )
+_preset(step::Step{N}, template::PWInput) where {N} = setproperties(
+    template.control,
+    calculation = N == 1 ? "scf" : "vc-relax",
+    verbosity = "high",
+    tstress = true,
+    tprnfor = true,
+)
 
 function preprocess(
     step::Step,
@@ -74,17 +77,16 @@ function preprocess(
 )
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
+    else
+        template = _preset(step, template)
+        objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
+        for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
+            object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
+            objects[i] = object  # `write` will create a file if it doesn't exist.
+            write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
+        end
+        return objects
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-    template = _preset(step, template)
-    objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
-    for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
-        # Create a new `object` from the `template`, with its `alat` and `pressure` changed
-        object = set_alat_press(template, trial_eos, pressure)
-        # `write` will create a file if it doesn't exist.
-        objects[i] = object
-        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
-    end
-    return objects
 end # function preprocess
 
 function fire(
@@ -96,17 +98,24 @@ function fire(
 )
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
+    else
+        n = nprocs_task(np, length(inputs))
+        cmds = similar(inputs, Base.AbstractCmd)
+        for (i, (input, output)) in enumerate(zip(inputs, outputs))
+            cmds[i] = pipeline(
+                convert(
+                    Cmd,
+                    setproperties(
+                        template,
+                        n = n,
+                        input = setproperties(template.cmd, inp = input),
+                    ),
+                ),
+                stdout = output,
+            )
+        end
+        return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-    n = nprocs_task(np, length(inputs))
-    cmds = similar(inputs, Base.AbstractCmd)
-    for (i, (input, output)) in enumerate(zip(inputs, outputs))
-        lenses = @batchlens(begin
-            _.n
-            _.cmd.inp
-        end)
-        cmds[i] = pipeline(convert(Cmd, set(template, lenses, (n, input))), stdout = output)
-    end
-    return distribute_process(cmds, ids)
 end # function fire
 
 function postprocess(
