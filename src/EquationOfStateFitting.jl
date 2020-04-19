@@ -58,25 +58,16 @@ function init_settings(path::AbstractString)
         error("unknown file extension `$ext`!")
     end
 end # function init_settings
+init_settings(path::AbstractString, settings = Settings()) = _saveto(path, _todict(settings))
 
 function load_settings(path::AbstractString)
-    path = expanduser(path)
-    ext = path |> splitext |> last |> lowercase
-    if ext ∈ (".yaml", ".yml")
-        settings = open(path, "r") do io
-            YAML.load(io)
-        end
-    elseif ext == ".json"
-        settings = JSON.parsefile(path)
-    else
-        error("unknown file extension `$ext`!")
-    end
+    settings = _loadfrom(path)
     _check_settings(settings)
     return settings
 end # function load_settings
 
 # This is a helper function and should not be exported!
-function _check_settings(settings::AbstractDict)
+function _check_settings(settings)
     if isempty(settings["template"])
         @warn "the path of the `template` file is not set!"
     end
@@ -203,5 +194,34 @@ function postprocess(
     end
     return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
+
+
+function _saveto(filepath::AbstractString, data)
+    ext = _getext(filepath)
+    if ext ∈ (".yaml", ".yml")
+        YAML.write_file(expanduser(filepath), data)
+    elseif ext == ".json"
+        open(expanduser(filepath), "w") do io
+            JSON.print(io, data)
+        end
+    else
+        error("unknown file extension `$ext`!")
+    end
+end # function _saveto
+
+function _loadfrom(filepath::AbstractString)
+    ext = _getext(filepath)
+    if ext ∈ (".yaml", ".yml")
+        return open(expanduser(filepath), "r") do io
+            YAML.load(io)
+        end
+    elseif ext == ".json"
+        return JSON.parsefile(expanduser(filepath))
+    else
+        error("unknown file extension `$ext`!")
+    end
+end # function _loadfrom
+
+_getext(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 
 end
