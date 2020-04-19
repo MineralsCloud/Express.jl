@@ -125,11 +125,10 @@ _preset(step::Step{N}, template::PWInput) where {N} = setproperties(
 
 function preprocess(
     step::Step,
-    inputs::AbstractArray{<:AbstractString},
+    inputs::AbstractArray,
     template::PWInput,
     trial_eos::EquationOfState,
     pressures::AbstractArray,
-    verbose::Bool = false,
 )
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
@@ -143,6 +142,16 @@ function preprocess(
         end
         return objects
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
+end # function preprocess
+function preprocess(::Step{1}, path::AbstractString)
+    settings = load_settings(path)
+    template = parse_template(InputFile(expanduser(settings["template"])))
+    pressures = settings["pressures"]
+    trial_eos = eval(quote settings["trial_eos"] end)
+    inputs = map(pressures) do p
+        joinpath(expanduser(settings["path"]), string(round(p)), "scf", settings["prefix"] * ".in")
+    end
+    return preprocess(Step(1), inputs, template, trial_eos, pressures)
 end # function preprocess
 
 function fire(
