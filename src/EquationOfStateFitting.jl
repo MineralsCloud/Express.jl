@@ -39,12 +39,12 @@ using ..Jobs: nprocs_task, distribute_process
 export init_settings, load_settings, parse_template, set_alat_press, preprocess, postprocess, fire
 
 function init_settings(path::AbstractString)
-    settings = Dict{Symbol,Any}(
-        :template => "",
-        :pressures => zeros(1),
-        :trial_eos => nothing,
-        :path => "",
-        :prefix => "",
+    settings = Dict{String,Any}(
+        "template" => "",
+        "pressures" => zeros(1),
+        "trial_eos" => nothing,
+        "path" => "",
+        "prefix" => "",
     )
     ext = lowercase(last(splitext(path)))
     if ext ∈ (".yaml", ".yml")
@@ -75,16 +75,16 @@ end # function load_settings
 
 # This is a helper function and should not be exported!
 function _check_settings(settings::AbstractDict)
-    if isempty(settings[:template])
+    if isempty(settings["template"])
         @warn "the path of the `template` file is not set!"
     end
-    if eltype(settings[:pressures]) ∉ (Int, Float64)
+    if eltype(settings["pressures"]) ∉ (Int, Float64)
         @warn ""
     end
-    if isnothing(settings[:trial_eos])
+    if isnothing(settings["trial_eos"])
         @warn "the trial eos is not set!"
     end
-    for key in (:path, :prefix)
+    for key in ("path", "prefix")
         if isempty(settings[key])
             @info "key `$key` is not set, will use the default value!"
         end
