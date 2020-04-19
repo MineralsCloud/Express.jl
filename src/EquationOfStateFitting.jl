@@ -38,26 +38,24 @@ using ..Jobs: nprocs_task, distribute_process
 
 export init_settings, load_settings, parse_template, set_alat_press, preprocess, postprocess, fire
 
-function init_settings(path::AbstractString)
-    settings = Dict{String,Any}(
-        "template" => "",
-        "pressures" => zeros(1),
-        "trial_eos" => nothing,
-        "path" => "",
-        "prefix" => "",
+@with_kw struct Settings
+    template::String = ""
+    pressures::AbstractArray{<:Unitful.AbstractQuantity} = zeros(8) .* u"GPa"
+    trial_eos::EquationOfState{<:Unitful.AbstractQuantity} = BirchMurnaghan3rd(0.0u"angstrom^3", 0.0u"GPa", 0.0, 0.0u"eV")
+    dir::String = "."
+    prefix::String = "scf"
+end
+
+function _todict(settings::Settings)
+    eos = settings.trial_eos
+    return Dict(
+        "template" => expanduser(settings.template),
+        "pressures" => Dict("values" => ustrip.(settings.pressures), "unit" => only(unique(unit.(settings.pressures)))),
+        "trial_eos" => Dict("type" => constructorof(typeof(eos)), "parameters" => ustrip.(fieldvalues(eos)), "units" => unit.(fieldvalues(eos))),
+        "dir" => expanduser(settings.dir),
+        "prefix" => settings.prefix
     )
-    path = expanduser(path)
-    ext = path |> splitext |> last |> lowercase
-    if ext ∈ (".yaml", ".yml")
-        YAML.write_file(path, settings)
-    elseif ext == ".json"
-        open(path, "w") do io
-            JSON.print(io, settings)
-        end
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function init_settings
+end # function _todict
 init_settings(path::AbstractString, settings = Settings()) = _saveto(path, _todict(settings))
 
 function load_settings(path::AbstractString)
