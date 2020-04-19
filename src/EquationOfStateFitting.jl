@@ -46,7 +46,8 @@ function init_settings(path::AbstractString)
         "path" => "",
         "prefix" => "",
     )
-    ext = lowercase(last(splitext(path)))
+    path = expanduser(path)
+    ext = path |> splitext |> last |> lowercase
     if ext ∈ (".yaml", ".yml")
         YAML.write_file(path, settings)
     elseif ext == ".json"
@@ -59,7 +60,8 @@ function init_settings(path::AbstractString)
 end # function init_settings
 
 function load_settings(path::AbstractString)
-    ext = lowercase(last(splitext(path)))
+    path = expanduser(path)
+    ext = path |> splitext |> last |> lowercase
     if ext ∈ (".yaml", ".yml")
         settings = open(path, "r") do io
             YAML.load(io)
