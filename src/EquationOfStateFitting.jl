@@ -153,13 +153,15 @@ function preprocess(
 end # function preprocess
 function preprocess(::Step{1}, path::AbstractString)
     settings = load_settings(path)
-    template = parse_template(InputFile(expanduser(settings["template"])))
-    pressures = settings["pressures"]
-    trial_eos = eval(quote settings["trial_eos"] end)
-    inputs = map(pressures) do p
-        joinpath(expanduser(settings["path"]), string(round(p)), "scf", settings["prefix"] * ".in")
+    if settings isa Settings
+        pressures = settings.pressures
+        inputs = map(pressures) do pressure
+            joinpath(settings.dir, string(round(pressure)), "scf", settings.prefix * ".in")
+        end
+        return preprocess(Step(1), inputs, parse_template(InputFile(settings.template)), settings.trial_eos, pressures)
+    else
+        error("an error setting is given!")
     end
-    return preprocess(Step(1), inputs, template, trial_eos, pressures)
 end # function preprocess
 
 function fire(
