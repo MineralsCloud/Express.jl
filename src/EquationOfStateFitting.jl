@@ -38,12 +38,20 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export Settings, init_settings, load_settings, parse_template, set_alat_press, preprocess, postprocess, fire
+export Settings,
+    init_settings,
+    load_settings,
+    parse_template,
+    set_alat_press,
+    preprocess,
+    postprocess,
+    fire
 
 @with_kw struct Settings
     template::String = ""
     pressures::AbstractArray{<:Unitful.AbstractQuantity} = zeros(8) .* u"GPa"
-    trial_eos::EquationOfState{<:Unitful.AbstractQuantity} = BirchMurnaghan3rd(0.0u"angstrom^3", 0.0u"GPa", 0.0, 0.0u"eV")
+    trial_eos::EquationOfState{<:Unitful.AbstractQuantity} =
+        BirchMurnaghan3rd(0.0 * u"angstrom^3", 0.0 * u"GPa", 0.0, 0.0 * u"eV")
     dir::String = "."
     prefix::String = "scf"
 end
@@ -52,25 +60,29 @@ function _todict(settings::Settings)
     eos = settings.trial_eos
     return Dict(
         "template" => expanduser(settings.template),
-        "pressures" => Dict("values" => ustrip.(settings.pressures), "unit" => only(unique(unit.(settings.pressures)))),
-        "trial_eos" => Dict("type" => constructorof(typeof(eos)), "parameters" => ustrip.(fieldvalues(eos)), "units" => unit.(fieldvalues(eos))),
+        "pressures" => Dict(
+            "values" => ustrip.(settings.pressures),
+            "unit" => only(unique(unit.(settings.pressures))),
+        ),
+        "trial_eos" => "",
         "dir" => expanduser(settings.dir),
-        "prefix" => settings.prefix
+        "prefix" => settings.prefix,
     )
 end # function _todict
 
-init_settings(path::AbstractString, settings = Settings()) = _saveto(path, _todict(settings))
+init_settings(path::AbstractString, settings = Settings()) =
+    _saveto(path, _todict(settings))
 
 function load_settings(path::AbstractString)
     settings = _loadfrom(path)
     if _isgood(settings)
-        eosdict = settings["trial_eos"]
         return Settings(
             template = expanduser(settings["template"]),
-            pressures = settings["pressures"]["values"] .* uparse(settings["pressures"]["unit"]),
-            trial_eos = eval(Meta.parse(eosdict["type"]))((eosdict["parameters"] .* uparse.(eosdict["units"]; unit_context = [Unitful, UnitfulAtomic]))...),
+            pressures = settings["pressures"]["values"] .*
+                        _uparse(settings["pressures"]["unit"]),
+            trial_eos = eval(Meta.parse(settings["trial_eos"])),
             dir = expanduser(settings["dir"]),
-            prefix = settings["prefix"]
+            prefix = settings["prefix"],
         )
     else
         @warn "some settings are not good! Check your input!"
@@ -159,9 +171,20 @@ function preprocess(::Step{1}, path::AbstractString)
     if settings isa Settings
         pressures = settings.pressures
         inputs = map(pressures) do pressure
-            joinpath(settings.dir, string(round(pressure)), "scf", settings.prefix * ".in")
+            joinpath(
+                settings.dir,
+                pressure |> ustrip |> round |> string,
+                "scf",
+                settings.prefix * ".in",
+            )
         end
-        return preprocess(Step(1), inputs, parse_template(InputFile(settings.template)), settings.trial_eos, pressures)
+        return preprocess(
+            Step(1),
+            inputs,
+            parse_template(InputFile(settings.template)),
+            settings.trial_eos,
+            pressures,
+        )
     else
         error("an error setting is given!")
     end
@@ -246,5 +269,7 @@ function _loadfrom(filepath::AbstractString)
 end # function _loadfrom
 
 _getext(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
+
+_uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 end
