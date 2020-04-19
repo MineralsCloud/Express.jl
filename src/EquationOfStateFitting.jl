@@ -18,6 +18,7 @@ using Distributed: workers
 using EquationsOfState.Collections: EquationOfState, Pressure, Energy
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
+using JSON
 using LinearAlgebra: det
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
 using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
@@ -29,12 +30,66 @@ using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set
 using Unitful
 using UnitfulAtomic
+using YAML
 
 import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export parse_template, set_alat_press, preprocess, postprocess, fire
+export init_settings, load_settings, parse_template, set_alat_press, preprocess, postprocess, fire
+
+function init_settings(path::AbstractString)
+    settings = Dict{Symbol,Any}(
+        :template => "",
+        :pressures => zeros(1),
+        :trial_eos => nothing,
+        :path => "",
+        :prefix => "",
+    )
+    ext = lowercase(last(splitext(path)))
+    if ext ∈ (".yaml", ".yml")
+        YAML.write_file(path, settings)
+    elseif ext == ".json"
+        open(path, "w") do io
+            JSON.print(io, settings)
+        end
+    else
+        error("unknown file extension `$ext`!")
+    end
+end # function init_settings
+
+function load_settings(path::AbstractString)
+    ext = lowercase(last(splitext(path)))
+    if ext ∈ (".yaml", ".yml")
+        settings = open(path, "r") do io
+            YAML.load(io)
+        end
+    elseif ext == ".json"
+        settings = JSON.parsefile(path)
+    else
+        error("unknown file extension `$ext`!")
+    end
+    _check_settings(settings)
+    return settings
+end # function load_settings
+
+# This is a helper function and should not be exported!
+function _check_settings(settings::AbstractDict)
+    if isempty(settings[:template])
+        @warn "the path of the `template` file is not set!"
+    end
+    if eltype(settings[:pressures]) ∉ (Int, Float64)
+        @warn ""
+    end
+    if isnothing(settings[:trial_eos])
+        @warn "the trial eos is not set!"
+    end
+    for key in (:path, :prefix)
+        if isempty(settings[key])
+            @info "key `$key` is not set, will use the default value!"
+        end
+    end
+end # function _check_settings
 
 parse_template(str::AbstractString) = parse(PWInput, str)
 parse_template(file::InputFile) = parse(PWInput, read(file))
