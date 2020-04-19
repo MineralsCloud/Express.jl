@@ -11,15 +11,17 @@ julia>
 """
 module EquationOfStateFitting
 
-using Compat: isnothing
-using ConstructionBase: setproperties
+using Compat: isnothing, only
+using ConstructionBase: setproperties, constructorof
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
-using EquationsOfState.Collections: EquationOfState, Pressure, Energy
+using EquationsOfState
+using EquationsOfState.Collections: EquationOfState, Pressure, Energy, BirchMurnaghan3rd
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using JSON
 using LinearAlgebra: det
+using Parameters: @with_kw
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
 using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
 using QuantumESPRESSO.Outputs: OutputFile
@@ -36,7 +38,7 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export init_settings, load_settings, parse_template, set_alat_press, preprocess, postprocess, fire
+export Settings, init_settings, load_settings, parse_template, set_alat_press, preprocess, postprocess, fire
 
 @with_kw struct Settings
     template::String = ""
@@ -56,31 +58,48 @@ function _todict(settings::Settings)
         "prefix" => settings.prefix
     )
 end # function _todict
+
 init_settings(path::AbstractString, settings = Settings()) = _saveto(path, _todict(settings))
 
 function load_settings(path::AbstractString)
     settings = _loadfrom(path)
-    _check_settings(settings)
-    return settings
+    if _isgood(settings)
+        eosdict = settings["trial_eos"]
+        return Settings(
+            template = expanduser(settings["template"]),
+            pressures = settings["pressures"]["values"] .* uparse(settings["pressures"]["unit"]),
+            trial_eos = eval(Meta.parse(eosdict["type"]))((eosdict["parameters"] .* uparse.(eosdict["units"]; unit_context = [Unitful, UnitfulAtomic]))...),
+            dir = expanduser(settings["dir"]),
+            prefix = settings["prefix"]
+        )
+    else
+        @warn "some settings are not good! Check your input!"
+        return settings
+    end
 end # function load_settings
 
 # This is a helper function and should not be exported!
-function _check_settings(settings)
+function _isgood(settings)
     if isempty(settings["template"])
         @warn "the path of the `template` file is not set!"
+        return false
     end
-    if eltype(settings["pressures"]) ∉ (Int, Float64)
-        @warn ""
+    if eltype(settings["pressures"]["values"]) ∉ (Int, Float64)
+        println(eltype(settings["pressures"]))
+        @warn "pressure values must be floats or integers!"
+        return false
     end
     if isnothing(settings["trial_eos"])
         @warn "the trial eos is not set!"
+        return false
     end
-    for key in ("path", "prefix")
+    for key in ("dir", "prefix")
         if isempty(settings[key])
             @info "key `$key` is not set, will use the default value!"
         end
     end
-end # function _check_settings
+    return true
+end # function _isgood
 
 parse_template(str::AbstractString) = parse(PWInput, str)
 parse_template(file::InputFile) = parse(PWInput, read(file))
@@ -193,6 +212,7 @@ function postprocess(
     return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
 
+fieldvalues(eos::EquationOfState) = [getfield(eos, i) for i in 1:nfields(eos)]
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
