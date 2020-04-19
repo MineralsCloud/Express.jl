@@ -124,11 +124,14 @@ end # function update_alat_press
 
 # This is a helper function and should not be exported.
 _preset(step::Step{N}, template::PWInput) where {N} = setproperties(
-    template.control,
-    calculation = N == 1 ? "scf" : "vc-relax",
-    verbosity = "high",
-    tstress = true,
-    tprnfor = true,
+    template,
+    control = setproperties(
+        template.control,
+        calculation = N == 1 ? "scf" : "vc-relax",
+        verbosity = "high",
+        tstress = true,
+        tprnfor = true,
+    ),
 )
 
 function preprocess(
