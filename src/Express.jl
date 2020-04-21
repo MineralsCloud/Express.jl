@@ -3,7 +3,7 @@ module Express
 export Step, PWscfCalculation, PHononCalculation, CPCalculation
 
 struct Step{N} end
-Step(n) = Step{n}()
+Step(N::Integer) = N > 0 ? Step{N}() : throw(ArgumentError("step `$N` is nonpositive!"))
 
 abstract type QuantumESPRESSOCalculation end
 struct PWscfCalculation{T} <: QuantumESPRESSOCalculation end
