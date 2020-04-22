@@ -5,9 +5,9 @@ export Step,
     PhononCalculation,
     StructureOptimization,
     CPMD,
-    PrepareInputs,
+    PrepareInput,
     LaunchJob,
-    AnalyseOutputs
+    AnalyseOutput
 
 struct Step{N} end
 Step(N::Integer) = N > 0 ? Step{N}() : throw(ArgumentError("step `$N` is nonpositive!"))
@@ -19,9 +19,9 @@ struct PhononCalculation <: Calculation end
 struct CPMD <: Calculation end
 
 abstract type Procedure end
-struct PrepareInputs <: Procedure end
+struct PrepareInput <: Procedure end
 struct LaunchJob <: Procedure end
-struct AnalyseOutputs <: Procedure end
+struct AnalyseOutput <: Procedure end
 
 include("CLI.jl")
 include("Jobs.jl")
