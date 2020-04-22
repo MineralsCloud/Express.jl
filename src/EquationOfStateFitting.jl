@@ -34,11 +34,27 @@ using Unitful
 using UnitfulAtomic
 using YAML
 
+using Express:
+    ScfCalculation,
+    PhononCalculation,
+    StructureOptimization,
+    CPMD,
+    PrepareInputs,
+    LaunchJob,
+    AnalyseOutputs
+
 import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
 export Settings, Step, init_settings, load_settings, parse_template, set_alat_press
+
+Step(::ScfCalculation, ::PrepareInputs) = Step(1)
+Step(::ScfCalculation, ::LaunchJob) = Step(2)
+Step(::ScfCalculation, ::AnalyseOutputs) = Step(3)
+Step(::StructureOptimization, ::PrepareInputs) = Step(4)
+Step(::StructureOptimization, ::LaunchJob) = Step(5)
+Step(::StructureOptimization, ::AnalyseOutputs) = Step(6)
 
 @with_kw struct Settings
     template::String = ""
