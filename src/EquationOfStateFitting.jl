@@ -38,14 +38,7 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export Settings,
-    init_settings,
-    load_settings,
-    parse_template,
-    set_alat_press,
-    preprocess,
-    postprocess,
-    fire
+export Settings, Step, init_settings, load_settings, parse_template, set_alat_press
 
 @with_kw struct Settings
     template::String = ""
@@ -146,17 +139,16 @@ _preset(step::Step{N}, template::PWInput) where {N} = setproperties(
     ),
 )
 
-function preprocess(
-    step::Step,
-    inputs::AbstractArray,
+function (::Step{N})(  # 1 or 4
+    inputs,
     template::PWInput,
     trial_eos::EquationOfState,
-    pressures::AbstractArray,
-)
+    pressures,
+) where {N}
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
     else
-        template = _preset(step, template)
+        template = _preset(Step(N), template)
         objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
         for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
             object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
@@ -165,8 +157,8 @@ function preprocess(
         end
         return objects
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-end # function preprocess
-function preprocess(::Step{1}, path::AbstractString)
+end
+function (::Step{1})(path::AbstractString)
     settings = load_settings(path)
     if settings isa Settings
         pressures = settings.pressures
@@ -178,8 +170,7 @@ function preprocess(::Step{1}, path::AbstractString)
                 settings.prefix * ".in",
             )
         end
-        return preprocess(
-            Step(1),
+        return Step(1)(
             inputs,
             parse_template(InputFile(settings.template)),
             settings.trial_eos,
@@ -190,12 +181,12 @@ function preprocess(::Step{1}, path::AbstractString)
     end
 end # function preprocess
 
-function fire(
-    inputs::AbstractArray{<:AbstractString},
-    outputs::AbstractArray{<:AbstractString},
-    np::Int,
+function (::Step)(
+    inputs,
+    outputs,
+    np::Integer,
     template::MpiExec = MpiExec(n = 1, cmd = PWCmd(inp = "")),
-    ids::AbstractArray{<:Integer} = workers(),
+    ids = workers(),
 )
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
@@ -217,30 +208,24 @@ function fire(
         end
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-end # function fire
+end
 
-function postprocess(
-    ::Step{N},
-    outputs::AbstractVector{<:AbstractString},
+function (::Step{N})(
+    outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
-) where {N}
+) where {N}  # 3 or 6
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
         s = read(OutputFile(output))
         isjobdone(s) || @warn("Job is not finished!")
         energies[i] = parse_electrons_energies(s, :converged).ε[end]
-        volumes[i] = if N == 1
-            parse(Preamble, s).omega
-        elseif N == 2
-            cellvolume(parsefinal(CellParametersCard, s))
-        else
-            error("The step $N must be `1` or `2`!")
-        end
+        volumes[i] = _results(Step(N), s)
     end
     return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
 
-fieldvalues(eos::EquationOfState) = [getfield(eos, i) for i in 1:nfields(eos)]
+_results(step::Step{3}, s::AbstractString) = parse(Preamble, s).omega
+_results(step::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
