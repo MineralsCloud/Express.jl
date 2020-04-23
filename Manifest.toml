@@ -82,6 +82,8 @@ version = "4.0.1"
 [[Crystallography]]
 deps = ["CoordinateTransformations", "EponymTuples", "LibSymspg", "LinearAlgebra", "ShiftedArrays", "StaticArrays", "Unitful"]
 git-tree-sha1 = "d735f9f95e0de2e31d7b5cfe5307d538d0bce49e"
+repo-rev = "master"
+repo-url = "git@github.com:singularitti/Crystallography.jl.git"
 uuid = "3bff3928-7a76-11e9-2089-d112443085a5"
 version = "0.1.0"
 
@@ -393,8 +395,10 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.3.1"
 
 [[QuantumESPRESSO]]
-deps = ["Crystallography", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "1142d2f1b4eb3c5740a086171b15c0ee3ce74430"
+deps = ["QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
+git-tree-sha1 = "36ede80dae80e9ef784e62153394253a0ac608ea"
+repo-rev = "master"
+repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 

@@ -27,8 +27,8 @@ using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWI
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using QuantumESPRESSOBase.CLI: PWCmd
-using QuantumESPRESSOBase.Setters: VerbositySetter, CellParametersSetter
+using QuantumESPRESSO.CLI: PWCmd
+using QuantumESPRESSO.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set
 using Unitful
 using UnitfulAtomic

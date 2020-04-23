@@ -19,7 +19,7 @@ using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWI
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using QuantumESPRESSOBase.Setters: CellParametersSetter, batchset
+using QuantumESPRESSO.Setters: CellParametersSetter, batchset
 using Setfield: get, set, @lens, @set!
 
 import ..Step
