@@ -34,18 +34,37 @@ using Unitful
 using UnitfulAtomic
 using YAML
 
+using Express:
+    ScfCalculation,
+    PhononCalculation,
+    StructureOptimization,
+    CPMD,
+    PrepareInput,
+    LaunchJob,
+    AnalyseOutput
+
 import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
 export Settings,
+    Step,
+    ScfCalculation,
+    StructureOptimization,
+    PrepareInput,
+    LaunchJob,
+    AnalyseOutput,
     init_settings,
     load_settings,
     parse_template,
-    set_alat_press,
-    preprocess,
-    postprocess,
-    fire
+    set_alat_press
+
+Step(::ScfCalculation, ::PrepareInput) = Step(1)
+Step(::ScfCalculation, ::LaunchJob) = Step(2)
+Step(::ScfCalculation, ::AnalyseOutput) = Step(3)
+Step(::StructureOptimization, ::PrepareInput) = Step(4)
+Step(::StructureOptimization, ::LaunchJob) = Step(5)
+Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
 
 @with_kw struct Settings
     template::String = ""
@@ -135,23 +154,22 @@ function set_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-_preset(step::Step{N}, template::PWInput) where {N} = setproperties(
+_preset(step::Union{Step{1},Step{4}}, template::PWInput) = setproperties(
     template,
     control = setproperties(
         template.control,
-        calculation = N == 1 ? "scf" : "vc-relax",
+        calculation = step isa Step{1} ? "scf" : "vc-relax",
         verbosity = "high",
         tstress = true,
         tprnfor = true,
     ),
 )
 
-function preprocess(
-    step::Step,
-    inputs::AbstractArray,
+function (step::Union{Step{1},Step{4}})(
+    inputs,
     template::PWInput,
     trial_eos::EquationOfState,
-    pressures::AbstractArray,
+    pressures,
 )
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
@@ -165,8 +183,8 @@ function preprocess(
         end
         return objects
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-end # function preprocess
-function preprocess(::Step{1}, path::AbstractString)
+end
+function (::Step{1})(path::AbstractString)
     settings = load_settings(path)
     if settings isa Settings
         pressures = settings.pressures
@@ -178,8 +196,7 @@ function preprocess(::Step{1}, path::AbstractString)
                 settings.prefix * ".in",
             )
         end
-        return preprocess(
-            Step(1),
+        return Step(1)(
             inputs,
             parse_template(InputFile(settings.template)),
             settings.trial_eos,
@@ -190,12 +207,12 @@ function preprocess(::Step{1}, path::AbstractString)
     end
 end # function preprocess
 
-function fire(
-    inputs::AbstractArray{<:AbstractString},
-    outputs::AbstractArray{<:AbstractString},
-    np::Int,
+function (::Union{Step{2},Step{5}})(
+    inputs,
+    outputs,
+    np::Integer,
     template::MpiExec = MpiExec(n = 1, cmd = PWCmd(inp = "")),
-    ids::AbstractArray{<:Integer} = workers(),
+    ids = workers(),
 )
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
@@ -217,30 +234,24 @@ function fire(
         end
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
-end # function fire
+end
 
-function postprocess(
-    ::Step{N},
-    outputs::AbstractVector{<:AbstractString},
+function (step::Union{Step{3},Step{6}})(
+    outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
-) where {N}
+)
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
         s = read(OutputFile(output))
         isjobdone(s) || @warn("Job is not finished!")
         energies[i] = parse_electrons_energies(s, :converged).ε[end]
-        volumes[i] = if N == 1
-            parse(Preamble, s).omega
-        elseif N == 2
-            cellvolume(parsefinal(CellParametersCard, s))
-        else
-            error("The step $N must be `1` or `2`!")
-        end
+        volumes[i] = _results(step, s)
     end
     return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
 
-fieldvalues(eos::EquationOfState) = [getfield(eos, i) for i in 1:nfields(eos)]
+_results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
+_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
