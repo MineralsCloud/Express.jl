@@ -1,29 +1,41 @@
 module CLI
 
 using Parameters: @with_kw_noshow
-using QuantumESPRESSO.CLI: PWCmd
+using QuantumESPRESSO.CLI: PWExec
 using REPL.Terminals: AbstractTerminal
 
 export MpiExec, DockerExec
 
-@with_kw_noshow struct DockerExec <: Base.AbstractCmd
-    which::String = "docker"
+struct DockerExec
+    cmd
     container::String
-    cmd::Base.AbstractCmd
-    detach::Bool = false
-    env::Base.EnvDict = ENV
-    interactive::Bool = false
-    tty::IO = stdin
-    user::UInt64 = 0
-    workdir::String = pwd()
+    which::String
+    detach::Bool
+    env::Base.EnvDict
+    interactive::Bool
+    tty::IO
+    user::UInt
+    workdir::String
 end
+DockerExec(
+    cmd,
+    container;
+    which = "docker",
+    detach = false,
+    env = ENV,
+    interactive = false,
+    tty = stdin,
+    user = 0,
+    workdir = pwd(),
+) = DockerExec(cmd, container, which, detach, env, interactive, tty, user, workdir)
 
-@with_kw_noshow struct MpiExec <: Base.AbstractCmd
+struct MpiExec
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
-    "The path to the executable, defaults to \"mpiexec\""
-    which::String = "mpiexec"
+    cmd
     "Specify the number of processes to use"
     n::Int
+    "The path to the executable, defaults to \"mpiexec\""
+    which::String = "mpiexec"
     "Name of host on which to run processes"
     host::String = ""
     "Pick hosts with this architecture type"
@@ -35,12 +47,23 @@ end
     "Implementation-defined specification file"
     file::String = ""
     configfile::String = ""
-    cmd::Base.AbstractCmd
     "Set environment variables to use when running the command, defaults to `ENV`"
     env = ENV
 end
+MpiExec(
+    cmd,
+    n;
+    which = "mpiexec",
+    host = "",
+    arch = "",
+    wdir = pwd(),
+    path = [],
+    file = "",
+    configfile = "",
+    env = ENV,
+) = MpiExec(cmd, n, which, host, arch, wdir, path, file, configfile, env)
 
-function Base.convert(::Type{Cmd}, cmd::MpiExec)
+function Base.Cmd(exec::MpiExec)
     options = String[]
     # for f in fieldnames(typeof(cmd))[3:end]  # Join options
     #     v = getfield(cmd, f)
@@ -51,12 +74,12 @@ function Base.convert(::Type{Cmd}, cmd::MpiExec)
     #     end
     # end
     return Cmd(
-        `$(cmd.which) -np $(cmd.n) $(options...) $(convert(Cmd, cmd.cmd).exec)`,
-        env = cmd.env,
-        dir = cmd.wdir,
+        `$(exec.which) -np $(exec.n) $(options...) $(Cmd(exec.cmd))`,
+        env = exec.env,
+        dir = exec.wdir,
     )
-end # function Base.convert
-function Base.convert(::Type{Cmd}, cmd::DockerExec)
+end # function Base.Cmd
+function Base.Cmd(exec::DockerExec)
     options = String[]
     # for f in fieldnames(typeof(cmd))[3:end]  # Join options
     #     v = getfield(cmd, f)
@@ -67,11 +90,10 @@ function Base.convert(::Type{Cmd}, cmd::DockerExec)
     #     end
     # end
     return Cmd(
-        `$(cmd.which) exec $(options...) $(cmd.container) $(convert(Cmd, cmd.cmd).exec)`,
-        env = cmd.env,
-        dir = cmd.workdir,
+        `$(exec.which) exec $(options...) $(exec.container) $(Cmd(exec.cmd))`,
+        env = exec.env,
+        dir = exec.workdir,
     )
-end # function Base.convert
+end # function Base.Cmd
 
 end # module CLI
-

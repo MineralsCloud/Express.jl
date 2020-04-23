@@ -27,7 +27,7 @@ using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWI
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using QuantumESPRESSO.CLI: PWCmd
+using QuantumESPRESSO.CLI: PWExec
 using QuantumESPRESSO.Setters: VerbositySetter, CellParametersSetter
 using Setfield: set
 using Unitful
@@ -202,7 +202,7 @@ function (::Union{Step{2},Step{5}})(
     inputs,
     outputs,
     np::Integer,
-    template::MpiExec = MpiExec(n = 1, cmd = PWCmd(inp = "")),
+    template::MpiExec = MpiExec(n = 1, cmd = PWExec(inp = "")),
     ids = workers(),
 )
     if size(inputs) != size(outputs)
