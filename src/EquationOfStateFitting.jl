@@ -154,27 +154,27 @@ function set_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-_preset(step::Step{N}, template::PWInput) where {N} = setproperties(
+_preset(step::Union{Step{1},Step{4}}, template::PWInput) = setproperties(
     template,
     control = setproperties(
         template.control,
-        calculation = N == 1 ? "scf" : "vc-relax",
+        calculation = step isa Step{1} ? "scf" : "vc-relax",
         verbosity = "high",
         tstress = true,
         tprnfor = true,
     ),
 )
 
-function (::Step{N})(  # 1 or 4
+function (step::Union{Step{1},Step{4}})(
     inputs,
     template::PWInput,
     trial_eos::EquationOfState,
     pressures,
-) where {N}
+)
     if size(inputs) != size(pressures)
         throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
     else
-        template = _preset(Step(N), template)
+        template = _preset(step, template)
         objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
         for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
             object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
@@ -207,7 +207,7 @@ function (::Step{1})(path::AbstractString)
     end
 end # function preprocess
 
-function (::Step)(
+function (::Union{Step{2},Step{5}})(
     inputs,
     outputs,
     np::Integer,
@@ -236,22 +236,22 @@ function (::Step)(
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
 end
 
-function (::Step{N})(
+function (step::Union{Step{3},Step{6}})(
     outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
-) where {N}  # 3 or 6
+)
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
         s = read(OutputFile(output))
         isjobdone(s) || @warn("Job is not finished!")
         energies[i] = parse_electrons_energies(s, :converged).ε[end]
-        volumes[i] = _results(Step(N), s)
+        volumes[i] = _results(step, s)
     end
     return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
 end # function postprocess
 
-_results(step::Step{3}, s::AbstractString) = parse(Preamble, s).omega
-_results(step::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard, s))
+_results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
+_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
