@@ -82,8 +82,6 @@ version = "4.0.1"
 [[Crystallography]]
 deps = ["CoordinateTransformations", "EponymTuples", "LibSymspg", "LinearAlgebra", "ShiftedArrays", "StaticArrays", "Unitful"]
 git-tree-sha1 = "d735f9f95e0de2e31d7b5cfe5307d538d0bce49e"
-repo-rev = "master"
-repo-url = "git@github.com:MineralsCloud/Crystallography.jl.git"
 uuid = "3bff3928-7a76-11e9-2089-d112443085a5"
 version = "0.1.0"
 
@@ -373,8 +371,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 [[Pseudopotentials]]
 deps = ["DataFrames", "JLD2", "JSON", "Parameters", "REPL"]
 git-tree-sha1 = "03f14c167f1a615e5ed7a425a38a5f7134b5865e"
-repo-rev = "master"
-repo-url = "git@github.com:MineralsCloud/Pseudopotentials.jl.git"
 uuid = "1b2dc2e6-48aa-4f00-b8f4-19d1a71d7a0e"
 version = "0.1.0"
 
@@ -387,8 +383,6 @@ version = "1.91.4"
 [[PyFortran90Namelists]]
 deps = ["Compat", "Pkg", "PyCall", "VersionParsing"]
 git-tree-sha1 = "977e16f5e271c8ea27f6bfcb3c843b782c2d047b"
-repo-rev = "master"
-repo-url = "git@github.com:singularitti/PyFortran90Namelists.jl.git"
 uuid = "e44308e6-bd5b-11e9-2850-49daf8f1ec40"
 version = "0.1.0"
 
@@ -401,24 +395,18 @@ version = "2.3.1"
 [[QuantumESPRESSO]]
 deps = ["Crystallography", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
 git-tree-sha1 = "1142d2f1b4eb3c5740a086171b15c0ee3ce74430"
-repo-rev = "master"
-repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "Crystallography", "Formatting", "Kaleido", "LinearAlgebra", "OrderedCollections", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "6616a67adeedc58c0f18faa51d3301801065c34f"
-repo-rev = "master"
-repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
+git-tree-sha1 = "89c0f0e18d7c5f9c7fdc72ebfacb52830898303b"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.0"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "Crystallography", "DataFrames", "DataStructures", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
 git-tree-sha1 = "a5701e4d1fa2167c5771a3dc4eef57d43eeea9eb"
-repo-rev = "master"
-repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
 version = "0.1.0"
 
@@ -555,9 +543,9 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[TimeZones]]
 deps = ["Dates", "EzXML", "Mocking", "Printf", "RecipesBase", "Serialization", "Unicode"]
-git-tree-sha1 = "0f070959511602e90ac4a8fa1799746c95cc3c19"
+git-tree-sha1 = "07af1bd3226d644ca1a3235c93e7d0207ce4536a"
 uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
-version = "1.1.0"
+version = "1.1.1"
 
 [[TranscodingStreams]]
 deps = ["Random", "Test"]
