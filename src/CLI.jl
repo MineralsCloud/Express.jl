@@ -1,7 +1,7 @@
 module CLI
 
 using Parameters: @with_kw_noshow
-using QuantumESPRESSOBase.CLI: PWCmd
+using QuantumESPRESSO.CLI: PWCmd
 using REPL.Terminals: AbstractTerminal
 
 export MpiExec, DockerExec
