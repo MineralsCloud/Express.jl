@@ -72,7 +72,6 @@ Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity} =
         BirchMurnaghan3rd(0.0 * u"angstrom^3", 0.0 * u"GPa", 0.0, 0.0 * u"eV")
     dir::String = "."
-    prefix::String = "scf"
 end
 
 function _todict(settings::Settings)
@@ -85,7 +84,6 @@ function _todict(settings::Settings)
         ),
         "trial_eos" => "",
         "dir" => expanduser(settings.dir),
-        "prefix" => settings.prefix,
     )
 end # function _todict
 
@@ -101,7 +99,6 @@ function load_settings(path::AbstractString)
                         _uparse(settings["pressures"]["unit"]),
             trial_eos = eval(Meta.parse(settings["trial_eos"])),
             dir = expanduser(settings["dir"]),
-            prefix = settings["prefix"],
         )
     else
         @warn "some settings are not good! Check your input!"
@@ -124,10 +121,8 @@ function _isgood(settings)
         @warn "the trial eos is not set!"
         return false
     end
-    for key in ("dir", "prefix")
-        if isempty(settings[key])
-            @info "key `$key` is not set, will use the default value!"
-        end
+    if isempty(settings["dir"])
+        @info "key `\"dir\"` is not set, will use the default value!"
     end
     return true
 end # function _isgood
@@ -188,20 +183,16 @@ function (::Step{1})(path::AbstractString)
     settings = load_settings(path)
     if settings isa Settings
         pressures = settings.pressures
+        template = parse_template(InputFile(settings.template))
         inputs = map(pressures) do pressure
             joinpath(
                 settings.dir,
                 pressure |> ustrip |> round |> string,
                 "scf",
-                settings.prefix * ".in",
+                template.control.prefix * ".in.txt",
             )
         end
-        return Step(1)(
-            inputs,
-            parse_template(InputFile(settings.template)),
-            settings.trial_eos,
-            pressures,
-        )
+        return Step(1)(inputs, template, settings.trial_eos, pressures)
     else
         error("an error setting is given!")
     end
