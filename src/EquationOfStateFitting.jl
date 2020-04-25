@@ -54,6 +54,7 @@ export Settings,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
+    InputFile,
     init_settings,
     load_settings,
     parse_template,
@@ -174,6 +175,8 @@ function (step::Union{Step{1},Step{4}})(
         for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
             object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
             objects[i] = object  # `write` will create a file if it doesn't exist.
+            mkpath(joinpath(splitpath(input)[1:end - 1]...))
+            touch(input)
             write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
         end
         return objects
