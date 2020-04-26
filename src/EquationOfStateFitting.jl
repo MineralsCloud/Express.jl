@@ -13,6 +13,7 @@ module EquationOfStateFitting
 
 using Compat: isnothing, only
 using ConstructionBase: setproperties, constructorof
+using Crystallography
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
 using EquationsOfState
@@ -23,13 +24,14 @@ using JSON
 using LinearAlgebra: det
 using Parameters: @with_kw
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
+using QuantumESPRESSO.Inputs.PWscf:
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSO.CLI: PWExec
 using QuantumESPRESSO.Setters: VerbositySetter, CellParametersSetter
-using Setfield: set
+using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
 using YAML
