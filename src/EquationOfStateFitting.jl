@@ -136,17 +136,16 @@ function set_alat_press(
     eos::EquationOfState{<:Unitful.AbstractQuantity},
     pressure::Unitful.AbstractQuantity,
 )
-    if isnothing(template.cell_parameters)
-        template = set(template, CellParametersSetter())
-    end
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     alat = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    return setproperties(
-        template,
-        system = setproperties(template.system, celldm = [alat]),
-        cell = setproperties(template.cell, press = ustrip(u"kbar", pressure)),
-        cell_parameters = setproperties(template.cell_parameters, option = "alat"),
-    )
+    if isnothing(template.cell_parameters)
+        @set! template.system.celldm[1] = alat
+    else
+        @set! template.system.celldm = zeros(6)
+        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters)
+    end
+    @set! template.cell.press = ustrip(u"kbar", pressure)
+    return template
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
