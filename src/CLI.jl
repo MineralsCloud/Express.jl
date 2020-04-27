@@ -31,9 +31,10 @@ DockerExec(
 
 struct MpiExec
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
-    cmd
     "Specify the number of processes to use"
     n::Int
+    "Specify the command to run"
+    cmd
     "The path to the executable, defaults to \"mpiexec\""
     which::String = "mpiexec"
     "Name of host on which to run processes"
@@ -51,8 +52,8 @@ struct MpiExec
     env = ENV
 end
 MpiExec(
-    cmd,
-    n;
+    n,
+    cmd;
     which = "mpiexec",
     host = "",
     arch = "",
@@ -61,7 +62,7 @@ MpiExec(
     file = "",
     configfile = "",
     env = ENV,
-) = MpiExec(cmd, n, which, host, arch, wdir, path, file, configfile, env)
+) = MpiExec(n, cmd, which, host, arch, wdir, path, file, configfile, env)
 
 function Base.Cmd(exec::MpiExec)
     options = String[]
