@@ -13,6 +13,7 @@ module EquationOfStateFitting
 
 using Compat: isnothing, only
 using ConstructionBase: setproperties, constructorof
+using Crystallography
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
 using EquationsOfState
@@ -23,13 +24,14 @@ using JSON
 using LinearAlgebra: det
 using Parameters: @with_kw
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
+using QuantumESPRESSO.Inputs.PWscf:
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using QuantumESPRESSO.CLI: PWCmd
+using QuantumESPRESSO.CLI: PWExec
 using QuantumESPRESSO.Setters: VerbositySetter, CellParametersSetter
-using Setfield: set
+using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
 using YAML
@@ -54,6 +56,7 @@ export Settings,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
+    InputFile,
     init_settings,
     load_settings,
     parse_template,
@@ -72,7 +75,7 @@ Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity} =
         BirchMurnaghan3rd(0.0 * u"angstrom^3", 0.0 * u"GPa", 0.0, 0.0 * u"eV")
     dir::String = "."
-    prefix::String = "scf"
+    np::Int = 1
 end
 
 function _todict(settings::Settings)
@@ -85,7 +88,7 @@ function _todict(settings::Settings)
         ),
         "trial_eos" => "",
         "dir" => expanduser(settings.dir),
-        "prefix" => settings.prefix,
+        "np" => settings.np,
     )
 end # function _todict
 
@@ -101,7 +104,7 @@ function load_settings(path::AbstractString)
                         _uparse(settings["pressures"]["unit"]),
             trial_eos = eval(Meta.parse(settings["trial_eos"])),
             dir = expanduser(settings["dir"]),
-            prefix = settings["prefix"],
+            np = settings["np"],
         )
     else
         @warn "some settings are not good! Check your input!"
@@ -124,10 +127,8 @@ function _isgood(settings)
         @warn "the trial eos is not set!"
         return false
     end
-    for key in ("dir", "prefix")
-        if isempty(settings[key])
-            @info "key `$key` is not set, will use the default value!"
-        end
+    if isempty(settings["dir"])
+        @info "key `\"dir\"` is not set, will use the default value!"
     end
     return true
 end # function _isgood
@@ -140,17 +141,16 @@ function set_alat_press(
     eos::EquationOfState{<:Unitful.AbstractQuantity},
     pressure::Unitful.AbstractQuantity,
 )
-    if isnothing(template.cell_parameters)
-        template = set(template, CellParametersSetter())
-    end
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     alat = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    return setproperties(
-        template,
-        system = setproperties(template.system, celldm = [alat]),
-        cell = setproperties(template.cell, press = ustrip(u"kbar", pressure)),
-        cell_parameters = setproperties(template.cell_parameters, option = "alat"),
-    )
+    if isnothing(template.cell_parameters)
+        @set! template.system.celldm[1] = alat
+    else
+        @set! template.system.celldm = zeros(6)
+        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters)
+    end
+    @set! template.cell.press = ustrip(u"kbar", pressure)
+    return template
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
@@ -179,6 +179,8 @@ function (step::Union{Step{1},Step{4}})(
         for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
             object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
             objects[i] = object  # `write` will create a file if it doesn't exist.
+            mkpath(joinpath(splitpath(input)[1:end-1]...))
+            touch(input)
             write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
         end
         return objects
@@ -188,20 +190,16 @@ function (::Step{1})(path::AbstractString)
     settings = load_settings(path)
     if settings isa Settings
         pressures = settings.pressures
+        template = parse_template(InputFile(settings.template))
         inputs = map(pressures) do pressure
             joinpath(
                 settings.dir,
                 pressure |> ustrip |> round |> string,
                 "scf",
-                settings.prefix * ".in",
+                template.control.prefix * ".in.txt",
             )
         end
-        return Step(1)(
-            inputs,
-            parse_template(InputFile(settings.template)),
-            settings.trial_eos,
-            pressures,
-        )
+        return Step(1)(inputs, template, settings.trial_eos, pressures)
     else
         error("an error setting is given!")
     end
@@ -211,29 +209,48 @@ function (::Union{Step{2},Step{5}})(
     inputs,
     outputs,
     np::Integer,
-    template::MpiExec = MpiExec(n = 1, cmd = PWCmd(inp = "")),
+    exec::MpiExec = MpiExec(1, PWExec("")),
     ids = workers(),
 )
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     else
         n = nprocs_task(np, length(inputs))
-        cmds = similar(inputs, Base.AbstractCmd)
-        for (i, (input, output)) in enumerate(zip(inputs, outputs))
-            cmds[i] = pipeline(
-                convert(
-                    Cmd,
-                    setproperties(
-                        template,
+        cmds = []
+        for (input, output) in zip(inputs, outputs)
+            push!(
+                cmds,
+                pipeline(
+                    Cmd(setproperties(
+                        exec,
                         n = n,
-                        input = setproperties(template.cmd, inp = input),
-                    ),
+                        input = setproperties(exec.cmd, inp = input),
+                    )),
+                    stdout = output,
                 ),
-                stdout = output,
             )
         end
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
+end
+function (step::Union{Step{2},Step{5}})(path::AbstractString)
+    settings = load_settings(path)
+    if settings isa Settings
+        pressures = settings.pressures
+        template = parse_template(InputFile(settings.template))
+        inputs = map(pressures) do pressure
+            joinpath(
+                settings.dir,
+                pressure |> ustrip |> round |> string,
+                "scf",
+                template.control.prefix * ".in.txt",
+            )
+        end
+        outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+        return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
+    else
+        error("an error setting is given!")
+    end
 end
 
 function (step::Union{Step{3},Step{6}})(
@@ -243,7 +260,9 @@ function (step::Union{Step{3},Step{6}})(
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
         s = read(OutputFile(output))
-        isjobdone(s) || @warn("Job is not finished!")
+        if !isjobdone(s)
+            @warn "Job is not finished!"
+        end
         energies[i] = parse_electrons_energies(s, :converged).ε[end]
         volumes[i] = _results(step, s)
     end
