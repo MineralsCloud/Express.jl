@@ -75,6 +75,7 @@ Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity} =
         BirchMurnaghan3rd(0.0 * u"angstrom^3", 0.0 * u"GPa", 0.0, 0.0 * u"eV")
     dir::String = "."
+    np::Int = 1
 end
 
 function _todict(settings::Settings)
@@ -87,6 +88,7 @@ function _todict(settings::Settings)
         ),
         "trial_eos" => "",
         "dir" => expanduser(settings.dir),
+        "np" => settings.np,
     )
 end # function _todict
 
@@ -102,6 +104,7 @@ function load_settings(path::AbstractString)
                         _uparse(settings["pressures"]["unit"]),
             trial_eos = eval(Meta.parse(settings["trial_eos"])),
             dir = expanduser(settings["dir"]),
+            np = settings["np"],
         )
     else
         @warn "some settings are not good! Check your input!"
@@ -176,7 +179,7 @@ function (step::Union{Step{1},Step{4}})(
         for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
             object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
             objects[i] = object  # `write` will create a file if it doesn't exist.
-            mkpath(joinpath(splitpath(input)[1:end - 1]...))
+            mkpath(joinpath(splitpath(input)[1:end-1]...))
             touch(input)
             write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
         end
@@ -206,29 +209,48 @@ function (::Union{Step{2},Step{5}})(
     inputs,
     outputs,
     np::Integer,
-    template::MpiExec = MpiExec(n = 1, cmd = PWExec(inp = "")),
+    exec::MpiExec = MpiExec(1, PWExec("")),
     ids = workers(),
 )
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     else
         n = nprocs_task(np, length(inputs))
-        cmds = similar(inputs, Base.AbstractCmd)
-        for (i, (input, output)) in enumerate(zip(inputs, outputs))
-            cmds[i] = pipeline(
-                convert(
-                    Cmd,
-                    setproperties(
-                        template,
+        cmds = []
+        for (input, output) in zip(inputs, outputs)
+            push!(
+                cmds,
+                pipeline(
+                    Cmd(setproperties(
+                        exec,
                         n = n,
-                        input = setproperties(template.cmd, inp = input),
-                    ),
+                        input = setproperties(exec.cmd, inp = input),
+                    )),
+                    stdout = output,
                 ),
-                stdout = output,
             )
         end
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
+end
+function (step::Union{Step{2},Step{5}})(path::AbstractString)
+    settings = load_settings(path)
+    if settings isa Settings
+        pressures = settings.pressures
+        template = parse_template(InputFile(settings.template))
+        inputs = map(pressures) do pressure
+            joinpath(
+                settings.dir,
+                pressure |> ustrip |> round |> string,
+                "scf",
+                template.control.prefix * ".in.txt",
+            )
+        end
+        outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+        return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
+    else
+        error("an error setting is given!")
+    end
 end
 
 function (step::Union{Step{3},Step{6}})(
@@ -238,7 +260,9 @@ function (step::Union{Step{3},Step{6}})(
     energies, volumes = zeros(length(outputs)), zeros(length(outputs))
     for (i, output) in enumerate(outputs)
         s = read(OutputFile(output))
-        isjobdone(s) || @warn("Job is not finished!")
+        if !isjobdone(s)
+            @warn "Job is not finished!"
+        end
         energies[i] = parse_electrons_energies(s, :converged).ε[end]
         volumes[i] = _results(step, s)
     end
