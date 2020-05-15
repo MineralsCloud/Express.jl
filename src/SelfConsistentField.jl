@@ -14,7 +14,7 @@ module SelfConsistentField
 using Parameters: @with_kw
 using QuantumESPRESSO.Inputs: InputFile
 using QuantumESPRESSO.Inputs.PWscf: PWInput, KPointsCard
-using Setfield: set, @set!
+using Setfield: set, @set!, @set
 
 using Express:
     ScfCalculation,
@@ -24,6 +24,8 @@ using Express:
     PrepareInput,
     LaunchJob,
     AnalyseOutput
+
+export Settings
 
 Step(::ScfCalculation, ::PrepareInput) = Step(1)
 Step(::ScfCalculation, ::LaunchJob) = Step(2)
