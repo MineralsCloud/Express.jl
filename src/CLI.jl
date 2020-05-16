@@ -6,7 +6,7 @@ using REPL.Terminals: AbstractTerminal
 
 export MpiExec, DockerExec
 
-struct DockerExec
+mutable struct DockerExec
     cmd
     container::String
     which::String
@@ -29,27 +29,27 @@ DockerExec(
     workdir = pwd(),
 ) = DockerExec(cmd, container, which, detach, env, interactive, tty, user, workdir)
 
-struct MpiExec
+mutable struct MpiExec
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
     "Specify the number of processes to use"
     n::Int
     "Specify the command to run"
     cmd
     "The path to the executable, defaults to \"mpiexec\""
-    which::String = "mpiexec"
+    which::String
     "Name of host on which to run processes"
-    host::String = ""
+    host::String
     "Pick hosts with this architecture type"
-    arch::String = ""
+    arch::String
     "`cd` to this one before running executable"
-    wdir::String = pwd()
+    wdir::String
     "Use this to find the executable"
-    path::Vector{String} = []
+    path::Vector{String}
     "Implementation-defined specification file"
-    file::String = ""
-    configfile::String = ""
+    file::String
+    configfile::String
     "Set environment variables to use when running the command, defaults to `ENV`"
-    env = ENV
+    env
 end
 MpiExec(
     n,
