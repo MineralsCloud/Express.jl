@@ -16,7 +16,7 @@ using ConstructionBase: setproperties, constructorof
 using Crystallography
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
-using EquationsOfState
+using DockerPy
 using EquationsOfState.Collections: EquationOfState, Pressure, Energy, BirchMurnaghan3rd
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
@@ -205,18 +205,14 @@ function (::Step{1})(path::AbstractString)
     end
 end # function preprocess
 
-function (::Union{Step{2},Step{5}})(inputs, outputs, np::Integer, exec, ids = workers())
+function (::Union{Step{2},Step{5}})(inputs, outputs, np::Integer, exec::PWExec, ids = workers())
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     else
         n = nprocs_task(np, length(inputs))
-        cmds = []
-        for (input, output) in zip(inputs, outputs)
-            exec.cmd.n = n  # DockerExec(MpiExec(PWExec))
-            exec.cmd.cmd.inp = input
-            push!(cmds, pipeline(Cmd(exec), stdout = output))
+        cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+            MpiExec(n)(exec(stdin = input, stdout = output))
         end
-        println(cmds[1])
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
 end
