@@ -205,13 +205,21 @@ function (::Step{1})(path::AbstractString)
     end
 end # function preprocess
 
-function (::Union{Step{2},Step{5}})(inputs, outputs, np::Integer, exec::PWExec, ids = workers())
+function _dockercmd(exec::PWExec, n, input, output)
+    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " * string(exec())[2:end-1] * " -inp $input > $output'"
+end # function _wrapcmd
+
+function (::Union{Step{2},Step{5}})(inputs, outputs, np, exec::PWExec, ids = workers())
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     else
         n = nprocs_task(np, length(inputs))
         cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-            MpiExec(n)(exec(stdin = input, stdout = output))
+            if isdocker
+                MpiExec(n)(exec(stdin = input, stdout = output))
+            else
+                _dockercmd(exec, n, input, output)
+            end
         end
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
@@ -230,7 +238,7 @@ function (step::Union{Step{2},Step{5}})(path::AbstractString)
             )
         end
         outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-        return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
+        # return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
     else
         error("an error setting is given!")
     end
