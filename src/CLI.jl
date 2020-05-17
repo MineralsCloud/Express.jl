@@ -27,36 +27,26 @@ MpiExec(
     which = "mpiexec",
     host = "",
     arch = "",
-    wdir = pwd(),
+    wdir = "",
     path = [],
     file = "",
     configfile = "",
     env = ENV,
 ) = MpiExec(n, which, host, arch, wdir, path, file, configfile, env)
-(exec::MpiExec)(cmd::Base.AbstractCmd) = `$(Cmd(exec)) $cmd`
-(exec::MpiExec)(cmd::Base.CmdRedirect) = pipeline(`$(Cmd(exec)) $(cmd.cmd)`)
-
-function Base.Cmd(exec::MpiExec)
+function (exec::MpiExec)(cmd::Base.AbstractCmd)
     options = String[]
-    # for f in Iterators.drop(fieldnames(typeof(exec)), 3)  # 4 to end
-    #     v = getfield(exec, f)
-    #     if !iszero(v)
-    #         push!(options, string(" -", f, ' ', v))
-    #     else
-    #         push!(options, "")
-    #     end
-    # end
-    return Cmd(
-        Cmd([
-            exec.which,
-            "-np",
-            string(exec.n),
-            options...,
-        ]),
-        env = exec.env,
-        dir = exec.wdir,
-    )
-end # function Base.Cmd
+    for f in (:host, :arch, :wdir, :file, :configfile)
+        v = getfield(exec, f)
+        if !isempty(v)
+            push!(options, "-$f", v)
+        end
+    end
+    _deepinject!(cmd, [exec.which, "-np", string(exec.n), options...])  # Horrible
+    # return Cmd(cmd, env = exec.env, dir = exec.wdir)
+    return cmd
+end
 
+_deepinject!(cmd::Cmd, prefix::AbstractVector) = prepend!(cmd.exec, prefix)
+_deepinject!(cmd::Base.CmdRedirect, prefix::AbstractVector) = _deepinject!(cmd.cmd, prefix)
 
 end # module CLI
