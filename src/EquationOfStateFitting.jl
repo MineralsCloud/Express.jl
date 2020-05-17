@@ -205,31 +205,18 @@ function (::Step{1})(path::AbstractString)
     end
 end # function preprocess
 
-function (::Union{Step{2},Step{5}})(
-    inputs,
-    outputs,
-    np::Integer,
-    exec::MpiExec = MpiExec(1, PWExec("")),
-    ids = workers(),
-)
+function (::Union{Step{2},Step{5}})(inputs, outputs, np::Integer, exec, ids = workers())
     if size(inputs) != size(outputs)
         throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
     else
         n = nprocs_task(np, length(inputs))
         cmds = []
         for (input, output) in zip(inputs, outputs)
-            push!(
-                cmds,
-                pipeline(
-                    Cmd(setproperties(
-                        exec,
-                        n = n,
-                        input = setproperties(exec.cmd, inp = input),
-                    )),
-                    stdout = output,
-                ),
-            )
+            exec.cmd.n = n  # DockerExec(MpiExec(PWExec))
+            exec.cmd.cmd.inp = input
+            push!(cmds, pipeline(Cmd(exec), stdout = output))
         end
+        println(cmds[1])
         return distribute_process(cmds, ids)
     end  # `zip` does not guarantee they are of the same size, must check explicitly.
 end

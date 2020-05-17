@@ -1,13 +1,8 @@
 module CLI
 
-using Parameters: @with_kw_noshow
-using QuantumESPRESSO.CLI: PWExec
-using REPL.Terminals: AbstractTerminal
-
 export MpiExec, DockerExec
 
 mutable struct DockerExec
-    cmd
     container::String
     which::String
     detach::Bool
@@ -18,7 +13,6 @@ mutable struct DockerExec
     workdir::String
 end
 DockerExec(
-    cmd,
     container;
     which = "docker",
     detach = false,
@@ -27,14 +21,36 @@ DockerExec(
     tty = stdin,
     user = 0,
     workdir = pwd(),
-) = DockerExec(cmd, container, which, detach, env, interactive, tty, user, workdir)
+) = DockerExec(container, which, detach, env, interactive, tty, user, workdir)
+function Base.Cmd(exec::DockerExec)
+    options = String[]
+    # for f in fieldnames(typeof(cmd))[3:end]  # Join options
+    #     v = getfield(cmd, f)
+    #     if !iszero(v)
+    #         push!(options, string(" -", f, ' ', v))
+    #     else
+    #         push!(options, "")
+    #     end
+    # end
+    return Cmd(
+        Cmd([
+            exec.which,
+            "exec",
+            options...,
+            exec.container,
+            "sh",
+            "-c",
+        ]),
+        env = exec.env,
+        dir = exec.workdir,
+    )
+end # function Base.Cmd
+(exec::DockerExec)(cmd::Base.AbstractCmd) = Cmd([string(Cmd(exec)), "sh", "-c", string(cmd)[2:end-1]])
 
 mutable struct MpiExec
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
     "Specify the number of processes to use"
     n::Int
-    "Specify the command to run"
-    cmd
     "The path to the executable, defaults to \"mpiexec\""
     which::String
     "Name of host on which to run processes"
@@ -49,11 +65,10 @@ mutable struct MpiExec
     file::String
     configfile::String
     "Set environment variables to use when running the command, defaults to `ENV`"
-    env
+    env::Any
 end
 MpiExec(
-    n,
-    cmd;
+    n;
     which = "mpiexec",
     host = "",
     arch = "",
@@ -62,12 +77,14 @@ MpiExec(
     file = "",
     configfile = "",
     env = ENV,
-) = MpiExec(n, cmd, which, host, arch, wdir, path, file, configfile, env)
+) = MpiExec(n, which, host, arch, wdir, path, file, configfile, env)
+(exec::MpiExec)(cmd::Base.AbstractCmd) = `$(Cmd(exec)) $cmd`
+(exec::MpiExec)(cmd::Base.CmdRedirect) = pipeline(`$(Cmd(exec)) $(cmd.cmd)`)
 
 function Base.Cmd(exec::MpiExec)
     options = String[]
-    # for f in fieldnames(typeof(cmd))[3:end]  # Join options
-    #     v = getfield(cmd, f)
+    # for f in Iterators.drop(fieldnames(typeof(exec)), 3)  # 4 to end
+    #     v = getfield(exec, f)
     #     if !iszero(v)
     #         push!(options, string(" -", f, ' ', v))
     #     else
@@ -75,26 +92,16 @@ function Base.Cmd(exec::MpiExec)
     #     end
     # end
     return Cmd(
-        `$(exec.which) -np $(exec.n) $(options...) $(Cmd(exec.cmd))`,
+        Cmd([
+            exec.which,
+            "-np",
+            string(exec.n),
+            options...,
+        ]),
         env = exec.env,
         dir = exec.wdir,
     )
 end # function Base.Cmd
-function Base.Cmd(exec::DockerExec)
-    options = String[]
-    # for f in fieldnames(typeof(cmd))[3:end]  # Join options
-    #     v = getfield(cmd, f)
-    #     if !iszero(v)
-    #         push!(options, string(" -", f, ' ', v))
-    #     else
-    #         push!(options, "")
-    #     end
-    # end
-    return Cmd(
-        `$(exec.which) exec $(options...) $(exec.container) $(Cmd(exec.cmd))`,
-        env = exec.env,
-        dir = exec.workdir,
-    )
-end # function Base.Cmd
+
 
 end # module CLI
