@@ -22,10 +22,10 @@ end
     FAILED
 end
 
-function nprocs_task(total_num::Int, nsubjob::Int)
+function nprocs_task(total_num, nsubjob)
     quotient, remainder = divrem(total_num, nsubjob)
-    if remainder != 0
-        @warn("The processes are not fully balanced! Consider the number of subjobs!")
+    if !iszero(remainder)
+        @warn "The processes are not fully balanced! Consider the number of subjobs!"
     end
     return quotient
 end # function nprocs_task
@@ -35,9 +35,8 @@ function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} =
     if length(cmds) != length(ids)  # The size of them can be different, but not length.
         throw(DimensionMismatch("`cmds` has different length than `ids`!"))
     end
-    promises = similar(cmds, Future)  # It can be of different size than `ids`!
-    for (i, (cmd, id)) in enumerate(zip(cmds, ids))
-        promises[i] = @spawnat id run(cmd, wait = true)  # TODO: Must wait?
+    promises = map(cmds, ids) do cmd, id
+        @spawnat id run(cmd, wait = true)  # TODO: Must wait?
     end
     return promises
 end # function distribute_process
@@ -55,51 +54,42 @@ function tasks_exited(bag::AbstractVector)
 end # function subjobs_exited
 
 function jobstatus(bag::AbstractVector{Future})
-    ids, status = Vector{Int}(undef, length(bag)), Vector{JobStatus}(undef, length(bag))
-    for (i, task) in enumerate(bag)
-        ids[i] = task.where
-        status[i] = isready(task) ? EXITED : RUNNING
-        if isready(task)
-            status[i] = EXITED
-        end
-        status[i] = RUNNING
+    return map(bag) do task
+        task.where => isready(task) ? EXITED : RUNNING  # id => status
     end
-    return ids, status
 end # function jobstatus
 
 function jobresult(bag::AbstractVector{Future})
-    ids, results = Vector{Int}(undef, length(bag)),
-    Vector{Union{JobResult,Nothing}}(undef, length(bag))
-    for (i, task) in enumerate(bag)
-        ids[i] = task.where
-        results[i] = isready(task) ? EXITED : RUNNING
+    return map(bag) do task
+        id = task.where
         if isready(task)
             try
                 ref = fetch(task)
-                results[i] = success(ref) ? SUCCEEDED : FAILED
+                result = success(ref) ? SUCCEEDED : FAILED
             catch e
-                results[i] = FAILED
+                result = FAILED
             end
+        else
+            result = nothing
         end
-        results[i] = nothing
+        id => result
     end
-    return ids, results
 end # function jobresult
 
 function fetch_results(bag::AbstractVector)
-    ids, results = Vector{Int}(undef, length(bag)), Vector{Any}(undef, length(bag))
-    for (i, task) in enumerate(bag)
-        ids[i] = task.where
+    return map(bag) do task
+        id = task.where
         if isready(task)
             try
-                results[i] = fetch(task)
+                result = fetch(task)
             catch e
-                results[i] = e
+                result = e
             end
+        else
+            result = nothing
         end
-        results[i] = nothing
+        id => result
     end
-    return ids, results
 end # function fetch_results
 
 end
