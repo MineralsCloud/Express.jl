@@ -1,51 +1,6 @@
 module CLI
 
-export MpiExec, DockerExec
-
-mutable struct DockerExec
-    container::String
-    which::String
-    detach::Bool
-    env::Base.EnvDict
-    interactive::Bool
-    tty::IO
-    user::UInt
-    workdir::String
-end
-DockerExec(
-    container;
-    which = "docker",
-    detach = false,
-    env = ENV,
-    interactive = false,
-    tty = stdin,
-    user = 0,
-    workdir = pwd(),
-) = DockerExec(container, which, detach, env, interactive, tty, user, workdir)
-function Base.Cmd(exec::DockerExec)
-    options = String[]
-    # for f in fieldnames(typeof(cmd))[3:end]  # Join options
-    #     v = getfield(cmd, f)
-    #     if !iszero(v)
-    #         push!(options, string(" -", f, ' ', v))
-    #     else
-    #         push!(options, "")
-    #     end
-    # end
-    return Cmd(
-        Cmd([
-            exec.which,
-            "exec",
-            options...,
-            exec.container,
-            "sh",
-            "-c",
-        ]),
-        env = exec.env,
-        dir = exec.workdir,
-    )
-end # function Base.Cmd
-(exec::DockerExec)(cmd::Base.AbstractCmd) = Cmd([string(Cmd(exec)), "sh", "-c", string(cmd)[2:end-1]])
+export MpiExec
 
 mutable struct MpiExec
     # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
