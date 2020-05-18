@@ -15,7 +15,7 @@ using QuantumESPRESSO.Inputs.PHonon: Q2rInput, DynmatInput
 using QuantumESPRESSO.Inputs.CP: CPInput
 using QuantumESPRESSOHelpers.Inputs: input_builder
 
-using ..EquationOfStateFitting: update_alat_press
+using ..EosFitting: update_alat_press
 
 export run_wizard
 
