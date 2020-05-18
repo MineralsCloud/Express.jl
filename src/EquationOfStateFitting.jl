@@ -170,20 +170,14 @@ function (step::Union{Step{1},Step{4}})(
     trial_eos::EquationOfState,
     pressures,
 )
-    if size(inputs) != size(pressures)
-        throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
-    else
-        template = _preset(step, template)
-        objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
-        for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
-            object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
-            objects[i] = object  # `write` will create a file if it doesn't exist.
-            mkpath(joinpath(splitpath(input)[1:end-1]...))
-            touch(input)
-            write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
-        end
-        return objects
-    end  # `zip` does not guarantee they are of the same size, must check explicitly.
+    template = _preset(step, template)
+    map(inputs, pressures) do input, pressure  # `map` will check size mismatch
+        mkpath(joinpath(splitpath(input)[1:end-1]...))
+        touch(input)
+        object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
+        object
+    end
 end
 function (::Step{1})(path::AbstractString)
     settings = load_settings(path)
@@ -210,7 +204,15 @@ function _dockercmd(exec::PWExec, n, input)
     " -inp $input'"
 end # function _wrapcmd
 
-function (::Union{Step{2},Step{5}})(inputs, outputs, np, exec::PWExec, ids = workers(); isdocker::Bool = true, container = nothing)
+function (::Union{Step{2},Step{5}})(
+    inputs,
+    outputs,
+    np,
+    exec::PWExec,
+    ids = workers();
+    isdocker::Bool = true,
+    container = nothing,
+)
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(np, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -220,7 +222,13 @@ function (::Union{Step{2},Step{5}})(inputs, outputs, np, exec::PWExec, ids = wor
             MpiExec(n)(exec(stdin = input, stdout = output))
         end
     end
-    return distribute_process(cmds, ids; isdocker = isdocker, container = container, inputs = inputs)
+    return distribute_process(
+        cmds,
+        ids;
+        isdocker = isdocker,
+        container = container,
+        inputs = inputs,
+    )
 end
 function (step::Union{Step{2},Step{5}})(path::AbstractString)
     settings = load_settings(path)
@@ -246,16 +254,14 @@ function (step::Union{Step{3},Step{6}})(
     outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
 )
-    energies, volumes = zeros(length(outputs)), zeros(length(outputs))
-    for (i, output) in enumerate(outputs)
+    xy = map(outputs) do output
         s = read(OutputFile(output))
         if !isjobdone(s)
             @warn "Job is not finished!"
         end
-        energies[i] = parse_electrons_energies(s, :converged).ε[end]
-        volumes[i] = _results(step, s)
+        _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
     end
-    return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
+    return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
 end # function postprocess
 
 _results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
