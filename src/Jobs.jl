@@ -1,6 +1,7 @@
 module Jobs
 
 using Distributed
+using DockerPy.Containers
 
 export JobStatus, JobResult
 export nprocs_task,
@@ -30,15 +31,15 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} = workers())
+function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} = workers(); isdocker::Bool = true, container, inputs)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    if length(cmds) != length(ids)  # The size of them can be different, but not length.
-        throw(DimensionMismatch("`cmds` has different length than `ids`!"))
+    return map(cmds, ids, inputs) do cmd, id, input  # promises
+        if isdocker
+            exec_run(container, cmd; demux = true, workdir = dirname(input))
+        else
+            @spawnat id run(cmd, wait = true)  # TODO: Must wait?
+        end
     end
-    promises = map(cmds, ids) do cmd, id
-        @spawnat id run(cmd, wait = true)  # TODO: Must wait?
-    end
-    return promises
 end # function distribute_process
 
 function isjobdone(bag::AbstractVector)

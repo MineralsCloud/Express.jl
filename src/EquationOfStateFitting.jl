@@ -16,7 +16,6 @@ using ConstructionBase: setproperties, constructorof
 using Crystallography
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
-using DockerPy
 using EquationsOfState.Collections: EquationOfState, Pressure, Energy, BirchMurnaghan3rd
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
@@ -205,24 +204,23 @@ function (::Step{1})(path::AbstractString)
     end
 end # function preprocess
 
-function _dockercmd(exec::PWExec, n, input, output)
-    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " * string(exec())[2:end-1] * " -inp $input > $output'"
+function _dockercmd(exec::PWExec, n, input)
+    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
+    string(exec())[2:end-1] *
+    " -inp $input'"
 end # function _wrapcmd
 
-function (::Union{Step{2},Step{5}})(inputs, outputs, np, exec::PWExec, ids = workers())
-    if size(inputs) != size(outputs)
-        throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
-    else
-        n = nprocs_task(np, length(inputs))
-        cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-            if isdocker
-                MpiExec(n)(exec(stdin = input, stdout = output))
-            else
-                _dockercmd(exec, n, input, output)
-            end
+function (::Union{Step{2},Step{5}})(inputs, outputs, np, exec::PWExec, ids = workers(); isdocker::Bool = true, container = nothing)
+    # `map` guarantees they are of the same size, no need to check.
+    n = nprocs_task(np, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+        if isdocker
+            _dockercmd(exec, n, input)
+        else
+            MpiExec(n)(exec(stdin = input, stdout = output))
         end
-        return distribute_process(cmds, ids)
-    end  # `zip` does not guarantee they are of the same size, must check explicitly.
+    end
+    return distribute_process(cmds, ids; isdocker = isdocker, container = container, inputs = inputs)
 end
 function (step::Union{Step{2},Step{5}})(path::AbstractString)
     settings = load_settings(path)
