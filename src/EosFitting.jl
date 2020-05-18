@@ -1,5 +1,5 @@
 """
-# module EquationOfStateFitting
+# module EosFitting
 
 
 
@@ -9,7 +9,7 @@
 julia>
 ```
 """
-module EquationOfStateFitting
+module EosFitting
 
 using Compat: isnothing, only
 using ConstructionBase: setproperties, constructorof
@@ -141,12 +141,12 @@ function set_alat_press(
     pressure::Unitful.AbstractQuantity,
 )
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    alat = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
+    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if isnothing(template.cell_parameters)
-        @set! template.system.celldm[1] = alat
+        @set! template.system.celldm[1] *= factor
     else
         @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters)
+        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters * factor)
     end
     @set! template.cell.press = ustrip(u"kbar", pressure)
     return template
