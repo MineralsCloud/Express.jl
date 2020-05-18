@@ -265,7 +265,7 @@ function (step::Union{Step{3},Step{6}})(
 end # function postprocess
 
 _results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
-_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard, s))
+_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
