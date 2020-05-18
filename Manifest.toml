@@ -141,7 +141,7 @@ version = "0.22.6"
 
 [[DockerPy]]
 deps = ["PyCall", "VersionParsing"]
-git-tree-sha1 = "428d76fbda02674566f74bc898de8611d94277a1"
+git-tree-sha1 = "1a76a69e8bb2a161bd4f0b0361c77f6d0f5ed751"
 repo-rev = "master"
 repo-url = "git@github.com:singularitti/DockerPy.jl.git"
 uuid = "7b2ae67c-a082-49fb-8801-fe9170dc9342"
@@ -424,8 +424,8 @@ uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.1"
 
 [[QuantumESPRESSOParsers]]
-deps = ["Compat", "Crystallography", "DataFrames", "DataStructures", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
-git-tree-sha1 = "7b849c0dd5267cf8a456dcf4816f11e983dea828"
+deps = ["Compat", "Crystallography", "DataFrames", "DataStructures", "LibSymspg", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
+git-tree-sha1 = "4e3502bd0f26bc90c2ce0c4c5b3ea91192785d48"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
