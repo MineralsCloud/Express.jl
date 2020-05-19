@@ -1,5 +1,5 @@
 """
-# module EquationOfStateFitting
+# module EosFitting
 
 
 
@@ -9,14 +9,13 @@
 julia>
 ```
 """
-module EquationOfStateFitting
+module EosFitting
 
 using Compat: isnothing, only
 using ConstructionBase: setproperties, constructorof
 using Crystallography
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
-using EquationsOfState
 using EquationsOfState.Collections: EquationOfState, Pressure, Energy, BirchMurnaghan3rd
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
@@ -142,12 +141,12 @@ function set_alat_press(
     pressure::Unitful.AbstractQuantity,
 )
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    alat = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
+    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if isnothing(template.cell_parameters)
-        @set! template.system.celldm[1] = alat
+        @set! template.system.celldm[1] *= factor
     else
         @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters)
+        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters * factor)
     end
     @set! template.cell.press = ustrip(u"kbar", pressure)
     return template
@@ -171,20 +170,14 @@ function (step::Union{Step{1},Step{4}})(
     trial_eos::EquationOfState,
     pressures,
 )
-    if size(inputs) != size(pressures)
-        throw(DimensionMismatch("`inputs` and `pressures` must be of the same size!"))
-    else
-        template = _preset(step, template)
-        objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
-        for (i, (input, pressure)) in enumerate(zip(inputs, pressures))
-            object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from the `template`, with its `alat` and `pressure` changed
-            objects[i] = object  # `write` will create a file if it doesn't exist.
-            mkpath(joinpath(splitpath(input)[1:end-1]...))
-            touch(input)
-            write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
-        end
-        return objects
-    end  # `zip` does not guarantee they are of the same size, must check explicitly.
+    template = _preset(step, template)
+    map(inputs, pressures) do input, pressure  # `map` will check size mismatch
+        mkpath(joinpath(splitpath(input)[1:end-1]...))
+        touch(input)
+        object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
+        object
+    end
 end
 function (::Step{1})(path::AbstractString)
     settings = load_settings(path)
@@ -205,33 +198,37 @@ function (::Step{1})(path::AbstractString)
     end
 end # function preprocess
 
+function _dockercmd(exec::PWExec, n, input)
+    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
+    string(exec())[2:end-1] *
+    " -inp $input'"
+end # function _wrapcmd
+
 function (::Union{Step{2},Step{5}})(
     inputs,
     outputs,
-    np::Integer,
-    exec::MpiExec = MpiExec(1, PWExec("")),
-    ids = workers(),
+    np,
+    exec::PWExec,
+    ids = workers();
+    isdocker::Bool = true,
+    container = nothing,
 )
-    if size(inputs) != size(outputs)
-        throw(DimensionMismatch("`inputs` and `outputs` must be of the same size!"))
-    else
-        n = nprocs_task(np, length(inputs))
-        cmds = []
-        for (input, output) in zip(inputs, outputs)
-            push!(
-                cmds,
-                pipeline(
-                    Cmd(setproperties(
-                        exec,
-                        n = n,
-                        input = setproperties(exec.cmd, inp = input),
-                    )),
-                    stdout = output,
-                ),
-            )
+    # `map` guarantees they are of the same size, no need to check.
+    n = nprocs_task(np, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+        if isdocker
+            _dockercmd(exec, n, input)
+        else
+            MpiExec(n)(exec(stdin = input, stdout = output))
         end
-        return distribute_process(cmds, ids)
-    end  # `zip` does not guarantee they are of the same size, must check explicitly.
+    end
+    return distribute_process(
+        cmds,
+        ids;
+        isdocker = isdocker,
+        container = container,
+        inputs = inputs,
+    )
 end
 function (step::Union{Step{2},Step{5}})(path::AbstractString)
     settings = load_settings(path)
@@ -247,7 +244,7 @@ function (step::Union{Step{2},Step{5}})(path::AbstractString)
             )
         end
         outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-        return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
+        # return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
     else
         error("an error setting is given!")
     end
@@ -257,20 +254,18 @@ function (step::Union{Step{3},Step{6}})(
     outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
 )
-    energies, volumes = zeros(length(outputs)), zeros(length(outputs))
-    for (i, output) in enumerate(outputs)
+    xy = map(outputs) do output
         s = read(OutputFile(output))
         if !isjobdone(s)
             @warn "Job is not finished!"
         end
-        energies[i] = parse_electrons_energies(s, :converged).ε[end]
-        volumes[i] = _results(step, s)
+        _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
     end
-    return lsqfit(trial_eos(Energy()), volumes .* u"bohr^3", energies .* u"Ry")
+    return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
 end # function postprocess
 
 _results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
-_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard, s))
+_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
