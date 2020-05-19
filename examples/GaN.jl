@@ -7,7 +7,6 @@ using QuantumESPRESSOParsers
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers
 
-#  template source: /rigel/edu/m6085/users/jw3699/fesio3/lqs/scf/scf.in
 scf = raw"""
 &control
 calculation='scf'
@@ -78,14 +77,10 @@ map(bag, map(x -> replace(x, ".in" => ".out"), inputs)) do x, outfile
 end
 # ================================================================= Step 3: read scf.out and curve-fitting =============================
 new_eos = Step(3)(map(x -> replace(x, ".in" => ".out"), inputs), crude_eos)
-# if isjobdone(subjobs)
-#     new_eos = Step(3)(map(x -> replace(x, ".in" => ".out"), inputs), crude_eos_ev)
-# end
 # new eos:  317.75905077576425 a₀^3, 172.89506496025282 GPa, 4.357510886414555, -612.4315102681139 Ry
 # ================================================================= Step 4 =============================
 vcdirs = map(x -> mkpath("examples/vc$(ustrip(x))"), pressures)
 vcinputs = map(x -> x * "/vc.in", vcdirs)
-# STEP3 use scf.out outcome to form vc-realx input
 Step(4)(vcinputs, template, new_eos, pressures)
 # ================================================================= Step 5 =============================
 vcinputs_ondocker = map(x -> replace(x, "scf" => "vc"), inputs_ondocker)
