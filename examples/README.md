@@ -35,3 +35,11 @@ it looks like the REPL stucks, but it is not. Just wait! Do not stop the REPL! E
 calculation will take about 2 minutes on 2 processors and each vc-relax calculation will
 take about 6-9 minutes. So it might need 2-3 hours to run the whole workflow, depending on
 how good your computer is.
+
+## Troubleshooting
+
+If you run into a `ConnectionError(..., PermissionError(..., 'Permission denied'))` reported
+by some `.py` files on a Linux system like Ubuntu. A possible solution is to follow
+[this tutorial](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+(A restart of your system may be required.) After that you do not need root privileges to
+run `docker` commands, and try the same commands again.
