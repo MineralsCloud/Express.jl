@@ -234,7 +234,7 @@ _results(::Step{6}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function _saveto(filepath::AbstractString, data)
-    ext = _getext(filepath)
+    ext = _extension(filepath)
     if ext ∈ (".yaml", ".yml")
         YAML.write_file(expanduser(filepath), data)
     elseif ext == ".json"
@@ -247,7 +247,7 @@ function _saveto(filepath::AbstractString, data)
 end # function _saveto
 
 function _loadfrom(filepath::AbstractString)
-    ext = _getext(filepath)
+    ext = _extension(filepath)
     if ext ∈ (".yaml", ".yml")
         return open(expanduser(filepath), "r") do io
             YAML.load(io)
@@ -259,7 +259,7 @@ function _loadfrom(filepath::AbstractString)
     end
 end # function _loadfrom
 
-_getext(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
+_extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
