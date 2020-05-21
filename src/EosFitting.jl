@@ -16,7 +16,14 @@ using ConstructionBase: setproperties, constructorof
 using Crystallography
 using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
-using EquationsOfState.Collections: EquationOfState, Pressure, Energy, BirchMurnaghan3rd
+using EquationsOfState.Collections:
+    EquationOfState,
+    Pressure,
+    Energy,
+    BirchMurnaghan2nd,
+    BirchMurnaghan3rd,
+    BirchMurnaghan4th,
+    Murnaghan
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using JSON
@@ -48,15 +55,13 @@ import ..Step
 using ..CLI: MpiExec
 using ..Jobs: nprocs_task, distribute_process
 
-export Settings,
-    Step,
+export Step,
     ScfCalculation,
     StructureOptimization,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
     InputFile,
-    init_settings,
     load_settings,
     parse_template,
     set_alat_press
@@ -68,8 +73,8 @@ Step(::StructureOptimization, ::PrepareInput) = Step(4)
 Step(::StructureOptimization, ::LaunchJob) = Step(5)
 Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
 
-function validate_settings(settings)
-    map(("template", "np", "pressures", "init_eos", "qe", "workdir")) do key
+function _check_settings(settings)
+    map(("template", "np", "pressures", "trial_eos", "qe", "workdir")) do key
         @assert haskey(settings, key) "`$key` is reuqired but not found in settings!"
     end
     if length(settings["qe"]) > 1
@@ -83,73 +88,41 @@ function validate_settings(settings)
         @info "pressures less than 6 may give unreliable results, consider more if possible!"
     end
     map(("type", "parameters")) do key
-        @assert haskey(settings["init_eos"], key) "`$key` is reuqired for eos `$type`!"
+        @assert haskey(settings["trial_eos"], key) "`$key` is reuqired for eos `$type`!"
     end
-end # function validate_settings
+end # function _check_settings
 
-@with_kw struct Settings
-    template::String = ""
-    pressures::AbstractArray{<:Unitful.AbstractQuantity} = zeros(8) .* u"GPa"
-    trial_eos::EquationOfState{<:Unitful.AbstractQuantity} =
-        BirchMurnaghan3rd(0.0 * u"angstrom^3", 0.0 * u"GPa", 0.0, 0.0 * u"eV")
-    dir::String = "."
-    np::Int = 1
-end
+const EosMap = (
+    m = Murnaghan,
+    bm2 = BirchMurnaghan2nd,
+    bm3 = BirchMurnaghan3rd,
+    bm4 = BirchMurnaghan4th,
+)
 
-function _todict(settings::Settings)
-    eos = settings.trial_eos
-    return Dict(
-        "template" => expanduser(settings.template),
-        "pressures" => Dict(
-            "values" => ustrip.(settings.pressures),
-            "unit" => only(unique(unit.(settings.pressures))),
-        ),
-        "trial_eos" => "",
-        "dir" => expanduser(settings.dir),
-        "np" => settings.np,
+function _expand_settings(settings)
+    template = parse_template(InputFile(abspath(expanduser(settings["template"]))))
+    return (
+        template = template,
+        pressures = settings["pressures"] * u"GPa",
+        trial_eos = getindex(EosMap, Symbol(settings["trial_eos"]["type"]))(settings["trial_eos"]["parameters"]...),
+        inputs = map(settings["pressures"]) do pressure
+            abspath(joinpath(
+                expanduser(settings["workdir"]),
+                "p" * string(pressure),
+                template.control.calculation,
+                template.control.prefix * ".in",
+            ))
+        end,
+        np = settings["np"],
+        qe = settings["qe"]
     )
-end # function _todict
-
-init_settings(path::AbstractString, settings = Settings()) =
-    _saveto(path, _todict(settings))
+end # function _expand_settings
 
 function load_settings(path::AbstractString)
     settings = _loadfrom(path)
-    if _isgood(settings)
-        return Settings(
-            template = expanduser(settings["template"]),
-            pressures = settings["pressures"]["values"] .*
-                        _uparse(settings["pressures"]["unit"]),
-            trial_eos = eval(Meta.parse(settings["trial_eos"])),
-            dir = expanduser(settings["dir"]),
-            np = settings["np"],
-        )
-    else
-        @warn "some settings are not good! Check your input!"
-        return settings
-    end
+    _check_settings(settings)  # Errors will be thrown if exist
+    return _expand_settings(settings)
 end # function load_settings
-
-# This is a helper function and should not be exported!
-function _isgood(settings)
-    if isempty(settings["template"])
-        @warn "the path of the `template` file is not set!"
-        return false
-    end
-    if eltype(settings["pressures"]["values"]) ∉ (Int, Float64)
-        println(eltype(settings["pressures"]))
-        @warn "pressure values must be floats or integers!"
-        return false
-    end
-    if isnothing(settings["trial_eos"])
-        @warn "the trial eos is not set!"
-        return false
-    end
-    if isempty(settings["dir"])
-        @info "key `\"dir\"` is not set, will use the default value!"
-    end
-    return true
-end # function _isgood
 
 parse_template(str::AbstractString) = parse(PWInput, str)
 parse_template(file::InputFile) = parse(PWInput, read(file))
@@ -200,22 +173,8 @@ function (step::Union{Step{1},Step{4}})(
     end
 end
 function (::Step{1})(path::AbstractString)
-    settings = load_settings(path)
-    if settings isa Settings
-        pressures = settings.pressures
-        template = parse_template(InputFile(settings.template))
-        inputs = map(pressures) do pressure
-            joinpath(
-                settings.dir,
-                pressure |> ustrip |> round |> string,
-                "scf",
-                template.control.prefix * ".in.txt",
-            )
-        end
-        return Step(1)(inputs, template, settings.trial_eos, pressures)
-    else
-        error("an error setting is given!")
-    end
+    template, pressures, trial_eos, inputs = load_settings(path)
+    return Step(1)(inputs, template, trial_eos, pressures)
 end # function preprocess
 
 function _dockercmd(exec::PWExec, n, input)
@@ -252,22 +211,8 @@ function (::Union{Step{2},Step{5}})(
 end
 function (step::Union{Step{2},Step{5}})(path::AbstractString)
     settings = load_settings(path)
-    if settings isa Settings
-        pressures = settings.pressures
-        template = parse_template(InputFile(settings.template))
-        inputs = map(pressures) do pressure
-            joinpath(
-                settings.dir,
-                pressure |> ustrip |> round |> string,
-                "scf",
-                template.control.prefix * ".in.txt",
-            )
-        end
-        outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-        # return step(inputs, outputs, MpiExec(settings.np, DockerExec()))
-    else
-        error("an error setting is given!")
-    end
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
+    return step(settings.inputs, outputs, settings.np, PWExec(which = settings.qe["bin"]))
 end
 
 function (step::Union{Step{3},Step{6}})(
