@@ -7,7 +7,7 @@ mutable struct MpiExec
     "Specify the number of processes to use"
     n::Int
     "The path to the executable, defaults to \"mpiexec\""
-    which::String
+    bin::String
     "Name of host on which to run processes"
     host::String
     "Pick hosts with this architecture type"
@@ -41,7 +41,7 @@ function (exec::MpiExec)(cmd::Base.AbstractCmd)
             push!(options, "-$f", v)
         end
     end
-    _deepinject!(cmd, [exec.which, "-np", string(exec.n), options...])  # Horrible
+    _deepinject!(cmd, [exec.bin, "-np", string(exec.n), options...])  # Horrible
     # return Cmd(cmd, env = exec.env, dir = exec.wdir)
     return cmd
 end
