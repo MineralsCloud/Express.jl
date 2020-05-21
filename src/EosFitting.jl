@@ -68,6 +68,25 @@ Step(::StructureOptimization, ::PrepareInput) = Step(4)
 Step(::StructureOptimization, ::LaunchJob) = Step(5)
 Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
 
+function validate_settings(settings)
+    map(("template", "np", "pressures", "init_eos", "qe", "workdir")) do key
+        @assert haskey(settings, key) "`$key` is reuqired but not found in settings!"
+    end
+    if length(settings["qe"]) > 1
+        error("multiple Quantum ESPRESSO methods are given! It must be 1!")
+    end
+    @assert only(keys(settings["qe"])) ∈ ("local", "docker", "ssh")
+    @assert isdir(settings["workdir"])
+    @assert isfile(settings["template"])
+    @assert isinteger(settings["np"]) && settings["np"] >= 1
+    if length(settings["pressures"]) <= 6
+        @info "pressures less than 6 may give unreliable results, consider more if possible!"
+    end
+    map(("type", "parameters")) do key
+        @assert haskey(settings["init_eos"], key) "`$key` is reuqired for eos `$type`!"
+    end
+end # function validate_settings
+
 @with_kw struct Settings
     template::String = ""
     pressures::AbstractArray{<:Unitful.AbstractQuantity} = zeros(8) .* u"GPa"
@@ -146,7 +165,8 @@ function set_alat_press(
         @set! template.system.celldm[1] *= factor
     else
         @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters * factor)
+        @set! template.cell_parameters =
+            optconvert("bohr", template.cell_parameters * factor)
     end
     @set! template.cell.press = ustrip(u"kbar", pressure)
     return template
@@ -265,7 +285,8 @@ function (step::Union{Step{3},Step{6}})(
 end # function postprocess
 
 _results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
-_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard{Float64}, s))
+_results(::Step{6}, s::AbstractString) =
+    cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
