@@ -35,7 +35,7 @@ function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} =
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     return map(cmds, ids, inputs) do cmd, id, input  # promises
         if isdocker
-            exec_run(container, cmd; demux = true, workdir = dirname(input))
+            exec_run(container, cmd; demux = true, workdir = dirname(input), stdout = true, stderr = true, stream = true)
         else
             @spawnat id run(cmd, wait = true)  # TODO: Must wait?
         end

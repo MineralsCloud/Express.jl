@@ -35,24 +35,20 @@ using QuantumESPRESSO.Inputs.PWscf:
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using QuantumESPRESSO.CLI: PWExec
-using QuantumESPRESSO.Setters: VerbositySetter, CellParametersSetter
+using QuantumESPRESSOBase.CLI: pwcmd
 using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
 using YAML
 
-using Express:
+using ..Express:
+    Step,
+    Calculation,
     ScfCalculation,
-    PhononCalculation,
-    StructureOptimization,
-    CPMD,
     PrepareInput,
     LaunchJob,
     AnalyseOutput
-
-import ..Step
-using ..CLI: MpiExec
+using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
 
 export Step,
@@ -65,6 +61,8 @@ export Step,
     load_settings,
     parse_template,
     set_alat_press
+
+struct StructureOptimization <: Calculation end
 
 Step(::ScfCalculation, ::PrepareInput) = Step(1)
 Step(::ScfCalculation, ::LaunchJob) = Step(2)
@@ -177,9 +175,9 @@ function (::Step{1})(path::AbstractString)
     return Step(1)(inputs, template, trial_eos, pressures)
 end # function preprocess
 
-function _dockercmd(exec::PWExec, n, input)
+function _dockercmd(exec, n, input)
     "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
-    string(exec())[2:end-1] *
+    string(exec)[2:end-1] *
     " -inp $input'"
 end # function _wrapcmd
 
@@ -187,7 +185,7 @@ function (::Union{Step{2},Step{5}})(
     inputs,
     outputs,
     np,
-    exec::PWExec,
+    cmd,
     ids = workers();
     isdocker::Bool = true,
     container = nothing,
@@ -196,9 +194,9 @@ function (::Union{Step{2},Step{5}})(
     n = nprocs_task(np, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
         if isdocker
-            _dockercmd(exec, n, input)
+            _dockercmd(cmd, n, input)
         else
-            MpiExec(n)(exec(stdin = input, stdout = output))
+            # MpiExec(n)(cmd(stdin = input, stdout = output))
         end
     end
     return distribute_process(
@@ -212,7 +210,7 @@ end
 function (step::Union{Step{2},Step{5}})(path::AbstractString)
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
-    return step(settings.inputs, outputs, settings.np, PWExec(which = settings.qe["bin"]))
+    return step(settings.inputs, outputs, settings.np, pwcmd(bin = settings.qe["bin"]))
 end
 
 function (step::Union{Step{3},Step{6}})(

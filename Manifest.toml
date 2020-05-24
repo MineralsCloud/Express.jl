@@ -89,15 +89,15 @@ version = "1.3.0"
 
 [[DataFrames]]
 deps = ["CategoricalArrays", "Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "Missings", "PooledArrays", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "1b4d832288e2d919eeaccdf1d9af7a8a57d773d6"
+git-tree-sha1 = "a3b230f7c0db4ce95d14d2026777e27c1b0f63db"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "0.21.0"
+version = "0.21.1"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "7d7578b00789cf16c5f68fad71868e773edd58a2"
+git-tree-sha1 = "af6d9c86e191c917c2276fbede1137e8ea20157f"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.16"
+version = "0.17.17"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -136,7 +136,7 @@ version = "0.22.6"
 
 [[DockerPy]]
 deps = ["PyCall", "VersionParsing"]
-git-tree-sha1 = "109f9ccc3af261f4dee421bdaaf044b225615d44"
+git-tree-sha1 = "5e25d244ae7b944a2cf584fb002b0caf7457bf2d"
 repo-rev = "master"
 repo-url = "git@github.com:singularitti/DockerPy.jl.git"
 uuid = "7b2ae67c-a082-49fb-8801-fe9170dc9342"
@@ -173,15 +173,15 @@ version = "1.3.0"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "6c89d5b673e59b8173c546c84127e5f623d865f6"
+git-tree-sha1 = "44f561e293987ffc84272cd3d2b14b0b93123d63"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.8.9"
+version = "0.8.10"
 
 [[FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "e65805de69d457029940acff64dd92e57b93c8a5"
+git-tree-sha1 = "fec7c2cb45c27071ef487fa7cae4fcac7509aa10"
 uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
-version = "2.3.1"
+version = "2.3.2"
 
 [[Formatting]]
 deps = ["Printf"]
@@ -198,6 +198,18 @@ version = "0.10.10"
 [[Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+
+[[HTTP]]
+deps = ["Base64", "Dates", "IniFile", "MbedTLS", "Sockets"]
+git-tree-sha1 = "fe31f4ff144392ad8176f5c7c03cca6ba320271c"
+uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+version = "0.8.14"
+
+[[IniFile]]
+deps = ["Test"]
+git-tree-sha1 = "098e4d2c533924c921f9f9847274f2ad89e018b8"
+uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
+version = "0.5.0"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -287,6 +299,18 @@ version = "0.5.5"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
+[[MbedTLS]]
+deps = ["Dates", "MbedTLS_jll", "Random", "Sockets"]
+git-tree-sha1 = "426a6978b03a97ceb7ead77775a1da066343ec6e"
+uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
+version = "1.0.2"
+
+[[MbedTLS_jll]]
+deps = ["Libdl", "Pkg"]
+git-tree-sha1 = "c83f5a1d038f034ad0549f9ee4d5fac3fb429e33"
+uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.16.0+2"
+
 [[Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "de0a5ce9e5289f27df672ffabef4d1e5861247d5"
@@ -374,9 +398,15 @@ version = "0.5.3"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[ProgressMeter]]
+deps = ["Distributed", "Printf"]
+git-tree-sha1 = "b3cb8834eee5410c7246734cc6f4f586fe0dc50e"
+uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
+version = "1.3.0"
+
 [[Pseudopotentials]]
-deps = ["DataFrames", "JLD2", "JSON", "Parameters", "REPL"]
-git-tree-sha1 = "5fe9e516007163a185c171c7d5aec471f37b7acc"
+deps = ["DataFrames", "EzXML", "JLD2", "Parameters", "REPL", "UrlDownload"]
+git-tree-sha1 = "720a4f92c3f1de88c4e13fa907ef9cb68940d1d3"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/Pseudopotentials.jl.git"
 uuid = "1b2dc2e6-48aa-4f00-b8f4-19d1a71d7a0e"
@@ -404,7 +434,7 @@ version = "2.3.1"
 
 [[QuantumESPRESSO]]
 deps = ["QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "141cde19941ee602b5ab8f842d1b2c9816d75a8a"
+git-tree-sha1 = "d962e194d3857efde2a953152dea7e1875c95316"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -412,7 +442,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["Compat", "Crystallography", "Formatting", "Kaleido", "LibSymspg", "LinearAlgebra", "OrderedCollections", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "d64044687e97de8fdd0a1db12223eab7d1e23429"
+git-tree-sha1 = "bd26eb33f9422328dfd7f27141242745fd59be57"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -506,9 +536,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[SpecialFunctions]]
 deps = ["OpenSpecFun_jll"]
-git-tree-sha1 = "a69e1eaf3397fbb5a4d718538463e5cc20ef42a4"
+git-tree-sha1 = "d8d8b8a9f4119829410ecd706da4cc8594a1e020"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "0.10.2"
+version = "0.10.3"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
@@ -528,9 +558,9 @@ version = "0.32.2"
 
 [[StatsFuns]]
 deps = ["Rmath", "SpecialFunctions"]
-git-tree-sha1 = "f290ddd5fdedeadd10e961eb3f4d3340f09d030a"
+git-tree-sha1 = "04a5a8e6ab87966b43f247920eab053fd5fdc925"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "0.9.4"
+version = "0.9.5"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -587,6 +617,12 @@ deps = ["Unitful"]
 git-tree-sha1 = "2edb47dbda92ce8a91f53603041ffe7745427b01"
 uuid = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 version = "0.3.0"
+
+[[UrlDownload]]
+deps = ["HTTP", "ProgressMeter"]
+git-tree-sha1 = "5fa94d45736fa706e7b636faebb9d3644a8db449"
+uuid = "856ac37a-3032-4c1c-9122-f86d88358c8b"
+version = "0.2.0"
 
 [[VersionParsing]]
 git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
