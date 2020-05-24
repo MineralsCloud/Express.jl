@@ -18,12 +18,24 @@ using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWI
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using QuantumESPRESSO.Setters: CellParametersSetter
+using QuantumESPRESSO.Setters: CellParametersSetter, VerbositySetter
 using Setfield: get, set, @lens, @set!
 
-using ..Express: Step
+using ..Express:
+    Step,
+    Calculation,
+    ScfCalculation,
+    PrepareInput,
+    LaunchJob,
+    AnalyseOutput
 
 export Step, update_structure, relay, preprocess
+
+struct PhononCalculation <: Calculation end
+
+Step(::ScfCalculation, ::PrepareInput) = Step(1)
+Step(::ScfCalculation, ::LaunchJob) = Step(2)
+Step(::ScfCalculation, ::AnalyseOutput) = Step(3)
 
 """
     update_structure(output::AbstractString, template::PWInput)
@@ -32,22 +44,24 @@ Read structure information from `output`, and update related fields of `template
 """
 function update_structure(output::AbstractString, template::PWInput)
     str = read(OutputFile(output))
+    cell = parsefinal(CellParametersCard{Float64}, str)
     return setproperties(
         template,
-        system = setproperties(template.system, ibrav = 0, celldm = [1]),
         atomic_positions = parsefinal(AtomicPositionsCard, str),
         cell_parameters = CellParametersCard(
+            cell.data / template.system.celldm[1],
             "alat",
-            optconvert("bohr", parsefinal(CellParametersCard, str)).data,
         ), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
     )
 end # function update_structure
 
 # This is a helper function and should not be exported.
 function _preset(template::PWInput)
-    @set! template.control = batchset(VerbositySetter(:high), template.control)
+    @set! template.control = set(template.control, VerbositySetter(:high))
     @set! template.control.calculation = "scf"
-    return batchset(CellParametersSetter(), template)
+    template = set(template, CellParametersSetter())
+    @set! template.system.ibrav = 0
+    return template
 end # function _preset
 function _preset(template::PhInput)
     lenses = @batchlens(begin
@@ -126,32 +140,28 @@ Prepare input files of the first step of a phonon calculation.
    they will be automatically created.
 - `outputs::AbstractVector{<:AbstractString}`: The output files of Quantum ESPRESSO of a vc-relax calculation.
 - `template::PWInput`:
-- `verbose::Bool = false`: control the format of input files, verbose or not.
 """
-function preprocess(
-    ::Step{1},
-    inputs::AbstractVector{<:AbstractString},
-    outputs::AbstractVector{<:AbstractString},
+function (::Step{1})(
+    scf_inputs::AbstractVector{<:AbstractString},
+    vc_outputs::AbstractVector{<:AbstractString},
     template::PWInput,
-    verbose::Bool = false,
 )
     template = _preset(template)
-    map(inputs, outputs) do (input, output)
+    map(scf_inputs, vc_outputs) do input, output
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
         write(InputFile(input), object)
+        object
     end
-    return
 end # function preprocess
 function preprocess(
     ::Step{2},
-    phonon_inputs::AbstractVector{<:AbstractString},
-    pwscf_inputs::AbstractVector{<:AbstractString},
+    phonon_inputs,
+    pwscf_inputs,
     template::PhInput,
-    verbose::Bool = false,
 )
     template = _preset(template)
-    map(phonon_inputs, pwscf_inputs) do (phonon_input, pwscf_input)
+    map(phonon_inputs, pwscf_inputs) do phonon_input, pwscf_input
         object = parse(PWInput, read(InputFile(pwscf_input)))
         write(InputFile(phonon_input), relay(object, template))
     end
@@ -162,7 +172,6 @@ function preprocess(
     q2r_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
     template::Q2rInput,
-    verbose::Bool = false,
 )
     map(q2r_inputs, phonon_inputs) do q2r_input, phonon_input
         object = parse(PhInput, read(InputFile(phonon_input)))
@@ -175,9 +184,8 @@ function preprocess(
     matdyn_inputs::AbstractVector{<:AbstractString},
     q2r_inputs::AbstractVector{<:AbstractString},
     template::MatdynInput,
-    verbose::Bool = false,
 )
-    map(matdyn_inputs, q2r_inputs) do (matdyn_input, q2r_input)
+    map(matdyn_inputs, q2r_inputs) do matdyn_input, q2r_input
         object = parse(Q2rInput, read(InputFile(q2r_input)))
         template = relay(object, template)
         if isfile(template.input.flfrq)
@@ -196,9 +204,8 @@ function preprocess(
     dynmat_inputs::AbstractVector{<:AbstractString},
     phonon_inputs::AbstractVector{<:AbstractString},
     template::DynmatInput,
-    verbose::Bool = false,
 )
-    map(dynmat_inputs, phonon_inputs) do (dynmat_input, phonon_input)
+    map(dynmat_inputs, phonon_inputs) do dynmat_input, phonon_input
         object = parse(PhInput, read(InputFile(phonon_input)))
         write(InputFile(dynmat_input), relay(object, template))
     end
