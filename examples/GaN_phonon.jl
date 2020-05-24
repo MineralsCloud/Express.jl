@@ -1,7 +1,5 @@
 using Distributed
 addprocs(16)
-using Pkg
-Pkg.activate(".")
 using Express.Phonon, Express.Jobs, Express.CLI
 using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.Inputs.PHonon, QuantumESPRESSOBase.CLI
 using QuantumESPRESSOParsers
