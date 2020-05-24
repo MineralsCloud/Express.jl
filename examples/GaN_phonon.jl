@@ -43,7 +43,7 @@ K_POINTS automatic
 
 docker = DockerClient()
 image = pull(docker, "rinnocente/qe-full-6.2.1")[1]
-begin
+try
     container = Container(
         docker,
         image,
@@ -56,8 +56,9 @@ begin
                 Dict("bind" => "/home/qe/test", "mode" => "rw"),
         ),
     )
+catch
+    container = get(docker.containers, "qe")
 end
-# container = containers(docker)[1]
 start(container)
 exec_run(container, "mkdir -p /home/qe/pseudo/")
 exec_run(
