@@ -57,7 +57,7 @@ begin
         ),
     )
 end
-container = containers(docker)[1]
+# container = containers(docker)[1]
 start(container)
 exec_run(container, "mkdir -p /home/qe/pseudo/")
 exec_run(
