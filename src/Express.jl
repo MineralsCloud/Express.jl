@@ -18,17 +18,17 @@ struct StructureOptimization <: Calculation end
 struct PhononCalculation <: Calculation end
 struct CPMD <: Calculation end
 
-abstract type Procedure end
-struct PrepareInput <: Procedure end
-struct LaunchJob <: Procedure end
-struct AnalyseOutput <: Procedure end
+abstract type Action end
+struct PrepareInput <: Action end
+struct LaunchJob <: Action end
+struct AnalyseOutput <: Action end
 
 include("CLI.jl")
 include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting.jl")
-# include("Phonon.jl")
+include("Phonon.jl")
 # include("Wizard/Wizard.jl")
 
 end # module
