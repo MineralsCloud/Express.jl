@@ -137,13 +137,8 @@ function preprocess(
     template::PWInput,
     verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(inputs) == length(outputs),
-        "The inputs, outputs must be the same length!"
-    )
     template = _preset(template)
-    for (input, output) in zip(inputs, outputs)
+    map(inputs, outputs) do (input, output)
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
         write(InputFile(input), object)
@@ -157,13 +152,8 @@ function preprocess(
     template::PhInput,
     verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(phonon_inputs) == length(pwscf_inputs),
-        "The PWscf and the PHonon inputs files must have the same length!",
-    )
     template = _preset(template)
-    for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
+    map(phonon_inputs, pwscf_inputs) do (phonon_input, pwscf_input)
         object = parse(PWInput, read(InputFile(pwscf_input)))
         write(InputFile(phonon_input), relay(object, template))
     end
@@ -176,12 +166,7 @@ function preprocess(
     template::Q2rInput,
     verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(q2r_inputs) == length(phonon_inputs),
-        "The phonon and the q2r inputs files must have the same length!",
-    )
-    for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
+    map(q2r_inputs, phonon_inputs) do q2r_input, phonon_input
         object = parse(PhInput, read(InputFile(phonon_input)))
         write(InputFile(q2r_input), relay(object, template))
     end
@@ -194,12 +179,7 @@ function preprocess(
     template::MatdynInput,
     verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(matdyn_inputs) == length(q2r_inputs),
-        "The q2r and the matdyn inputs files must have the same length!",
-    )
-    for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
+    map(matdyn_inputs, q2r_inputs) do (matdyn_input, q2r_input)
         object = parse(Q2rInput, read(InputFile(q2r_input)))
         template = relay(object, template)
         if isfile(template.input.flfrq)
@@ -220,12 +200,7 @@ function preprocess(
     template::DynmatInput,
     verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(dynmat_inputs) == length(phonon_inputs),
-        "The dynmat and the phonon inputs files must have the same length!",
-    )
-    for (dynmat_input, phonon_input) in zip(dynmat_inputs, phonon_inputs)
+    map(dynmat_inputs, phonon_inputs) do (dynmat_input, phonon_input)
         object = parse(PhInput, read(InputFile(phonon_input)))
         write(InputFile(dynmat_input), relay(object, template))
     end
