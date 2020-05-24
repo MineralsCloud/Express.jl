@@ -13,19 +13,17 @@ module Phonon
 
 using ConstructionBase: setproperties
 using Kaleido: @batchlens
-using QuantumESPRESSO.Inputs: InputFile, optconvert, qestring
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
-# using QuantumESPRESSO.Inputs.PHonon: SpecialQPoint, QPointsSpecsCard
+using QuantumESPRESSO.Inputs: InputFile, qestring
+using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using QuantumESPRESSO.Setters: CellParametersSetter, batchset
+using QuantumESPRESSO.Setters: CellParametersSetter
 using Setfield: get, set, @lens, @set!
 
-import ..Step
-using ..BandStructure: generate_path
+using ..Express: Step
 
-export update_structure, relay, preprocess
+export Step, update_structure, relay, preprocess
 
 """
     update_structure(output::AbstractString, template::PWInput)
