@@ -72,16 +72,16 @@ Step(::StructureOptimization, ::LaunchJob) = Step(5)
 Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
 
 function _check_settings(settings)
-    map(("template", "np", "pressures", "trial_eos", "qe", "workdir")) do key
+    map(("template", "nprocs", "pressures", "trial_eos", "qe", "dir")) do key
         @assert haskey(settings, key) "`$key` is reuqired but not found in settings!"
     end
     if length(settings["qe"]) > 1
         error("multiple Quantum ESPRESSO methods are given! It must be 1!")
     end
     @assert only(keys(settings["qe"])) ∈ ("local", "docker", "ssh")
-    @assert isdir(settings["workdir"])
+    @assert isdir(settings["dir"])
     @assert isfile(settings["template"])
-    @assert isinteger(settings["np"]) && settings["np"] >= 1
+    @assert isinteger(settings["nprocs"]) && settings["nprocs"] >= 1
     if length(settings["pressures"]) <= 6
         @info "pressures less than 6 may give unreliable results, consider more if possible!"
     end
@@ -102,16 +102,16 @@ function _expand_settings(settings)
     return (
         template = template,
         pressures = settings["pressures"] * u"GPa",
-        trial_eos = getindex(EosMap, Symbol(settings["trial_eos"]["type"]))(settings["trial_eos"]["parameters"]...),
+        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"]...),
         inputs = map(settings["pressures"]) do pressure
             abspath(joinpath(
-                expanduser(settings["workdir"]),
+                expanduser(settings["dir"]),
                 "p" * string(pressure),
                 template.control.calculation,
                 template.control.prefix * ".in",
             ))
         end,
-        np = settings["np"],
+        np = settings["nprocs"],
         qe = settings["qe"]
     )
 end # function _expand_settings
@@ -210,7 +210,7 @@ end
 function (step::Union{Step{2},Step{5}})(path::AbstractString)
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
-    return step(settings.inputs, outputs, settings.np, pwcmd(bin = settings.qe["bin"]))
+    return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
 end
 
 function (step::Union{Step{3},Step{6}})(
