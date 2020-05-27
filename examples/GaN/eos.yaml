@@ -1,0 +1,15 @@
+qe:
+  bin: pw.x
+  scheme: local
+dir: examples
+template: /Users/qz/Downloads/GaN/scfin/50.in
+nprocs: 16
+pressures: [-5, 0, 5, 10, 15, 20, 25, 30]
+trial_eos:
+  type: bm3
+  parameters: [317, 210, 4, -612.43]
+  units:
+    - angstrom^3
+    - GPa
+    - "1"
+    - Ry

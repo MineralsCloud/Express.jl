@@ -1,16 +1,16 @@
 using Distributed
 addprocs(8)
-@everywhere using Pkg
-@everywhere Pkg.activate(".")
-@everywhere using Express, Express.EosFitting, Express.Jobs, Express.CLI
-@everywhere using EquationsOfState.NonlinearFitting,
+using Pkg
+Pkg.activate(".")
+using Express, Express.EosFitting, Express.Jobs, Express.CLI
+using EquationsOfState.NonlinearFitting,
     EquationsOfState.Collections, EquationsOfState.Find
-@everywhere using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSOBase.CLI
-@everywhere using QuantumESPRESSOParsers
-@everywhere using Unitful, UnitfulAtomic
-@everywhere using DockerPy.Client, DockerPy.Images, DockerPy.Containers
+using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSOBase.CLI
+using QuantumESPRESSOParsers
+using Unitful, UnitfulAtomic
+using DockerPy.Client, DockerPy.Images, DockerPy.Containers
 
-@everywhere str = raw"""
+str = raw"""
 &control
 calculation='scf'
 verbosity = 'high'
@@ -45,9 +45,9 @@ K_POINTS automatic
 6 6 6 0 0 0
 """
 
-@everywhere docker = DockerClient()
-@everywhere image = pull(docker, "rinnocente/qe-full-6.2.1")[1]
-# @everywhere begin
+docker = DockerClient()
+image = pull(docker, "rinnocente/qe-full-6.2.1")[1]
+# begin
 #     container = Container(
 #         docker,
 #         image,
@@ -61,7 +61,7 @@ K_POINTS automatic
 #         ),
 #     )
 # end
-@everywhere container = containers(docker)[1]
+container = containers(docker)[1]
 start(container)
 exec_run(container, "mkdir -p /home/qe/pseudo/")
 exec_run(
@@ -74,16 +74,16 @@ exec_run(
 )
 # ================================================================= Step 1 =============================
 # pressures = [-100, -50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 500] * u"kbar"
-@everywhere pressures = [-50, 0, 50, 100, 150, 200, 250, 300] * u"kbar"
-@everywhere scfdirs_local = map(x -> mkpath("examples/scf$(ustrip(x))"), pressures)
-@everywhere scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
-@everywhere crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
-@everywhere template = parse(PWInput, str)
+pressures = [-50, 0, 50, 100, 150, 200, 250, 300] * u"kbar"
+scfdirs_local = map(x -> mkpath("examples/scf$(ustrip(x))"), pressures)
+scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
+crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
+template = parse(PWInput, str)
 Step(1)(scfinputs_local, template, crude_eos, pressures)
-@everywhere scfinputs_docker = map(x -> "/home/qe/test/scf$(ustrip(x))/scf.in", pressures)
-@everywhere scfoutputs_docker = map(x -> replace(x, ".in" => ".out"), scfinputs_docker)
+scfinputs_docker = map(x -> "/home/qe/test/scf$(ustrip(x))/scf.in", pressures)
+scfoutputs_docker = map(x -> replace(x, ".in" => ".out"), scfinputs_docker)
 # ================================================================= Step 2 =============================
-@everywhere bag = Step(2)(
+bag = Step(2)(
     scfinputs_docker,
     scfoutputs_docker,
     16,
