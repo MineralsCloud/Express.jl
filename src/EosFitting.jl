@@ -41,13 +41,7 @@ using Unitful
 using UnitfulAtomic
 using YAML
 
-using ..Express:
-    Step,
-    Calculation,
-    ScfCalculation,
-    PrepareInput,
-    LaunchJob,
-    AnalyseOutput
+using ..Express: Step, Calculation, ScfCalculation, PrepareInput, LaunchJob, AnalyseOutput
 using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
 
@@ -71,22 +65,32 @@ Step(::StructureOptimization, ::PrepareInput) = Step(4)
 Step(::StructureOptimization, ::LaunchJob) = Step(5)
 Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
 
+function _check_qe_settings(settings)
+    map(("scheme", "bin")) do key
+        @assert haskey(settings, key)
+    end
+    if settings["scheme"] == "docker"
+        @assert haskey(settings, "container")
+    elseif settings["scheme"] == "ssh"
+    elseif settings["scheme"] == "local"  # Do nothing
+    else
+        error("unknown scheme `$(settings["scheme"])`!")
+    end
+end # function _check_qe_settings
+
 function _check_settings(settings)
     map(("template", "nprocs", "pressures", "trial_eos", "qe", "dir")) do key
-        @assert haskey(settings, key) "`$key` is reuqired but not found in settings!"
+        @assert haskey(settings, key)
     end
-    if length(settings["qe"]) > 1
-        error("multiple Quantum ESPRESSO methods are given! It must be 1!")
-    end
-    @assert only(keys(settings["qe"])) ∈ ("local", "docker", "ssh")
+    _check_qe_settings(settings["qe"])
     @assert isdir(settings["dir"])
     @assert isfile(settings["template"])
     @assert isinteger(settings["nprocs"]) && settings["nprocs"] >= 1
     if length(settings["pressures"]) <= 6
         @info "pressures less than 6 may give unreliable results, consider more if possible!"
     end
-    map(("type", "parameters")) do key
-        @assert haskey(settings["trial_eos"], key) "`$key` is reuqired for eos `$type`!"
+    map(("type", "parameters", "units")) do key
+        @assert haskey(settings["trial_eos"], key)
     end
 end # function _check_settings
 
@@ -97,12 +101,14 @@ const EosMap = (
     bm4 = BirchMurnaghan4th,
 )
 
-function _expand_settings(settings)
+function Settings(settings)
     template = parse_template(InputFile(abspath(expanduser(settings["template"]))))
     return (
         template = template,
-        pressures = settings["pressures"] * u"GPa",
-        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"]...),
+        pressures = settings["pressures"] .* u"GPa",
+        trial_eos =
+            EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
+                                                          _uparse.(settings["trial_eos"]["units"])...),
         inputs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
@@ -111,15 +117,15 @@ function _expand_settings(settings)
                 template.control.prefix * ".in",
             ))
         end,
-        np = settings["nprocs"],
-        qe = settings["qe"]
+        nprocs = settings["nprocs"],
+        qe = settings["qe"],
     )
-end # function _expand_settings
+end # function Settings
 
 function load_settings(path::AbstractString)
     settings = _loadfrom(path)
     _check_settings(settings)  # Errors will be thrown if exist
-    return _expand_settings(settings)
+    return Settings(settings)
 end # function load_settings
 
 parse_template(str::AbstractString) = parse(PWInput, str)
@@ -135,9 +141,15 @@ function set_alat_press(
     if isnothing(template.cell_parameters)
         @set! template.system.celldm[1] *= factor
     else
-        @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters =
-            optconvert("bohr", template.cell_parameters * factor)
+        if template.cell_parameters.option == "alat"
+            @set! template.system.celldm[1] *= factor
+        else
+            @set! template.system.celldm = zeros(6)
+            @set! template.cell_parameters = optconvert(
+                "bohr",
+                CellParametersCard(template.cell_parameters.data * factor),
+            )
+        end
     end
     @set! template.cell.press = ustrip(u"kbar", pressure)
     return template
