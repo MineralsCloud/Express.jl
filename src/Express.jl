@@ -13,6 +13,7 @@ struct AnalyseOutput <: Action end
 
 include("CLI.jl")
 include("Jobs.jl")
+include("Schemes.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting.jl")
