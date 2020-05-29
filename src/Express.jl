@@ -10,6 +10,33 @@ abstract type Action end
 struct PrepareInput <: Action end
 struct LaunchJob <: Action end
 struct AnalyseOutput <: Action end
+function save(filepath::AbstractString, data)
+    ext = extension(filepath)
+    if ext ∈ (".yaml", ".yml")
+        YAML.write_file(expanduser(filepath), data)
+    elseif ext == ".json"
+        open(expanduser(filepath), "w") do io
+            JSON.print(io, data)
+        end
+    else
+        error("unknown file extension `$ext`!")
+    end
+end # function save
+
+function load(filepath::AbstractString)
+    ext = extension(filepath)
+    if ext ∈ (".yaml", ".yml")
+        return open(expanduser(filepath), "r") do io
+            YAML.load(io)
+        end
+    elseif ext == ".json"
+        return JSON.parsefile(expanduser(filepath))
+    else
+        error("unknown file extension `$ext`!")
+    end
+end # function load
+
+extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 
 include("CLI.jl")
 include("Jobs.jl")

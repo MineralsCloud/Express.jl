@@ -243,33 +243,6 @@ _results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
 _results(::Step{6}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
-function _saveto(filepath::AbstractString, data)
-    ext = _extension(filepath)
-    if ext ∈ (".yaml", ".yml")
-        YAML.write_file(expanduser(filepath), data)
-    elseif ext == ".json"
-        open(expanduser(filepath), "w") do io
-            JSON.print(io, data)
-        end
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function _saveto
-
-function _loadfrom(filepath::AbstractString)
-    ext = _extension(filepath)
-    if ext ∈ (".yaml", ".yml")
-        return open(expanduser(filepath), "r") do io
-            YAML.load(io)
-        end
-    elseif ext == ".json"
-        return JSON.parsefile(expanduser(filepath))
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function _loadfrom
-
-_extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
