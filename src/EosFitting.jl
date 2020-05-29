@@ -14,7 +14,6 @@ module EosFitting
 using Compat: isnothing, only
 using ConstructionBase: setproperties, constructorof
 using Crystallography
-using Crystallography.Arithmetics: cellvolume
 using Distributed: workers
 using EquationsOfState.Collections:
     EquationOfState,
@@ -26,12 +25,11 @@ using EquationsOfState.Collections:
     Murnaghan
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using JSON
 using LinearAlgebra: det
 using Parameters: @with_kw
 using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
-using QuantumESPRESSO.Inputs.PWscf:
-    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
+using QuantumESPRESSOBase.Inputs.PWscf:
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert, xmldir
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
@@ -39,31 +37,30 @@ using QuantumESPRESSOBase.CLI: pwcmd
 using Setfield: set, @set!
 using Unitful
 using UnitfulAtomic
-using YAML
 
-using ..Express: Step, Calculation, ScfCalculation, PrepareInput, LaunchJob, AnalyseOutput
+using ..Express:
+    Calculation,
+    SelfConsistentField,
+    PREPARE_INPUT,
+    LAUNCH_JOB,
+    ANALYSE_OUTPUT,
+    load,
+    save,
+    _uparse
 using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
 
-export Step,
-    ScfCalculation,
+export SelfConsistentField,
     StructureOptimization,
-    PrepareInput,
-    LaunchJob,
-    AnalyseOutput,
+    PREPARE_INPUT,
+    LAUNCH_JOB,
+    ANALYSE_OUTPUT,
     InputFile,
     load_settings,
     parse_template,
     set_alat_press
 
-struct StructureOptimization <: Calculation end
-
-Step(::ScfCalculation, ::PrepareInput) = Step(1)
-Step(::ScfCalculation, ::LaunchJob) = Step(2)
-Step(::ScfCalculation, ::AnalyseOutput) = Step(3)
-Step(::StructureOptimization, ::PrepareInput) = Step(4)
-Step(::StructureOptimization, ::LaunchJob) = Step(5)
-Step(::StructureOptimization, ::AnalyseOutput) = Step(6)
+struct StructureOptimization{T} <: Calculation{T} end
 
 function _check_qe_settings(settings)
     map(("scheme", "bin")) do key
@@ -123,7 +120,7 @@ function Settings(settings)
 end # function Settings
 
 function load_settings(path::AbstractString)
-    settings = _loadfrom(path)
+    settings = load(path)
     _check_settings(settings)  # Errors will be thrown if exist
     return Settings(settings)
 end # function load_settings
@@ -156,21 +153,26 @@ function set_alat_press(
 end # function update_alat_press
 
 # This is a helper function and should not be exported.
-_preset(step::Union{Step{1},Step{4}}, template::PWInput) = setproperties(
+_preset(
+    step::Union{SelfConsistentField{PREPARE_INPUT},StructureOptimization{PREPARE_INPUT}},
+    template::PWInput,
+) = setproperties(
     template,
     control = setproperties(
         template.control,
-        calculation = step isa Step{1} ? "scf" : "vc-relax",
+        calculation = step isa SelfConsistentField ? "scf" : "vc-relax",
         verbosity = "high",
         tstress = true,
         tprnfor = true,
     ),
 )
 
-function (step::Union{Step{1},Step{4}})(
+function (
+    step::Union{SelfConsistentField{PREPARE_INPUT},StructureOptimization{PREPARE_INPUT}}
+)(
     inputs,
-    template::PWInput,
-    trial_eos::EquationOfState,
+    template,
+    trial_eos,
     pressures,
 )
     template = _preset(step, template)
@@ -182,7 +184,7 @@ function (step::Union{Step{1},Step{4}})(
         object
     end
 end
-function (::Step{1})(path::AbstractString)
+function (::SelfConsistentField{PREPARE_INPUT})(path::AbstractString)
     template, pressures, trial_eos, inputs = load_settings(path)
     return Step(1)(inputs, template, trial_eos, pressures)
 end # function preprocess
@@ -193,7 +195,7 @@ function _dockercmd(exec, n, input)
     " -inp $input'"
 end # function _wrapcmd
 
-function (::Union{Step{2},Step{5}})(
+function (::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
     inputs,
     outputs,
     np,
@@ -219,13 +221,17 @@ function (::Union{Step{2},Step{5}})(
         inputs = inputs,
     )
 end
-function (step::Union{Step{2},Step{5}})(path::AbstractString)
+function (step::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
+    path::AbstractString,
+)
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
 end
 
-function (step::Union{Step{3},Step{6}})(
+function (
+    step::Union{SelfConsistentField{ANALYSE_OUTPUT},StructureOptimization{ANALYSE_OUTPUT}}
+)(
     outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
 )
@@ -239,11 +245,8 @@ function (step::Union{Step{3},Step{6}})(
     return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
 end # function postprocess
 
-_results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
-_results(::Step{6}, s::AbstractString) =
+_results(::SelfConsistentField{ANALYSE_OUTPUT}, s::AbstractString) = parse(Preamble, s).omega
+_results(::StructureOptimization{ANALYSE_OUTPUT}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
-
-
-_uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 end

@@ -42,6 +42,8 @@ end # function load
 
 extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 
+_uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
+
 include("CLI.jl")
 include("Jobs.jl")
 include("Schemes.jl")
