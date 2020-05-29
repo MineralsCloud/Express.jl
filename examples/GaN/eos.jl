@@ -9,41 +9,6 @@ using QuantumESPRESSOParsers
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers
 
-str = raw"""
-&control
-calculation='scf'
-verbosity = 'high'
-pseudo_dir  = '/home/qe/pseudo'
-prefix='GaN'
-outdir      = './tmp'
-tprnfor = .true.
-tstress = .true.
-/
-&system
-ibrav = 4
-celldm(1)=5.95484286816
-celldm(3)=1.63011343669
-nat = 4
-ntyp = 2
-ecutwfc = 160
-/
-&electrons
-diagonalization='david'
-mixing_beta=0.7
-conv_thr=1.0d-10
-/
-ATOMIC_SPECIES
-Ga  0   Ga.pbe-dn-kjpaw_psl.1.0.0.UPF
-N   0   N.pbe-n-kjpaw_psl.1.0.0.UPF
-ATOMIC_POSITIONS (crystal)
-Ga       0.666666667   0.333333333  -0.000051966
-N        0.666666667   0.333333333   0.376481188
-Ga       0.333333333   0.666666667   0.499948034
-N        0.333333333   0.666666667   0.876481188
-K_POINTS automatic
-6 6 6 0 0 0
-"""
-
 docker = DockerClient()
 image = pull(docker, "rinnocente/qe-full-6.2.1")[1]
 container = Container(
@@ -74,7 +39,7 @@ pressures = [-50, 0, 50, 100, 200, 300] * u"kbar"
 scfdirs_local = map(x -> mkpath("examples/GaN/scf$(ustrip(x))"), pressures)
 scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
 crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
-template = parse(PWInput, str)
+template = parse_template(InputFile("examples/GaN/template.in"))
 SelfConsistentField{PREPARE_INPUT}()(scfinputs_local, template, crude_eos, pressures)
 scfinputs_docker = map(x -> "/home/qe/test/scf$(ustrip(x))/scf.in", pressures)
 scfoutputs = map(x -> replace(x, ".in" => ".out"), scfinputs_local)
