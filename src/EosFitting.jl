@@ -49,6 +49,7 @@ using ..Express:
     _uparse
 using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
+using ..Workspaces: DockerWorkspace
 
 export SelfConsistentField,
     StructureOptimization,
@@ -181,7 +182,6 @@ function (
         touch(input)
         object = set_alat_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
         write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
-        object
     end
 end
 function (::SelfConsistentField{PREPARE_INPUT})(path::AbstractString)
@@ -200,26 +200,27 @@ function (::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_J
     outputs,
     np,
     cmd,
-    ids = workers();
-    isdocker::Bool = true,
-    container = nothing,
+    ids = workers(),
 )
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(np, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        if isdocker
-            _dockercmd(cmd, n, input)
-        else
-            # MpiExec(n)(cmd(stdin = input, stdout = output))
-        end
     end
-    return distribute_process(
-        cmds,
-        ids;
-        isdocker = isdocker,
-        container = container,
-        inputs = inputs,
-    )
+    return distribute_process(cmds, ids)
+end
+function (::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
+    inputs,
+    outputs,
+    workspace::DockerWorkspace,
+    cmd,
+    ids = workers(),
+)
+    # `map` guarantees they are of the same size, no need to check.
+    n = nprocs_task(workspace.n, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+        _dockercmd(cmd, n, input)
+    end
+    return distribute_process(workspace, outputs, cmds, ids)
 end
 function (step::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
     path::AbstractString,
@@ -245,8 +246,33 @@ function (
     return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
 end # function postprocess
 
-_results(::SelfConsistentField{ANALYSE_OUTPUT}, s::AbstractString) = parse(Preamble, s).omega
+_results(::SelfConsistentField{ANALYSE_OUTPUT}, s::AbstractString) =
+    parse(Preamble, s).omega
 _results(::StructureOptimization{ANALYSE_OUTPUT}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
+
+# function (::SelfConsistentField)(
+#     inputs,
+#     template,
+#     trial_eos,
+#     pressures,
+#     outputs,
+#     np,
+#     cmd,
+#     ids = workers();
+#     isdocker::Bool = true,
+#     container = nothing,
+# )
+#     SelfConsistentField{PREPARE_INPUT}(inputs, template, trial_eos, pressures)
+#     SelfConsistentField{LAUNCH_JOB}(
+#         outputs,
+#         np,
+#         cmd,
+#         ids;
+#         isdocker = isdocker,
+#         container = container,
+#     )
+#     SelfConsistentField{ANALYSE_OUTPUT}(outputs, trial_eos)
+# end
 
 end
