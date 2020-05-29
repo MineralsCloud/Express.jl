@@ -14,28 +14,22 @@ module Phonon
 using ConstructionBase: setproperties
 using Kaleido: @batchlens
 using QuantumESPRESSO.Inputs: InputFile, qestring
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput, optconvert
+using QuantumESPRESSO.Inputs.PWscf:
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using QuantumESPRESSO.Setters: CellParametersSetter, VerbositySetter
 using Setfield: get, set, @lens, @set!
 
-using ..Express:
-    Step,
-    Calculation,
-    ScfCalculation,
-    PrepareInput,
-    LaunchJob,
-    AnalyseOutput
+using ..Express: Calculation, SelfConsistentField, PREPARE_INPUT, LAUNCH_JOB, ANALYSE_OUTPUT
 
-export Step, update_structure, relay, preprocess
+export update_structure, relay, preprocess
 
-struct PhononCalculation <: Calculation end
-
-Step(::ScfCalculation, ::PrepareInput) = Step(1)
-Step(::ScfCalculation, ::LaunchJob) = Step(2)
-Step(::ScfCalculation, ::AnalyseOutput) = Step(3)
+struct DensityFunctionalPertubation{T} <: Calculation{T} end
+struct ReciprocalToReal{T} <: Calculation{T} end
+struct PhononDensityOfStates{T} <: Calculation{T} end
+struct PhononDispersion{T} <: Calculation{T} end
 
 """
     update_structure(output::AbstractString, template::PWInput)
@@ -48,10 +42,7 @@ function update_structure(output::AbstractString, template::PWInput)
     return setproperties(
         template,
         atomic_positions = parsefinal(AtomicPositionsCard, str),
-        cell_parameters = CellParametersCard(
-            cell.data / template.system.celldm[1],
-            "alat",
-        ), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
+        cell_parameters = CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
     )
 end # function update_structure
 
@@ -141,11 +132,7 @@ Prepare input files of the first step of a phonon calculation.
 - `outputs::AbstractVector{<:AbstractString}`: The output files of Quantum ESPRESSO of a vc-relax calculation.
 - `template::PWInput`:
 """
-function (::Step{1})(
-    scf_inputs::AbstractVector{<:AbstractString},
-    vc_outputs::AbstractVector{<:AbstractString},
-    template::PWInput,
-)
+function (::SelfConsistentField{PREPARE_INPUT})(scf_inputs, vc_outputs, template::PWInput)
     template = _preset(template)
     map(scf_inputs, vc_outputs) do input, output
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
@@ -155,7 +142,7 @@ function (::Step{1})(
     end
 end # function preprocess
 function preprocess(
-    ::Step{2},
+    ::DensityFunctionalPertubation{PREPARE_INPUT},
     phonon_inputs,
     pwscf_inputs,
     template::PhInput,
@@ -168,9 +155,9 @@ function preprocess(
     return
 end # function preprocess
 function preprocess(
-    ::Step{3},
-    q2r_inputs::AbstractVector{<:AbstractString},
-    phonon_inputs::AbstractVector{<:AbstractString},
+    ::ReciprocalToReal{PREPARE_INPUT},
+    q2r_inputs,
+    phonon_inputs,
     template::Q2rInput,
 )
     map(q2r_inputs, phonon_inputs) do q2r_input, phonon_input
@@ -180,9 +167,9 @@ function preprocess(
     return
 end # function preprocess
 function preprocess(
-    ::Step{4},
-    matdyn_inputs::AbstractVector{<:AbstractString},
-    q2r_inputs::AbstractVector{<:AbstractString},
+    ::PhononDispersion{PREPARE_INPUT},
+    matdyn_inputs,
+    q2r_inputs,
     template::MatdynInput,
 )
     map(matdyn_inputs, q2r_inputs) do matdyn_input, q2r_input
@@ -200,9 +187,9 @@ function preprocess(
     return
 end # function preprocess
 function preprocess(
-    ::Step{5},
-    dynmat_inputs::AbstractVector{<:AbstractString},
-    phonon_inputs::AbstractVector{<:AbstractString},
+    ::PhononDispersion{PREPARE_INPUT},
+    dynmat_inputs,
+    phonon_inputs,
     template::DynmatInput,
 )
     map(dynmat_inputs, phonon_inputs) do dynmat_input, phonon_input
@@ -213,6 +200,5 @@ function preprocess(
 end # function preprocess
 
 #???
-
 
 end
