@@ -1,15 +1,19 @@
 module Express
 
-struct Step{N} end
-Step(N::Integer) = N > 0 ? Step{N}() : throw(ArgumentError("step `$N` is nonpositive!"))
+using JSON
+using YAML
+using Unitful
+using UnitfulAtomic
 
-abstract type Calculation end
-struct ScfCalculation <: Calculation end
+@enum Action begin
+    PREPARE_INPUT = 1
+    LAUNCH_JOB = 2
+    ANALYSE_OUTPUT = 3
+end
 
-abstract type Action end
-struct PrepareInput <: Action end
-struct LaunchJob <: Action end
-struct AnalyseOutput <: Action end
+abstract type Calculation{T} end
+struct SelfConsistentField{T} <: Calculation{T} end
+
 function save(filepath::AbstractString, data)
     ext = extension(filepath)
     if ext ∈ (".yaml", ".yml")
