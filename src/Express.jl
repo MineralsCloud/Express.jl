@@ -45,8 +45,8 @@ extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 include("CLI.jl")
+include("Workspaces.jl")
 include("Jobs.jl")
-include("Schemes.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting.jl")
