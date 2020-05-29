@@ -3,22 +3,18 @@ module Jobs
 using Distributed
 using DockerPy.Containers
 
-export JobStatus, JobResult
+export JobStatus
 export nprocs_task,
     distribute_process,
     isjobdone,
     tasks_running,
     tasks_exited,
     fetch_results,
-    jobstatus,
-    jobresult
+    jobstatus
 
 @enum JobStatus begin
+    PENDING
     RUNNING
-    EXITED
-end
-
-@enum JobResult begin
     SUCCEEDED
     FAILED
 end
@@ -56,26 +52,20 @@ end # function subjobs_exited
 
 function jobstatus(bag::AbstractVector{Future})
     return map(bag) do task
-        task.where => isready(task) ? EXITED : RUNNING  # id => status
-    end
-end # function jobstatus
-
-function jobresult(bag::AbstractVector{Future})
-    return map(bag) do task
         id = task.where
         if isready(task)
             try
                 ref = fetch(task)
-                result = success(ref) ? SUCCEEDED : FAILED
+                status = success(ref) ? SUCCEEDED : FAILED
             catch e
-                result = FAILED
+                status = FAILED
             end
         else
-            result = nothing
+            status = RUNNING
         end
-        id => result
+        id => status
     end
-end # function jobresult
+end # function jobstatus
 
 function fetch_results(bag::AbstractVector)
     return map(bag) do task
