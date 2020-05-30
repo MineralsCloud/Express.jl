@@ -1,0 +1,32 @@
+&control
+calculation='scf'
+verbosity = 'high'
+pseudo_dir  = '/home/qe/pseudo'
+prefix='GaN'
+outdir      = './tmp'
+tprnfor = .true.
+tstress = .true.
+/
+&system
+ibrav = 4
+celldm(1)=5.95484286816
+celldm(3)=1.63011343669
+nat = 4
+ntyp = 2
+ecutwfc = 160
+/
+&electrons
+diagonalization='david'
+mixing_beta=0.7
+conv_thr=1.0d-10
+/
+ATOMIC_SPECIES
+Ga  0   Ga.pbe-dn-kjpaw_psl.1.0.0.UPF
+N   0   N.pbe-n-kjpaw_psl.1.0.0.UPF
+ATOMIC_POSITIONS (crystal)
+Ga       0.666666667   0.333333333  -0.000051966
+N        0.666666667   0.333333333   0.376481188
+Ga       0.333333333   0.666666667   0.499948034
+N        0.333333333   0.666666667   0.876481188
+K_POINTS automatic
+6 6 6 0 0 0

@@ -2,7 +2,7 @@ qe:
   bin: pw.x
   scheme: local
 dir: examples/GaN
-template: /Users/qz/Downloads/GaN/scfin/50.in
+template: template.in
 nprocs: 16
 pressures:
   - -5
