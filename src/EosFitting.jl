@@ -11,9 +11,9 @@ julia>
 """
 module EosFitting
 
-using Compat: isnothing, only
-using ConstructionBase: setproperties, constructorof
-using Crystallography
+using Compat: isnothing
+using ConstructionBase: setproperties
+using Crystallography: cellvolume
 using Distributed: workers
 using EquationsOfState.Collections:
     EquationOfState,
@@ -25,11 +25,8 @@ using EquationsOfState.Collections:
     Murnaghan
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using LinearAlgebra: det
-using Parameters: @with_kw
-using QuantumESPRESSO.Inputs: InputFile, getoption, qestring
-using QuantumESPRESSOBase.Inputs.PWscf:
-    AtomicPositionsCard, CellParametersCard, PWInput, optconvert, xmldir
+using QuantumESPRESSO.Inputs: InputFile
+using QuantumESPRESSOBase.Inputs.PWscf: CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
