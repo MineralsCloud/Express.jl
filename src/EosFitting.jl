@@ -126,11 +126,7 @@ end # function load_settings
 parse_template(str::AbstractString) = parse(PWInput, str)
 parse_template(file::InputFile) = parse(PWInput, read(file))
 
-function set_alat_press(
-    template::PWInput,
-    eos::EquationOfState{<:Unitful.AbstractQuantity},
-    pressure::Unitful.AbstractQuantity,
-)
+function set_alat_press(template::PWInput, eos, pressure)
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
     factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if isnothing(template.cell_parameters)
