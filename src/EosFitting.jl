@@ -31,6 +31,8 @@ using ..Express:
 using ..Jobs: nprocs_task, distribute_process
 using ..Workspaces: DockerWorkspace, LocalWorkspace
 
+import ..Express
+
 export Step,
     SelfConsistentField,
     VariableCellRelaxation,
@@ -105,6 +107,22 @@ end # function postprocess
 #     Step{typeof(T),AnalyseOutput}(outputs, trial_eos)
 # end
 
+function Express._check_settings(settings)
+    map(("template", "nprocs", "pressures", "trial_eos", "dir")) do key
+        @assert haskey(settings, key)
+    end
+    _check_software_settings(settings)
+    @assert isdir(settings["dir"])
+    @assert isfile(settings["template"])
+    @assert isinteger(settings["nprocs"]) && settings["nprocs"] >= 1
+    if length(settings["pressures"]) <= 6
+        @info "pressures less than 6 may give unreliable results, consider more if possible!"
+    end
+    map(("type", "parameters", "units")) do key
+        @assert haskey(settings["trial_eos"], key)
+    end
+end # function _check_settings
+
 _generate_cmds(n, cmd::Cmd, input, ::DockerWorkspace) = join(
     [
         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
@@ -119,6 +137,8 @@ function parse_template end
 function parseenergies end
 
 function _set_verbosity end
+
+function _check_software_settings end
 
 module QuantumESPRESSO
 
@@ -153,7 +173,8 @@ function EosFitting.set_press_vol(template::PWInput, pressure, volume)
     return template
 end # function EosFitting.set_press_vol
 
-function _check_qe_settings(settings)
+function EosFitting._check_software_settings(settings)
+    settings = settings["qe"]
     map(("scheme", "bin")) do key
         @assert haskey(settings, key)
     end
@@ -165,22 +186,6 @@ function _check_qe_settings(settings)
         error("unknown scheme `$(settings["scheme"])`!")
     end
 end # function _check_qe_settings
-
-function Express._check_settings(settings)
-    map(("template", "nprocs", "pressures", "trial_eos", "qe", "dir")) do key
-        @assert haskey(settings, key)
-    end
-    _check_qe_settings(settings["qe"])
-    @assert isdir(settings["dir"])
-    @assert isfile(settings["template"])
-    @assert isinteger(settings["nprocs"]) && settings["nprocs"] >= 1
-    if length(settings["pressures"]) <= 6
-        @info "pressures less than 6 may give unreliable results, consider more if possible!"
-    end
-    map(("type", "parameters", "units")) do key
-        @assert haskey(settings["trial_eos"], key)
-    end
-end # function _check_settings
 
 const EosMap = (
     m = Murnaghan,
