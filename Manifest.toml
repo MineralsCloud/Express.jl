@@ -136,7 +136,7 @@ version = "0.22.6"
 
 [[DockerPy]]
 deps = ["PyCall", "VersionParsing"]
-git-tree-sha1 = "5e25d244ae7b944a2cf584fb002b0caf7457bf2d"
+git-tree-sha1 = "5111591f42020bf0d3482859e60bf1095eeb798c"
 repo-rev = "master"
 repo-url = "git@github.com:singularitti/DockerPy.jl.git"
 uuid = "7b2ae67c-a082-49fb-8801-fe9170dc9342"
