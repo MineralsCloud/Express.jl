@@ -58,13 +58,23 @@ extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
 
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
+function _check_settings end
+
+function Settings end
+
+function load_settings(path::AbstractString)
+    settings = load(path)
+    _check_settings(settings)  # Errors will be thrown if exist
+    return Settings(settings)
+end # function load_settings
+
 include("CLI.jl")
 include("Workspaces.jl")
 include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting.jl")
-include("Phonon.jl")
+# include("Phonon.jl")
 # include("Wizard/Wizard.jl")
 
 end # module

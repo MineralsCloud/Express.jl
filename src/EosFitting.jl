@@ -11,29 +11,15 @@ julia>
 """
 module EosFitting
 
-using Compat: isnothing
-using ConstructionBase: setproperties
 using Crystallography: cellvolume
 using Distributed: workers
-using EquationsOfState.Collections:
-    EquationOfState,
-    Pressure,
-    Energy,
-    BirchMurnaghan2nd,
-    BirchMurnaghan3rd,
-    BirchMurnaghan4th,
-    Murnaghan
+using EquationsOfState.Collections: Pressure, Energy
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using QuantumESPRESSO.Inputs: InputFile
-using QuantumESPRESSOBase.Inputs.PWscf: CellParametersCard, PWInput, optconvert
-using QuantumESPRESSO.Outputs: OutputFile
-using QuantumESPRESSO.Outputs.PWscf:
-    Preamble, parse_electrons_energies, parsefinal, isjobdone
+using Unitful: NoUnits
+using UnitfulAtomic: bohr, Ry
 using QuantumESPRESSOBase.CLI: pwcmd
-using Setfield: set, @set!
-using Unitful
-using UnitfulAtomic
+using QuantumESPRESSO.Inputs: InputFile, qestring
 
 using ..Express:
     Step,
@@ -42,8 +28,7 @@ using ..Express:
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
-    load,
-    save,
+    load_settings,
     _uparse
 using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
@@ -60,33 +45,21 @@ export Step,
     parse_template,
     set_vol_press
 
-function set_vol_press(template::PWInput, eos, pressure)
+function set_vol_press(template, eos, pressure)
     volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    if isnothing(template.cell_parameters)
-        @set! template.system.celldm[1] *= factor
-    else
-        if template.cell_parameters.option == "alat"
-            @set! template.system.celldm[1] *= factor
-        else
-            @set! template.system.celldm = zeros(6)
-            @set! template.cell_parameters = optconvert(
-                "bohr",
-                CellParametersCard(template.cell_parameters.data * factor),
-            )
-        end
-    end
-    @set! template.cell.press = ustrip(u"kbar", pressure)
-    return template
+    factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
+    return _set_vol_press(template, factor, pressure)
 end # function set_vol_press
+function _set_vol_press end
 
 function (step::Step{T,PrepareInput})(inputs, template, trial_eos, pressures) where {T}
     template = _preset(step, template)
     map(inputs, pressures) do input, pressure  # `map` will check size mismatch
-        mkpath(joinpath(splitpath(input)[1:end-1]...))
-        touch(input)
+        mkpath(dirname(input))
         object = set_vol_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
-        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
+        open(input, "w") do io
+            write(io, qestring(object))
+        end
     end
 end
 function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
@@ -121,18 +94,12 @@ function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
     return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
 end
 
-function (step::Step{T,AnalyseOutput})(
-    outputs,
-    trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
-) where {T}
+function (step::Step{T,AnalyseOutput})(outputs, trial_eos) where {T}
     xy = map(outputs) do output
-        s = read(OutputFile(output))
-        if !isjobdone(s)
-            @warn "Job is not finished!"
-        end
-        _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+        s = read(output, String)
+        parseenergies(step, s)
     end
-    return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
+    return lsqfit(trial_eos(Energy()), first.(xy) .* bohr^3, last.(xy) .* Ry)
 end # function postprocess
 
 function (::SelfConsistentField)(
@@ -151,6 +118,71 @@ function (::SelfConsistentField)(
     Step{SelfConsistentField,AnalyseOutput}(outputs, trial_eos)
 end
 
+function parse_template end
+
+function _preset end
+
+function _results end
+
+function _dockercmd(exec, n, input)
+    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
+    string(exec)[2:end-1] *
+    " -inp $input'"
+end # function _wrapcmd
+
+function tostring end
+
+function parseenergies end
+
+module QuantumESPRESSO
+
+using Compat: isnothing
+using Crystallography: cellvolume
+using ConstructionBase: setproperties
+using EquationsOfState.Collections
+using QuantumESPRESSO.Inputs: InputFile
+using QuantumESPRESSOBase.Inputs.PWscf: CellParametersCard, PWInput, optconvert, qestring
+using QuantumESPRESSO.Outputs: OutputFile
+using QuantumESPRESSO.Outputs.PWscf:
+    Preamble, parse_electrons_energies, parsefinal, isjobdone
+using QuantumESPRESSOBase.CLI: pwcmd
+using Setfield: @set!
+using Unitful: @u_str, ustrip
+
+using ...Express:
+    Step,
+    SelfConsistentField,
+    VariableCellRelaxation,
+    PrepareInput,
+    LaunchJob,
+    AnalyseOutput,
+    load_settings,
+    _uparse
+using ...CLI: mpicmd
+using ...Jobs: nprocs_task, distribute_process
+using ...Workspaces: DockerWorkspace
+
+import ...Express
+import ..EosFitting
+
+function EosFitting._set_vol_press(template::PWInput, factor, pressure)
+    if isnothing(template.cell_parameters)
+        @set! template.system.celldm[1] *= factor
+    else
+        if template.cell_parameters.option == "alat"
+            @set! template.system.celldm[1] *= factor
+        else
+            @set! template.system.celldm = zeros(6)
+            @set! template.cell_parameters = optconvert(
+                "bohr",
+                CellParametersCard(template.cell_parameters.data * factor),
+            )
+        end
+    end
+    @set! template.cell.press = ustrip(u"kbar", pressure)
+    return template
+end # function EosFitting._set_vol_press
+
 function _check_qe_settings(settings)
     map(("scheme", "bin")) do key
         @assert haskey(settings, key)
@@ -164,7 +196,7 @@ function _check_qe_settings(settings)
     end
 end # function _check_qe_settings
 
-function _check_settings(settings)
+function Express._check_settings(settings)
     map(("template", "nprocs", "pressures", "trial_eos", "qe", "dir")) do key
         @assert haskey(settings, key)
     end
@@ -187,7 +219,7 @@ const EosMap = (
     bm4 = BirchMurnaghan4th,
 )
 
-function Settings(settings)
+function Express.Settings(settings)
     template = parse_template(InputFile(abspath(expanduser(settings["template"]))))
     return (
         template = template,
@@ -208,17 +240,11 @@ function Settings(settings)
     )
 end # function Settings
 
-function load_settings(path::AbstractString)
-    settings = load(path)
-    _check_settings(settings)  # Errors will be thrown if exist
-    return Settings(settings)
-end # function load_settings
-
-parse_template(str::AbstractString) = parse(PWInput, str)
-parse_template(file::InputFile) = parse(PWInput, read(file))
+EosFitting.parse_template(str::AbstractString) = parse(PWInput, str)
+EosFitting.parse_template(file::InputFile) = parse(PWInput, read(file))
 
 # This is a helper function and should not be exported.
-_preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
+EosFitting._preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
     template,
     control = setproperties(
         template.control,
@@ -229,15 +255,18 @@ _preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
     ),
 )
 
-function _dockercmd(exec, n, input)
-    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
-    string(exec)[2:end-1] *
-    " -inp $input'"
-end # function _wrapcmd
-
-_results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
+EosFitting._results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
-_results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
+EosFitting._results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
+
+function EosFitting.parseenergies(step, s)
+    if !isjobdone(s)
+        @warn "Job is not finished!"
+    end
+    return _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+end # function EosFitting.parseenergies
+
+end # module QuantumESPRESSO
 
 end
