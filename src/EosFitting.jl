@@ -36,11 +36,12 @@ using Unitful
 using UnitfulAtomic
 
 using ..Express:
-    Calculation,
+    Step,
     SelfConsistentField,
-    PREPARE_INPUT,
-    LAUNCH_JOB,
-    ANALYSE_OUTPUT,
+    VariableCellRelaxation,
+    PrepareInput,
+    LaunchJob,
+    AnalyseOutput,
     load,
     save,
     _uparse
@@ -48,17 +49,16 @@ using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
 using ..Workspaces: DockerWorkspace
 
-export SelfConsistentField,
-    StructureOptimization,
-    PREPARE_INPUT,
-    LAUNCH_JOB,
-    ANALYSE_OUTPUT,
+export Step,
+    SelfConsistentField,
+    VariableCellRelaxation,
+    PrepareInput,
+    LaunchJob,
+    AnalyseOutput,
     InputFile,
     load_settings,
     parse_template,
     set_vol_press
-
-struct StructureOptimization{T} <: Calculation{T} end
 
 function _check_qe_settings(settings)
     map(("scheme", "bin")) do key
@@ -147,28 +147,18 @@ function set_vol_press(template::PWInput, eos, pressure)
 end # function set_vol_press
 
 # This is a helper function and should not be exported.
-_preset(
-    step::Union{SelfConsistentField{PREPARE_INPUT},StructureOptimization{PREPARE_INPUT}},
-    template::PWInput,
-) = setproperties(
+_preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
     template,
     control = setproperties(
         template.control,
-        calculation = step isa SelfConsistentField ? "scf" : "vc-relax",
+        calculation = T isa SelfConsistentField ? "scf" : "vc-relax",
         verbosity = "high",
         tstress = true,
         tprnfor = true,
     ),
 )
 
-function (
-    step::Union{SelfConsistentField{PREPARE_INPUT},StructureOptimization{PREPARE_INPUT}}
-)(
-    inputs,
-    template,
-    trial_eos,
-    pressures,
-)
+function (step::Step{T,PrepareInput})(inputs, template, trial_eos, pressures) where {T}
     template = _preset(step, template)
     map(inputs, pressures) do input, pressure  # `map` will check size mismatch
         mkpath(joinpath(splitpath(input)[1:end-1]...))
@@ -177,9 +167,9 @@ function (
         write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
     end
 end
-function (::SelfConsistentField{PREPARE_INPUT})(path::AbstractString)
+function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
     template, pressures, trial_eos, inputs = load_settings(path)
-    return Step(1)(inputs, template, trial_eos, pressures)
+    return step(inputs, template, trial_eos, pressures)
 end # function preprocess
 
 function _dockercmd(exec, n, input)
@@ -188,26 +178,20 @@ function _dockercmd(exec, n, input)
     " -inp $input'"
 end # function _wrapcmd
 
-function (::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
-    inputs,
-    outputs,
-    np,
-    cmd,
-    ids = workers(),
-)
+function (::Step{T,LaunchJob})(inputs, outputs, np, cmd, ids = workers()) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(np, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
     end
     return distribute_process(cmds, ids)
 end
-function (::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
+function (::Step{T,LaunchJob})(
     inputs,
     outputs,
     workspace::DockerWorkspace,
     cmd,
     ids = workers(),
-)
+) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(workspace.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -215,20 +199,16 @@ function (::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_J
     end
     return distribute_process(workspace, outputs, cmds, ids)
 end
-function (step::Union{SelfConsistentField{LAUNCH_JOB},StructureOptimization{LAUNCH_JOB}})(
-    path::AbstractString,
-)
+function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
 end
 
-function (
-    step::Union{SelfConsistentField{ANALYSE_OUTPUT},StructureOptimization{ANALYSE_OUTPUT}}
-)(
+function (step::Step{T,AnalyseOutput})(
     outputs,
     trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
-)
+) where {T}
     xy = map(outputs) do output
         s = read(OutputFile(output))
         if !isjobdone(s)
@@ -239,9 +219,9 @@ function (
     return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
 end # function postprocess
 
-_results(::SelfConsistentField{ANALYSE_OUTPUT}, s::AbstractString) =
+_results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
-_results(::StructureOptimization{ANALYSE_OUTPUT}, s::AbstractString) =
+_results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 # function (::SelfConsistentField)(
@@ -250,22 +230,14 @@ _results(::StructureOptimization{ANALYSE_OUTPUT}, s::AbstractString) =
 #     trial_eos,
 #     pressures,
 #     outputs,
+#     workspace,
 #     np,
 #     cmd,
-#     ids = workers();
-#     isdocker::Bool = true,
-#     container = nothing,
+#     ids = workers(),
 # )
-#     SelfConsistentField{PREPARE_INPUT}(inputs, template, trial_eos, pressures)
-#     SelfConsistentField{LAUNCH_JOB}(
-#         outputs,
-#         np,
-#         cmd,
-#         ids;
-#         isdocker = isdocker,
-#         container = container,
-#     )
-#     SelfConsistentField{ANALYSE_OUTPUT}(outputs, trial_eos)
+#     Step{SelfConsistentField,PrepareInput}(inputs, template, trial_eos, pressures)
+#     Step{SelfConsistentField,LaunchJob}(outputs, np, cmd, ids)
+#     Step{SelfConsistentField,AnalyseOutput}(outputs, trial_eos)
 # end
 
 end
