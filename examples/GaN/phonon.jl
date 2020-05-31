@@ -1,7 +1,7 @@
 using Distributed
 addprocs(16)
 using Express.Phonon, Express.Jobs, Express.CLI
-using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.Inputs.PHonon, QuantumESPRESSOBase.CLI
+using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.Inputs.PHonon, QuantumESPRESSO.CLI
 using QuantumESPRESSOParsers
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers

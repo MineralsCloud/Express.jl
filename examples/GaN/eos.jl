@@ -5,7 +5,7 @@ Pkg.activate(".")
 using Express, Express.EosFitting, Express.Jobs, Express.CLI, Express.Workspaces, Express.EosFitting.QuantumESPRESSO
 using EquationsOfState.NonlinearFitting, EquationsOfState.Collections, EquationsOfState.Find
 using QuantumESPRESSO.Inputs
-using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSOBase.CLI
+using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.CLI
 using QuantumESPRESSOParsers
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers

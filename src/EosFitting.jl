@@ -18,8 +18,8 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Unitful: NoUnits
 using UnitfulAtomic: bohr, Ry
-using QuantumESPRESSOBase.CLI: pwcmd
-using QuantumESPRESSO.Inputs: InputFile, qestring
+using QuantumESPRESSO.CLI: pwcmd
+using QuantumESPRESSO.Inputs: InputFile, inputstring
 
 using ..Express:
     Step,
@@ -141,11 +141,11 @@ using Crystallography: cellvolume
 using ConstructionBase: setproperties
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: InputFile
-using QuantumESPRESSOBase.Inputs.PWscf: CellParametersCard, PWInput, optconvert, qestring
+using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert, inputstring
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using QuantumESPRESSOBase.CLI: pwcmd
+using QuantumESPRESSO.CLI: pwcmd
 using Setfield: @set!
 using Unitful: @u_str, ustrip
 
