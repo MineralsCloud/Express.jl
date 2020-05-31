@@ -12,8 +12,7 @@ julia>
 module EosFitting
 
 using Crystallography: cellvolume
-using Distributed: workers
-using EquationsOfState.Collections: Pressure, Energy
+using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using Unitful: NoUnits
@@ -30,9 +29,8 @@ using ..Express:
     AnalyseOutput,
     load_settings,
     _uparse
-using ..CLI: mpicmd
 using ..Jobs: nprocs_task, distribute_process
-using ..Workspaces: DockerWorkspace
+using ..Workspaces: DockerWorkspace, LocalWorkspace
 
 export Step,
     SelfConsistentField,
@@ -48,15 +46,14 @@ export Step,
 function set_press_vol(template, pressure, eos; minscale = eps(), maxscale = 1.3)
     @assert minscale > zero(minscale)  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, (minscale, maxscale) .* eos.v0)
-    return _set_press_vol(template, pressure, volume)
+    return set_press_vol(template, pressure, volume)
 end # function set_press_vol
-function _set_press_vol end
 
 function (step::Step{T,PrepareInput})(
     inputs,
     template,
-    trial_eos,
-    pressures;
+    pressures,
+    trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
     template = _set_verbosity(T, template)
@@ -69,30 +66,17 @@ function (step::Step{T,PrepareInput})(
     end
 end
 function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
-    template, pressures, trial_eos, inputs = load_settings(path)
-    return step(inputs, template, trial_eos, pressures)
+    settings = load_settings(path)
+    return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,LaunchJob})(inputs, outputs, np, cmd, ids = workers()) where {T}
-    # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(np, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-    end
-    return distribute_process(cmds, ids)
-end
-function (::Step{T,LaunchJob})(
-    inputs,
-    outputs,
-    workspace::DockerWorkspace,
-    cmd,
-    ids = workers(),
-) where {T}
+function (::Step{T,LaunchJob})(outputs, inputs, workspace, cmdtemplate) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(workspace.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _dockercmd(cmd, n, input)
+        _generate_cmds(n, cmdtemplate, input, workspace)
     end
-    return distribute_process(workspace, outputs, cmds, ids)
+    return distribute_process(cmds, workspace)
 end
 function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
     settings = load_settings(path)
@@ -108,37 +92,34 @@ function (step::Step{T,AnalyseOutput})(outputs, trial_eos) where {T}
     return lsqfit(trial_eos(Energy()), first.(xy) .* bohr^3, last.(xy) .* Ry)
 end # function postprocess
 
-function (::SelfConsistentField)(
-    inputs,
-    template,
-    trial_eos,
-    pressures,
-    outputs,
-    workspace,
-    np,
-    cmd,
-    ids = workers(),
-)
-    Step{SelfConsistentField,PrepareInput}(inputs, template, trial_eos, pressures)
-    Step{SelfConsistentField,LaunchJob}(outputs, np, cmd, ids)
-    Step{SelfConsistentField,AnalyseOutput}(outputs, trial_eos)
-end
+# function (::T)(
+#     outputs,
+#     inputs,
+#     template,
+#     pressures,
+#     trial_eos,
+#     workspace,
+#     cmd,
+# ) where {T<:Union{SelfConsistentField,VariableCellRelaxation}}
+#     Step{typeof(T),PrepareInput}(inputs, template, pressures, trial_eos)
+#     Step{typeof(T),LaunchJob}(outputs, inputs, workspace, cmd)
+#     Step{typeof(T),AnalyseOutput}(outputs, trial_eos)
+# end
+
+_generate_cmds(n, cmd, input, ::DockerWorkspace) =
+    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
+    string(cmd)[2:end-1] *
+    " -inp $input'"
 
 function parse_template end
 
-function _preset end
-
 function _results end
-
-function _dockercmd(exec, n, input)
-    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
-    string(exec)[2:end-1] *
-    " -inp $input'"
-end # function _wrapcmd
 
 function tostring end
 
 function parseenergies end
+
+function _set_verbosity end
 
 module QuantumESPRESSO
 
@@ -165,14 +146,13 @@ using ...Express:
     AnalyseOutput,
     load_settings,
     _uparse
-using ...CLI: mpicmd
 using ...Jobs: nprocs_task, distribute_process
 using ...Workspaces: DockerWorkspace
 
 import ...Express
 import ..EosFitting
 
-function EosFitting._set_press_vol(template::PWInput, pressure, volume)
+function EosFitting.set_press_vol(template::PWInput, pressure, volume)
     @set! template.cell.press = ustrip(u"kbar", pressure)
     factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if isnothing(template.cell_parameters) || getoption(template.cell_parameters) == "alat"
@@ -183,7 +163,7 @@ function EosFitting._set_press_vol(template::PWInput, pressure, volume)
             optconvert("bohr", CellParametersCard(template.cell_parameters.data * factor))
     end
     return template
-end # function EosFitting._set_press_vol
+end # function EosFitting.set_press_vol
 
 function _check_qe_settings(settings)
     map(("scheme", "bin")) do key
@@ -246,16 +226,15 @@ EosFitting.parse_template(str::AbstractString) = parse(PWInput, str)
 EosFitting.parse_template(file::InputFile) = parse(PWInput, read(file))
 
 # This is a helper function and should not be exported.
-EosFitting._preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
-    template,
-    control = setproperties(
-        template.control,
-        calculation = T isa SelfConsistentField ? "scf" : "vc-relax",
-        verbosity = "high",
-        tstress = true,
-        tprnfor = true,
-    ),
-)
+function EosFitting._set_verbosity(T, template::PWInput)
+    @set! template.control.verbosity = "high"
+    @set! template.control.wf_collect = true
+    @set! template.control.tstress = true
+    @set! template.control.tprnfor = true
+    @set! template.control.disk_io = "high"
+    @set! template.control.calculation = T <: SelfConsistentField ? "scf" : "vc-relax"
+    return template
+end # macro _set_verbosity
 
 EosFitting._results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega

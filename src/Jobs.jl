@@ -3,7 +3,7 @@ module Jobs
 using Distributed
 using DockerPy.Containers
 
-using ..Workspaces: DockerWorkspace
+using ..Workspaces: DockerWorkspace, LocalWorkspace
 
 export JobStatus
 export nprocs_task,
@@ -29,20 +29,18 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} = workers())
+function distribute_process(cmds, ::LocalWorkspace)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
+    ids = addprocs(length(cmds))
     return map(cmds, ids) do cmd, id  # promises
-        @spawnat id run(cmd, wait = true)  # TODO: Must wait?
+        @spawnat id run(cmd; wait = true)  # TODO: Must wait?
     end
 end # function distribute_process
-function distribute_process(workspace::DockerWorkspace, outputs, cmds, ids = workers())
+function distribute_process(cmds, workspace::DockerWorkspace)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    return map(cmds, ids, outputs) do cmd, id, output  # promises
-        res = exec_run(workspace.container, cmd; demux = true)
-        touch(output)
-        open(output, "r+") do io
-            write(io, res.output[1])
-        end
+    ids = addprocs(length(cmds))
+    return map(cmds, ids) do cmd, id  # promises
+        exec_run(workspace.container, cmd; demux = true)
     end
 end # function distribute_process
 
