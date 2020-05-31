@@ -22,10 +22,10 @@ version = "2.8.7"
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[BinaryProvider]]
-deps = ["Libdl", "SHA"]
-git-tree-sha1 = "5b08ed6036d9d3f0ee6369410b830f8873d4024c"
+deps = ["Libdl", "Logging", "SHA"]
+git-tree-sha1 = "ecdec412a9abc8db54c0efc5548c64dfce072058"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
-version = "0.5.8"
+version = "0.5.10"
 
 [[CategoricalArrays]]
 deps = ["DataAPI", "Future", "JSON", "Missings", "Printf", "Statistics", "Unicode"]
@@ -261,9 +261,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[LibSymspg]]
 deps = ["BinaryProvider", "Libdl", "Test"]
-git-tree-sha1 = "efecb80388f1ea4415f326949ef783f36e61186a"
-repo-rev = "master"
-repo-url = "git@github.com:singularitti/LibSymspg.jl.git"
+git-tree-sha1 = "29f99e23b35b74521cae927d8ab9af5c7ee2dd61"
 uuid = "2098c8a6-82c4-11e9-1f54-e72760d085ce"
 version = "0.4.0"
 
