@@ -43,22 +43,28 @@ export Step,
     InputFile,
     load_settings,
     parse_template,
-    set_vol_press
+    set_press_vol
 
-function set_vol_press(template, eos, pressure)
-    volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    return _set_vol_press(template, factor, pressure)
-end # function set_vol_press
-function _set_vol_press end
+function set_press_vol(template, pressure, eos; minscale = eps(), maxscale = 1.3)
+    @assert minscale > zero(minscale)  # No negative volume
+    volume = findvolume(eos(Pressure()), pressure, (minscale, maxscale) .* eos.v0)
+    return _set_press_vol(template, pressure, volume)
+end # function set_press_vol
+function _set_press_vol end
 
-function (step::Step{T,PrepareInput})(inputs, template, trial_eos, pressures) where {T}
-    template = _preset(step, template)
+function (step::Step{T,PrepareInput})(
+    inputs,
+    template,
+    trial_eos,
+    pressures;
+    kwargs...,
+) where {T}
+    template = _set_verbosity(T, template)
     map(inputs, pressures) do input, pressure  # `map` will check size mismatch
         mkpath(dirname(input))
-        object = set_vol_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        object = set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
         open(input, "w") do io
-            write(io, qestring(object))
+            write(io, inputstring(object))
         end
     end
 end
@@ -140,14 +146,15 @@ using Compat: isnothing
 using Crystallography: cellvolume
 using ConstructionBase: setproperties
 using EquationsOfState.Collections
-using QuantumESPRESSO.Inputs: InputFile
-using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert, inputstring
+using QuantumESPRESSO.Inputs: InputFile, inputstring, getoption
+using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using QuantumESPRESSO.CLI: pwcmd
 using Setfield: @set!
-using Unitful: @u_str, ustrip
+using Unitful: NoUnits, @u_str, ustrip
+using UnitfulAtomic: bohr
 
 using ...Express:
     Step,
@@ -165,23 +172,18 @@ using ...Workspaces: DockerWorkspace
 import ...Express
 import ..EosFitting
 
-function EosFitting._set_vol_press(template::PWInput, factor, pressure)
-    if isnothing(template.cell_parameters)
+function EosFitting._set_press_vol(template::PWInput, pressure, volume)
+    @set! template.cell.press = ustrip(u"kbar", pressure)
+    factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
+    if isnothing(template.cell_parameters) || getoption(template.cell_parameters) == "alat"
         @set! template.system.celldm[1] *= factor
     else
-        if template.cell_parameters.option == "alat"
-            @set! template.system.celldm[1] *= factor
-        else
-            @set! template.system.celldm = zeros(6)
-            @set! template.cell_parameters = optconvert(
-                "bohr",
-                CellParametersCard(template.cell_parameters.data * factor),
-            )
-        end
+        @set! template.system.celldm = zeros(6)
+        @set! template.cell_parameters =
+            optconvert("bohr", CellParametersCard(template.cell_parameters.data * factor))
     end
-    @set! template.cell.press = ustrip(u"kbar", pressure)
     return template
-end # function EosFitting._set_vol_press
+end # function EosFitting._set_press_vol
 
 function _check_qe_settings(settings)
     map(("scheme", "bin")) do key
