@@ -18,7 +18,6 @@ using EquationsOfState.Find: findvolume
 using Unitful: NoUnits
 using UnitfulAtomic: bohr, Ry
 using QuantumESPRESSO.CLI: pwcmd
-using QuantumESPRESSO.Inputs: InputFile, inputstring
 
 using ..Express:
     Step,
@@ -28,7 +27,7 @@ using ..Express:
     LaunchJob,
     AnalyseOutput,
     load_settings,
-    _uparse
+    inputstring
 using ..Jobs: nprocs_task, distribute_process
 using ..Workspaces: DockerWorkspace, LocalWorkspace
 
@@ -38,10 +37,10 @@ export Step,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
-    InputFile,
     load_settings,
     parse_template,
-    set_press_vol
+    set_press_vol,
+    inputstring
 
 function set_press_vol(template, pressure, eos; minscale = eps(), maxscale = 1.3)
     @assert minscale > zero(minscale)  # No negative volume
@@ -106,16 +105,16 @@ end # function postprocess
 #     Step{typeof(T),AnalyseOutput}(outputs, trial_eos)
 # end
 
-_generate_cmds(n, cmd, input, ::DockerWorkspace) =
-    "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
-    string(cmd)[2:end-1] *
-    " -inp $input'"
+_generate_cmds(n, cmd::Cmd, input, ::DockerWorkspace) = join(
+    [
+        "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
+        cmd.exec...,
+        "-inp $input'",
+    ],
+    " ",
+)
 
 function parse_template end
-
-function _results end
-
-function tostring end
 
 function parseenergies end
 
@@ -129,24 +128,13 @@ using ConstructionBase: setproperties
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: InputFile, inputstring, getoption
 using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert
-using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
-using QuantumESPRESSO.CLI: pwcmd
 using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr
 
-using ...Express:
-    Step,
-    SelfConsistentField,
-    VariableCellRelaxation,
-    PrepareInput,
-    LaunchJob,
-    AnalyseOutput,
-    load_settings,
-    _uparse
-using ...Jobs: nprocs_task, distribute_process
+using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
 using ...Workspaces: DockerWorkspace
 
 import ...Express
@@ -236,9 +224,9 @@ function EosFitting._set_verbosity(T, template::PWInput)
     return template
 end # macro _set_verbosity
 
-EosFitting._results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
+_results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
-EosFitting._results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
+_results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function EosFitting.parseenergies(step, s)
@@ -247,6 +235,8 @@ function EosFitting.parseenergies(step, s)
     end
     return _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end # function EosFitting.parseenergies
+
+Express.inputstring(object::PWInput) = inputstring(object)
 
 end # module QuantumESPRESSO
 

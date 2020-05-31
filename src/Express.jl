@@ -68,6 +68,8 @@ function load_settings(path::AbstractString)
     return Settings(settings)
 end # function load_settings
 
+function inputstring end
+
 include("CLI.jl")
 include("Workspaces.jl")
 include("Jobs.jl")
