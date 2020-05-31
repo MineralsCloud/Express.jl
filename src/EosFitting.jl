@@ -60,6 +60,97 @@ export Step,
     parse_template,
     set_vol_press
 
+function set_vol_press(template::PWInput, eos, pressure)
+    volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
+    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
+    if isnothing(template.cell_parameters)
+        @set! template.system.celldm[1] *= factor
+    else
+        if template.cell_parameters.option == "alat"
+            @set! template.system.celldm[1] *= factor
+        else
+            @set! template.system.celldm = zeros(6)
+            @set! template.cell_parameters = optconvert(
+                "bohr",
+                CellParametersCard(template.cell_parameters.data * factor),
+            )
+        end
+    end
+    @set! template.cell.press = ustrip(u"kbar", pressure)
+    return template
+end # function set_vol_press
+
+function (step::Step{T,PrepareInput})(inputs, template, trial_eos, pressures) where {T}
+    template = _preset(step, template)
+    map(inputs, pressures) do input, pressure  # `map` will check size mismatch
+        mkpath(joinpath(splitpath(input)[1:end-1]...))
+        touch(input)
+        object = set_vol_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
+    end
+end
+function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
+    template, pressures, trial_eos, inputs = load_settings(path)
+    return step(inputs, template, trial_eos, pressures)
+end # function preprocess
+
+function (::Step{T,LaunchJob})(inputs, outputs, np, cmd, ids = workers()) where {T}
+    # `map` guarantees they are of the same size, no need to check.
+    n = nprocs_task(np, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+    end
+    return distribute_process(cmds, ids)
+end
+function (::Step{T,LaunchJob})(
+    inputs,
+    outputs,
+    workspace::DockerWorkspace,
+    cmd,
+    ids = workers(),
+) where {T}
+    # `map` guarantees they are of the same size, no need to check.
+    n = nprocs_task(workspace.n, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+        _dockercmd(cmd, n, input)
+    end
+    return distribute_process(workspace, outputs, cmds, ids)
+end
+function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
+    settings = load_settings(path)
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
+    return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
+end
+
+function (step::Step{T,AnalyseOutput})(
+    outputs,
+    trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
+) where {T}
+    xy = map(outputs) do output
+        s = read(OutputFile(output))
+        if !isjobdone(s)
+            @warn "Job is not finished!"
+        end
+        _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+    end
+    return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
+end # function postprocess
+
+function (::SelfConsistentField)(
+    inputs,
+    template,
+    trial_eos,
+    pressures,
+    outputs,
+    workspace,
+    np,
+    cmd,
+    ids = workers(),
+)
+    Step{SelfConsistentField,PrepareInput}(inputs, template, trial_eos, pressures)
+    Step{SelfConsistentField,LaunchJob}(outputs, np, cmd, ids)
+    Step{SelfConsistentField,AnalyseOutput}(outputs, trial_eos)
+end
+
 function _check_qe_settings(settings)
     map(("scheme", "bin")) do key
         @assert haskey(settings, key)
@@ -126,26 +217,6 @@ end # function load_settings
 parse_template(str::AbstractString) = parse(PWInput, str)
 parse_template(file::InputFile) = parse(PWInput, read(file))
 
-function set_vol_press(template::PWInput, eos, pressure)
-    volume = findvolume(eos(Pressure()), pressure, (eps(float(eos.v0)), 1.3 * eos.v0))  # In case `eos.v0` has a `Int` as `T`. See https://github.com/PainterQubits/Unitful.jl/issues/274.
-    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    if isnothing(template.cell_parameters)
-        @set! template.system.celldm[1] *= factor
-    else
-        if template.cell_parameters.option == "alat"
-            @set! template.system.celldm[1] *= factor
-        else
-            @set! template.system.celldm = zeros(6)
-            @set! template.cell_parameters = optconvert(
-                "bohr",
-                CellParametersCard(template.cell_parameters.data * factor),
-            )
-        end
-    end
-    @set! template.cell.press = ustrip(u"kbar", pressure)
-    return template
-end # function set_vol_press
-
 # This is a helper function and should not be exported.
 _preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
     template,
@@ -158,86 +229,15 @@ _preset(::Step{T,PrepareInput}, template::PWInput) where {T} = setproperties(
     ),
 )
 
-function (step::Step{T,PrepareInput})(inputs, template, trial_eos, pressures) where {T}
-    template = _preset(step, template)
-    map(inputs, pressures) do input, pressure  # `map` will check size mismatch
-        mkpath(joinpath(splitpath(input)[1:end-1]...))
-        touch(input)
-        object = set_vol_press(template, trial_eos, pressure)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
-        write(InputFile(input), object)  # Write the `object` to a Quantum ESPRESSO input file
-    end
-end
-function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
-    template, pressures, trial_eos, inputs = load_settings(path)
-    return step(inputs, template, trial_eos, pressures)
-end # function preprocess
-
 function _dockercmd(exec, n, input)
     "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n " *
     string(exec)[2:end-1] *
     " -inp $input'"
 end # function _wrapcmd
 
-function (::Step{T,LaunchJob})(inputs, outputs, np, cmd, ids = workers()) where {T}
-    # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(np, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-    end
-    return distribute_process(cmds, ids)
-end
-function (::Step{T,LaunchJob})(
-    inputs,
-    outputs,
-    workspace::DockerWorkspace,
-    cmd,
-    ids = workers(),
-) where {T}
-    # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(workspace.n, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _dockercmd(cmd, n, input)
-    end
-    return distribute_process(workspace, outputs, cmds, ids)
-end
-function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
-    settings = load_settings(path)
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
-    return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
-end
-
-function (step::Step{T,AnalyseOutput})(
-    outputs,
-    trial_eos::EquationOfState{<:Unitful.AbstractQuantity},
-) where {T}
-    xy = map(outputs) do output
-        s = read(OutputFile(output))
-        if !isjobdone(s)
-            @warn "Job is not finished!"
-        end
-        _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
-    end
-    return lsqfit(trial_eos(Energy()), first.(xy) .* u"bohr^3", last.(xy) .* u"Ry")
-end # function postprocess
-
 _results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
 _results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
-
-# function (::SelfConsistentField)(
-#     inputs,
-#     template,
-#     trial_eos,
-#     pressures,
-#     outputs,
-#     workspace,
-#     np,
-#     cmd,
-#     ids = workers(),
-# )
-#     Step{SelfConsistentField,PrepareInput}(inputs, template, trial_eos, pressures)
-#     Step{SelfConsistentField,LaunchJob}(outputs, np, cmd, ids)
-#     Step{SelfConsistentField,AnalyseOutput}(outputs, trial_eos)
-# end
 
 end
