@@ -71,13 +71,13 @@ function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
     return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,LaunchJob})(outputs, inputs, workspace, cmdtemplate) where {T}
+function (::Step{T,LaunchJob})(outputs, inputs, environment, cmdtemplate) where {T}
     # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(workspace.n, length(inputs))
+    n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _generate_cmds(n, cmdtemplate, input, workspace)
+        _generate_cmds(n, cmdtemplate, input, environment)
     end
-    return distribute_process(cmds, workspace)
+    return distribute_process(cmds, environment)
 end
 function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
     settings = load_settings(path)
@@ -99,11 +99,11 @@ end # function postprocess
 #     template,
 #     pressures,
 #     trial_eos,
-#     workspace,
+#     environment,
 #     cmd,
 # ) where {T<:Union{SelfConsistentField,VariableCellRelaxation}}
 #     Step{typeof(T),PrepareInput}(inputs, template, pressures, trial_eos)
-#     Step{typeof(T),LaunchJob}(outputs, inputs, workspace, cmd)
+#     Step{typeof(T),LaunchJob}(outputs, inputs, environment, cmd)
 #     Step{typeof(T),AnalyseOutput}(outputs, trial_eos)
 # end
 
@@ -174,15 +174,15 @@ function EosFitting.set_press_vol(template::PWInput, pressure, volume)
 end # function EosFitting.set_press_vol
 
 function _check_qe_settings(settings)
-    map(("workspace", "bin")) do key
+    map(("environment", "bin")) do key
         @assert haskey(settings, key)
     end
-    if settings["workspace"] == "docker"
+    if settings["environment"] == "docker"
         @assert haskey(settings, "container")
-    elseif settings["workspace"] == "ssh"
-    elseif settings["workspace"] == "local"  # Do nothing
+    elseif settings["environment"] == "ssh"
+    elseif settings["environment"] == "local"  # Do nothing
     else
-        error("unknown workspace `$(settings["workspace"])`!")
+        error("unknown environment `$(settings["environment"])`!")
     end
 end # function _check_qe_settings
 

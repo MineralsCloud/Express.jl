@@ -36,11 +36,11 @@ function distribute_process(cmds, ::LocalEnvironment)
         @spawnat id run(cmd; wait = true)  # TODO: Must wait?
     end
 end # function distribute_process
-function distribute_process(cmds, workspace::DockerEnvironment)
+function distribute_process(cmds, environment::DockerEnvironment)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     ids = addprocs(length(cmds))
     return map(cmds, ids) do cmd, id  # promises
-        exec_run(workspace.container, cmd; demux = true)
+        exec_run(environment.container, cmd; demux = true)
     end
 end # function distribute_process
 
