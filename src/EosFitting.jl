@@ -29,7 +29,7 @@ using ..Express:
     load_settings,
     inputstring
 using ..Jobs: nprocs_task, distribute_process
-using ..Workspaces: DockerEnvironment, LocalEnvironment
+using ..Environments: DockerEnvironment, LocalEnvironment
 
 import ..Express
 
@@ -155,7 +155,7 @@ using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr
 
 using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
-using ...Workspaces: DockerEnvironment
+using ...Environments: DockerEnvironment
 
 import ...Express
 import ..EosFitting

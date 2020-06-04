@@ -71,7 +71,7 @@ end # function load_settings
 function inputstring end
 
 include("CLI.jl")
-include("Workspaces.jl")
+include("Environments.jl")
 include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")

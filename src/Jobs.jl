@@ -3,7 +3,7 @@ module Jobs
 using Distributed
 using DockerPy.Containers
 
-using ..Workspaces: DockerEnvironment, LocalEnvironment
+using ..Environments: DockerEnvironment, LocalEnvironment
 
 export JobStatus
 export nprocs_task,
