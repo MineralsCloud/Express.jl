@@ -1,20 +1,20 @@
-module Workspaces
+module Environments
 
-export LocalWorkspace, DockerWorkspace, SSHWorkspace
+export LocalEnvironment, DockerEnvironment, ServerEnvironment
 
-abstract type Workspace end
-struct LocalWorkspace <: Workspace
+abstract type SimulationEnvironment end
+struct LocalEnvironment <: SimulationEnvironment
     n::Int
-    bin
-    dir
-    env
+    bin::Any
+    dir::Any
+    env::Any
 end
-abstract type RemoteWorkspace <: Workspace end
-abstract type VirtualMachineWorkspace <: RemoteWorkspace end
-struct DockerWorkspace <: VirtualMachineWorkspace
+abstract type RemoteEnvironment <: SimulationEnvironment end
+abstract type VirtualMachineEnvironment <: RemoteEnvironment end
+struct DockerEnvironment <: VirtualMachineEnvironment
     n::Int
-    container
+    container::Any
 end
-struct SSHWorkspace <: RemoteWorkspace end
+struct ServerEnvironment <: RemoteEnvironment end
 
-end # module Workspaces
+end # module Environments
