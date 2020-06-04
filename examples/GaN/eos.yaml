@@ -1,6 +1,6 @@
 qe:
   bin: pw.x
-  scheme: local
+  environment: local
 dir: examples/GaN
 template: template.in
 nprocs: 16

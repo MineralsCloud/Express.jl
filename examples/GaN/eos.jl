@@ -2,7 +2,7 @@ using Distributed
 addprocs(6)
 using Pkg
 Pkg.activate(".")
-using Express, Express.EosFitting, Express.Jobs, Express.CLI, Express.Workspaces, Express.EosFitting.QuantumESPRESSO
+using Express, Express.EosFitting, Express.Jobs, Express.CLI, Express.Environments, Express.EosFitting.QuantumESPRESSO
 using EquationsOfState.NonlinearFitting, EquationsOfState.Collections, EquationsOfState.Find
 using QuantumESPRESSO.Inputs
 using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.CLI
@@ -48,7 +48,7 @@ scfoutputs = map(x -> replace(x, ".in" => ".out"), scfinputs_local)
 bag = Step{SelfConsistentField,LaunchJob}()(
     scfinputs_docker,
     scfoutputs,
-    DockerWorkspace(12, container),
+    DockerEnvironment(12, container),
     pwcmd(bin = "/home/qe/qe-6.2.1/bin/pw.x"),
     workers(),
 )
@@ -68,7 +68,7 @@ vcoutput = map(x -> replace(x, ".in" => ".out"), vcinputs_local)
 bag2 = Step{SelfConsistentField,LaunchJob}()(
     vcinputs_docker,
     vcoutput,
-    DockerWorkspace(12, container),
+    DockerEnvironment(12, container),
     pwcmd(bin = "/home/qe/qe-6.2.1/bin/pw.x"),
     workers(),
 )

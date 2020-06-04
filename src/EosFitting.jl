@@ -29,7 +29,7 @@ using ..Express:
     load_settings,
     inputstring
 using ..Jobs: nprocs_task, distribute_process
-using ..Workspaces: DockerWorkspace, LocalWorkspace
+using ..Workspaces: DockerEnvironment, LocalEnvironment
 
 import ..Express
 
@@ -123,7 +123,7 @@ function Express._check_settings(settings)
     end
 end # function _check_settings
 
-_generate_cmds(n, cmd::Cmd, input, ::DockerWorkspace) = join(
+_generate_cmds(n, cmd::Cmd, input, ::DockerEnvironment) = join(
     [
         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
         cmd.exec...,
@@ -155,7 +155,7 @@ using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr
 
 using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
-using ...Workspaces: DockerWorkspace
+using ...Workspaces: DockerEnvironment
 
 import ...Express
 import ..EosFitting
@@ -173,17 +173,16 @@ function EosFitting.set_press_vol(template::PWInput, pressure, volume)
     return template
 end # function EosFitting.set_press_vol
 
-function EosFitting._check_software_settings(settings)
-    settings = settings["qe"]
-    map(("scheme", "bin")) do key
+function _check_qe_settings(settings)
+    map(("workspace", "bin")) do key
         @assert haskey(settings, key)
     end
-    if settings["scheme"] == "docker"
+    if settings["workspace"] == "docker"
         @assert haskey(settings, "container")
-    elseif settings["scheme"] == "ssh"
-    elseif settings["scheme"] == "local"  # Do nothing
+    elseif settings["workspace"] == "ssh"
+    elseif settings["workspace"] == "local"  # Do nothing
     else
-        error("unknown scheme `$(settings["scheme"])`!")
+        error("unknown workspace `$(settings["workspace"])`!")
     end
 end # function _check_qe_settings
 
