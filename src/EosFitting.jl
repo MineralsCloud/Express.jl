@@ -57,7 +57,7 @@ function (step::Step{T,PrepareInput})(
     trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
-    template = _set_verbosity(T, template)
+    template = _set_boilerplate(T, template)
     map(inputs, pressures) do input, pressure  # `map` will check size mismatch
         mkpath(dirname(input))
         object = set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
@@ -136,7 +136,7 @@ function parse_template end
 
 function parseenergies end
 
-function _set_verbosity end
+function _set_boilerplate end
 
 function _check_software_settings end
 
@@ -218,7 +218,7 @@ EosFitting.parse_template(str::AbstractString) = parse(PWInput, str)
 EosFitting.parse_template(file::InputFile) = parse(PWInput, read(file))
 
 # This is a helper function and should not be exported.
-function EosFitting._set_verbosity(T, template::PWInput)
+function EosFitting._set_boilerplate(T, template::PWInput)
     @set! template.control.verbosity = "high"
     @set! template.control.wf_collect = true
     @set! template.control.tstress = true
@@ -226,7 +226,7 @@ function EosFitting._set_verbosity(T, template::PWInput)
     @set! template.control.disk_io = "high"
     @set! template.control.calculation = T <: SelfConsistentField ? "scf" : "vc-relax"
     return template
-end # macro _set_verbosity
+end # macro _set_boilerplate
 
 _results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
