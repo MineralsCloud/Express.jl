@@ -99,6 +99,11 @@ function (step::Step{T,AnalyseOutput})(outputs, trial_eos) where {T}
     end
     return lsqfit(trial_eos(Energy()), first.(xy) .* bohr^3, last.(xy) .* Ry)
 end # function postprocess
+function (step::Step{T,AnalyseOutput})(path::AbstractString) where {T}
+    settings = load_settings(path)
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
+    return step(outputs, settings.trial_eos)
+end # function (step::Step{T,AnalyseOutput})
 
 # function (::T)(
 #     outputs,
