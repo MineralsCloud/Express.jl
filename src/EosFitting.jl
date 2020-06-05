@@ -30,6 +30,7 @@ using ..Express:
     inputstring
 using ..Jobs: nprocs_task, distribute_process
 using ..Environments: DockerEnvironment, LocalEnvironment
+using ..CLI: mpicmd
 
 import ..Express
 
@@ -44,10 +45,16 @@ export Step,
     set_press_vol,
     inputstring
 
-function set_press_vol(template, pressure, eos; minscale = eps(), maxscale = 1.3)
+function set_press_vol(
+    template,
+    pressure,
+    eos::EquationOfState;
+    minscale = eps(),
+    maxscale = 1.3,
+)
     @assert minscale > zero(minscale)  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, (minscale, maxscale) .* eos.v0)
-    return set_press_vol(template, pressure, volume)
+    return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
 function (step::Step{T,PrepareInput})(
@@ -71,18 +78,18 @@ function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
     return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,LaunchJob})(outputs, inputs, environment, cmdtemplate) where {T}
+function (::Step{T,LaunchJob})(outputs, inputs, environment) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _generate_cmds(n, cmdtemplate, input, environment)
+        _generate_cmds(n, input, environment)
     end
     return distribute_process(cmds, environment)
 end
 function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
-    return step(settings.inputs, outputs, settings.nprocs, pwcmd(bin = settings.qe["bin"]))
+    return step(outputs, settings.inputs, settings.environment)
 end
 
 function (step::Step{T,AnalyseOutput})(outputs, trial_eos) where {T}
@@ -108,13 +115,12 @@ end # function postprocess
 # end
 
 function Express._check_settings(settings)
-    map(("template", "nprocs", "pressures", "trial_eos", "dir")) do key
+    map(("template", "pressures", "trial_eos", "dir")) do key
         @assert haskey(settings, key)
     end
-    _check_software_settings(settings)
+    _check_software_settings(settings["qe"])
     @assert isdir(settings["dir"])
     @assert isfile(settings["template"])
-    @assert isinteger(settings["nprocs"]) && settings["nprocs"] >= 1
     if length(settings["pressures"]) <= 6
         @info "pressures less than 6 may give unreliable results, consider more if possible!"
     end
@@ -123,14 +129,16 @@ function Express._check_settings(settings)
     end
 end # function _check_settings
 
-_generate_cmds(n, cmd::Cmd, input, ::DockerEnvironment) = join(
+_generate_cmds(n, input, env::DockerEnvironment) = join(
     [
         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
-        cmd.exec...,
+        pwcmd(bin = env.bin).exec...,
         "-inp $input'",
     ],
     " ",
 )
+_generate_cmds(n, input, env::LocalEnvironment) =
+    pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input)
 
 function parse_template end
 
@@ -139,6 +147,8 @@ function parseenergies end
 function _set_boilerplate end
 
 function _check_software_settings end
+
+function _set_press_vol end
 
 module QuantumESPRESSO
 
@@ -155,12 +165,13 @@ using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr
 
 using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
-using ...Environments: DockerEnvironment
+using ...Environments: DockerEnvironment, LocalEnvironment
+using ..EosFitting: parse_template
 
 import ...Express
 import ..EosFitting
 
-function EosFitting.set_press_vol(template::PWInput, pressure, volume)
+function EosFitting._set_press_vol(template::PWInput, pressure, volume)
     @set! template.cell.press = ustrip(u"kbar", pressure)
     factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if isnothing(template.cell_parameters) || getoption(template.cell_parameters) == "alat"
@@ -173,10 +184,11 @@ function EosFitting.set_press_vol(template::PWInput, pressure, volume)
     return template
 end # function EosFitting.set_press_vol
 
-function _check_qe_settings(settings)
-    map(("environment", "bin")) do key
-        @assert haskey(settings, key)
+function EosFitting._check_software_settings(settings)
+    map(("environment", "bin", "n")) do key
+        @assert haskey(settings, key) "key `$key` not found!"
     end
+    @assert isinteger(settings["n"]) && settings["n"] >= 1
     if settings["environment"] == "docker"
         @assert haskey(settings, "container")
     elseif settings["environment"] == "ssh"
@@ -184,7 +196,7 @@ function _check_qe_settings(settings)
     else
         error("unknown environment `$(settings["environment"])`!")
     end
-end # function _check_qe_settings
+end # function _check_software_settings
 
 const EosMap = (
     m = Murnaghan,
@@ -195,12 +207,22 @@ const EosMap = (
 
 function Express.Settings(settings)
     template = parse_template(InputFile(abspath(expanduser(settings["template"]))))
+    qe = settings["qe"]
+    if qe["environment"] == "local"
+        n = qe["n"]
+        bin = qe["bin"]
+        environment = LocalEnvironment(n, bin, ENV)
+    elseif qe["environment"] == "docker"
+        n = qe["n"]
+        bin = qe["bin"]
+        environment = DockerEnvironment(n, qe["container"], bin)
+    else
+    end
     return (
         template = template,
         pressures = settings["pressures"] .* u"GPa",
-        trial_eos =
-            EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
-                                                          _uparse.(settings["trial_eos"]["units"])...),
+        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
+                                                                  _uparse.(settings["trial_eos"]["units"])...),
         inputs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
@@ -209,8 +231,7 @@ function Express.Settings(settings)
                 template.control.prefix * ".in",
             ))
         end,
-        nprocs = settings["nprocs"],
-        qe = settings["qe"],
+        environment = environment,
     )
 end # function Settings
 
