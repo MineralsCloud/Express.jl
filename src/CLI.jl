@@ -20,8 +20,7 @@ function mpicmd(
             push!(options, "-$f", v)
         end
     end
-    return Cmd([bin, "-n", string(n), options..., cmd])
-    return cmd
+    return Cmd([bin, "-n", string(n), options..., cmd.exec...])
 end # function mpicmd
 # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
 
