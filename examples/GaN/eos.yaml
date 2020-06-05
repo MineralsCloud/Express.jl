@@ -1,9 +1,9 @@
 qe:
   bin: pw.x
   environment: local
+  n: 16
 dir: examples/GaN
-template: template.in
-nprocs: 16
+template: examples/GaN/template.in
 pressures:
   - -5
   - 0
