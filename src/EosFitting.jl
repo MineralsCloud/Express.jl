@@ -58,20 +58,41 @@ function set_press_vol(
 end # function set_press_vol
 
 function (step::Step{T,PrepareInput})(
-    inputs,
     template,
     pressures,
     trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
     template = _set_boilerplate(T, template)
-    map(inputs, pressures) do input, pressure  # `map` will check size mismatch
-        mkpath(dirname(input))
-        object = set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
-        open(input, "w") do io
-            write(io, inputstring(object))
+    return map(pressures) do pressure  # `map` will check size mismatch
+        set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+    end
+end
+function (step::Step{T,PrepareInput})(
+    inputs,
+    template,
+    pressures,
+    trial_eos::EquationOfState;
+    dry_run = false,
+    kwargs...,
+) where {T}
+    objects = step(template, pressures, trial_eos; kwargs...)
+    map(inputs, pressures, objects) do input, pressure, object  # `map` will check size mismatch
+        if dry_run
+            if isfile(input)
+                @warn "file `$input` will be overwritten!"
+            else
+                @warn "file `$input` will be created!"
+            end
+            print(inputstring(object))
+        else
+            mkpath(dirname(input))
+            open(input, "w") do io
+                write(io, inputstring(object))
+            end
         end
     end
+    return
 end
 function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
     settings = load_settings(path)
