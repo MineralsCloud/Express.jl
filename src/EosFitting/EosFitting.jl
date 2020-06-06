@@ -11,7 +11,6 @@ julia>
 """
 module EosFitting
 
-using Crystallography: cellvolume
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
@@ -27,7 +26,7 @@ using ..Express:
     load_settings,
     inputstring
 using ..Jobs: nprocs_task, distribute_process
-using ..Environments: DockerEnvironment, LocalEnvironment
+using ..Environments: DockerEnvironment, LocalEnvironment, SimulationEnvironment
 using ..CLI: mpicmd
 
 import ..Express
