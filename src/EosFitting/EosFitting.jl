@@ -77,7 +77,7 @@ function (step::Step{T,PrepareInput})(
     kwargs...,
 ) where {T}
     objects = step(template, pressures, trial_eos; kwargs...)
-    map(inputs, pressures, objects) do input, pressure, object  # `map` will check size mismatch
+    map(inputs, objects) do input, object  # `map` will check size mismatch
         if dry_run
             if isfile(input)
                 @warn "file `$input` will be overwritten!"
