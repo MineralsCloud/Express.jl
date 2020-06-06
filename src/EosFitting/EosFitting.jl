@@ -118,11 +118,11 @@ function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
 end
 
 function (step::Step{T,AnalyseOutput})(outputs, trial_eos) where {T}
-    xy = map(outputs) do output
+    results = map(outputs) do output
         s = read(output, String)
         parseenergies(step, s)
     end
-    return lsqfit(trial_eos(Energy()), first.(xy) .* bohr^3, last.(xy) .* Ry)
+    return lsqfit(trial_eos(Energy()), volumes(results), energies(results))
 end # function postprocess
 function (step::Step{T,AnalyseOutput})(path::AbstractString) where {T}
     settings = load_settings(path)
@@ -183,6 +183,10 @@ function _set_boilerplate end
 function _check_software_settings end
 
 function _set_press_vol end
+
+function volumes end
+
+function energies end
 
 include("QuantumESPRESSO.jl")
 

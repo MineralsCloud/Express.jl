@@ -10,7 +10,7 @@ using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
-using UnitfulAtomic: bohr
+using UnitfulAtomic: bohr, Ry
 
 using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
 using ...Environments: DockerEnvironment, LocalEnvironment
@@ -108,6 +108,9 @@ function EosFitting.parseenergies(step, s)
     end
     return _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end # function EosFitting.parseenergies
+
+EosFitting.volumes(xy) = first.(xy) .* bohr^3
+EosFitting.energies(xy) = last.(xy) .* Ry
 
 Express.inputstring(object::PWInput) = inputstring(object)
 
