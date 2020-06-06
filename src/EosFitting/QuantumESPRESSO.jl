@@ -2,7 +2,6 @@ module QuantumESPRESSO
 
 using Compat: isnothing
 using Crystallography: cellvolume
-using ConstructionBase: setproperties
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: InputFile, inputstring, getoption
 using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert

@@ -15,8 +15,6 @@ using Crystallography: cellvolume
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using Unitful: NoUnits
-using UnitfulAtomic: bohr, Ry
 using QuantumESPRESSO.CLI: pwcmd
 
 using ..Express:
