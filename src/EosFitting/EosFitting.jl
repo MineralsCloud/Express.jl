@@ -38,7 +38,6 @@ export Step,
     LaunchJob,
     AnalyseOutput,
     load_settings,
-    parse_template,
     set_press_vol,
     inputstring
 
@@ -170,8 +169,6 @@ _generate_cmds(n, input, output, env::LocalEnvironment) =
 mutable struct ContextManager
     environment::SimulationEnvironment
 end
-
-function parse_template end
 
 function parseenergies end
 

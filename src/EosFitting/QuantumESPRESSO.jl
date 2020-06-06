@@ -3,7 +3,7 @@ module QuantumESPRESSO
 using Compat: isnothing
 using Crystallography: cellvolume
 using EquationsOfState.Collections
-using QuantumESPRESSO.Inputs: InputFile, inputstring, getoption
+using QuantumESPRESSO.Inputs: inputstring, getoption
 using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
@@ -13,7 +13,6 @@ using UnitfulAtomic: bohr, Ry
 
 using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
 using ...Environments: DockerEnvironment, LocalEnvironment
-using ..EosFitting: parse_template
 
 import ...Express
 import ..EosFitting
@@ -53,7 +52,7 @@ const EosMap = (
 )
 
 function Express.Settings(settings)
-    template = parse_template(InputFile(abspath(expanduser(settings["template"]))))
+    template = parse(PWInput, read(expanduser(settings["template"]), String))
     qe = settings["qe"]
     if qe["environment"] == "local"
         n = qe["n"]
@@ -81,9 +80,6 @@ function Express.Settings(settings)
         environment = environment,
     )
 end # function Settings
-
-EosFitting.parse_template(str::AbstractString) = parse(PWInput, str)
-EosFitting.parse_template(file::InputFile) = parse(PWInput, read(file))
 
 # This is a helper function and should not be exported.
 function EosFitting._set_boilerplate(T, template::PWInput)
