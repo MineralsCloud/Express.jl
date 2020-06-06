@@ -99,13 +99,17 @@ function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
     return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,LaunchJob})(outputs, inputs, environment) where {T}
+function (::Step{T,LaunchJob})(outputs, inputs, environment; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
         _generate_cmds(n, input, output, environment)
     end
-    return distribute_process(cmds, environment)
+    if dry_run
+        return cmds
+    else
+        return distribute_process(cmds, environment)
+    end
 end
 function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
     settings = load_settings(path)
