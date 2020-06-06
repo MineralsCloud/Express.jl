@@ -82,7 +82,7 @@ function (::Step{T,LaunchJob})(outputs, inputs, environment) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _generate_cmds(n, input, environment)
+        _generate_cmds(n, input, output, environment)
     end
     return distribute_process(cmds, environment)
 end
@@ -134,7 +134,7 @@ function Express._check_settings(settings)
     end
 end # function _check_settings
 
-_generate_cmds(n, input, env::DockerEnvironment) = join(
+_generate_cmds(n, input, output, env::DockerEnvironment) = join(
     [
         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
         pwcmd(bin = env.bin).exec...,
@@ -142,8 +142,8 @@ _generate_cmds(n, input, env::DockerEnvironment) = join(
     ],
     " ",
 )
-_generate_cmds(n, input, env::LocalEnvironment) =
-    pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input)
+_generate_cmds(n, input, output, env::LocalEnvironment) =
+    pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input, stdout = output)
 
 function parse_template end
 

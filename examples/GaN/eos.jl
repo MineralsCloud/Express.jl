@@ -2,7 +2,12 @@ using Distributed
 addprocs(6)
 using Pkg
 Pkg.activate(".")
-using Express, Express.EosFitting, Express.Jobs, Express.CLI, Express.Environments, Express.EosFitting.QuantumESPRESSO
+using Express,
+    Express.EosFitting,
+    Express.Jobs,
+    Express.CLI,
+    Express.Environments,
+    Express.EosFitting.QuantumESPRESSO
 using EquationsOfState.NonlinearFitting, EquationsOfState.Collections, EquationsOfState.Find
 using QuantumESPRESSO.Inputs
 using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.CLI
@@ -20,7 +25,8 @@ container = Container(
     tty = true,
     stdin_open = true,
     volumes = Dict(
-        joinpath(pwd(), "examples/GaN") => Dict("bind" => "/home/qe/test", "mode" => "rw"),
+        joinpath(pwd(), "examples/GaN") =>
+            Dict("bind" => "/home/qe/test", "mode" => "rw"),
     ),
 )
 # container = containers(docker)[1]
@@ -41,16 +47,14 @@ scfdirs_local = map(x -> mkpath("examples/GaN/scf$(ustrip(x))"), pressures)
 scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
 crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
 template = parse_template(InputFile("examples/GaN/template.in"))
-Step{SelfConsistentField,PrepareInput}()(scfinputs_local, template, crude_eos, pressures)
+Step{SelfConsistentField,PrepareInput}()(scfinputs_local, template, pressures, crude_eos)
 scfinputs_docker = map(x -> "/home/qe/test/scf$(ustrip(x))/scf.in", pressures)
 scfoutputs = map(x -> replace(x, ".in" => ".out"), scfinputs_local)
 # ================================================================= Step 2 =============================
 bag = Step{SelfConsistentField,LaunchJob}()(
-    scfinputs_docker,
     scfoutputs,
+    scfinputs_docker,
     DockerEnvironment(12, container),
-    pwcmd(bin = "/home/qe/qe-6.2.1/bin/pw.x"),
-    workers(),
 )
 # ================================================================= Step 3: read scf.out and curve-fitting =============================
 new_eos = Step{SelfConsistentField,AnalyseOutput}()(
@@ -61,16 +65,14 @@ new_eos = Step{SelfConsistentField,AnalyseOutput}()(
 # ================================================================= Step 4 =============================
 vcdirs_local = map(x -> mkpath("examples/GaN/vc$(ustrip(x))"), pressures)
 vcinputs_local = map(x -> x * "/vc.in", vcdirs_local)
-Step{SelfConsistentField,PrepareInput}()(vcinputs_local, template, new_eos, pressures)
+Step{SelfConsistentField,PrepareInput}()(vcinputs_local, template, pressures, new_eos)
 # ================================================================= Step 5 =============================
 vcinputs_docker = map(x -> replace(x, "scf" => "vc"), scfinputs_docker)
 vcoutput = map(x -> replace(x, ".in" => ".out"), vcinputs_local)
 bag2 = Step{SelfConsistentField,LaunchJob}()(
-    vcinputs_docker,
     vcoutput,
+    vcinputs_docker,
     DockerEnvironment(12, container),
-    pwcmd(bin = "/home/qe/qe-6.2.1/bin/pw.x"),
-    workers(),
 )
 stop(container)
 # ================================================================= Step 6: read vcrelax.out file and curve-fitting =============================
