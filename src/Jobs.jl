@@ -9,8 +9,6 @@ export JobStatus
 export nprocs_task,
     distributejobs,
     isjobdone,
-    tasks_running,
-    tasks_exited,
     jobresult,
     jobstatus
 
@@ -43,17 +41,8 @@ function distributejobs(cmds, environment::DockerEnvironment)
     end
 end # function distributejobs
 
-function isjobdone(bag::AbstractVector)
-    return all(map(isready, bag))
-end # function isjobdone
-
-function tasks_running(bag::AbstractVector)
-    return filter(!isready, bag)
-end # function tasks_running
-
-function tasks_exited(bag::AbstractVector)
-    return filter(isready, bag)
-end # function subjobs_exited
+isjobdone(job::Future) = isready(job)
+isjobdone(bag) = map(isjobdone, bag)
 
 function jobstatus(job::Future)
     id = job.where
