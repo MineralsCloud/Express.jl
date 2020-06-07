@@ -7,7 +7,7 @@ using DockerPy.Containers
 using ..Environments: DockerEnvironment, LocalEnvironment
 
 export JobStatus
-export nprocs_task, distributejobs, isjobdone, jobresult, jobstatus
+export nprocs_task, launchjob, isjobdone, jobresult, jobstatus
 
 @enum JobStatus begin
     RUNNING
@@ -23,16 +23,16 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function distributejobs(cmds, ::LocalEnvironment)
+function launchjob(cmds, ::LocalEnvironment)
     return map(cmds) do cmd
         @async run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-end # function distributejobs
-function distributejobs(cmds, environment::DockerEnvironment)
+end # function launchjob
+function launchjob(cmds, environment::DockerEnvironment)
     return map(cmds) do cmd
         @async exec_run(environment.container, cmd; demux = true)
     end
-end # function distributejobs
+end # function launchjob
 
 isjobdone(job::Future) = isready(job)
 isjobdone(bag) = map(isjobdone, bag)
