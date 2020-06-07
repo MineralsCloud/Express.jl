@@ -1,7 +1,5 @@
 module Express
 
-using JSON
-using YAML
 using Unitful
 using UnitfulAtomic
 
@@ -30,43 +28,11 @@ struct Step{S<:Simulation,T<:Action} end
 
 struct Software{T} end
 
-function save(filepath, data)
-    ext = extension(filepath)
-    if ext ∈ (".yaml", ".yml")
-        YAML.write_file(expanduser(filepath), data)
-    elseif ext == ".json"
-        open(expanduser(filepath), "w") do io
-            JSON.print(io, data)
-        end
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function save
-
-function load(filepath)
-    ext = extension(filepath)
-    if ext ∈ (".yaml", ".yml")
-        return open(expanduser(filepath), "r") do io
-            YAML.load(io)
-        end
-    elseif ext == ".json"
-        return JSON.parsefile(expanduser(filepath))
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function load
-
-function extension(filepath)  # From https://github.com/rofinn/FilePathsBase.jl/blob/af850a4/src/path.jl#L331-L340
-    name = basename(filepath)
-    tokenized = split(name, '.')
-    if length(tokenized) > 1
-        return lowercase(tokenized[end])
-    else
-        return ""
-    end
-end
-
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
+
+function inputstring end
+
+include("fileops.jl")
 
 function _check_settings end
 
@@ -77,8 +43,6 @@ function load_settings(path)
     _check_settings(settings)  # Errors will be thrown if exist
     return Settings(settings)
 end # function load_settings
-
-function inputstring end
 
 include("CLI.jl")
 include("Environments.jl")
