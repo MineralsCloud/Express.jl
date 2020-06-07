@@ -168,8 +168,8 @@ end # function _check_settings
 _generate_cmds(n, input, output, env::DockerEnvironment) = join(
     [
         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
-        pwcmd(bin = env.bin).exec...,
-        "-inp $input'",
+        string('"', pwcmd(bin = env.bin).exec..., '"'),
+        "-inp \"$input\"'",
     ],
     " ",
 )
