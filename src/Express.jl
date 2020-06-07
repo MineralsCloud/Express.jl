@@ -26,6 +26,8 @@ struct AnalyseOutput <: Action end
 
 struct Step{S<:Simulation,T<:Action} end
 
+struct Workflow{T} end
+
 struct Software{T} end
 
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
