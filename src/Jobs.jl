@@ -1,21 +1,15 @@
 module Jobs
 
+using Compat: isnothing
 using Distributed
 using DockerPy.Containers
 
 using ..Environments: DockerEnvironment, LocalEnvironment
 
 export JobStatus
-export nprocs_task,
-    distribute_process,
-    isjobdone,
-    tasks_running,
-    tasks_exited,
-    fetch_results,
-    jobstatus
+export nprocs_task, launchjob, isjobdone, jobresult, jobstatus
 
 @enum JobStatus begin
-    PENDING
     RUNNING
     SUCCEEDED
     FAILED
@@ -29,64 +23,39 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function distribute_process(cmds, ::LocalEnvironment)
-    # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    ids = addprocs(length(cmds))
-    return map(cmds, ids) do cmd, id  # promises
-        @spawnat id run(cmd; wait = true)  # TODO: Must wait?
+function launchjob(cmds, ::LocalEnvironment)
+    return map(cmds) do cmd
+        @async run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-end # function distribute_process
-function distribute_process(cmds, environment::DockerEnvironment)
-    # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
-    ids = addprocs(length(cmds))
-    return map(cmds, ids) do cmd, id  # promises
-        exec_run(environment.container, cmd; demux = true)
+end # function launchjob
+function launchjob(cmds, environment::DockerEnvironment)
+    return map(cmds) do cmd
+        @async exec_run(environment.container, cmd; demux = true)
     end
-end # function distribute_process
+end # function launchjob
 
-function isjobdone(bag::AbstractVector)
-    return all(map(isready, bag))
-end # function isjobdone
+isjobdone(job::Future) = isready(job)
+isjobdone(bag) = map(isjobdone, bag)
 
-function tasks_running(bag::AbstractVector)
-    return filter(!isready, bag)
-end # function tasks_running
-
-function tasks_exited(bag::AbstractVector)
-    return filter(isready, bag)
-end # function subjobs_exited
-
-function jobstatus(bag::AbstractVector{Future})
-    return map(bag) do task
-        id = task.where
-        if isready(task)
-            try
-                ref = fetch(task)
-                status = success(ref) ? SUCCEEDED : FAILED
-            catch e
-                status = FAILED
-            end
-        else
-            status = RUNNING
-        end
-        id => status
-    end
+function jobstatus(job::Future)
+    id, result = jobresult(job)
+    return isnothing(result) ? RUNNING : success(result) ? SUCCEEDED : FAILED
 end # function jobstatus
+jobstatus(bag) = map(jobstatus, bag)
 
-function fetch_results(bag::AbstractVector)
-    return map(bag) do task
-        id = task.where
-        if isready(task)
-            try
-                result = fetch(task)
-            catch e
-                result = e
-            end
-        else
-            result = nothing
+function jobresult(job::Future)
+    id = job.where
+    if isready(job)
+        try
+            result = fetch(job)
+        catch e
+            result = e
         end
-        id => result
+    else
+        result = nothing
     end
-end # function fetch_results
+    return id => result
+end # function jobresult
+jobresult(bag) = map(jobresult, bag)
 
 end

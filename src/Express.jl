@@ -1,7 +1,5 @@
 module Express
 
-using JSON
-using YAML
 using Unitful
 using UnitfulAtomic
 
@@ -22,55 +20,32 @@ struct VariableCellMolecularDynamics <: Simulation end
 const BandStructure = Dispersion{Electronic}
 
 abstract type Action end
+struct PreparePotential <: Action end
 struct PrepareInput <: Action end
 struct LaunchJob <: Action end
 struct AnalyseOutput <: Action end
 
 struct Step{S<:Simulation,T<:Action} end
 
+struct Workflow{T} end
+
 struct Software{T} end
 
-function save(filepath::AbstractString, data)
-    ext = extension(filepath)
-    if ext ∈ (".yaml", ".yml")
-        YAML.write_file(expanduser(filepath), data)
-    elseif ext == ".json"
-        open(expanduser(filepath), "w") do io
-            JSON.print(io, data)
-        end
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function save
-
-function load(filepath::AbstractString)
-    ext = extension(filepath)
-    if ext ∈ (".yaml", ".yml")
-        return open(expanduser(filepath), "r") do io
-            YAML.load(io)
-        end
-    elseif ext == ".json"
-        return JSON.parsefile(expanduser(filepath))
-    else
-        error("unknown file extension `$ext`!")
-    end
-end # function load
-
-extension(filepath::AbstractString) = filepath |> splitext |> last |> lowercase
-
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
+
+function inputstring end
+
+include("fileops.jl")
 
 function _check_settings end
 
 function Settings end
 
-function load_settings(path::AbstractString)
+function load_settings(path)
     settings = load(path)
     _check_settings(settings)  # Errors will be thrown if exist
     return Settings(settings)
 end # function load_settings
-
-function inputstring end
 
 include("CLI.jl")
 include("Environments.jl")

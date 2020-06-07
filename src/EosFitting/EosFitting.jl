@@ -20,12 +20,13 @@ using ..Express:
     Step,
     SelfConsistentField,
     VariableCellRelaxation,
+    PreparePotential,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
     load_settings,
     inputstring
-using ..Jobs: nprocs_task, distribute_process
+using ..Jobs: nprocs_task, launchjob
 using ..Environments: DockerEnvironment, LocalEnvironment, SimulationEnvironment
 using ..CLI: mpicmd
 
@@ -34,6 +35,7 @@ import ..Express
 export Step,
     SelfConsistentField,
     VariableCellRelaxation,
+    PreparePotential,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
@@ -104,7 +106,7 @@ function (::Step{T,LaunchJob})(outputs, inputs, environment; dry_run = false) wh
     if dry_run
         return cmds
     else
-        return distribute_process(cmds, environment)
+        return launchjob(cmds, environment)
     end
 end
 function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
@@ -125,6 +127,14 @@ function (step::Step{T,AnalyseOutput})(path::AbstractString) where {T}
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(outputs, settings.trial_eos)
 end # function (step::Step{T,AnalyseOutput})
+
+function (step::Step{SelfConsistentField,PreparePotential})(template)
+    required = getpotentials(template)
+    path = getpotentialdir(template)
+    return map(required) do potential
+        download_potential(potential, path)
+    end
+end
 
 # function (::T)(
 #     outputs,
@@ -181,6 +191,12 @@ function _set_press_vol end
 function volumes end
 
 function energies end
+
+function getpotentials end
+
+function getpotentialdir end
+
+function download_potential end
 
 include("QuantumESPRESSO.jl")
 
