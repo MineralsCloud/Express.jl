@@ -87,7 +87,7 @@ function Express.Settings(settings)
 end # function Settings
 
 # This is a helper function and should not be exported.
-function EosFitting._set_boilerplate(T, template::PWInput)
+function EosFitting.preset(T, template::PWInput)
     @set! template.control.verbosity = "high"
     @set! template.control.wf_collect = true
     @set! template.control.tstress = true
@@ -95,7 +95,7 @@ function EosFitting._set_boilerplate(T, template::PWInput)
     @set! template.control.disk_io = "high"
     @set! template.control.calculation = T <: SelfConsistentField ? "scf" : "vc-relax"
     return template
-end # macro _set_boilerplate
+end # macro preset
 
 _results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
