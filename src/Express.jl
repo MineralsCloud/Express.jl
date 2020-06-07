@@ -28,6 +28,8 @@ struct AnalyseOutput <: Action end
 
 struct Step{S<:Simulation,T<:Action} end
 
+struct Software{T} end
+
 function save(filepath::AbstractString, data)
     ext = extension(filepath)
     if ext ∈ (".yaml", ".yml")
@@ -75,7 +77,7 @@ include("Environments.jl")
 include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
-include("EosFitting.jl")
+include("EosFitting/EosFitting.jl")
 # include("Phonon.jl")
 # include("Wizard/Wizard.jl")
 
