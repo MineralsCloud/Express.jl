@@ -7,7 +7,7 @@ using ..Environments: DockerEnvironment, LocalEnvironment
 
 export JobStatus
 export nprocs_task,
-    distribute_process,
+    distributejobs,
     isjobdone,
     tasks_running,
     tasks_exited,
@@ -28,20 +28,20 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function distribute_process(cmds, ::LocalEnvironment)
+function distributejobs(cmds, ::LocalEnvironment)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     ids = addprocs(length(cmds))
     return map(cmds, ids) do cmd, id  # promises
         @spawnat id run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-end # function distribute_process
-function distribute_process(cmds, environment::DockerEnvironment)
+end # function distributejobs
+function distributejobs(cmds, environment::DockerEnvironment)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     ids = addprocs(length(cmds))
     return map(cmds, ids) do cmd, id  # promises
         exec_run(environment.container, cmd; demux = true)
     end
-end # function distribute_process
+end # function distributejobs
 
 function isjobdone(bag::AbstractVector)
     return all(map(isready, bag))

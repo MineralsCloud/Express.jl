@@ -25,7 +25,7 @@ using ..Express:
     AnalyseOutput,
     load_settings,
     inputstring
-using ..Jobs: nprocs_task, distribute_process
+using ..Jobs: nprocs_task, distributejobs
 using ..Environments: DockerEnvironment, LocalEnvironment, SimulationEnvironment
 using ..CLI: mpicmd
 
@@ -104,7 +104,7 @@ function (::Step{T,LaunchJob})(outputs, inputs, environment; dry_run = false) wh
     if dry_run
         return cmds
     else
-        return distribute_process(cmds, environment)
+        return distributejobs(cmds, environment)
     end
 end
 function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
