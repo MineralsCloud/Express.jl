@@ -11,7 +11,6 @@ using Express,
 using EquationsOfState.NonlinearFitting, EquationsOfState.Collections, EquationsOfState.Find
 using QuantumESPRESSO.Inputs
 using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.CLI
-using QuantumESPRESSOParsers
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers
 
@@ -43,7 +42,7 @@ exec_run(
 # ================================================================= Step 1 =============================
 # pressures = [-100, -50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 500] * u"kbar"
 pressures = [-50, 0, 50, 100, 200, 300] * u"kbar"
-scfdirs_local = map(x -> mkpath("examples/GaN/scf$(ustrip(x))"), pressures)
+scfdirs_local = map(x -> "examples/GaN/scf$x", pressures)
 scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
 crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
 template = parse_template(InputFile("examples/GaN/template.in"))
@@ -57,10 +56,7 @@ bag = Step{SelfConsistentField,LaunchJob}()(
     DockerEnvironment(12, container),
 )
 # ================================================================= Step 3: read scf.out and curve-fitting =============================
-new_eos = Step{SelfConsistentField,AnalyseOutput}()(
-    map(x -> replace(x, ".in" => ".out"), scfinputs_local),
-    crude_eos,
-)
+new_eos = Step{SelfConsistentField,AnalyseOutput}()(scfoutputs, crude_eos)
 # new eos:  317.75905077576425 a₀^3, 172.89506496025282 GPa, 4.357510886414555, -612.4315102681139 Ry
 # ================================================================= Step 4 =============================
 vcdirs_local = map(x -> mkpath("examples/GaN/vc$(ustrip(x))"), pressures)
