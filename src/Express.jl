@@ -20,6 +20,7 @@ struct VariableCellMolecularDynamics <: Simulation end
 const BandStructure = Dispersion{Electronic}
 
 abstract type Action end
+struct PreparePotential <: Action end
 struct PrepareInput <: Action end
 struct LaunchJob <: Action end
 struct AnalyseOutput <: Action end
