@@ -17,6 +17,11 @@ using ...Environments: DockerEnvironment, LocalEnvironment
 import ...Express
 import ..EosFitting
 
+EosFitting.getpotentials(template::PWInput) =
+    [x.pseudopot for x in template.atomic_species.data]
+
+EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
+
 function EosFitting._set_press_vol(template::PWInput, pressure, volume)
     @set! template.cell.press = ustrip(u"kbar", pressure)
     factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
