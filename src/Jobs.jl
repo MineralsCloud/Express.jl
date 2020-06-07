@@ -11,11 +11,10 @@ export nprocs_task,
     isjobdone,
     tasks_running,
     tasks_exited,
-    fetch_results,
+    jobresult,
     jobstatus
 
 @enum JobStatus begin
-    PENDING
     RUNNING
     SUCCEEDED
     FAILED
@@ -56,37 +55,35 @@ function tasks_exited(bag::AbstractVector)
     return filter(isready, bag)
 end # function subjobs_exited
 
-function jobstatus(bag::AbstractVector{Future})
-    return map(bag) do task
-        id = task.where
-        if isready(task)
-            try
-                ref = fetch(task)
-                status = success(ref) ? SUCCEEDED : FAILED
-            catch e
-                status = FAILED
-            end
-        else
-            status = RUNNING
+function jobstatus(job::Future)
+    id = job.where
+    if isready(job)
+        try
+            ref = fetch(job)
+            status = success(ref) ? SUCCEEDED : FAILED
+        catch e
+            status = FAILED
         end
-        id => status
+    else
+        status = RUNNING
     end
+    return id => status
 end # function jobstatus
+jobstatus(bag) = map(jobstatus, bag)
 
-function fetch_results(bag::AbstractVector)
-    return map(bag) do task
-        id = task.where
-        if isready(task)
-            try
-                result = fetch(task)
-            catch e
-                result = e
-            end
-        else
-            result = nothing
+function jobresult(job::Future)
+    id = job.where
+    if isready(job)
+        try
+            result = fetch(job)
+        catch e
+            result = e
         end
-        id => result
+    else
+        result = nothing
     end
-end # function fetch_results
+    return id => result
+end # function jobresult
+jobresult(bag) = map(jobresult, bag)
 
 end
