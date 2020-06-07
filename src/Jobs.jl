@@ -1,5 +1,6 @@
 module Jobs
 
+using Compat: isnothing
 using Distributed
 using DockerPy.Containers
 
@@ -45,18 +46,8 @@ isjobdone(job::Future) = isready(job)
 isjobdone(bag) = map(isjobdone, bag)
 
 function jobstatus(job::Future)
-    id = job.where
-    if isready(job)
-        try
-            ref = fetch(job)
-            status = success(ref) ? SUCCEEDED : FAILED
-        catch e
-            status = FAILED
-        end
-    else
-        status = RUNNING
-    end
-    return id => status
+    id, result = jobresult(job)
+    return isnothing(result) ? RUNNING : success(result) ? SUCCEEDED : FAILED
 end # function jobstatus
 jobstatus(bag) = map(jobstatus, bag)
 
