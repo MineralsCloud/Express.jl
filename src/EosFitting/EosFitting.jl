@@ -20,6 +20,7 @@ using ..Express:
     Step,
     SelfConsistentField,
     VariableCellRelaxation,
+    PreparePotential,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
@@ -34,6 +35,7 @@ import ..Express
 export Step,
     SelfConsistentField,
     VariableCellRelaxation,
+    PreparePotential,
     PrepareInput,
     LaunchJob,
     AnalyseOutput,
@@ -126,6 +128,14 @@ function (step::Step{T,AnalyseOutput})(path::AbstractString) where {T}
     return step(outputs, settings.trial_eos)
 end # function (step::Step{T,AnalyseOutput})
 
+function (step::Step{SelfConsistentField,PreparePotential})(template)
+    required = getpotentials(template)
+    path = getpotentialdir(template)
+    return map(required) do potential
+        download_potential(potential, path)
+    end
+end
+
 # function (::T)(
 #     outputs,
 #     inputs,
@@ -181,6 +191,12 @@ function _set_press_vol end
 function volumes end
 
 function energies end
+
+function getpotentials end
+
+function getpotentialdir end
+
+function download_potential end
 
 include("QuantumESPRESSO.jl")
 
