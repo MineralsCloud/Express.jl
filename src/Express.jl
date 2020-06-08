@@ -26,10 +26,13 @@ const PREPARE_POTENTIAL = Prepare{:potential}()
 const PREPARE_INPUT = Prepare{:input}()
 const LAUNCH_JOB = Launch{:job}()
 const ANALYSE_OUTPUT = Analyse{:output}()
+Base.show(io::IO, ::Prepare{T}) where {T} = print(io, "prepare " * lowercase(string(T)))
+Base.show(io::IO, ::Launch{T}) where {T} = print(io, "launch " * lowercase(string(T)))
+Base.show(io::IO, ::Analyse{T}) where {T} = print(io, "analyse " * lowercase(string(T)))
 
 struct Step{S<:Calculation,T<:Action} end
 (::Type{S})(::T) where {S<:Calculation,T<:Action} = Step{S,T}()
-Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $T for a $S calculation")
+Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $(string(T())) @ calculation $S")
 
 struct Workflow{T} end
 
