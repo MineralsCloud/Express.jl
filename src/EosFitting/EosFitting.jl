@@ -19,7 +19,7 @@ using QuantumESPRESSO.CLI: pwcmd
 using ..Express:
     Step,
     SelfConsistentField,
-    VariableCellRelaxation,
+    VariableCellOptimization,
     PreparePotential,
     PrepareInput,
     LaunchJob,
@@ -27,14 +27,14 @@ using ..Express:
     load_settings,
     inputstring
 using ..Jobs: nprocs_task, launchjob
-using ..Environments: DockerEnvironment, LocalEnvironment, SimulationEnvironment
+using ..Environments: DockerEnvironment, LocalEnvironment, CalculationEnvironment
 using ..CLI: mpicmd
 
 import ..Express
 
 export Step,
     SelfConsistentField,
-    VariableCellRelaxation,
+    VariableCellOptimization,
     PreparePotential,
     PrepareInput,
     LaunchJob,
@@ -144,7 +144,7 @@ end
 #     trial_eos,
 #     environment,
 #     cmd,
-# ) where {T<:Union{SelfConsistentField,VariableCellRelaxation}}
+# ) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
 #     Step{typeof(T),PrepareInput}(inputs, template, pressures, trial_eos)
 #     Step{typeof(T),LaunchJob}(outputs, inputs, environment, cmd)
 #     Step{typeof(T),AnalyseOutput}(outputs, trial_eos)
@@ -177,7 +177,7 @@ _generate_cmds(n, input, output, env::LocalEnvironment) =
     pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input, stdout = output)
 
 mutable struct ContextManager
-    environment::SimulationEnvironment
+    environment::CalculationEnvironment
 end
 
 function parseenergies end

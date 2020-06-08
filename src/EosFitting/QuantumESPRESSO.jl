@@ -11,7 +11,7 @@ using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr, Ry
 
-using ...Express: Step, SelfConsistentField, VariableCellRelaxation, AnalyseOutput, _uparse
+using ...Express: Step, SelfConsistentField, VariableCellOptimization, AnalyseOutput, _uparse
 using ...Environments: DockerEnvironment, LocalEnvironment
 
 import ...Express
@@ -99,7 +99,7 @@ end # macro preset
 
 _results(::Step{SelfConsistentField,AnalyseOutput}, s::AbstractString) =
     parse(Preamble, s).omega
-_results(::Step{VariableCellRelaxation,AnalyseOutput}, s::AbstractString) =
+_results(::Step{VariableCellOptimization,AnalyseOutput}, s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function EosFitting.parseenergies(step, s)

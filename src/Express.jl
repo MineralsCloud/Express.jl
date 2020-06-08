@@ -3,21 +3,20 @@ module Express
 using Unitful
 using UnitfulAtomic
 
-abstract type Property end
-struct Electronic <: Property end
-struct Phononic <: Property end
-
-abstract type Simulation end
-struct SelfConsistentField <: Simulation end
-struct NonSelfConsistentField <: Simulation end
-struct Dispersion{T<:Property} <: Simulation end
-struct DensityOfStates{T<:Property} <: Simulation end
-abstract type StructureOptimization <: Simulation end
-struct Relaxation <: StructureOptimization end
-struct VariableCellRelaxation <: StructureOptimization end
-struct MolecularDynamics <: Simulation end
-struct VariableCellMolecularDynamics <: Simulation end
-const BandStructure = Dispersion{Electronic}
+abstract type Calculation end
+abstract type ElectronicStructure <: Calculation end
+struct SelfConsistentField <: ElectronicStructure end
+struct NonSelfConsistentField <: ElectronicStructure end
+struct BandStructure <: ElectronicStructure end
+struct ElectronicDensityOfStates <: ElectronicStructure end
+struct DftPlusU <: ElectronicStructure end
+struct HartreeFock <: ElectronicStructure end
+abstract type Optimization <: Calculation end
+struct StructuralOptimization <: Optimization end
+struct VariableCellOptimization <: Optimization end
+abstract type Dynamics <: Calculation end
+struct MolecularDynamics <: Dynamics end
+struct VariableCellMolecularDynamics <: Dynamics end
 
 abstract type Action end
 struct PreparePotential <: Action end
@@ -25,7 +24,7 @@ struct PrepareInput <: Action end
 struct LaunchJob <: Action end
 struct AnalyseOutput <: Action end
 
-struct Step{S<:Simulation,T<:Action} end
+struct Step{S<:Calculation,T<:Action} end
 
 struct Workflow{T} end
 

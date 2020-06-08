@@ -2,13 +2,13 @@ module Environments
 
 export LocalEnvironment, DockerEnvironment, ServerEnvironment
 
-abstract type SimulationEnvironment end
-struct LocalEnvironment <: SimulationEnvironment
+abstract type CalculationEnvironment end
+struct LocalEnvironment <: CalculationEnvironment
     n::Int
     bin::Any
     env::Any
 end
-abstract type RemoteEnvironment <: SimulationEnvironment end
+abstract type RemoteEnvironment <: CalculationEnvironment end
 abstract type VirtualMachineEnvironment <: RemoteEnvironment end
 struct DockerEnvironment <: VirtualMachineEnvironment
     n::Int
