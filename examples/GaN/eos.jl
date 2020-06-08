@@ -51,11 +51,11 @@ new_eos = Step{SelfConsistentField,AnalyseOutput}()(scfoutputs, crude_eos)
 # ================================================================= Step 4 =============================
 vcdirs_local = map(x -> mkpath("examples/GaN/vc$x"), pressures)
 vcinputs_local = map(x -> x * "/vc.in", vcdirs_local)
-Step{SelfConsistentField,PrepareInput}()(vcinputs_local, template, pressures, new_eos)
+Step{VariableCellOptimization,PrepareInput}()(vcinputs_local, template, pressures, new_eos)
 # ================================================================= Step 5 =============================
 vcinputs_docker = map(x -> replace(x, "scf" => "vc"), scfinputs_docker)
 vcoutput = map(x -> replace(x, ".in" => ".out"), vcinputs_local)
-bag2 = Step{SelfConsistentField,LaunchJob}()(
+bag2 = Step{VariableCellOptimization,LaunchJob}()(
     vcoutput,
     vcinputs_docker,
     DockerEnvironment(12, container),
@@ -63,5 +63,5 @@ bag2 = Step{SelfConsistentField,LaunchJob}()(
 stop(container)
 # ================================================================= Step 6: read vcrelax.out file and curve-fitting =============================
 # final eos: 317.7711705399742 a₀^3, 172.8125730578396 GPa, 4.3535165337769195, -612.4315134858152 Ry
-result = Step{SelfConsistentField,AnalyseOutput}()(vcoutput, new_eos)
+result = Step{VariableCellOptimization,AnalyseOutput}()(vcoutput, new_eos)
 println(result)
