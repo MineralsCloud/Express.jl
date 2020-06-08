@@ -20,10 +20,13 @@ using ..Express:
     Step,
     SelfConsistentField,
     VariableCellOptimization,
-    PreparePotential,
-    PrepareInput,
-    LaunchJob,
-    AnalyseOutput,
+    Prepare,
+    Launch,
+    Analyse,
+    PREPARE_POTENTIAL,
+    PREPARE_INPUT,
+    LAUNCH_JOB,
+    ANALYSE_OUTPUT,
     load_settings,
     inputstring
 using ..Jobs: nprocs_task, launchjob
@@ -35,10 +38,10 @@ import ..Express
 export Step,
     SelfConsistentField,
     VariableCellOptimization,
-    PreparePotential,
-    PrepareInput,
-    LaunchJob,
-    AnalyseOutput,
+    PREPARE_POTENTIAL,
+    PREPARE_INPUT,
+    LAUNCH_JOB,
+    ANALYSE_OUTPUT,
     load_settings,
     set_press_vol,
     inputstring
@@ -55,7 +58,7 @@ function set_press_vol(
     return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
-function (step::Step{T,PrepareInput})(
+function (step::Step{T,Prepare{:input}})(
     template,
     pressures,
     trial_eos::EquationOfState;
@@ -66,7 +69,7 @@ function (step::Step{T,PrepareInput})(
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
 end
-function (step::Step{T,PrepareInput})(
+function (step::Step{T,Prepare{:input}})(
     inputs,
     template,
     pressures,
@@ -92,12 +95,12 @@ function (step::Step{T,PrepareInput})(
     end
     return
 end
-function (step::Step{T,PrepareInput})(path::AbstractString) where {T}
+function (step::Step{T,Prepare{:input}})(path::AbstractString) where {T}
     settings = load_settings(path)
     return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,LaunchJob})(outputs, inputs, environment; dry_run = false) where {T}
+function (::Step{T,Launch})(outputs, inputs, environment; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -109,26 +112,26 @@ function (::Step{T,LaunchJob})(outputs, inputs, environment; dry_run = false) wh
         return launchjob(cmds, environment)
     end
 end
-function (step::Step{T,LaunchJob})(path::AbstractString) where {T}
+function (step::Step{T,Launch})(path::AbstractString) where {T}
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(outputs, settings.inputs, settings.environment)
 end
 
-function (step::Step{T,AnalyseOutput})(outputs, trial_eos) where {T}
+function (step::Step{T,Analyse})(outputs, trial_eos) where {T}
     results = map(outputs) do output
         s = read(output, String)
         parseenergies(step, s)
     end
     return lsqfit(trial_eos(Energy()), volumes(results), energies(results))
 end # function postprocess
-function (step::Step{T,AnalyseOutput})(path::AbstractString) where {T}
+function (step::Step{T,Analyse})(path::AbstractString) where {T}
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(outputs, settings.trial_eos)
-end # function (step::Step{T,AnalyseOutput})
+end
 
-function (step::Step{SelfConsistentField,PreparePotential})(template)
+function (step::Step{SelfConsistentField,Prepare{:potential}})(template)
     required = getpotentials(template)
     path = getpotentialdir(template)
     return map(required) do potential
@@ -145,9 +148,9 @@ end
 #     environment,
 #     cmd,
 # ) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
-#     Step{typeof(T),PrepareInput}(inputs, template, pressures, trial_eos)
-#     Step{typeof(T),LaunchJob}(outputs, inputs, environment, cmd)
-#     Step{typeof(T),AnalyseOutput}(outputs, trial_eos)
+#     Step{typeof(T),Prepare{:input}}(inputs, template, pressures, trial_eos)
+#     Step{typeof(T),Launch{:job}}(outputs, inputs, environment, cmd)
+#     Step{typeof(T),Analyse}(outputs, trial_eos)
 # end
 
 function Express._check_settings(settings)

@@ -1,5 +1,5 @@
 using EquationsOfState.Collections
-using Express, Express.EosFitting, Express.Jobs, Express.Environments
+using Express.EosFitting, Express.Jobs, Express.Environments
 using QuantumESPRESSO.Inputs.PWscf
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers
@@ -36,26 +36,26 @@ scfdirs_local = map(x -> "examples/GaN/scf$x", pressures)
 scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
 crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
 template = parse(PWInput, read("examples/GaN/template.in", String))
-Step{SelfConsistentField,PrepareInput}()(scfinputs_local, template, pressures, crude_eos)
+SelfConsistentField(PREPARE_INPUT)(scfinputs_local, template, pressures, crude_eos)
 # ================================================================= Step 2 =============================
 scfinputs_docker = map(x -> "/home/qe/test/scf$x/scf.in", pressures)
 scfoutputs = map(x -> replace(x, ".in" => ".out"), scfinputs_local)
-bag = Step{SelfConsistentField,LaunchJob}()(
+bag = SelfConsistentField(LAUNCH_JOB)(
     scfoutputs_docker,
     scfinputs_docker,
     DockerEnvironment(12, container, "/home/qe/qe-6.2.1/bin/pw.x"),
 )
 # ================================================================= Step 3: read scf.out and curve-fitting =============================
-new_eos = Step{SelfConsistentField,AnalyseOutput}()(scfoutputs, crude_eos)
+new_eos = SelfConsistentField(ANALYSE_OUTPUT)(scfoutputs, crude_eos)
 # new eos:  317.75905077576425 a₀^3, 172.89506496025282 GPa, 4.357510886414555, -612.4315102681139 Ry
 # ================================================================= Step 4 =============================
 vcdirs_local = map(x -> mkpath("examples/GaN/vc$x"), pressures)
 vcinputs_local = map(x -> x * "/vc.in", vcdirs_local)
-Step{VariableCellOptimization,PrepareInput}()(vcinputs_local, template, pressures, new_eos)
+VariableCellOptimization(PREPARE_INPUT)(vcinputs_local, template, pressures, new_eos)
 # ================================================================= Step 5 =============================
 vcinputs_docker = map(x -> replace(x, "scf" => "vc"), scfinputs_docker)
 vcoutput = map(x -> replace(x, ".in" => ".out"), vcinputs_local)
-bag2 = Step{VariableCellOptimization,LaunchJob}()(
+bag2 = VariableCellOptimization(LAUNCH_JOB)(
     vcoutput,
     vcinputs_docker,
     DockerEnvironment(12, container),
@@ -63,5 +63,5 @@ bag2 = Step{VariableCellOptimization,LaunchJob}()(
 stop(container)
 # ================================================================= Step 6: read vcrelax.out file and curve-fitting =============================
 # final eos: 317.7711705399742 a₀^3, 172.8125730578396 GPa, 4.3535165337769195, -612.4315134858152 Ry
-result = Step{VariableCellOptimization,AnalyseOutput}()(vcoutput, new_eos)
+result = VariableCellOptimization(ANALYSE_OUTPUT)(vcoutput, new_eos)
 println(result)
