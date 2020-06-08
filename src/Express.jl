@@ -19,12 +19,17 @@ struct MolecularDynamics <: Dynamics end
 struct VariableCellMolecularDynamics <: Dynamics end
 
 abstract type Action end
-struct PreparePotential <: Action end
-struct PrepareInput <: Action end
-struct LaunchJob <: Action end
-struct AnalyseOutput <: Action end
+struct Prepare{T} <: Action end
+struct Launch{T} <: Action end
+struct Analyse{T} <: Action end
+const PREPARE_POTENTIAL = Prepare{:potential}()
+const PREPARE_INPUT = Prepare{:input}()
+const LAUNCH_JOB = Launch{:job}()
+const ANALYSE_OUTPUT = Analyse{:output}()
 
 struct Step{S<:Calculation,T<:Action} end
+(::Type{S})(::T) where {S<:Calculation,T<:Action} = Step{S,T}()
+Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $T for a $S calculation")
 
 struct Workflow{T} end
 
