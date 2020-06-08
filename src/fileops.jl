@@ -3,9 +3,9 @@ using YAML
 
 function save(filepath, data)
     ext = extension(filepath)
-    if ext ∈ (".yaml", ".yml")
+    if ext ∈ ("yaml", "yml")
         YAML.write_file(expanduser(filepath), data)
-    elseif ext == ".json"
+    elseif ext == "json"
         open(expanduser(filepath), "w") do io
             JSON.print(io, data)
         end
@@ -16,11 +16,11 @@ end # function save
 
 function load(filepath)
     ext = extension(filepath)
-    if ext ∈ (".yaml", ".yml")
+    if ext ∈ ("yaml", "yml")
         return open(expanduser(filepath), "r") do io
             YAML.load(io)
         end
-    elseif ext == ".json"
+    elseif ext == "json"
         return JSON.parsefile(expanduser(filepath))
     else
         error("unknown file extension `$ext`!")
