@@ -1,16 +1,6 @@
-using Distributed
-addprocs(6)
-using Pkg
-Pkg.activate(".")
-using Express,
-    Express.EosFitting,
-    Express.Jobs,
-    Express.CLI,
-    Express.Environments,
-    Express.EosFitting.QuantumESPRESSO
-using EquationsOfState.NonlinearFitting, EquationsOfState.Collections, EquationsOfState.Find
-using QuantumESPRESSO.Inputs
-using QuantumESPRESSO.Inputs.PWscf, QuantumESPRESSO.CLI
+using EquationsOfState.Collections
+using Express, Express.EosFitting, Express.Jobs, Express.Environments
+using QuantumESPRESSO.Inputs.PWscf
 using Unitful, UnitfulAtomic
 using DockerPy.Client, DockerPy.Images, DockerPy.Containers
 
@@ -28,7 +18,7 @@ container = Container(
             Dict("bind" => "/home/qe/test", "mode" => "rw"),
     ),
 )
-# container = containers(docker)[1]
+# container = get(docker.containers, "qe")
 start(container)
 exec_run(container, "mkdir -p /home/qe/pseudo/")
 exec_run(
@@ -45,21 +35,21 @@ pressures = [-50, 0, 50, 100, 200, 300] * u"kbar"
 scfdirs_local = map(x -> "examples/GaN/scf$x", pressures)
 scfinputs_local = map(x -> x * "/scf.in", scfdirs_local)
 crude_eos = BirchMurnaghan3rd(317 * u"bohr^3", 210 * u"GPa", 4, -612.43 * u"Ry")
-template = parse_template(InputFile("examples/GaN/template.in"))
+template = parse(PWInput, read("examples/GaN/template.in", String))
 Step{SelfConsistentField,PrepareInput}()(scfinputs_local, template, pressures, crude_eos)
-scfinputs_docker = map(x -> "/home/qe/test/scf$(ustrip(x))/scf.in", pressures)
-scfoutputs = map(x -> replace(x, ".in" => ".out"), scfinputs_local)
 # ================================================================= Step 2 =============================
+scfinputs_docker = map(x -> "/home/qe/test/scf$x/scf.in", pressures)
+scfoutputs = map(x -> replace(x, ".in" => ".out"), scfinputs_local)
 bag = Step{SelfConsistentField,LaunchJob}()(
-    scfoutputs,
+    scfoutputs_docker,
     scfinputs_docker,
-    DockerEnvironment(12, container),
+    DockerEnvironment(12, container, "/home/qe/qe-6.2.1/bin/pw.x"),
 )
 # ================================================================= Step 3: read scf.out and curve-fitting =============================
 new_eos = Step{SelfConsistentField,AnalyseOutput}()(scfoutputs, crude_eos)
 # new eos:  317.75905077576425 a₀^3, 172.89506496025282 GPa, 4.357510886414555, -612.4315102681139 Ry
 # ================================================================= Step 4 =============================
-vcdirs_local = map(x -> mkpath("examples/GaN/vc$(ustrip(x))"), pressures)
+vcdirs_local = map(x -> mkpath("examples/GaN/vc$x"), pressures)
 vcinputs_local = map(x -> x * "/vc.in", vcdirs_local)
 Step{SelfConsistentField,PrepareInput}()(vcinputs_local, template, pressures, new_eos)
 # ================================================================= Step 5 =============================
