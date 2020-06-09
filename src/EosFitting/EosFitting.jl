@@ -64,7 +64,8 @@ function (step::Step{T,Prepare{:input}})(
     trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
-    template = preset(T, template)
+    template = step(template)  # To be extended
+    alert_pressures(pressures)
     return map(pressures) do pressure  # `map` will check size mismatch
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
@@ -97,10 +98,11 @@ function (step::Step{T,Prepare{:input}})(
 end
 function (step::Step{T,Prepare{:input}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    return step(inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,Launch})(outputs, inputs, environment; dry_run = false) where {T}
+function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -112,22 +114,22 @@ function (::Step{T,Launch})(outputs, inputs, environment; dry_run = false) where
         return launchjob(cmds, environment)
     end
 end
-function (step::Step{T,Launch})(path::AbstractString) where {T}
+function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
-    return step(outputs, settings.inputs, settings.environment)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    return step(outputs, inputs, settings.environment)
 end
 
-function (step::Step{T,Analyse})(outputs, trial_eos) where {T}
-    results = map(outputs) do output
-        s = read(output, String)
-        parseenergies(step, s)
-    end
-    return lsqfit(trial_eos(Energy()), volumes(results), energies(results))
+function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
+    strs = (read(output, String) for output in outputs)
+    results = (step(str) for str in strs)  # [volume => energy]
+    return lsqfit(trial_eos(Energy()), keys(results), values(results))
 end # function postprocess
-function (step::Step{T,Analyse})(path::AbstractString) where {T}
+function (step::Step{T,Analyse{:output}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, settings.trial_eos)
 end
 
@@ -160,9 +162,7 @@ function Express._check_settings(settings)
     _check_software_settings(settings["qe"])
     @assert isdir(settings["dir"])
     @assert isfile(settings["template"])
-    if length(settings["pressures"]) <= 6
-        @info "pressures less than 6 may give unreliable results, consider more if possible!"
-    end
+    alert_pressures(settings["pressures"])
     map(("type", "parameters", "units")) do key
         @assert haskey(settings["trial_eos"], key)
     end
@@ -179,21 +179,22 @@ _generate_cmds(n, input, output, env::DockerEnvironment) = join(
 _generate_cmds(n, input, output, env::LocalEnvironment) =
     pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input, stdout = output)
 
+function alert_pressures(pressures)
+    if length(pressures) <= 6
+        @info "pressures <= 6 may give unreliable results, consider more if possible!"
+    end
+    if minimum(pressures) >= zero(eltype(pressures))
+        @warn "for better fitting, we need at least 1 negative pressure!"
+    end
+end # function alert_pressures
+
 mutable struct ContextManager
     environment::CalculationEnvironment
 end
 
-function parseenergies end
-
-function preset end
-
 function _check_software_settings end
 
 function _set_press_vol end
-
-function volumes end
-
-function energies end
 
 function getpotentials end
 

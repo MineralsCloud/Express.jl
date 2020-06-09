@@ -11,7 +11,8 @@ using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr, Ry
 
-using ...Express: Step, SelfConsistentField, VariableCellOptimization, Analyse, _uparse
+using ...Express:
+    Step, SelfConsistentField, VariableCellOptimization, Prepare, Analyse, _uparse
 using ...Environments: DockerEnvironment, LocalEnvironment
 
 import ...Express
@@ -54,6 +55,7 @@ const EosMap = (
     bm2 = BirchMurnaghan2nd,
     bm3 = BirchMurnaghan3rd,
     bm4 = BirchMurnaghan4th,
+    v = Vinet,
 )
 
 function Express.Settings(settings)
@@ -74,20 +76,20 @@ function Express.Settings(settings)
         pressures = settings["pressures"] .* u"GPa",
         trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
                                                                   _uparse.(settings["trial_eos"]["units"])...),
-        inputs = map(settings["pressures"]) do pressure
+        dirs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
+                template.control.prefix,
                 "p" * string(pressure),
-                template.control.calculation,
-                template.control.prefix * ".in",
             ))
         end,
         environment = environment,
     )
 end # function Settings
 
-# This is a helper function and should not be exported.
-function EosFitting.preset(T, template::PWInput)
+function (::EosFitting.Step{T,Prepare{:input}})(
+    template::PWInput,
+) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
     @set! template.control.verbosity = "high"
     @set! template.control.wf_collect = true
     @set! template.control.tstress = true
@@ -95,22 +97,18 @@ function EosFitting.preset(T, template::PWInput)
     @set! template.control.disk_io = "high"
     @set! template.control.calculation = T <: SelfConsistentField ? "scf" : "vc-relax"
     return template
-end # macro preset
+end
 
-_results(::Step{SelfConsistentField,Analyse}, s::AbstractString) =
-    parse(Preamble, s).omega
-_results(::Step{VariableCellOptimization,Analyse}, s::AbstractString) =
-    cellvolume(parsefinal(CellParametersCard{Float64}, s))
-
-function EosFitting.parseenergies(step, s)
+function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
+    return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+end
+function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
-    return _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
-end # function EosFitting.parseenergies
-
-EosFitting.volumes(xy) = first.(xy) .* bohr^3
-EosFitting.energies(xy) = last.(xy) .* Ry
+    return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
+        parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+end
 
 Express.inputstring(object::PWInput) = inputstring(object)
 
