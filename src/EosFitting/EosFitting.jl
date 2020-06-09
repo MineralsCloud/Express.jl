@@ -98,7 +98,8 @@ function (step::Step{T,Prepare{:input}})(
 end
 function (step::Step{T,Prepare{:input}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    return step(inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
 function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
@@ -115,8 +116,9 @@ function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false)
 end
 function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
-    return step(outputs, settings.inputs, settings.environment)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    return step(outputs, inputs, settings.environment)
 end
 
 function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
@@ -126,7 +128,8 @@ function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
 end # function postprocess
 function (step::Step{T,Analyse{:output}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, settings.trial_eos)
 end
 

@@ -76,12 +76,11 @@ function Express.Settings(settings)
         pressures = settings["pressures"] .* u"GPa",
         trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
                                                                   _uparse.(settings["trial_eos"]["units"])...),
-        inputs = map(settings["pressures"]) do pressure
+        dirs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
+                template.control.prefix,
                 "p" * string(pressure),
-                template.control.calculation,
-                template.control.prefix * ".in",
             ))
         end,
         environment = environment,
