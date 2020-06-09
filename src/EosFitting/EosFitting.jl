@@ -120,11 +120,9 @@ function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
 end
 
 function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
-    results = map(outputs) do output
-        s = read(output, String)
-        parseenergies(step, s)
-    end
-    return lsqfit(trial_eos(Energy()), volumes(results), energies(results))
+    strs = (read(output, String) for output in outputs)
+    results = (step(str) for str in strs)  # [volume => energy]
+    return lsqfit(trial_eos(Energy()), keys(results), values(results))
 end # function postprocess
 function (step::Step{T,Analyse{:output}})(path::AbstractString) where {T}
     settings = load_settings(path)
@@ -191,15 +189,9 @@ mutable struct ContextManager
     environment::CalculationEnvironment
 end
 
-function parseenergies end
-
 function _check_software_settings end
 
 function _set_press_vol end
-
-function volumes end
-
-function energies end
 
 function getpotentials end
 

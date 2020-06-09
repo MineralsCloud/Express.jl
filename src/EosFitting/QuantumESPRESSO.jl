@@ -99,19 +99,16 @@ function (::EosFitting.Step{T,Prepare{:input}})(
     return template
 end
 
-(::Step{SelfConsistentField,Analyse{:output}})(s::AbstractString) = parse(Preamble, s).omega
-(::Step{VariableCellOptimization,Analyse{:output}})(s::AbstractString) =
-    cellvolume(parsefinal(CellParametersCard{Float64}, s))
-
-function EosFitting.parseenergies(step, s)
+function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
+    return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+end
+function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
-    return step(s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
-end # function EosFitting.parseenergies
-
-EosFitting.volumes(xy) = first.(xy) .* bohr^3
-EosFitting.energies(xy) = last.(xy) .* Ry
+    return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
+        parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+end
 
 Express.inputstring(object::PWInput) = inputstring(object)
 
