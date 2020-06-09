@@ -96,10 +96,16 @@ function (step::Step{T,Prepare{:input}})(
     end
     return
 end
-function (step::Step{T,Prepare{:input}})(path::AbstractString) where {T}
+function (step::Step{SelfConsistentField,Prepare{:input}})(path::AbstractString)
     settings = load_settings(path)
-    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    inputs = settings.dirs .* "/scf.in"
     return step(inputs, settings.template, settings.pressures, settings.trial_eos)
+end # function preprocess
+function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractString)
+    settings = load_settings(path)
+    inputs = settings.dirs .* "/vc-relax.in"
+    new_eos = SelfConsistentField(ANALYSE_OUTPUT)(path, settings.trial_eos)
+    return step(inputs, settings.template, settings.pressures, new_eos)
 end # function preprocess
 
 function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
@@ -126,12 +132,19 @@ function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
     results = (step(str) for str in strs)  # [volume => energy]
     return lsqfit(trial_eos(Energy()), keys(results), values(results))
 end # function postprocess
-function (step::Step{T,Analyse{:output}})(path::AbstractString) where {T}
+function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
     settings = load_settings(path)
-    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, settings.trial_eos)
 end
+function (step::Step{VariableCellOptimization,Analyse{:output}})(path::AbstractString)
+    settings = load_settings(path)
+    inputs = settings.dirs .* "/vc-relax.in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    new_eos = SelfConsistentField(ANALYSE_OUTPUT)(path, settings.trial_eos)
+    return step(outputs, new_eos)
+end # function preprocess
 
 function (step::Step{SelfConsistentField,Prepare{:potential}})(template)
     required = getpotentials(template)
