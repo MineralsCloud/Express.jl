@@ -100,7 +100,7 @@ function (step::Step{T,Prepare{:input}})(path::AbstractString) where {T}
     return step(settings.inputs, settings.template, settings.pressures, settings.trial_eos)
 end # function preprocess
 
-function (::Step{T,Launch})(outputs, inputs, environment; dry_run = false) where {T}
+function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(environment.n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -112,20 +112,20 @@ function (::Step{T,Launch})(outputs, inputs, environment; dry_run = false) where
         return launchjob(cmds, environment)
     end
 end
-function (step::Step{T,Launch})(path::AbstractString) where {T}
+function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(outputs, settings.inputs, settings.environment)
 end
 
-function (step::Step{T,Analyse})(outputs, trial_eos) where {T}
+function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
     results = map(outputs) do output
         s = read(output, String)
         parseenergies(step, s)
     end
     return lsqfit(trial_eos(Energy()), volumes(results), energies(results))
 end # function postprocess
-function (step::Step{T,Analyse})(path::AbstractString) where {T}
+function (step::Step{T,Analyse{:output}})(path::AbstractString) where {T}
     settings = load_settings(path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), settings.inputs)
     return step(outputs, settings.trial_eos)
