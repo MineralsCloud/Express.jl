@@ -11,7 +11,8 @@ using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr, Ry
 
-using ...Express: Step, SelfConsistentField, VariableCellOptimization, Prepare, Analyse, _uparse
+using ...Express:
+    Step, SelfConsistentField, VariableCellOptimization, Prepare, Analyse, _uparse
 using ...Environments: DockerEnvironment, LocalEnvironment
 
 import ...Express
@@ -86,7 +87,9 @@ function Express.Settings(settings)
     )
 end # function Settings
 
-function (::EosFitting.Step{T,Prepare{:input}})(template::PWInput) where {T}
+function (::EosFitting.Step{T,Prepare{:input}})(
+    template::PWInput,
+) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
     @set! template.control.verbosity = "high"
     @set! template.control.wf_collect = true
     @set! template.control.tstress = true
@@ -96,16 +99,15 @@ function (::EosFitting.Step{T,Prepare{:input}})(template::PWInput) where {T}
     return template
 end
 
-_results(::Step{SelfConsistentField,Analyse}, s::AbstractString) =
-    parse(Preamble, s).omega
-_results(::Step{VariableCellOptimization,Analyse}, s::AbstractString) =
+(::Step{SelfConsistentField,Analyse{:output}})(s::AbstractString) = parse(Preamble, s).omega
+(::Step{VariableCellOptimization,Analyse{:output}})(s::AbstractString) =
     cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function EosFitting.parseenergies(step, s)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
-    return _results(step, s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+    return step(s), parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end # function EosFitting.parseenergies
 
 EosFitting.volumes(xy) = first.(xy) .* bohr^3
