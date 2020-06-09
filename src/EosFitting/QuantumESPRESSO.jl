@@ -55,6 +55,7 @@ const EosMap = (
     bm2 = BirchMurnaghan2nd,
     bm3 = BirchMurnaghan3rd,
     bm4 = BirchMurnaghan4th,
+    v = Vinet,
 )
 
 function Express.Settings(settings)
