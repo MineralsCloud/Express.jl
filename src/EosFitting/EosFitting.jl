@@ -64,7 +64,7 @@ function (step::Step{T,Prepare{:input}})(
     trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
-    template = preset(T, template)
+    template = step(template)
     return map(pressures) do pressure  # `map` will check size mismatch
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
@@ -184,8 +184,6 @@ mutable struct ContextManager
 end
 
 function parseenergies end
-
-function preset end
 
 function _check_software_settings end
 
