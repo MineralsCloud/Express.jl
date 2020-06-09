@@ -65,6 +65,7 @@ function (step::Step{T,Prepare{:input}})(
     kwargs...,
 ) where {T}
     template = step(template)  # To be extended
+    alert_pressures(pressures)
     return map(pressures) do pressure  # `map` will check size mismatch
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
@@ -160,9 +161,7 @@ function Express._check_settings(settings)
     _check_software_settings(settings["qe"])
     @assert isdir(settings["dir"])
     @assert isfile(settings["template"])
-    if length(settings["pressures"]) <= 6
-        @info "pressures less than 6 may give unreliable results, consider more if possible!"
-    end
+    alert_pressures(settings["pressures"])
     map(("type", "parameters", "units")) do key
         @assert haskey(settings["trial_eos"], key)
     end
@@ -178,6 +177,15 @@ _generate_cmds(n, input, output, env::DockerEnvironment) = join(
 )
 _generate_cmds(n, input, output, env::LocalEnvironment) =
     pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input, stdout = output)
+
+function alert_pressures(pressures)
+    if length(pressures) <= 6
+        @info "pressures <= 6 may give unreliable results, consider more if possible!"
+    end
+    if minimum(pressures) >= zero(eltype(pressures))
+        @warn "for better fitting, we need at least 1 negative pressure!"
+    end
+end # function alert_pressures
 
 mutable struct ContextManager
     environment::CalculationEnvironment
