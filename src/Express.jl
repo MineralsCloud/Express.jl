@@ -17,12 +17,12 @@ struct VariableCellOptimization <: Optimization end
 abstract type Dynamics <: Calculation end
 struct MolecularDynamics <: Dynamics end
 struct VariableCellMolecularDynamics <: Dynamics end
-Base.show(io::IO, ::SelfConsistentField) = print(io, "scf")
-Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf")
-Base.show(io::IO, ::StructuralOptimization) = print(io, "relax")
-Base.show(io::IO, ::VariableCellOptimization) = print(io, "vc-relax")
-Base.show(io::IO, ::MolecularDynamics) = print(io, "md")
-Base.show(io::IO, ::VariableCellMolecularDynamics) = print(io, "vc-md")
+Base.show(io::IO, ::SelfConsistentField) = print(io, "scf calculation")
+Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf calculation")
+Base.show(io::IO, ::StructuralOptimization) = print(io, "relax calculation")
+Base.show(io::IO, ::VariableCellOptimization) = print(io, "vc-relax calculation")
+Base.show(io::IO, ::MolecularDynamics) = print(io, "md calculation")
+Base.show(io::IO, ::VariableCellMolecularDynamics) = print(io, "vc-md calculation")
 
 abstract type Action end
 struct Prepare{T} <: Action end
@@ -38,7 +38,7 @@ Base.show(io::IO, ::Analyse{T}) where {T} = print(io, "analyse " * lowercase(str
 
 struct Step{S<:Calculation,T<:Action} end
 (::Type{S})(::T) where {S<:Calculation,T<:Action} = Step{S,T}()
-Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $(T()) @ $(S()) calculation")
+Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $(T()) @ $(S())")
 
 struct Workflow{T} end
 
