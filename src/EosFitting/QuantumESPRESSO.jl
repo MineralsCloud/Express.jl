@@ -1,6 +1,5 @@
 module QuantumESPRESSO
 
-using Compat: isnothing
 using Crystallography: cellvolume
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, getoption
@@ -26,7 +25,7 @@ EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseu
 function EosFitting._set_press_vol(template::PWInput, pressure, volume)
     @set! template.cell.press = ustrip(u"kbar", pressure)
     factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    if isnothing(template.cell_parameters) || getoption(template.cell_parameters) == "alat"
+    if template.cell_parameters === nothing || getoption(template.cell_parameters) == "alat"
         @set! template.system.celldm[1] *= factor
     else
         @set! template.system.celldm = zeros(6)

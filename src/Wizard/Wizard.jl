@@ -4,7 +4,6 @@ using REPL
 using REPL.Terminals
 using REPL.TerminalMenus
 
-using Compat: isnothing
 using Crayons.Box: GREEN_FG
 using EquationsOfState.Collections
 using JLD2: jldopen
@@ -28,7 +27,7 @@ include("state.jl")
 
 # Referenced from https://github.com/JuliaPackaging/BinaryBuilder.jl/blob/0eece73/src/wizard/state.jl
 function run_wizard(state::Union{Nothing,WizardState} = nothing)
-    if isnothing(state)
+    if state === nothing
         # If we weren't given a state, check to see if we'd like to resume a
         # previous run or start from scratch again.
         state = load_last_wizard_state()
