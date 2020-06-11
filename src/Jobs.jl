@@ -31,7 +31,13 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function distribute_process(cmds::AbstractArray, ids::AbstractArray{<:Integer} = workers(); isdocker::Bool = true, container, inputs)
+function distribute_process(
+    cmds::AbstractArray,
+    ids::AbstractArray{<:Integer} = workers();
+    isdocker::Bool = true,
+    container,
+    inputs,
+)
     # Similar to `invoke_on_workers` in https://cosx.org/2017/08/distributed-learning-in-julia
     return map(cmds, ids, inputs) do cmd, id, input  # promises
         if isdocker

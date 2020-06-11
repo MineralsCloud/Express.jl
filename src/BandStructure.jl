@@ -30,13 +30,16 @@ which_calculation(step::Step{2}) = "bands"
 # This is a helper function and should not be exported
 function set_calculation(step::Step, template::PWInput)
     @warn "We will set the calculation type to be \"$type\" for you."
-    return setproperties(template, setproperties(template.control, calculation = which_calculation(step)))
+    return setproperties(
+        template,
+        setproperties(template.control, calculation = which_calculation(step)),
+    )
 end # function set_calculation
 
 function prepare(step::Step{1}, inputs::AbstractVector{<:AbstractString}, template::PWInput)
     # Checking parameters
     template = set_calculation(step, template)
-end # function prepare
+end# function prepare
 function prepare(
     step::Step{2},
     inputs::AbstractVector{<:AbstractString},

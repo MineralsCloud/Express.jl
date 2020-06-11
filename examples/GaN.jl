@@ -53,13 +53,29 @@ Step(1)(inputs, template, crude_eos, pressures)
 # ================================================================= Step 2 =============================
 docker = DockerClient()
 image = pull(docker.images, "rinnocente/qe-full-6.2.1")[1]
-container = Container(docker, image, command = "sh", name = "qe", tty = true, stdin_open = true, volumes = Dict(joinpath(pwd(), "examples") => Dict("bind" => "/home/qe/test", "mode" => "rw")))
+container = Container(
+    docker,
+    image,
+    command = "sh",
+    name = "qe",
+    tty = true,
+    stdin_open = true,
+    volumes = Dict(
+        joinpath(pwd(), "examples") => Dict("bind" => "/home/qe/test", "mode" => "rw"),
+    ),
+)
 start(container)
 inputs_ondocker = map(x -> "/home/qe/test/scf$(ustrip(x))/scf.in", pressures)
 scf_outputs = map(x -> replace(x, ".in" => ".out"), inputs_ondocker)
 exec_run(container, "mkdir -p /home/qe/pseudo/")
-exec_run(container, "wget -O /home/qe/pseudo/Ga.pbe-dn-kjpaw_psl.1.0.0.UPF https://www.quantum-espresso.org/upf_files/Ga.pbe-dn-kjpaw_psl.1.0.0.UPF")
-exec_run(container, "wget -O /home/qe/pseudo/N.pbe-n-kjpaw_psl.1.0.0.UPF https://www.quantum-espresso.org/upf_files/N.pbe-n-kjpaw_psl.1.0.0.UPF")
+exec_run(
+    container,
+    "wget -O /home/qe/pseudo/Ga.pbe-dn-kjpaw_psl.1.0.0.UPF https://www.quantum-espresso.org/upf_files/Ga.pbe-dn-kjpaw_psl.1.0.0.UPF",
+)
+exec_run(
+    container,
+    "wget -O /home/qe/pseudo/N.pbe-n-kjpaw_psl.1.0.0.UPF https://www.quantum-espresso.org/upf_files/N.pbe-n-kjpaw_psl.1.0.0.UPF",
+)
 bag = Step(2)(
     inputs_ondocker,
     scf_outputs,

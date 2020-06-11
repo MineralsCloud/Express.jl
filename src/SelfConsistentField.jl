@@ -33,9 +33,9 @@ Step(::ScfCalculation, ::AnalyseOutput) = Step(3)
 
 @with_kw struct Settings
     template::String
-    ecutwfc
-    ecutrho
-    mesh
+    ecutwfc::Any
+    ecutrho::Any
+    mesh::Any
 end
 
 function (step::Step{1})(inputs, template::PWInput, settings::Settings)
@@ -44,7 +44,8 @@ function (step::Step{1})(inputs, template::PWInput, settings::Settings)
     @set! template.control.tstress = true
     @set! template.control.tprnfor = true
     objects = similar(inputs, PWInput)  # Create an array of `undef` of `PWInput` type
-    for (i, (input, wfc, rho, mesh)) in enumerate(zip(inputs, settings.ecutwfc, settings.ecutrho, settings.mesh))
+    for (i, (input, wfc, rho, mesh)) in
+        enumerate(zip(inputs, settings.ecutwfc, settings.ecutrho, settings.mesh))
         object = @set template.system.ecutwfc = wfc
         @set! object.system.ecutrho = rho
         @set! object.k_points = KPointsCard(mesh)

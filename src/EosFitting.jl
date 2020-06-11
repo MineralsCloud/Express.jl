@@ -146,7 +146,8 @@ function set_alat_press(
         @set! template.system.celldm[1] *= factor
     else
         @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters = optconvert("bohr", template.cell_parameters * factor)
+        @set! template.cell_parameters =
+            optconvert("bohr", template.cell_parameters * factor)
     end
     @set! template.cell.press = ustrip(u"kbar", pressure)
     return template
@@ -265,7 +266,8 @@ function (step::Union{Step{3},Step{6}})(
 end # function postprocess
 
 _results(::Step{3}, s::AbstractString) = parse(Preamble, s).omega
-_results(::Step{6}, s::AbstractString) = cellvolume(parsefinal(CellParametersCard{Float64}, s))
+_results(::Step{6}, s::AbstractString) =
+    cellvolume(parsefinal(CellParametersCard{Float64}, s))
 
 function _saveto(filepath::AbstractString, data)
     ext = _getext(filepath)
