@@ -37,7 +37,8 @@ Base.show(io::IO, ::Launch{T}) where {T} = print(io, "launch " * lowercase(strin
 Base.show(io::IO, ::Analyse{T}) where {T} = print(io, "analyse " * lowercase(string(T)))
 
 struct Step{S<:Calculation,T<:Action} end
-(::Type{S})(::T) where {S<:Calculation,T<:Action} = Step{S,T}()
+Step(c::Calculation, a::Action) = Step{typeof(c),typeof(a)}()
+(c::Calculation)(a::Action) = Step(c, a)
 Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $(T()) @ $(S())")
 
 struct Workflow{T} end
