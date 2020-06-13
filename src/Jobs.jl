@@ -20,11 +20,10 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function launchjob(cmds, environ)
-    tasks = map(cmds) do cmd
+function launchjob(cmds)
+    return map(cmds) do cmd
         @async run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-    return tasks
 end # function launchjob
 # function launchjob(cmds, environment::DockerEnvironment)
 #     return map(cmds) do cmd
