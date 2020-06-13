@@ -29,7 +29,9 @@ using ..Express:
     LAUNCH_JOB,
     ANALYSE_OUTPUT,
     load_settings,
-    inputstring
+    inputstring,
+    calculationtype,
+    actiontype
 using ..Jobs: nprocs_task, launchjob
 using ..CLI: mpicmd
 
@@ -44,7 +46,9 @@ export Step,
     ANALYSE_OUTPUT,
     load_settings,
     set_press_vol,
-    inputstring
+    inputstring,
+    calculationtype,
+    actiontype
 
 function set_press_vol(
     template,
@@ -61,23 +65,41 @@ end # function set_press_vol
 ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    callback::Function,
-    templates,
-    pressures,
+    f::Function,
+    template::Input,
+    pressure::Number,
     trial_eos::EquationOfState,
     args...;
     minscale = eps(),
     maxscale = 1.3,
     kwargs...,
 )
+    template = f(step, template, pressure, trial_eos, args...; kwargs...)  # A callback
+    return set_press_vol(
+        template,
+        pressure,
+        trial_eos;
+        minscale = minscale,
+        maxscale = maxscale,
+    )
+end
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    template::Input,
+    pressure::Number,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+) = step(preset, template, pressure, trial_eos, args...; kwargs...)
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    f::Function,
+    templates,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+)
     return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        set_press_vol(
-            callback(template, pressure, trial_eos, args...; kwargs...),
-            pressure,
-            trial_eos;
-            minscale = minscale,
-            maxscale = maxscale,
-        )  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        step(f, template, pressure, trial_eos, args...; kwargs...)
     end
 end
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
@@ -86,33 +108,22 @@ end
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) = step(first, templates, pressures, trial_eos, args...; kwargs...)
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    callback::Function,
+) = step(preset, templates, pressures, trial_eos, args...; kwargs...)
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    f::Function,
     template::Input,
     pressures,
     trial_eos::EquationOfState,
     args...;
-    minscale = eps(),
-    maxscale = 1.3,
     kwargs...,
-)
-    template = callback(template, pressures, trial_eos, args...; kwargs...)
-    return step(
-        fill(template, size(pressures)),
-        pressures,
-        trial_eos;
-        minscale = minscale,
-        maxscale = maxscale,
-    )
-end
+) = step(f, fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     template::Input,
     pressures,
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) = step(first, template, pressures, trial_eos, args...; kwargs...)
+) = step(fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     inputs,
     templates,
@@ -149,7 +160,7 @@ function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractSt
     inputs = settings.dirs .* "/vc-relax.in"
     new_eos = SelfConsistentField(ANALYSE_OUTPUT)(path, settings.trial_eos)
     return step(inputs, settings.template, settings.pressures, new_eos)
-end # function preprocess
+end
 
 function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
@@ -165,7 +176,8 @@ function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false)
 end
 function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    inputs =
+        @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, inputs, settings.environment)
 end
@@ -251,6 +263,8 @@ end
 function _check_software_settings end
 
 function _set_press_vol end
+
+function preset end
 
 function getpotentials end
 

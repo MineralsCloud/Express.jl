@@ -11,8 +11,13 @@ using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr, Ry
 
 using ...Express:
-    Step, SelfConsistentField, VariableCellOptimization, Prepare, Analyse, _uparse
-using ...Environments: DockerEnvironment, LocalEnvironment
+    Step,
+    SelfConsistentField,
+    VariableCellOptimization,
+    Prepare,
+    Analyse,
+    _uparse,
+    calculationtype
 
 import ...Express
 import ..EosFitting
@@ -86,15 +91,14 @@ function Express.Settings(settings)
     )
 end # function Settings
 
-function (::EosFitting.Step{T,Prepare{:input}})(
-    template::PWInput,
-) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
+function EosFitting.preset(step, template, args...)
     @set! template.control.verbosity = "high"
     @set! template.control.wf_collect = true
     @set! template.control.tstress = true
     @set! template.control.tprnfor = true
     @set! template.control.disk_io = "high"
-    @set! template.control.calculation = T <: SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.calculation =
+        calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
     return template
 end
 
