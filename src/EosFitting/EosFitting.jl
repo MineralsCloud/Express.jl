@@ -183,7 +183,7 @@ end
 
 function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
     strs = (read(output, String) for output in outputs)
-    results = (step(str) for str in strs)  # [volume => energy]
+    results = (analyse(step, str) for str in strs)  # [volume => energy]
     return lsqfit(trial_eos(Energy()), keys(results), values(results))
 end # function postprocess
 function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
@@ -266,6 +266,8 @@ function getpotentials end
 function getpotentialdir end
 
 function download_potential end
+
+function analyse end
 
 include("QuantumESPRESSO.jl")
 

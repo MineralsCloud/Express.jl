@@ -113,15 +113,16 @@ function EosFitting.preset(step, template, args...)
     return template
 end
 
-function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
-    return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
-end
-function (::EosFitting.Step{VariableCellOptimization,Analyse{:output}})(s::AbstractString)
-    if !isjobdone(s)
-        @warn "Job is not finished!"
+function EosFitting.analyse(step, s::AbstractString)
+    if calculationtype(step) <: SelfConsistentField
+        return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+    else
+        if !isjobdone(s)
+            @warn "Job is not finished!"
+        end
+        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
+            parse_electrons_energies(s, :converged).ε[end]  # volume, energy
     end
-    return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
-        parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end
 
 end # module QuantumESPRESSO
