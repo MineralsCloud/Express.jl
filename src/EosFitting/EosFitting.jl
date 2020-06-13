@@ -49,6 +49,12 @@ export Step,
     calculationtype,
     actiontype
 
+mutable struct WorkingFiles
+    pending
+    running
+    finished
+end
+
 function set_press_vol(
     template,
     pressure,
@@ -182,9 +188,11 @@ function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
 end
 
 function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
-    strs = (read(output, String) for output in outputs)
-    results = (analyse(step, str) for str in strs)  # [volume => energy]
-    return lsqfit(trial_eos(Energy()), keys(results), values(results))
+    results = map(outputs) do output
+        str = read(output, String)
+        analyse(step, str)  # volume => energy
+    end
+    return lsqfit(trial_eos(Energy()), first.(results), last.(results))
 end # function postprocess
 function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
     settings = load_settings(path)
