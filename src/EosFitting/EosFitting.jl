@@ -66,18 +66,10 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     pressures,
     trial_eos::EquationOfState,
     args...;
-    minscale = eps(),
-    maxscale = 1.3,
     kwargs...,
 )
     return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        set_press_vol(
-            callback(template, pressure, trial_eos, args...; kwargs...),
-            pressure,
-            trial_eos;
-            minscale = minscale,
-            maxscale = maxscale,
-        )  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        step(callback, template, pressure, trial_eos, args...; kwargs...)
     end
 end
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
@@ -90,17 +82,17 @@ end
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     callback::Function,
     template::Input,
-    pressures,
+    pressure,
     trial_eos::EquationOfState,
     args...;
     minscale = eps(),
     maxscale = 1.3,
     kwargs...,
 )
-    template = callback(template, pressures, trial_eos, args...; kwargs...)
-    return step(
-        fill(template, size(pressures)),
-        pressures,
+    template = callback(template, pressure, trial_eos, args...; kwargs...)
+    return set_press_vol(
+        template,
+        pressure,
         trial_eos;
         minscale = minscale,
         maxscale = maxscale,
@@ -108,11 +100,11 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
 end
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     template::Input,
-    pressures,
+    pressure,
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) = step(first, template, pressures, trial_eos, args...; kwargs...)
+) = step(first, template, pressure, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     inputs,
     templates,
