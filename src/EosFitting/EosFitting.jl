@@ -58,67 +58,69 @@ function set_press_vol(
     return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
-function (step::Step{T,Prepare{:input}})(
-    callback,
+ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
+
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    callback::Function,
     templates,
     pressures,
     trial_eos::EquationOfState,
     args...;
+    minscale = eps(),
+    maxscale = 1.3,
     kwargs...,
-) where {T}
+)
     return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        template = callback(template, pressures, trial_eos, args...; kwargs...)
-        set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+        set_press_vol(
+            callback(template, pressure, trial_eos, args...; kwargs...),
+            pressure,
+            trial_eos;
+            minscale = minscale,
+            maxscale = maxscale,
+        )  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
 end
-function (step::Step{T,Prepare{:input}})(
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     templates,
     pressures,
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) where {T}
-    return step(first, templates, pressures, trial_eos, args...; kwargs...)
-end
-function (step::Step{T,Prepare{:input}})(
+) = step(first, templates, pressures, trial_eos, args...; kwargs...)
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    callback::Function,
     template::Input,
     pressures,
     trial_eos::EquationOfState,
     args...;
+    minscale = eps(),
+    maxscale = 1.3,
     kwargs...,
-) where {T}
-    return step(first, template, pressures, trial_eos, args...; kwargs...)
-end
-function (step::Step{T,Prepare{:input}})(
-    callback,
-    template::Input,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) where {T}
+)
     template = callback(template, pressures, trial_eos, args...; kwargs...)
-    return step(fill(template, size(pressures)), pressures, trial_eos; kwargs...)
+    return step(
+        fill(template, size(pressures)),
+        pressures,
+        trial_eos;
+        minscale = minscale,
+        maxscale = maxscale,
+    )
 end
-function (step::Step{T,Prepare{:input}})(
-    templates,
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    template::Input,
     pressures,
-    trial_eos::EquationOfState;
+    trial_eos::EquationOfState,
+    args...;
     kwargs...,
-) where {T}
-    alert_pressures(pressures)
-    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
-    end
-end
-function (step::Step{T,Prepare{:input}})(
+) = step(first, template, pressures, trial_eos, args...; kwargs...)
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     inputs,
     templates,
     pressures,
     trial_eos::EquationOfState;
     dry_run = false,
     kwargs...,
-) where {T}
+)
     objects = step(templates, pressures, trial_eos; kwargs...)
     map(inputs, objects) do input, object  # `map` will check size mismatch
         if dry_run
