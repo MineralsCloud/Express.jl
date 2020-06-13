@@ -22,7 +22,8 @@ end # function nprocs_task
 
 function launchjob(cmds)
     return map(cmds) do cmd
-        @async run(cmd; wait = true)  # Must wait, or else lose I/O streams
+        sleep(5)
+        @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
 end # function launchjob
 # function launchjob(cmds, environment::DockerEnvironment)
