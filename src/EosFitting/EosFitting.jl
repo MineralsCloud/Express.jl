@@ -29,7 +29,9 @@ using ..Express:
     LAUNCH_JOB,
     ANALYSE_OUTPUT,
     load_settings,
-    inputstring
+    inputstring,
+    calculationtype,
+    actiontype
 using ..Jobs: nprocs_task, launchjob
 using ..CLI: mpicmd
 
@@ -44,7 +46,9 @@ export Step,
     ANALYSE_OUTPUT,
     load_settings,
     set_press_vol,
-    inputstring
+    inputstring,
+    calculationtype,
+    actiontype
 
 function set_press_vol(
     template,
