@@ -88,7 +88,7 @@ end
 ) = step(first, template, pressure, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     callback::Function,
-    templates,
+    templates::Union{AbstractArray,Tuple},
     pressures,
     trial_eos::EquationOfState,
     args...;
@@ -105,6 +105,28 @@ end
     args...;
     kwargs...,
 ) = step(first, templates, pressures, trial_eos, args...; kwargs...)
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    callback::Function,
+    template::Input,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+) = step(
+    callback,
+    fill(template, size(pressures)),
+    pressures,
+    trial_eos,
+    args...;
+    kwargs...,
+)
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    template::Input,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+) = step(fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     inputs,
     templates,
