@@ -20,19 +20,23 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function launchjob(cmds, environment::LocalEnvironment)
-    addprocs(environment.n)
+function launchjob(cmds, environ)
     tasks = map(cmds) do cmd
         @async run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-    rmprocs()
     return tasks
 end # function launchjob
-function launchjob(cmds, environment::DockerEnvironment)
-    return map(cmds) do cmd
-        @async exec_run(environment.container, cmd; demux = true)
-    end
-end # function launchjob
+# function launchjob(cmds, environment::DockerEnvironment)
+#     return map(cmds) do cmd
+#         @async exec_run(environment.container, cmd; demux = true)
+#     end
+# end # function launchjob
+
+function notifyme(job)
+    result = fetch(job)
+    println("job is finished!")
+    return result
+end # function notifyme
 
 isjobdone(job::Future) = isready(job)
 isjobdone(bag) = map(isjobdone, bag)
