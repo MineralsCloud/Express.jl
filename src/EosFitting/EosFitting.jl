@@ -256,10 +256,6 @@ function alert_pressures(pressures)
     end
 end # function alert_pressures
 
-mutable struct ContextManager
-    environment::CalculationEnvironment
-end
-
 function _check_software_settings end
 
 function _set_press_vol end
