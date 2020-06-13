@@ -52,8 +52,6 @@ _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomi
 
 function inputstring end
 
-include("fileops.jl")
-
 function _check_settings end
 
 function Settings end
