@@ -63,7 +63,7 @@ ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     f::Function,
     template::Input,
-    pressure,
+    pressure::Number,
     trial_eos::EquationOfState,
     args...;
     minscale = eps(),
@@ -81,14 +81,14 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
 end
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     template::Input,
-    pressure,
+    pressure::Number,
     trial_eos::EquationOfState,
     args...;
     kwargs...,
 ) = step(first, template, pressure, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     f::Function,
-    templates::Union{AbstractArray,Tuple},
+    templates,
     pressures,
     trial_eos::EquationOfState,
     args...;
