@@ -47,8 +47,6 @@ actiontype(::Step{S,T}) where {S,T} = T
 
 struct Workflow{T} end
 
-struct Software{T} end
-
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 function _check_settings end
