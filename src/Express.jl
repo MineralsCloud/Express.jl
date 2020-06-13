@@ -62,7 +62,6 @@ function load_settings(path)
 end # function load_settings
 
 include("CLI.jl")
-include("Environments.jl")
 include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
