@@ -167,16 +167,16 @@ function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractSt
     return step(inputs, settings.template, settings.pressures, new_eos)
 end
 
-function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
+function (::Step{T,Launch{:job}})(outputs, inputs, n, bin; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(environment.n, length(inputs))
+    n = nprocs_task(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _generate_cmds(n, input, output, environment)
+        _generate_cmds(n, input, output, bin)
     end
     if dry_run
         return cmds
     else
-        return launchjob(cmds, environment)
+        return launchjob(cmds)
     end
 end
 function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
@@ -184,7 +184,7 @@ function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return step(outputs, inputs, settings.environment)
+    return step(outputs, inputs, settings.manager.np, settings.bin)
 end
 
 function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
@@ -251,8 +251,8 @@ end # function _check_settings
 #     ],
 #     " ",
 # )
-_generate_cmds(n, input, output, env) =
-    pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input, stdout = output)
+_generate_cmds(n, input, output, bin) =
+    pipeline(mpicmd(n, pwcmd(bin = bin)), stdin = input, stdout = output)
 
 function alert_pressures(pressures)
     if length(pressures) <= 6

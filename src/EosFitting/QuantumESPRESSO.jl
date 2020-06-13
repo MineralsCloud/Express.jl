@@ -68,9 +68,8 @@ function Express.Settings(settings)
     template = parse(PWInput, read(expanduser(settings["template"]), String))
     qe = settings["qe"]
     if qe["manager"] == "local"
-        n = qe["n"]
         bin = qe["bin"]
-        manager = LocalManager(n, true)
+        manager = LocalManager(qe["n"], true)
     elseif qe["manager"] == "docker"
         n = qe["n"]
         bin = qe["bin"]
@@ -89,6 +88,7 @@ function Express.Settings(settings)
                 "p" * string(pressure),
             ))
         end,
+        bin = bin,
         manager = manager,
     )
 end # function Settings
