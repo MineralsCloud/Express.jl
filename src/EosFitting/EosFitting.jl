@@ -70,7 +70,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     maxscale = 1.3,
     kwargs...,
 )
-    template = f(template, pressure, trial_eos, args...; kwargs...)
+    template = f(step, template, pressure, trial_eos, args...; kwargs...)  # A callback
     return set_press_vol(
         template,
         pressure,
