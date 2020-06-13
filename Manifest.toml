@@ -1,7 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[AbInitioSoftwareBase]]
-git-tree-sha1 = "4f2a4f5584b835524ac7dbf2e90953885a04fed7"
+deps = ["JSON", "YAML"]
+git-tree-sha1 = "09e52818bb9689bbc5ee59a50000c542fe4eb066"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
