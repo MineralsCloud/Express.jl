@@ -163,7 +163,7 @@ end # function preprocess
 function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractString)
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = SelfConsistentField(ANALYSE_OUTPUT)(path, settings.trial_eos)
+    new_eos = SelfConsistentField()(ANALYSE_OUTPUT)(path, settings.trial_eos)
     return step(inputs, settings.template, settings.pressures, new_eos)
 end
 
@@ -204,7 +204,7 @@ function (step::Step{VariableCellOptimization,Analyse{:output}})(path::AbstractS
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_eos = SelfConsistentField(ANALYSE_OUTPUT)(path, settings.trial_eos)
+    new_eos = SelfConsistentField()(ANALYSE_OUTPUT)(path, settings.trial_eos)
     return step(outputs, new_eos)
 end # function preprocess
 
