@@ -1,6 +1,8 @@
 module QuantumESPRESSO
 
 using Crystallography: cellvolume
+using Dates: now
+using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, getoption
 using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert
@@ -41,16 +43,16 @@ function EosFitting._set_press_vol(template::PWInput, pressure, volume)
 end # function EosFitting.set_press_vol
 
 function EosFitting._check_software_settings(settings)
-    map(("environment", "bin", "n")) do key
+    map(("manager", "bin", "n")) do key
         @assert haskey(settings, key) "key `$key` not found!"
     end
     @assert isinteger(settings["n"]) && settings["n"] >= 1
-    if settings["environment"] == "docker"
+    if settings["manager"] == "docker"
         @assert haskey(settings, "container")
-    elseif settings["environment"] == "ssh"
-    elseif settings["environment"] == "local"  # Do nothing
+    elseif settings["manager"] == "ssh"
+    elseif settings["manager"] == "local"  # Do nothing
     else
-        error("unknown environment `$(settings["environment"])`!")
+        error("unknown manager `$(settings["manager"])`!")
     end
 end # function _check_software_settings
 
@@ -65,14 +67,14 @@ const EosMap = (
 function Express.Settings(settings)
     template = parse(PWInput, read(expanduser(settings["template"]), String))
     qe = settings["qe"]
-    if qe["environment"] == "local"
+    if qe["manager"] == "local"
         n = qe["n"]
         bin = qe["bin"]
-        environment = LocalEnvironment(n, bin, ENV)
-    elseif qe["environment"] == "docker"
+        manager = LocalManager(n, true)
+    elseif qe["manager"] == "docker"
         n = qe["n"]
         bin = qe["bin"]
-        environment = DockerEnvironment(n, qe["container"], bin)
+        # manager = DockerEnvironment(n, qe["container"], bin)
     else
     end
     return (
@@ -87,7 +89,7 @@ function Express.Settings(settings)
                 "p" * string(pressure),
             ))
         end,
-        environment = environment,
+        manager = manager,
     )
 end # function Settings
 
@@ -99,20 +101,28 @@ function EosFitting.preset(step, template, args...)
     @set! template.control.disk_io = "high"
     @set! template.control.calculation =
         calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.outdir = join(
+        [
+            template.control.prefix,
+            template.control.calculation,
+            string(now()),
+            string(rand(UInt)),
+        ],
+        "_",
+    )
     return template
 end
 
-function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
-    return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
-end
-function (::EosFitting.Step{VariableCellOptimization,Analyse{:output}})(s::AbstractString)
-    if !isjobdone(s)
-        @warn "Job is not finished!"
+function EosFitting.analyse(step, s::AbstractString)
+    if calculationtype(step) <: SelfConsistentField
+        return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+    else
+        if !isjobdone(s)
+            @warn "Job is not finished!"
+        end
+        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
+            parse_electrons_energies(s, :converged).ε[end]  # volume, energy
     end
-    return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
-        parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end
-
-Express.inputstring(object::PWInput) = inputstring(object)
 
 end # module QuantumESPRESSO

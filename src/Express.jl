@@ -1,5 +1,6 @@
 module Express
 
+using AbInitioSoftwareBase: load
 using Unitful
 using UnitfulAtomic
 
@@ -46,13 +47,7 @@ actiontype(::Step{S,T}) where {S,T} = T
 
 struct Workflow{T} end
 
-struct Software{T} end
-
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
-
-function inputstring end
-
-include("fileops.jl")
 
 function _check_settings end
 

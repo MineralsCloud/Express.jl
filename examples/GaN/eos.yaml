@@ -1,6 +1,6 @@
 qe:
   bin: pw.x
-  environment: local
+  manager: local
   n: 16
 dir: examples/GaN
 template: examples/GaN/template.in

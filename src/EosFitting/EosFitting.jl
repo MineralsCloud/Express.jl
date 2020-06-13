@@ -29,7 +29,6 @@ using ..Express:
     LAUNCH_JOB,
     ANALYSE_OUTPUT,
     load_settings,
-    inputstring,
     calculationtype,
     actiontype
 using ..Jobs: nprocs_task, launchjob
@@ -184,7 +183,7 @@ end
 
 function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
     strs = (read(output, String) for output in outputs)
-    results = (step(str) for str in strs)  # [volume => energy]
+    results = (analyse(step, str) for str in strs)  # [volume => energy]
     return lsqfit(trial_eos(Energy()), keys(results), values(results))
 end # function postprocess
 function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
@@ -256,10 +255,6 @@ function alert_pressures(pressures)
     end
 end # function alert_pressures
 
-mutable struct ContextManager
-    environment::CalculationEnvironment
-end
-
 function _check_software_settings end
 
 function _set_press_vol end
@@ -271,6 +266,8 @@ function getpotentials end
 function getpotentialdir end
 
 function download_potential end
+
+function analyse end
 
 include("QuantumESPRESSO.jl")
 
