@@ -1,5 +1,12 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[AbInitioSoftwareBase]]
+git-tree-sha1 = "4f2a4f5584b835524ac7dbf2e90953885a04fed7"
+repo-rev = "master"
+repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
+uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
+version = "0.1.0"
+
 [[Arpack]]
 deps = ["Arpack_jll", "Libdl", "LinearAlgebra"]
 git-tree-sha1 = "2ff92b71ba1747c5fdd541f8fc87736d82f40ec9"
@@ -47,9 +54,9 @@ version = "0.2.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "37964a28fa8231d769faa10eec8c4436253c48ba"
+git-tree-sha1 = "054993b6611376ddb40203e973e954fd9d1d1902"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.11.0"
+version = "3.12.0"
 
 [[CompilerSupportLibraries_jll]]
 deps = ["Libdl", "Pkg"]
@@ -249,12 +256,6 @@ git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
-[[Kaleido]]
-deps = ["Requires", "Setfield"]
-git-tree-sha1 = "65c15176dda64db5cc552331125d0df1d412bb2d"
-uuid = "caafb194-7e8d-11e9-2724-d5981dd0806d"
-version = "0.2.5"
-
 [[LibGit2]]
 deps = ["Printf"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -398,13 +399,13 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[ProgressMeter]]
 deps = ["Distributed", "Printf"]
-git-tree-sha1 = "b3cb8834eee5410c7246734cc6f4f586fe0dc50e"
+git-tree-sha1 = "3e1784c27847bba115815d4d4e668b99873985e5"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "1.3.0"
+version = "1.3.1"
 
 [[Pseudopotentials]]
 deps = ["DataFrames", "EzXML", "JLD2", "Parameters", "REPL", "UrlDownload"]
-git-tree-sha1 = "9db6dd5afa7762ff6a5d608030b5300e5ffdf5c3"
+git-tree-sha1 = "9d683009fec292c71cf747850ac4ef872bc65148"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/Pseudopotentials.jl.git"
 uuid = "1b2dc2e6-48aa-4f00-b8f4-19d1a71d7a0e"
@@ -432,15 +433,15 @@ version = "2.3.1"
 
 [[QuantumESPRESSO]]
 deps = ["QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "dbaefb0fa3d561a64019a7e07fbfc9cf439eb4f5"
+git-tree-sha1 = "253bd4481551c0d73c6d834cde459e833c83a849"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
-deps = ["Compat", "Crystallography", "Formatting", "Kaleido", "LinearAlgebra", "OrderedCollections", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "c48b54faa460ca3a7c3b26551d2ba8262ea27714"
+deps = ["AbInitioSoftwareBase", "Compat", "Crystallography", "Formatting", "LinearAlgebra", "OrderedCollections", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
+git-tree-sha1 = "a4e2aa61d9285a9baf6bbaaa3b99ba419eb02cf2"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -448,7 +449,7 @@ version = "0.1.2"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataFrames", "DataStructures", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
-git-tree-sha1 = "e4de736015634ffca7975f1259647e6726c1b5b8"
+git-tree-sha1 = "102c1ac1d87df532f4d9f59d8e493642834d6cae"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -487,15 +488,15 @@ version = "0.6.1"
 
 [[Rmath_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "1660f8fefbf5ab9c67560513131d4e933012fc4b"
+git-tree-sha1 = "d76185aa1f421306dec73c057aa384bad74188f0"
 uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
-version = "0.2.2+0"
+version = "0.2.2+1"
 
 [[Roots]]
 deps = ["Printf"]
-git-tree-sha1 = "955ce06c1f424ca7043c7827f5cb14d8eb397065"
+git-tree-sha1 = "c2f7348c55d1433d1cab0159b4d2c6d27af36fc4"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.0.1"
+version = "1.0.2"
 
 [[Rotations]]
 deps = ["LinearAlgebra", "StaticArrays", "Statistics"]
@@ -612,15 +613,15 @@ version = "1.2.1"
 
 [[UnitfulAtomic]]
 deps = ["Unitful"]
-git-tree-sha1 = "2edb47dbda92ce8a91f53603041ffe7745427b01"
+git-tree-sha1 = "903be579194534af1c4b4778d1ace676ca042238"
 uuid = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
-version = "0.3.0"
+version = "1.0.0"
 
 [[UrlDownload]]
 deps = ["HTTP", "ProgressMeter"]
-git-tree-sha1 = "fec39d6788322c10072496f6f290061418d54573"
+git-tree-sha1 = "5f4a56e15ed7c4e37d35cd30b82ecc2fb28a0f5d"
 uuid = "856ac37a-3032-4c1c-9122-f86d88358c8b"
-version = "0.2.2"
+version = "0.3.0"
 
 [[VersionParsing]]
 git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
