@@ -64,8 +64,17 @@ function (step::Step{T,Prepare{:input}})(
     trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
-    template = step(template)  # To be extended
     return step(fill(template, size(pressures)), pressures, trial_eos; kwargs...)
+end
+function (step::Step{T,Prepare{:input}})(
+    callback,
+    template::Input,
+    pressures,
+    trial_eos::EquationOfState;
+    kwargs...,
+) where {T}
+    template = callback(template, pressures, trial_eos; kwargs...)
+    return step(template, pressures, trial_eos; kwargs...)
 end
 function (step::Step{T,Prepare{:input}})(
     templates,
@@ -75,6 +84,18 @@ function (step::Step{T,Prepare{:input}})(
 ) where {T}
     alert_pressures(pressures)
     return map(templates, pressures) do template, pressure  # `map` will check size mismatch
+        set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+    end
+end
+function (step::Step{T,Prepare{:input}})(
+    callback,
+    templates,
+    pressures,
+    trial_eos::EquationOfState;
+    kwargs...,
+) where {T}
+    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
+        template = callback(template, pressures, trial_eos; kwargs...)
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
 end
