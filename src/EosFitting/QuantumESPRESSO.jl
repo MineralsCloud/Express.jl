@@ -115,13 +115,14 @@ end
 
 function EosFitting.analyse(step, s::AbstractString)
     if calculationtype(step) <: SelfConsistentField
-        return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+        return parse(Preamble, s).omega * bohr^3 =>
+            parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
     else
         if !isjobdone(s)
             @warn "Job is not finished!"
         end
-        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) =>
-            parse_electrons_energies(s, :converged).ε[end]  # volume, energy
+        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) * bohr^3 =>
+            parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
     end
 end
 
