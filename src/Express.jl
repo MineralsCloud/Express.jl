@@ -42,8 +42,11 @@ Step(c::Calculation, a::Action) = Step{typeof(c),typeof(a)}()
 (c::Calculation)(a::Action) = Step(c, a)
 Base.show(io::IO, ::Step{S,T}) where {S,T} = print(io, "step: $(T()) @ $(S())")
 
-calculationtype(::Step{S,T}) where {S,T} = S  # No instance, `S` could be abstract
-actiontype(::Step{S,T}) where {S,T} = T
+calculationtype(::Type{Step{S,T}}) where {S,T} = S
+calculationtype(s::Step) = calculationtype(typeof(s))  # No instance, `S` could be abstract
+
+actiontype(::Type{Step{S,T}}) where {S,T} = T
+actiontype(s::Step) = actiontype(typeof(s))
 
 struct Workflow{T} end
 
