@@ -1,6 +1,7 @@
 module QuantumESPRESSO
 
 using Crystallography: cellvolume
+using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, getoption
@@ -100,6 +101,15 @@ function EosFitting.preset(step, template, args...)
     @set! template.control.disk_io = "high"
     @set! template.control.calculation =
         calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.outdir = join(
+        [
+            template.control.prefix,
+            template.control.calculation,
+            string(now()),
+            string(rand(UInt)),
+        ],
+        "_",
+    )
     return template
 end
 
