@@ -62,25 +62,6 @@ ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     callback::Function,
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-)
-    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        step(callback, template, pressure, trial_eos, args...; kwargs...)
-    end
-end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(first, templates, pressures, trial_eos, args...; kwargs...)
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    callback::Function,
     template::Input,
     pressure,
     trial_eos::EquationOfState,
@@ -105,6 +86,25 @@ end
     args...;
     kwargs...,
 ) = step(first, template, pressure, trial_eos, args...; kwargs...)
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    callback::Function,
+    templates,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+)
+    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
+        step(callback, template, pressure, trial_eos, args...; kwargs...)
+    end
+end
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    templates,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+) = step(first, templates, pressures, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     inputs,
     templates,
