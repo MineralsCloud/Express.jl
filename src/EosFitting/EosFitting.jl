@@ -85,7 +85,7 @@ end
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) = step(first, template, pressure, trial_eos, args...; kwargs...)
+) = step(preset, template, pressure, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     f::Function,
     templates,
@@ -104,7 +104,7 @@ end
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) = step(first, templates, pressures, trial_eos, args...; kwargs...)
+) = step(preset, templates, pressures, trial_eos, args...; kwargs...)
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     f::Function,
     template::Input,
@@ -156,7 +156,7 @@ function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractSt
     inputs = settings.dirs .* "/vc-relax.in"
     new_eos = SelfConsistentField(ANALYSE_OUTPUT)(path, settings.trial_eos)
     return step(inputs, settings.template, settings.pressures, new_eos)
-end # function preprocess
+end
 
 function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false) where {T}
     # `map` guarantees they are of the same size, no need to check.
@@ -259,6 +259,8 @@ end
 function _check_software_settings end
 
 function _set_press_vol end
+
+function preset end
 
 function getpotentials end
 
