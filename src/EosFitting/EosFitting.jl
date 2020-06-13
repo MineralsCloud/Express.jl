@@ -59,22 +59,46 @@ function set_press_vol(
 end # function set_press_vol
 
 function (step::Step{T,Prepare{:input}})(
-    template::Input,
+    callback,
+    templates,
     pressures,
-    trial_eos::EquationOfState;
+    trial_eos::EquationOfState,
+    args...;
     kwargs...,
 ) where {T}
-    return step(fill(template, size(pressures)), pressures, trial_eos; kwargs...)
+    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
+        template = callback(template, pressures, trial_eos, args...; kwargs...)
+        set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
+    end
+end
+function (step::Step{T,Prepare{:input}})(
+    templates,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+) where {T}
+    return step(first, templates, pressures, trial_eos, args...; kwargs...)
+end
+function (step::Step{T,Prepare{:input}})(
+    template::Input,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    kwargs...,
+) where {T}
+    return step(first, template, pressures, trial_eos, args...; kwargs...)
 end
 function (step::Step{T,Prepare{:input}})(
     callback,
     template::Input,
     pressures,
-    trial_eos::EquationOfState;
+    trial_eos::EquationOfState,
+    args...;
     kwargs...,
 ) where {T}
-    template = callback(template, pressures, trial_eos; kwargs...)
-    return step(template, pressures, trial_eos; kwargs...)
+    template = callback(template, pressures, trial_eos, args...; kwargs...)
+    return step(fill(template, size(pressures)), pressures, trial_eos; kwargs...)
 end
 function (step::Step{T,Prepare{:input}})(
     templates,
@@ -84,18 +108,6 @@ function (step::Step{T,Prepare{:input}})(
 ) where {T}
     alert_pressures(pressures)
     return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
-    end
-end
-function (step::Step{T,Prepare{:input}})(
-    callback,
-    templates,
-    pressures,
-    trial_eos::EquationOfState;
-    kwargs...,
-) where {T}
-    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        template = callback(template, pressures, trial_eos; kwargs...)
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
 end
