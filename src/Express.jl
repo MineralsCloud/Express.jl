@@ -1,5 +1,6 @@
 module Express
 
+using AbInitioSoftwareBase: load
 using Unitful
 using UnitfulAtomic
 
@@ -49,8 +50,6 @@ struct Workflow{T} end
 struct Software{T} end
 
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
-
-function inputstring end
 
 function _check_settings end
 
