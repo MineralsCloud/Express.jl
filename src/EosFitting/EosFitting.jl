@@ -29,7 +29,6 @@ using ..Express:
     LAUNCH_JOB,
     ANALYSE_OUTPUT,
     load_settings,
-    inputstring,
     calculationtype,
     actiontype
 using ..Jobs: nprocs_task, launchjob

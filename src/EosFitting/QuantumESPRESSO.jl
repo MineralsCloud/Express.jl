@@ -124,6 +124,4 @@ function (::EosFitting.Step{VariableCellOptimization,Analyse{:output}})(s::Abstr
         parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end
 
-Express.inputstring(object::PWInput) = inputstring(object)
-
 end # module QuantumESPRESSO
