@@ -11,6 +11,7 @@ julia>
 """
 module EosFitting
 
+using AbInitioSoftwareBase.Inputs: Input, inputstring
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
@@ -58,26 +59,34 @@ function set_press_vol(
 end # function set_press_vol
 
 function (step::Step{T,Prepare{:input}})(
-    template,
+    template::Input,
     pressures,
     trial_eos::EquationOfState;
     kwargs...,
 ) where {T}
     template = step(template)  # To be extended
+    return step(fill(template, size(pressures)), pressures, trial_eos; kwargs...)
+end
+function (step::Step{T,Prepare{:input}})(
+    templates,
+    pressures,
+    trial_eos::EquationOfState;
+    kwargs...,
+) where {T}
     alert_pressures(pressures)
-    return map(pressures) do pressure  # `map` will check size mismatch
+    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
         set_press_vol(template, pressure, trial_eos; kwargs...)  # Create a new `object` from `template`, with its `alat` and `pressure` changed
     end
 end
 function (step::Step{T,Prepare{:input}})(
     inputs,
-    template,
+    templates,
     pressures,
     trial_eos::EquationOfState;
     dry_run = false,
     kwargs...,
 ) where {T}
-    objects = step(template, pressures, trial_eos; kwargs...)
+    objects = step(templates, pressures, trial_eos; kwargs...)
     map(inputs, objects) do input, object  # `map` will check size mismatch
         if dry_run
             if isfile(input)
