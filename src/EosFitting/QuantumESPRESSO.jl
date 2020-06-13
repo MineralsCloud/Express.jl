@@ -101,7 +101,7 @@ end
 function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
     return parse(Preamble, s).omega => parse_electrons_energies(s, :converged).ε[end]  # volume, energy
 end
-function (::EosFitting.Step{SelfConsistentField,Analyse{:output}})(s::AbstractString)
+function (::EosFitting.Step{VariableCellOptimization,Analyse{:output}})(s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
