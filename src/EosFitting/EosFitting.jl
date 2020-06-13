@@ -30,7 +30,6 @@ using ..Express:
     load_settings,
     inputstring
 using ..Jobs: nprocs_task, launchjob
-using ..Environments: DockerEnvironment, LocalEnvironment, CalculationEnvironment
 using ..CLI: mpicmd
 
 import ..Express
@@ -181,15 +180,15 @@ function Express._check_settings(settings)
     end
 end # function _check_settings
 
-_generate_cmds(n, input, output, env::DockerEnvironment) = join(
-    [
-        "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
-        string('"', pwcmd(bin = env.bin).exec..., '"'),
-        "-inp \"$input\"'",
-    ],
-    " ",
-)
-_generate_cmds(n, input, output, env::LocalEnvironment) =
+# _generate_cmds(n, input, output, env::DockerEnvironment) = join(
+#     [
+#         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
+#         string('"', pwcmd(bin = env.bin).exec..., '"'),
+#         "-inp \"$input\"'",
+#     ],
+#     " ",
+# )
+_generate_cmds(n, input, output, env) =
     pipeline(mpicmd(n, pwcmd(bin = env.bin)), stdin = input, stdout = output)
 
 function alert_pressures(pressures)
