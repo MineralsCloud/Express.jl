@@ -61,7 +61,7 @@ end # function set_press_vol
 ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    callback::Function,
+    f::Function,
     template::Input,
     pressure,
     trial_eos::EquationOfState,
@@ -70,7 +70,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     maxscale = 1.3,
     kwargs...,
 )
-    template = callback(template, pressure, trial_eos, args...; kwargs...)
+    template = f(template, pressure, trial_eos, args...; kwargs...)
     return set_press_vol(
         template,
         pressure,
@@ -87,7 +87,7 @@ end
     kwargs...,
 ) = step(first, template, pressure, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    callback::Function,
+    f::Function,
     templates::Union{AbstractArray,Tuple},
     pressures,
     trial_eos::EquationOfState,
@@ -95,7 +95,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     kwargs...,
 )
     return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        step(callback, template, pressure, trial_eos, args...; kwargs...)
+        step(f, template, pressure, trial_eos, args...; kwargs...)
     end
 end
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
@@ -106,20 +106,13 @@ end
     kwargs...,
 ) = step(first, templates, pressures, trial_eos, args...; kwargs...)
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    callback::Function,
+    f::Function,
     template::Input,
     pressures,
     trial_eos::EquationOfState,
     args...;
     kwargs...,
-) = step(
-    callback,
-    fill(template, size(pressures)),
-    pressures,
-    trial_eos,
-    args...;
-    kwargs...,
-)
+) = step(f, fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
 (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     template::Input,
     pressures,
@@ -179,7 +172,8 @@ function (::Step{T,Launch{:job}})(outputs, inputs, environment; dry_run = false)
 end
 function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     settings = load_settings(path)
-    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
+    inputs =
+        @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, inputs, settings.environment)
 end
