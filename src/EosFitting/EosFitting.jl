@@ -209,6 +209,9 @@ function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
         str = read(output, String)
         analyse(step, str)  # volume => energy
     end
+    if length(outputs) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
+    end
     return lsqfit(trial_eos(Energy()), first.(results), last.(results))
 end # function postprocess
 function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
@@ -272,8 +275,8 @@ _generate_cmds(n, input, output, bin) =
     pipeline(mpicmd(n, pwcmd(bin = bin)), stdin = input, stdout = output)
 
 function alert_pressures(pressures)
-    if length(pressures) <= 6
-        @info "pressures <= 6 may give unreliable results, consider more if possible!"
+    if length(pressures) <= 5
+        @info "pressures <= 5 may give unreliable results, consider more if possible!"
     end
     if minimum(pressures) >= zero(eltype(pressures))
         @warn "for better fitting, we need at least 1 negative pressure!"
