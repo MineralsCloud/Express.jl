@@ -49,12 +49,6 @@ export Step,
     calculationtype,
     actiontype
 
-mutable struct WorkingFiles
-    pending
-    running
-    finished
-end
-
 function set_press_vol(
     template,
     pressure,
