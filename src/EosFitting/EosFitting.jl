@@ -67,7 +67,7 @@ function set_press_vol(
     return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
-ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
+const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     f::Function,
