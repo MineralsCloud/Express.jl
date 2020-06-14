@@ -13,19 +13,23 @@ module Phonon
 
 using ConstructionBase: setproperties
 using Kaleido: @batchlens
-using QuantumESPRESSO.Inputs: InputFile, optconvert, qestring
-using QuantumESPRESSO.Inputs.PWscf: AtomicPositionsCard, CellParametersCard, PWInput
-# using QuantumESPRESSO.Inputs.PHonon: SpecialQPoint, QPointsSpecsCard
+using QuantumESPRESSO.Inputs: InputFile, qestring
+using QuantumESPRESSO.Inputs.PWscf:
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs: OutputFile
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
-using QuantumESPRESSO.Setters: CellParametersSetter, batchset
+using QuantumESPRESSO.Setters: CellParametersSetter, VerbositySetter
 using Setfield: get, set, @lens, @set!
 
-import ..Step
-using ..BandStructure: generate_path
+using ..Express: Calculation, SelfConsistentField, PREPARE_INPUT, LAUNCH_JOB, ANALYSE_OUTPUT
 
 export update_structure, relay, preprocess
+
+struct DensityFunctionalPertubation{T} <: Calculation{T} end
+struct ReciprocalToReal{T} <: Calculation{T} end
+struct PhononDensityOfStates{T} <: Calculation{T} end
+struct PhononDispersion{T} <: Calculation{T} end
 
 """
     update_structure(output::AbstractString, template::PWInput)
@@ -34,22 +38,21 @@ Read structure information from `output`, and update related fields of `template
 """
 function update_structure(output::AbstractString, template::PWInput)
     str = read(OutputFile(output))
+    cell = parsefinal(CellParametersCard{Float64}, str)
     return setproperties(
         template,
-        system = setproperties(template.system, ibrav = 0, celldm = [1]),
         atomic_positions = parsefinal(AtomicPositionsCard, str),
-        cell_parameters = CellParametersCard(
-            "alat",
-            optconvert("bohr", parsefinal(CellParametersCard, str)).data,
-        ), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
+        cell_parameters = CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
     )
 end # function update_structure
 
 # This is a helper function and should not be exported.
 function _preset(template::PWInput)
-    @set! template.control = batchset(VerbositySetter(:high), template.control)
+    @set! template.control = set(template.control, VerbositySetter(:high))
     @set! template.control.calculation = "scf"
-    return batchset(CellParametersSetter(), template)
+    template = set(template, CellParametersSetter())
+    @set! template.system.ibrav = 0
+    return template
 end # function _preset
 function _preset(template::PhInput)
     lenses = @batchlens(begin
@@ -128,78 +131,48 @@ Prepare input files of the first step of a phonon calculation.
    they will be automatically created.
 - `outputs::AbstractVector{<:AbstractString}`: The output files of Quantum ESPRESSO of a vc-relax calculation.
 - `template::PWInput`:
-- `verbose::Bool = false`: control the format of input files, verbose or not.
 """
-function preprocess(
-    ::Step{1},
-    inputs::AbstractVector{<:AbstractString},
-    outputs::AbstractVector{<:AbstractString},
-    template::PWInput,
-    verbose::Bool = false,
-)
-    # Check parameters
-    @assert(
-        length(inputs) == length(outputs),
-        "The inputs, outputs must be the same length!"
-    )
+function (::SelfConsistentField{PREPARE_INPUT})(scf_inputs, vc_outputs, template::PWInput)
     template = _preset(template)
-    for (input, output) in zip(inputs, outputs)
+    map(scf_inputs, vc_outputs) do input, output
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
         object = update_structure(output, template)
         write(InputFile(input), object)
+        object
     end
-    return
 end # function preprocess
 function preprocess(
-    ::Step{2},
-    phonon_inputs::AbstractVector{<:AbstractString},
-    pwscf_inputs::AbstractVector{<:AbstractString},
+    ::DensityFunctionalPertubation{PREPARE_INPUT},
+    phonon_inputs,
+    pwscf_inputs,
     template::PhInput,
-    verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(phonon_inputs) == length(pwscf_inputs),
-        "The PWscf and the PHonon inputs files must have the same length!",
-    )
     template = _preset(template)
-    for (phonon_input, pwscf_input) in zip(phonon_inputs, pwscf_inputs)
+    map(phonon_inputs, pwscf_inputs) do phonon_input, pwscf_input
         object = parse(PWInput, read(InputFile(pwscf_input)))
         write(InputFile(phonon_input), relay(object, template))
     end
     return
 end # function preprocess
 function preprocess(
-    ::Step{3},
-    q2r_inputs::AbstractVector{<:AbstractString},
-    phonon_inputs::AbstractVector{<:AbstractString},
+    ::ReciprocalToReal{PREPARE_INPUT},
+    q2r_inputs,
+    phonon_inputs,
     template::Q2rInput,
-    verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(q2r_inputs) == length(phonon_inputs),
-        "The phonon and the q2r inputs files must have the same length!",
-    )
-    for (q2r_input, phonon_input) in zip(q2r_inputs, phonon_inputs)
+    map(q2r_inputs, phonon_inputs) do q2r_input, phonon_input
         object = parse(PhInput, read(InputFile(phonon_input)))
         write(InputFile(q2r_input), relay(object, template))
     end
     return
 end # function preprocess
 function preprocess(
-    ::Step{4},
-    matdyn_inputs::AbstractVector{<:AbstractString},
-    q2r_inputs::AbstractVector{<:AbstractString},
+    ::PhononDispersion{PREPARE_INPUT},
+    matdyn_inputs,
+    q2r_inputs,
     template::MatdynInput,
-    verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(matdyn_inputs) == length(q2r_inputs),
-        "The q2r and the matdyn inputs files must have the same length!",
-    )
-    for (matdyn_input, q2r_input) in zip(matdyn_inputs, q2r_inputs)
+    map(matdyn_inputs, q2r_inputs) do matdyn_input, q2r_input
         object = parse(Q2rInput, read(InputFile(q2r_input)))
         template = relay(object, template)
         if isfile(template.input.flfrq)
@@ -214,18 +187,12 @@ function preprocess(
     return
 end # function preprocess
 function preprocess(
-    ::Step{5},
-    dynmat_inputs::AbstractVector{<:AbstractString},
-    phonon_inputs::AbstractVector{<:AbstractString},
+    ::PhononDispersion{PREPARE_INPUT},
+    dynmat_inputs,
+    phonon_inputs,
     template::DynmatInput,
-    verbose::Bool = false,
 )
-    # Check parameters
-    @assert(
-        length(dynmat_inputs) == length(phonon_inputs),
-        "The dynmat and the phonon inputs files must have the same length!",
-    )
-    for (dynmat_input, phonon_input) in zip(dynmat_inputs, phonon_inputs)
+    map(dynmat_inputs, phonon_inputs) do dynmat_input, phonon_input
         object = parse(PhInput, read(InputFile(phonon_input)))
         write(InputFile(dynmat_input), relay(object, template))
     end
@@ -233,6 +200,5 @@ function preprocess(
 end # function preprocess
 
 #???
-
 
 end
