@@ -130,14 +130,16 @@ end
     kwargs...,
 ) = step(fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    f::Function,
     inputs,
     templates,
     pressures,
-    trial_eos::EquationOfState;
+    trial_eos::EquationOfState,
+    args...;
     dry_run = false,
     kwargs...,
 )
-    objects = step(templates, pressures, trial_eos; kwargs...)
+    objects = step(f, templates, pressures, trial_eos, args...; kwargs...)
     map(inputs, objects) do input, object  # `map` will check size mismatch
         if dry_run
             if isfile(input)
@@ -155,6 +157,15 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     end
     return
 end
+(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    inputs,
+    templates,
+    pressures,
+    trial_eos::EquationOfState,
+    args...;
+    dry_run = false,
+    kwargs...,
+) = step(preset, inputs, templates, pressures, trial_eos, args...; kwargs...)
 function (step::Step{SelfConsistentField,Prepare{:input}})(path::AbstractString)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
