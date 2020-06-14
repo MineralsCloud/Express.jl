@@ -204,23 +204,22 @@ function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     return step(outputs, inputs, settings.manager.np, settings.bin)
 end
 
-function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
+function (step::Step{T,Analyse{:output}})(outputs, trial_eos::EquationOfState) where {T}
     results = map(outputs) do output
-        str = read(output, String)
-        analyse(step, str)  # volume => energy
+        analyse(step, read(output, String))  # volume => energy
     end
     if length(outputs) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
     return lsqfit(trial_eos(Energy()), first.(results), last.(results))
 end # function postprocess
-function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
+function (step::Step{SelfConsistentField,Analyse{:output}})(path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, settings.trial_eos)
 end
-function (step::Step{VariableCellOptimization,Analyse{:output}})(path::AbstractString)
+function (step::Step{VariableCellOptimization,Analyse{:output}})(path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
