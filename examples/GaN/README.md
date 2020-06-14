@@ -6,25 +6,16 @@ Install [Docker Desktop](https://docs.docker.com/docker-for-mac/install/), start
 Start your Julia terminal, run
 
 ```julia
-julia> using Pkg
-
-julia> pkg"add https://github.com/MineralsCloud/Pseudopotentials.jl.git"
-
-julia> pkg"add https://github.com/singularitti/LibSymspg.jl.git"
-
-julia> pkg"add https://github.com/MineralsCloud/Crystallography.jl.git"
-
-julia> pkg"add https://github.com/singularitti/DockerPy.jl.git"
-
-julia> pkg"add https://github.com/singularitti/PyFortran90Namelists.jl.git"
-
-julia> pkg"add https://github.com/MineralsCloud/QuantumESPRESSOBase.jl.git"
-
-julia> pkg"add https://github.com/MineralsCloud/QuantumESPRESSOParsers.jl.git"
-
-julia> pkg"add https://github.com/MineralsCloud/QuantumESPRESSO.jl.git"
-
-julia> pkg"dev https://github.com/MineralsCloud/Express.jl.git"
+using Pkg
+pkg"add git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
+pkg"add git@github.com:MineralsCloud/Pseudopotentials.jl.git"
+pkg"add git@github.com:MineralsCloud/Crystallography.jl.git"
+pkg"add git@github.com:singularitti/DockerPy.jl.git"
+pkg"add git@github.com:singularitti/PyFortran90Namelists.jl.git"
+pkg"add git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
+pkg"add git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
+pkg"add git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
+pkg"dev git@github.com:MineralsCloud/Express.jl.git"
 ```
 
 After the last command, this repo will be cloned to `DEPOT_PATH`. On a *nix system, it is
