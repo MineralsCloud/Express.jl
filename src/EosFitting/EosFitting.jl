@@ -166,16 +166,22 @@ end
     dry_run = false,
     kwargs...,
 ) = step(preset, inputs, templates, pressures, trial_eos, args...; kwargs...)
-function (step::Step{SelfConsistentField,Prepare{:input}})(path::AbstractString)
+function (step::Step{SelfConsistentField,Prepare{:input}})(path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
-    return step(inputs, settings.template, settings.pressures, settings.trial_eos)
-end # function preprocess
-function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractString)
+    return step(
+        inputs,
+        settings.template,
+        settings.pressures,
+        settings.trial_eos;
+        kwargs...,
+    )
+end
+function (step::Step{VariableCellOptimization,Prepare{:input}})(path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
     new_eos = SelfConsistentField()(ANALYSE_OUTPUT)(path)
-    return step(inputs, settings.template, settings.pressures, new_eos)
+    return step(inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
 function (::Step{T,Launch{:job}})(outputs, inputs, n, bin; dry_run = false) where {T}
