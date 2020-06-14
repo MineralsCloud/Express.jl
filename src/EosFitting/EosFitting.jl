@@ -49,12 +49,6 @@ export Step,
     calculationtype,
     actiontype
 
-mutable struct WorkingFiles
-    pending
-    running
-    finished
-end
-
 function set_press_vol(
     template,
     pressure,
@@ -166,16 +160,22 @@ end
     dry_run = false,
     kwargs...,
 ) = step(preset, inputs, templates, pressures, trial_eos, args...; kwargs...)
-function (step::Step{SelfConsistentField,Prepare{:input}})(path::AbstractString)
+function (step::Step{SelfConsistentField,Prepare{:input}})(path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
-    return step(inputs, settings.template, settings.pressures, settings.trial_eos)
-end # function preprocess
-function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractString)
+    return step(
+        inputs,
+        settings.template,
+        settings.pressures,
+        settings.trial_eos;
+        kwargs...,
+    )
+end
+function (step::Step{VariableCellOptimization,Prepare{:input}})(path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
     new_eos = SelfConsistentField()(ANALYSE_OUTPUT)(path)
-    return step(inputs, settings.template, settings.pressures, new_eos)
+    return step(inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
 function (::Step{T,Launch{:job}})(outputs, inputs, n, bin; dry_run = false) where {T}
@@ -198,20 +198,22 @@ function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     return step(outputs, inputs, settings.manager.np, settings.bin)
 end
 
-function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
+function (step::Step{T,Analyse{:output}})(outputs, trial_eos::EquationOfState) where {T}
     results = map(outputs) do output
-        str = read(output, String)
-        analyse(step, str)  # volume => energy
+        analyse(step, read(output, String))  # volume => energy
+    end
+    if length(outputs) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
     return lsqfit(trial_eos(Energy()), first.(results), last.(results))
 end # function postprocess
-function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
+function (step::Step{SelfConsistentField,Analyse{:output}})(path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return step(outputs, settings.trial_eos)
 end
-function (step::Step{VariableCellOptimization,Analyse{:output}})(path::AbstractString)
+function (step::Step{VariableCellOptimization,Analyse{:output}})(path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
@@ -266,8 +268,8 @@ _generate_cmds(n, input, output, bin) =
     pipeline(mpicmd(n, pwcmd(bin = bin)), stdin = input, stdout = output)
 
 function alert_pressures(pressures)
-    if length(pressures) <= 6
-        @info "pressures <= 6 may give unreliable results, consider more if possible!"
+    if length(pressures) <= 5
+        @info "pressures <= 5 may give unreliable results, consider more if possible!"
     end
     if minimum(pressures) >= zero(eltype(pressures))
         @warn "for better fitting, we need at least 1 negative pressure!"

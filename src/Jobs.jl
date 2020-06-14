@@ -3,13 +3,19 @@ module Jobs
 using Distributed
 using DockerPy.Containers
 
-export JobStatus
-export nprocs_task, launchjob, isjobdone, jobresult, jobstatus
+export nprocs_task, launchjob, update!
 
-@enum JobStatus begin
-    RUNNING
-    SUCCEEDED
-    FAILED
+struct JobTracker
+    running
+    succeeded
+    failed
+    n::Int
+    JobTracker(running, succeeded, failed) = new(
+        running,
+        succeeded,
+        failed,
+        length(running) + length(succeeded) + length(failed),
+    )
 end
 
 function nprocs_task(total_num, nsubjob)
@@ -20,11 +26,12 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function launchjob(cmds)
-    return map(cmds) do cmd
-        sleep(5)
+function launchjob(cmds; sleepfor = 5)
+    tasks = map(cmds) do cmd
+        sleep(sleepfor)
         @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
+    return JobTracker(pairs(tasks), [], [])
 end # function launchjob
 # function launchjob(cmds, environment::DockerEnvironment)
 #     return map(cmds) do cmd
@@ -32,34 +39,24 @@ end # function launchjob
 #     end
 # end # function launchjob
 
-function notifyme(job)
-    result = fetch(job)
-    println("job is finished!")
-    return result
-end # function notifyme
-
-isjobdone(job::Future) = isready(job)
-isjobdone(bag) = map(isjobdone, bag)
-
-function jobstatus(job::Future)
-    id, result = jobresult(job)
-    return result === nothing ? RUNNING : success(result) ? SUCCEEDED : FAILED
-end # function jobstatus
-jobstatus(bag) = map(jobstatus, bag)
-
-function jobresult(job::Future)
-    id = job.where
-    if isready(job)
-        try
-            result = fetch(job)
-        catch e
-            result = e
+function update!(x::JobTracker)
+    @assert isvalid(x)
+    for (i, task) in enumerate(x.running)
+        if isready(task)
+            try
+                result = fetch(task)
+                push!(x.succeeded, i => result)
+            catch e
+                push!(x.failed, i => e)
+            finally
+                deleteat!(x.running, i)
+            end
         end
-    else
-        result = nothing
     end
-    return id => result
-end # function jobresult
-jobresult(bag) = map(jobresult, bag)
+    return x
+end # function update!
+
+Base.isvalid(x::JobTracker) =
+    x.n == length(x.running) + length(x.succeeded) + length(x.failed)
 
 end
