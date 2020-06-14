@@ -3,13 +3,19 @@ module Jobs
 using Distributed
 using DockerPy.Containers
 
-export JobStatus
-export nprocs_task, launchjob, isjobdone, jobresult, jobstatus
+export nprocs_task, launchjob, update!
 
-@enum JobStatus begin
-    RUNNING
-    SUCCEEDED
-    FAILED
+struct JobTracker
+    running
+    succeeded
+    failed
+    n::Int
+    JobTracker(running, succeeded, failed) = new(
+        running,
+        succeeded,
+        failed,
+        length(running) + length(succeeded) + length(failed),
+    )
 end
 
 function nprocs_task(total_num, nsubjob)
