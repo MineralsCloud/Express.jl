@@ -41,7 +41,7 @@ end # function launchjob
 
 function update!(x::JobTracker)
     @assert isvalid(x)
-    for (i, task) in enumerate(x.running)
+    for (i, task) in x.running
         if isready(task)
             try
                 result = fetch(task)
