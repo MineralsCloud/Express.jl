@@ -2,6 +2,17 @@ module CLI
 
 export mpicmd
 
+struct MpiCmd
+    n::Int
+    bin
+    host
+    arch
+    wdir
+    path
+    file
+    configfile
+    env
+end
 function mpicmd(
     n,
     cmd;
