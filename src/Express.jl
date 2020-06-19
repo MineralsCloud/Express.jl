@@ -45,8 +45,6 @@ calculationtype(s::Step) = calculationtype(typeof(s))  # No instance, `S` could 
 actiontype(::Type{Step{S,T}}) where {S,T} = T
 actiontype(s::Step) = actiontype(typeof(s))
 
-struct Workflow{T} end
-
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 function _check_settings end
