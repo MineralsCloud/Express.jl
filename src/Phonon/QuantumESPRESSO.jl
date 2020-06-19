@@ -9,16 +9,14 @@ using Setfield: @set!
 
 import Express.Phonon: set_structure, preset
 
-function set_structure(output::AbstractString, template::PWInput)
-    str = open(output, "r") do io
-        read(output, String)
-    end
-    cell = parsefinal(CellParametersCard{Float64}, str)
-    return setproperties(
-        template,
-        atomic_positions = parsefinal(AtomicPositionsCard, str),
-        cell_parameters = CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
-    )
+function set_structure(
+    template::PWInput,
+    cell_parameters::CellParametersCard,
+    atomic_positions::Union{Nothing,AtomicPositionsCard} = nothing,
+)
+    @set! template.atomic_positions = atomic_positions
+    @set! template.cell_parameters = cell_parameters
+    return template
 end # function set_structure
 
 # This is a helper function and should not be exported.
@@ -87,5 +85,17 @@ function relay(ph::PhInput, dynmat::DynmatInput)
     @set! dynmat.input.amass = ph.inputph.amass
     return dynmat
 end # function relay
+
+function (::Step{SelfConsistentField,PREPARE_INPUT})(vc_output, template::PWInput)
+    str = open(vc_output, "r") do io
+        read(vc_output, String)
+    end
+    cell = parsefinal(CellParametersCard{Float64}, str)
+    cell_parameters =
+        CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
+        atomic_positions = tryparsefinal(AtomicPositionsCard, str)
+    set_structure(template, cell_parameters, atomic_positions)
+    return preset(template)
+end
 
 end
