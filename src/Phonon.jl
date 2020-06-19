@@ -52,6 +52,7 @@ function preset(template::PWInput)
 end # function preset
 function preset(template::PhInput)
     @set! template.inputph.verbosity = "high"
+    return template
 end # function preset
 
 """
@@ -89,6 +90,7 @@ in a matdyn calculation.
 function relay(q2r::Q2rInput, matdyn::MatdynInput)
     @set! matdyn.input.flfrc = q2r.input.flfrc
     @set! matdyn.input.loto_2d = q2r.input.loto_2d
+    return matdyn
 end # function relay
 """
     relay(from::PhInput, to::DynmatInput)
