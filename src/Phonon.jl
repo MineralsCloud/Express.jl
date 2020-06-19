@@ -24,7 +24,7 @@ using Setfield: get, set, @lens, @set!
 
 using ..Express: Calculation, SelfConsistentField, PREPARE_INPUT, LAUNCH_JOB, ANALYSE_OUTPUT
 
-export update_structure, relay, preprocess
+export set_structure, relay, preprocess
 
 struct DensityFunctionalPertubation{T} <: Calculation{T} end
 struct ReciprocalToReal{T} <: Calculation{T} end
@@ -32,11 +32,11 @@ struct PhononDensityOfStates{T} <: Calculation{T} end
 struct PhononDispersion{T} <: Calculation{T} end
 
 """
-    update_structure(output::AbstractString, template::PWInput)
+    set_structure(output::AbstractString, template::PWInput)
 
 Read structure information from `output`, and update related fields of `template`.
 """
-function update_structure(output::AbstractString, template::PWInput)
+function set_structure(output::AbstractString, template::PWInput)
     str = read(OutputFile(output))
     cell = parsefinal(CellParametersCard{Float64}, str)
     return setproperties(
@@ -44,23 +44,23 @@ function update_structure(output::AbstractString, template::PWInput)
         atomic_positions = parsefinal(AtomicPositionsCard, str),
         cell_parameters = CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
     )
-end # function update_structure
+end # function set_structure
 
 # This is a helper function and should not be exported.
-function _preset(template::PWInput)
+function preset(template::PWInput)
     @set! template.control = set(template.control, VerbositySetter(:high))
     @set! template.control.calculation = "scf"
     template = set(template, CellParametersSetter())
     @set! template.system.ibrav = 0
     return template
-end # function _preset
-function _preset(template::PhInput)
+end # function preset
+function preset(template::PhInput)
     lenses = @batchlens(begin
         _.inputph.verbosity  # Get the `template`'s `phonon.calculation` value
     end)
     # Set the `template`'s values with...
     template = set(template, lenses, ("high",))
-end # function _preset
+end # function preset
 
 """
     relay(from::PWInput, to::PhInput)
@@ -133,10 +133,10 @@ Prepare input files of the first step of a phonon calculation.
 - `template::PWInput`:
 """
 function (::SelfConsistentField{PREPARE_INPUT})(scf_inputs, vc_outputs, template::PWInput)
-    template = _preset(template)
+    template = preset(template)
     map(scf_inputs, vc_outputs) do input, output
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
-        object = update_structure(output, template)
+        object = set_structure(output, template)
         write(InputFile(input), object)
         object
     end
@@ -147,7 +147,7 @@ function preprocess(
     pwscf_inputs,
     template::PhInput,
 )
-    template = _preset(template)
+    template = preset(template)
     map(phonon_inputs, pwscf_inputs) do phonon_input, pwscf_input
         object = parse(PWInput, read(InputFile(pwscf_input)))
         write(InputFile(phonon_input), relay(object, template))
