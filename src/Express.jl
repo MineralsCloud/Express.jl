@@ -18,6 +18,12 @@ struct VariableCellOptimization <: Optimization end
 abstract type Dynamics <: Calculation end
 struct MolecularDynamics <: Dynamics end
 struct VariableCellMolecularDynamics <: Dynamics end
+abstract type PhononCalculation <: Calculation end
+struct DfptMethod <: PhononCalculation end
+struct SmallDisplacementMethod <: PhononCalculation end
+struct ForceConstant <: PhononCalculation end
+struct PhononDispersion <: PhononCalculation end
+struct PhononDensityOfStates <: PhononCalculation end
 
 abstract type Action end
 struct Prepare{T} <: Action end
