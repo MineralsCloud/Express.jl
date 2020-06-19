@@ -18,12 +18,6 @@ struct VariableCellOptimization <: Optimization end
 abstract type Dynamics <: Calculation end
 struct MolecularDynamics <: Dynamics end
 struct VariableCellMolecularDynamics <: Dynamics end
-Base.show(io::IO, ::SelfConsistentField) = print(io, "scf calculation")
-Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf calculation")
-Base.show(io::IO, ::StructuralOptimization) = print(io, "relax calculation")
-Base.show(io::IO, ::VariableCellOptimization) = print(io, "vc-relax calculation")
-Base.show(io::IO, ::MolecularDynamics) = print(io, "md calculation")
-Base.show(io::IO, ::VariableCellMolecularDynamics) = print(io, "vc-md calculation")
 
 abstract type Action end
 struct Prepare{T} <: Action end
@@ -33,9 +27,6 @@ const PREPARE_POTENTIAL = Prepare{:potential}()
 const PREPARE_INPUT = Prepare{:input}()
 const LAUNCH_JOB = Launch{:job}()
 const ANALYSE_OUTPUT = Analyse{:output}()
-Base.show(io::IO, ::Prepare{T}) where {T} = print(io, "prepare " * lowercase(string(T)))
-Base.show(io::IO, ::Launch{T}) where {T} = print(io, "launch " * lowercase(string(T)))
-Base.show(io::IO, ::Analyse{T}) where {T} = print(io, "analyse " * lowercase(string(T)))
 
 struct Step{S<:Calculation,T<:Action} end
 Step(c::Calculation, a::Action) = Step{typeof(c),typeof(a)}()
@@ -61,6 +52,16 @@ function load_settings(path)
     _check_settings(settings)  # Errors will be thrown if exist
     return Settings(settings)
 end # function load_settings
+
+Base.show(io::IO, ::SelfConsistentField) = print(io, "scf calculation")
+Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf calculation")
+Base.show(io::IO, ::StructuralOptimization) = print(io, "relax calculation")
+Base.show(io::IO, ::VariableCellOptimization) = print(io, "vc-relax calculation")
+Base.show(io::IO, ::MolecularDynamics) = print(io, "md calculation")
+Base.show(io::IO, ::VariableCellMolecularDynamics) = print(io, "vc-md calculation")
+Base.show(io::IO, ::Prepare{T}) where {T} = print(io, "prepare " * lowercase(string(T)))
+Base.show(io::IO, ::Launch{T}) where {T} = print(io, "launch " * lowercase(string(T)))
+Base.show(io::IO, ::Analyse{T}) where {T} = print(io, "analyse " * lowercase(string(T)))
 
 include("CLI.jl")
 include("Jobs.jl")
