@@ -24,6 +24,8 @@ using ...Express:
 import ...Express
 import ..EosFitting
 
+export safe_exit
+
 EosFitting.getpotentials(template::PWInput) =
     [x.pseudopot for x in template.atomic_species.data]
 
@@ -125,5 +127,7 @@ function EosFitting.analyse(step, s::AbstractString)
             parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
     end
 end
+
+safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
 end # module QuantumESPRESSO
