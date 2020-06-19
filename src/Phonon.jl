@@ -21,7 +21,14 @@ using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using QuantumESPRESSO.Setters: CellParametersSetter, VerbositySetter
 using Setfield: @set!
 
-using ..Express: Calculation, SelfConsistentField, PREPARE_INPUT, LAUNCH_JOB, ANALYSE_OUTPUT
+using ..Express:
+    Calculation,
+    SelfConsistentField,
+    DfptMethod,
+    ForceConstant,
+    PREPARE_INPUT,
+    LAUNCH_JOB,
+    ANALYSE_OUTPUT
 
 export set_structure, relay, preprocess
 
@@ -107,19 +114,11 @@ function relay(ph::PhInput, dynmat::DynmatInput)
     return dynmat
 end # function relay
 
-"""
-    preprocess(step::Step{1}, inputs, outputs, template[, verbose::Bool = false])
-
-Prepare input files of the first step of a phonon calculation.
-
-# Arguments
-- `step::Step{1}`: Denotes the first step of a phonon calculation.
-- `inputs::AbstractVector{<:AbstractString}`: The input files of Quantum ESPRESSO of a phonon calculation. If not exist,
-   they will be automatically created.
-- `outputs::AbstractVector{<:AbstractString}`: The output files of Quantum ESPRESSO of a vc-relax calculation.
-- `template::PWInput`:
-"""
-function (::SelfConsistentField{PREPARE_INPUT})(scf_inputs, vc_outputs, template::PWInput)
+function (::Step{SelfConsistentField,PREPARE_INPUT})(
+    scf_inputs,
+    vc_outputs,
+    template::PWInput,
+)
     template = preset(template)
     map(scf_inputs, vc_outputs) do input, output
         # Get a new `object` from the `template`, with its `alat` and `pressure` changed
@@ -127,9 +126,9 @@ function (::SelfConsistentField{PREPARE_INPUT})(scf_inputs, vc_outputs, template
         write(InputFile(input), object)
         object
     end
-end # function preprocess
+end
 function preprocess(
-    ::DensityFunctionalPertubation{PREPARE_INPUT},
+    ::Step{DfptMethod,PREPARE_INPUT},
     phonon_inputs,
     pwscf_inputs,
     template::PhInput,
@@ -140,9 +139,9 @@ function preprocess(
         write(InputFile(phonon_input), relay(object, template))
     end
     return
-end # function preprocess
+end
 function preprocess(
-    ::ReciprocalToReal{PREPARE_INPUT},
+    ::Step{ForceConstant,PREPARE_INPUT},
     q2r_inputs,
     phonon_inputs,
     template::Q2rInput,
@@ -154,7 +153,7 @@ function preprocess(
     return
 end # function preprocess
 function preprocess(
-    ::PhononDispersion{PREPARE_INPUT},
+    ::Step{PhononDispersion,PREPARE_INPUT},
     matdyn_inputs,
     q2r_inputs,
     template::MatdynInput,
@@ -172,9 +171,9 @@ function preprocess(
         write(InputFile(matdyn_input), template)
     end
     return
-end # function preprocess
+end
 function preprocess(
-    ::PhononDispersion{PREPARE_INPUT},
+    ::Step{PhononDispersion,PREPARE_INPUT},
     dynmat_inputs,
     phonon_inputs,
     template::DynmatInput,
@@ -184,7 +183,7 @@ function preprocess(
         write(InputFile(dynmat_input), relay(object, template))
     end
     return
-end # function preprocess
+end
 
 #???
 
