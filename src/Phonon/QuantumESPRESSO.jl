@@ -1,5 +1,6 @@
 module QuantumESPRESSO
 
+using Crystallography: Cell, eachatom
 using QuantumESPRESSO.Inputs: InputFile, inputstring
 using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert
@@ -16,6 +17,11 @@ function set_structure(
 )
     @set! template.atomic_positions = atomic_positions
     @set! template.cell_parameters = cell_parameters
+    return template
+end # function set_structure
+function set_structure(template::PWInput, cell::Cell)
+    @set! template.atomic_positions = AtomicPositionsCard([atom for atom in eachatom(cell)])
+    @set! template.cell_parameters = CellParametersCard(cell.lattice)
     return template
 end # function set_structure
 
