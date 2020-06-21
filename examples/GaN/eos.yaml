@@ -1,3 +1,4 @@
+workflow: eos
 qe:
   bin: pw.x
   manager: local

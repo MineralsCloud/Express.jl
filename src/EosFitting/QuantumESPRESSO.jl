@@ -5,7 +5,7 @@ using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, getoption
-using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert
+using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert, set_verbosity
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone
 using Setfield: @set!
@@ -23,6 +23,8 @@ using ...Express:
 
 import ...Express
 import ..EosFitting
+
+export safe_exit
 
 EosFitting.getpotentials(template::PWInput) =
     [x.pseudopot for x in template.atomic_species.data]
@@ -94,11 +96,7 @@ function Express.Settings(settings)
 end # function Settings
 
 function EosFitting.preset(step, template, args...)
-    @set! template.control.verbosity = "high"
-    @set! template.control.wf_collect = true
-    @set! template.control.tstress = true
-    @set! template.control.tprnfor = true
-    @set! template.control.disk_io = "high"
+    template = set_verbosity(template, "high")
     @set! template.control.calculation =
         calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
@@ -125,5 +123,7 @@ function EosFitting.analyse(step, s::AbstractString)
             parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
     end
 end
+
+safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
 end # module QuantumESPRESSO
