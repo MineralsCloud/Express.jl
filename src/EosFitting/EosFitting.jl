@@ -202,7 +202,7 @@ function (step::Step{T,Analyse{:output}})(outputs, trial_eos::EquationOfState) w
     results = map(outputs) do output
         analyse(step, read(output, String))  # volume => energy
     end
-    if length(outputs) <= 5
+    if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
     return lsqfit(trial_eos(Energy()), first.(results), last.(results))
