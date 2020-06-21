@@ -1,13 +1,19 @@
 module QuantumESPRESSO
 
-using Crystallography: cellvolume
+using Crystallography: Cell, eachatom
 using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, getoption
-using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert, set_verbosity
+using QuantumESPRESSO.Inputs.PWscf:
+    CellParametersCard,
+    AtomicPositionsCard,
+    PWInput,
+    optconvert,
+    set_verbosity,
+    set_structure
 using QuantumESPRESSO.Outputs.PWscf:
-    Preamble, parse_electrons_energies, parsefinal, isjobdone
+    Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr, Ry
@@ -119,11 +125,18 @@ function EosFitting.analyse(step, s::AbstractString)
         if !isjobdone(s)
             @warn "Job is not finished!"
         end
-        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) * bohr^3 =>
+        return cellvolume(parsefinal(CellParametersCard, s)) * bohr^3 =>
             parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
     end
 end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
+
+function EosFitting.parsecell(str::AbstractString)
+    return tryparsefinal(CellParametersCard, str),
+    tryparsefinal(AtomicPositionsCard, str)
+end
+
+EosFitting.set_structure(template::PWInput, c, a) = set_structure(template, c, a)
 
 end # module QuantumESPRESSO
