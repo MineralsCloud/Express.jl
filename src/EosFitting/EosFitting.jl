@@ -12,6 +12,7 @@ julia>
 module EosFitting
 
 using AbInitioSoftwareBase.Inputs: Input, inputstring
+using Crystallography: Cell
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
@@ -198,15 +199,35 @@ function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
     return step(outputs, inputs, settings.manager.np, settings.bin)
 end
 
-function (step::Step{T,Analyse{:output}})(outputs, trial_eos::EquationOfState) where {T}
+function (step::Step{<:ALLOWED_CALCULATIONS,Analyse{:output}})(
+    outputs,
+    trial_eos::EquationOfState,
+    fit_e::Bool = true,
+)
     results = map(outputs) do output
         analyse(step, read(output, String))  # volume => energy
     end
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return lsqfit(trial_eos(Energy()), first.(results), last.(results))
-end # function postprocess
+    if fit_e
+        return lsqfit(trial_eos(Energy()), first.(results), last.(results))
+    else
+        return lsqfit(trial_eos(Pressure()), first.(results), last.(results))
+    end
+end
+function (step::Step{VariableCellOptimization,Analyse{:output}})(output, template::Input)
+    cell = open(output, "r") do io
+        str = read(io, String)
+        parse(Cell, output)
+    end
+    return set_structure(template, cell)
+end
+function (step::Step{VariableCellOptimization,Analyse{:output}})(outputs, templates)
+    return map(templates, outputs) do template, output  # `map` will check size mismatch
+        step(output, template)
+    end
+end
 function (step::Step{SelfConsistentField,Analyse{:output}})(path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
@@ -289,6 +310,8 @@ function getpotentialdir end
 function download_potential end
 
 function analyse end
+
+function set_structure end
 
 include("QuantumESPRESSO.jl")
 
