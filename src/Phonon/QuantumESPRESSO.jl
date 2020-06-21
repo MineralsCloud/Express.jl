@@ -1,37 +1,17 @@
 module QuantumESPRESSO
 
-using Crystallography: Cell, eachatom
 using QuantumESPRESSO.Inputs: InputFile, inputstring
 using QuantumESPRESSO.Inputs.PWscf:
-    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert, set_verbosity
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using Setfield: @set!
 
 import Express.Phonon: set_structure, preset
 
-function set_structure(
-    template::PWInput,
-    cell_parameters::CellParametersCard,
-    atomic_positions::Union{Nothing,AtomicPositionsCard} = nothing,
-)
-    @set! template.atomic_positions = atomic_positions
-    @set! template.cell_parameters = cell_parameters
-    return template
-end # function set_structure
-function set_structure(template::PWInput, cell::Cell)
-    @set! template.atomic_positions = AtomicPositionsCard([atom for atom in eachatom(cell)])
-    @set! template.cell_parameters = CellParametersCard(cell.lattice)
-    return template
-end # function set_structure
-
 # This is a helper function and should not be exported.
 function preset(template::PWInput)
-    @set! template.control.verbosity = "high"
-    @set! template.control.wf_collect = true
-    @set! template.control.tstress = true
-    @set! template.control.tprnfor = true
-    @set! template.control.disk_io = "high"
+    template = set_verbosity(template, "high")
     @set! template.control.calculation = "scf"
     return template
 end # function preset

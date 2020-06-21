@@ -1,6 +1,6 @@
 module QuantumESPRESSO
 
-using Crystallography: cellvolume
+using Crystallography: Cell, eachatom
 using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
@@ -125,5 +125,20 @@ function EosFitting.analyse(step, s::AbstractString)
 end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
+
+function set_structure(
+    template::PWInput,
+    cell_parameters::CellParametersCard,
+    atomic_positions::Union{Nothing,AtomicPositionsCard} = nothing,
+)
+    @set! template.atomic_positions = atomic_positions
+    @set! template.cell_parameters = cell_parameters
+    return template
+end # function set_structure
+function set_structure(template::PWInput, cell::Cell)
+    @set! template.atomic_positions = AtomicPositionsCard([atom for atom in eachatom(cell)])
+    @set! template.cell_parameters = CellParametersCard(cell.lattice)
+    return template
+end # function set_structure
 
 end # module QuantumESPRESSO
