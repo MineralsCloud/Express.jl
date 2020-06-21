@@ -179,7 +179,13 @@ function (step::Step{VariableCellOptimization,Prepare{:input}})(path; kwargs...)
     return step(inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
-function (::Step{T,Launch{:job}})(outputs, inputs, n, bin; dry_run = false) where {T}
+function (::Step{<:ALLOWED_CALCULATIONS,Launch{:job}})(
+    outputs,
+    inputs,
+    n,
+    bin;
+    dry_run = false,
+)
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -191,7 +197,7 @@ function (::Step{T,Launch{:job}})(outputs, inputs, n, bin; dry_run = false) wher
         return launchjob(cmds)
     end
 end
-function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
+function (step::Step{T,Launch{:job}})(path::AbstractString) where {T<:ALLOWED_CALCULATIONS}
     settings = load_settings(path)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
