@@ -5,9 +5,15 @@ using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, getoption
-using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert, set_verbosity
+using QuantumESPRESSO.Inputs.PWscf:
+    CellParametersCard,
+    AtomicPositionsCard,
+    PWInput,
+    optconvert,
+    set_verbosity,
+    set_structure
 using QuantumESPRESSO.Outputs.PWscf:
-    Preamble, parse_electrons_energies, parsefinal, isjobdone
+    Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic: bohr, Ry
@@ -126,19 +132,11 @@ end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
-function set_structure(
-    template::PWInput,
-    cell_parameters::CellParametersCard,
-    atomic_positions::Union{Nothing,AtomicPositionsCard} = nothing,
-)
-    @set! template.atomic_positions = atomic_positions
-    @set! template.cell_parameters = cell_parameters
-    return template
-end # function set_structure
-function set_structure(template::PWInput, cell::Cell)
-    @set! template.atomic_positions = AtomicPositionsCard([atom for atom in eachatom(cell)])
-    @set! template.cell_parameters = CellParametersCard(cell.lattice)
-    return template
-end # function set_structure
+function EosFitting.parsecell(str::AbstractString)
+    return tryparsefinal(CellParametersCard{Float64}, str),
+    tryparsefinal(AtomicPositionsCard, str)
+end
+
+EosFitting.set_structure(template::PWInput, c, a) = set_structure(template, c, a)
 
 end # module QuantumESPRESSO

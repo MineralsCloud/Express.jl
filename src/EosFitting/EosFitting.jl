@@ -12,13 +12,9 @@ julia>
 module EosFitting
 
 using AbInitioSoftwareBase.Inputs: Input, inputstring
-using Crystallography: Cell
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using Setfield
-using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, AtomicPositionsCard
-using QuantumESPRESSO.Outputs.PWscf: tryparsefinal
 using QuantumESPRESSO.CLI: pwcmd
 
 using ..Express:
@@ -226,15 +222,11 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Analyse{:output}})(
     end
 end
 function (step::Step{VariableCellOptimization,Analyse{:output}})(output, template::Input)
-    l, a = open(output, "r") do io
+    cell = open(output, "r") do io
         str = read(io, String)
-        tryparsefinal(CellParametersCard{Float64}, str),
-        tryparsefinal(AtomicPositionsCard, str)
+        parsecell(str)
     end
-    @set! template.cell_parameters = l
-    @set! template.atomic_positions = a
-    return template
-    # return set_structure(template, l, a)
+    return set_structure(template, cell...)
 end
 function (step::Step{VariableCellOptimization,Analyse{:output}})(outputs, templates)
     return map(templates, outputs) do template, output  # `map` will check size mismatch
