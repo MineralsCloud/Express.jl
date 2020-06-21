@@ -125,7 +125,7 @@ function EosFitting.analyse(step, s::AbstractString)
         if !isjobdone(s)
             @warn "Job is not finished!"
         end
-        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) * bohr^3 =>
+        return cellvolume(parsefinal(CellParametersCard, s)) * bohr^3 =>
             parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
     end
 end
@@ -133,7 +133,7 @@ end
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
 function EosFitting.parsecell(str::AbstractString)
-    return tryparsefinal(CellParametersCard{Float64}, str),
+    return tryparsefinal(CellParametersCard, str),
     tryparsefinal(AtomicPositionsCard, str)
 end
 

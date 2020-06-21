@@ -76,7 +76,7 @@ function (::Step{SelfConsistentField,PREPARE_INPUT})(vc_output, template::PWInpu
     str = open(vc_output, "r") do io
         read(vc_output, String)
     end
-    cell = parsefinal(CellParametersCard{Float64}, str)
+    cell = parsefinal(CellParametersCard, str)
     cell_parameters =
         CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
         atomic_positions = tryparsefinal(AtomicPositionsCard, str)
