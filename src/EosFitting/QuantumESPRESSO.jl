@@ -106,12 +106,7 @@ function EosFitting.preset(step, template, args...)
     @set! template.control.calculation =
         calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
-        [
-            template.control.prefix,
-            template.control.calculation,
-            string(now()),
-            string(rand(UInt)),
-        ],
+        [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",
     )
     return template
@@ -132,10 +127,8 @@ end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
-function EosFitting.parsecell(str::AbstractString)
-    return tryparsefinal(CellParametersCard, str),
-    tryparsefinal(AtomicPositionsCard, str)
-end
+EosFitting.parsecell(str::AbstractString) =
+    tryparsefinal(CellParametersCard, str), tryparsefinal(AtomicPositionsCard, str)
 
 EosFitting.set_structure(template::PWInput, c, a) = set_structure(template, c, a)
 
