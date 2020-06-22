@@ -16,7 +16,7 @@ using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
-using UnitfulAtomic: bohr, Ry
+using UnitfulAtomic
 
 using ...Express:
     Step,
@@ -119,14 +119,14 @@ end
 
 function EosFitting.analyse(step, s::AbstractString)
     if calculationtype(step) <: SelfConsistentField
-        return parse(Preamble, s).omega * bohr^3 =>
-            parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
+        return parse(Preamble, s).omega * u"bohr^3" =>
+            parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
     else
         if !isjobdone(s)
             @warn "Job is not finished!"
         end
-        return cellvolume(parsefinal(CellParametersCard, s)) * bohr^3 =>
-            parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
+        return cellvolume(parsefinal(CellParametersCard, s)) * u"bohr^3" =>
+            parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
     end
 end
 
