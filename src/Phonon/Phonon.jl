@@ -11,25 +11,15 @@ julia>
 """
 module Phonon
 
-using ..Express:
-    Step,
-    Calculation,
-    SelfConsistentField,
-    DfptMethod,
-    ForceConstant,
-    PREPARE_INPUT,
-    LAUNCH_JOB,
-    ANALYSE_OUTPUT
+using ..Express: Step, Calculation, SelfConsistentField, DfptMethod, ForceConstant, Prepare
 
-export set_structure, relay, Step
-
-function set_structure end
+export relay, Step
 
 function preset end
 
 function relay end
 
-function (::Step{SelfConsistentField,PREPARE_INPUT})(
+function (::Step{SelfConsistentField,Prepare{:input}})(
     scf_inputs,
     vc_outputs,
     template::PWInput,
@@ -42,8 +32,7 @@ function (::Step{SelfConsistentField,PREPARE_INPUT})(
         object
     end
 end
-function preprocess(
-    ::Step{DfptMethod,PREPARE_INPUT},
+function (::Step{DfptMethod,Prepare{:input}})(
     phonon_inputs,
     pwscf_inputs,
     template::PhInput,
@@ -55,8 +44,7 @@ function preprocess(
     end
     return
 end
-function preprocess(
-    ::Step{ForceConstant,PREPARE_INPUT},
+function (::Step{ForceConstant,Prepare{:input}})(
     q2r_inputs,
     phonon_inputs,
     template::Q2rInput,
@@ -66,9 +54,8 @@ function preprocess(
         write(InputFile(q2r_input), relay(object, template))
     end
     return
-end # function preprocess
-function preprocess(
-    ::Step{PhononDispersion,PREPARE_INPUT},
+end
+function (::Step{PhononDispersion,Prepare{:input}})(
     matdyn_inputs,
     q2r_inputs,
     template::MatdynInput,
@@ -87,8 +74,7 @@ function preprocess(
     end
     return
 end
-function preprocess(
-    ::Step{PhononDispersion,PREPARE_INPUT},
+function (::Step{PhononDispersion,Prepare{:input}})(
     dynmat_inputs,
     phonon_inputs,
     template::DynmatInput,
