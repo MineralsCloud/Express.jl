@@ -7,13 +7,12 @@ using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using Setfield: @set!
 
-import Express.Phonon: set_structure, preset
+import Express.Phonon: preset
 
 # This is a helper function and should not be exported.
 function preset(template::PWInput)
-    template = set_verbosity(template, "high")
     @set! template.control.calculation = "scf"
-    return template
+    return set_verbosity(template, "high")
 end # function preset
 function preset(template::PhInput)
     @set! template.inputph.verbosity = "high"
