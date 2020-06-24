@@ -15,6 +15,7 @@ using AbInitioSoftwareBase.Inputs: Input, inputstring
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
+using OptionalArgChecks: @argcheck
 using QuantumESPRESSO.CLI: pwcmd
 
 using ..Express:
@@ -55,9 +56,8 @@ function set_press_vol(
     eos::EquationOfState;
     minscale = eps(),
     maxscale = 1.3,
-)
-    @assert minscale > zero(minscale)  # No negative volume
 )::Input
+    @argcheck minscale > zero(minscale)  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, (minscale, maxscale) .* eos.v0)
     return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
@@ -241,14 +241,14 @@ end
 
 function Express._check_settings(settings)
     map(("template", "pressures", "trial_eos", "dir")) do key
-        @assert haskey(settings, key)
+        @argcheck haskey(settings, key)
     end
     _check_software_settings(settings["qe"])
-    @assert isdir(settings["dir"])
-    @assert isfile(settings["template"])
+    @argcheck isdir(settings["dir"])
+    @argcheck isfile(settings["template"])
     alert_pressures(settings["pressures"])
     map(("type", "parameters", "units")) do key
-        @assert haskey(settings["trial_eos"], key)
+        @argcheck haskey(settings["trial_eos"], key)
     end
 end # function _check_settings
 

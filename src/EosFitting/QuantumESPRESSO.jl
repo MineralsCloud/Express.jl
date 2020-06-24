@@ -4,6 +4,7 @@ using Crystallography: Cell, eachatom, cellvolume
 using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
+using OptionalArgChecks: @argcheck
 using QuantumESPRESSO.Inputs: inputstring, getoption
 using QuantumESPRESSO.Inputs.PWscf:
     CellParametersCard,
@@ -52,11 +53,11 @@ end # function EosFitting.set_press_vol
 
 function EosFitting._check_software_settings(settings)
     map(("manager", "bin", "n")) do key
-        @assert haskey(settings, key) "key `$key` not found!"
+        @argcheck haskey(settings, key) "key `$key` not found!"
     end
-    @assert isinteger(settings["n"]) && settings["n"] >= 1
+    @argcheck isinteger(settings["n"]) && settings["n"] >= 1
     if settings["manager"] == "docker"
-        @assert haskey(settings, "container")
+        @argcheck haskey(settings, "container")
     elseif settings["manager"] == "ssh"
     elseif settings["manager"] == "local"  # Do nothing
     else
