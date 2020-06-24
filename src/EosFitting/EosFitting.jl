@@ -50,13 +50,14 @@ export Step,
     actiontype
 
 function set_press_vol(
-    template,
+    template::Input,
     pressure,
     eos::EquationOfState;
     minscale = eps(),
     maxscale = 1.3,
 )
     @assert minscale > zero(minscale)  # No negative volume
+)::Input
     volume = findvolume(eos(Pressure()), pressure, (minscale, maxscale) .* eos.v0)
     return _set_press_vol(template, pressure, volume)
 end # function set_press_vol

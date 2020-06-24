@@ -37,7 +37,7 @@ EosFitting.getpotentials(template::PWInput) =
 
 EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
-function EosFitting._set_press_vol(template::PWInput, pressure, volume)
+function EosFitting._set_press_vol(template::PWInput, pressure, volume)::PWInput
     @set! template.cell.press = ustrip(u"kbar", pressure)
     factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if template.cell_parameters === nothing || getoption(template.cell_parameters) == "alat"
