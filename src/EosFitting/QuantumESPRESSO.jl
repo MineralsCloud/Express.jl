@@ -1,6 +1,6 @@
 module QuantumESPRESSO
 
-using Crystallography: Cell, eachatom
+using Crystallography: Cell, eachatom, cellvolume
 using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
@@ -39,7 +39,7 @@ EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseu
 
 function EosFitting._set_press_vol(template::PWInput, pressure, volume)
     @set! template.cell.press = ustrip(u"kbar", pressure)
-    factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
+    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
     if template.cell_parameters === nothing || getoption(template.cell_parameters) == "alat"
         @set! template.system.celldm[1] *= factor
     else
