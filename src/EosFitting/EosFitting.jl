@@ -64,16 +64,13 @@ end # function set_press_vol
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
 function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
     template::Input,
     pressure::Number,
-    trial_eos::EquationOfState,
-    args...;
+    trial_eos::EquationOfState;
     minscale = eps(),
     maxscale = 1.3,
-    kwargs...,
 )
-    template = f(step, template, pressure, trial_eos, args...; kwargs...)  # A callback
+    template = preset(step, template)
     return set_press_vol(
         template,
         pressure,
@@ -82,76 +79,42 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
         maxscale = maxscale,
     )
 end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    input,
     template::Input,
     pressure::Number,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(preset, template, pressure, trial_eos, args...; kwargs...)
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-)
-    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        step(f, template, pressure, trial_eos, args...; kwargs...)
-    end
-end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(preset, templates, pressures, trial_eos, args...; kwargs...)
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    template::Input,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(f, fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    template::Input,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    inputs,
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
+    trial_eos::EquationOfState;
     dry_run = false,
     kwargs...,
 )
-    objects = step(f, templates, pressures, trial_eos, args...; kwargs...)
-    map(inputs, objects) do input, object  # `map` will check size mismatch
-        if dry_run
-            if isfile(input)
-                @warn "file `$input` will be overwritten!"
-            else
-                @warn "file `$input` will be created!"
-            end
-            print(inputstring(object))
+    object = step(template, pressure, trial_eos; kwargs...)
+    if dry_run
+        if isfile(input)
+            @warn "file `$input` will be overwritten!"
         else
-            mkpath(dirname(input))
-            open(input, "w") do io
-                write(io, inputstring(object))
-            end
+            @warn "file `$input` will be created!"
+        end
+        print(inputstring(object))
+    else
+        mkpath(dirname(input))
+        open(input, "w") do io
+            write(io, inputstring(object))
         end
     end
     return
 end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
+    templates,
+    pressures,
+    trial_eos::EquationOfState;
+    kwargs...,
+)
+    alert_pressures(pressures)
+    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
+        step(template, pressure, trial_eos; kwargs...)
+    end
+end
+function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
     inputs,
     templates,
     pressures,
@@ -159,7 +122,13 @@ end
     args...;
     dry_run = false,
     kwargs...,
-) = step(preset, inputs, templates, pressures, trial_eos, args...; kwargs...)
+)
+    alert_pressures(pressures)
+    map(inputs, templates, pressures) do input, template, pressure  # `map` will check size mismatch
+        step(input, template, pressures, trial_eos, args...; dry_run = dry_run, kwargs...)
+    end
+    return
+end
 function (step::Step{SelfConsistentField,Prepare{:input}})(path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
