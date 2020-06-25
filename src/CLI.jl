@@ -1,9 +1,9 @@
 module CLI
 
-export mpicmd
+export MpiCmd
 
 struct MpiCmd
-    n::Int
+    n::UInt
     bin
     host
     arch
@@ -13,9 +13,8 @@ struct MpiCmd
     configfile
     env
 end
-function mpicmd(
-    n,
-    cmd;
+MpiCmd(
+    n;
     bin = "mpiexec",
     host = "",
     arch = "",
@@ -24,15 +23,7 @@ function mpicmd(
     file = "",
     configfile = "",
     env = ENV,
-)
-    options = String[]
-    for (f, v) in zip((:host, :arch, :wdir, :file, :configfile), (host, arch, wdir, file, configfile))
-        if !isempty(v)
-            push!(options, "-$f", v)
-        end
-    end
-    return Cmd([bin, "-n", string(n), options..., cmd.exec...])
-end # function mpicmd
+) = MpiCmd(n, bin, host, arch, wdir, path, file, configfile, env)
 # The docs are from https://www.mpich.org/static/docs/v3.3/www1/mpiexec.html.
 
 end # module CLI
