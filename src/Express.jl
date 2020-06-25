@@ -44,7 +44,6 @@ Base.show(io::IO, ::VariableCellOptimization) = print(io, "vc-relax calculation"
 Base.show(io::IO, ::MolecularDynamics) = print(io, "md calculation")
 Base.show(io::IO, ::VariableCellMolecularDynamics) = print(io, "vc-md calculation")
 
-include("CLI.jl")
 include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
