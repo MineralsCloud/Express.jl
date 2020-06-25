@@ -127,7 +127,15 @@ function preprocess(calc::VariableCellOptimization, path; kwargs...)
     )
 end
 
-function process(outputs, inputs, n, softwarecmd; dry_run = false, kwargs...)
+function process(
+    ::ALLOWED_CALCULATIONS,
+    outputs,
+    inputs,
+    n,
+    softwarecmd;
+    dry_run = false,
+    kwargs...,
+)
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
