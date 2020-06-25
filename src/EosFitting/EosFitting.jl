@@ -91,7 +91,7 @@ function preprocess(
 )
     alert_pressures(pressures)
     map(files, templates, pressures) do file, template, pressure  # `map` will check size mismatch
-        object = prep_input(calc, template, pressures, trial_eos; args...)
+        object = prep_input(calc, template, pressures, trial_eos; kwargs...)
         write_input(file, object; dry_run = dry_run)
     end
     return
