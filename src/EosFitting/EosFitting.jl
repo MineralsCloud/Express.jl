@@ -55,18 +55,6 @@ function prep_input(
 )
     return set_press_vol(_prep_input(calc, template), pressure, trial_eos, volume_scale)
 end
-function prep_input(
-    calc::ALLOWED_CALCULATIONS,
-    templates,
-    pressures,
-    trial_eos::EquationOfState;
-    kwargs...,
-)
-    alert_pressures(pressures)
-    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        prep_input(calc, template, pressure, trial_eos; kwargs...)
-    end
-end
 
 function write_input(file, object::Input; dry_run = false)
     if dry_run
@@ -96,7 +84,7 @@ function preprocess(
 )
     alert_pressures(pressures)
     map(files, templates, pressures) do file, template, pressure  # `map` will check size mismatch
-        object = prep_input(calc, template, pressures, trial_eos; kwargs...)
+        object = prep_input(calc, template, pressure, trial_eos; kwargs...)
         write_input(file, object; dry_run = dry_run)
     end
     return
