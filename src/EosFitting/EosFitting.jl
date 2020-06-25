@@ -12,20 +12,25 @@ julia>
 module EosFitting
 
 using AbInitioSoftwareBase.Inputs: Input, inputstring
+using AbInitioSoftwareBase.CLI: MpiCmd
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 using OptionalArgChecks: @argcheck
-using QuantumESPRESSO.CLI: pwcmd
 
 using ..Express: SelfConsistentField, VariableCellOptimization, load_settings
 using ..Jobs: nprocs_task, launchjob
-using ..CLI: mpicmd
 
 import ..Express
 
 export SelfConsistentField,
-    VariableCellOptimization, load_settings, set_press_vol, inputstring
+    VariableCellOptimization,
+    load_settings,
+    set_press_vol,
+    inputstring,
+    preprocess,
+    process,
+    postprocess
 
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
@@ -122,13 +127,23 @@ function preprocess(calc::VariableCellOptimization, path; kwargs...)
     )
 end
 
-function process(::ALLOWED_CALCULATIONS, outputs, inputs, n, bin; dry_run = false)
+function process(
+    ::ALLOWED_CALCULATIONS,
+    outputs,
+    inputs,
+    n,
+    softwarecmd;
+    dry_run = false,
+    kwargs...,
+)
     # `map` guarantees they are of the same size, no need to check.
     n = nprocs_task(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _generate_cmds(n, input, output, bin)
+        f = MpiCmd(n; kwargs...) ∘ softwarecmd
+        f(stdin = input, stdout = output)
     end
     if dry_run
+        @warn "the following commands will be run:"
         return cmds
     else
         return launchjob(cmds)
@@ -229,8 +244,6 @@ end # function _check_settings
 #     ],
 #     " ",
 # )
-_generate_cmds(n, input, output, bin) =
-    pipeline(mpicmd(n, pwcmd(bin = bin)), stdin = input, stdout = output)
 
 function alert_pressures(pressures)
     if length(pressures) <= 5
