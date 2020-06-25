@@ -19,15 +19,7 @@ using Setfield: @set!
 using Unitful: NoUnits, @u_str, ustrip
 using UnitfulAtomic
 
-using ...Express:
-    Step,
-    SelfConsistentField,
-    VariableCellOptimization,
-    Prepare,
-    Analyse,
-    _uparse,
-    calculationtype
-
+using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
 import ...Express
 import ..EosFitting
 
@@ -102,10 +94,10 @@ function Express.Settings(settings)
     )
 end # function Settings
 
-function EosFitting.preset(step, template, args...)
+function EosFitting._prep_input(calculation, template)
     template = set_verbosity(template, "high")
     @set! template.control.calculation =
-        calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
+        calculation <: SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
         [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",
