@@ -97,7 +97,7 @@ end # function Settings
 function EosFitting._prep_input(calculation, template)
     template = set_verbosity(template, "high")
     @set! template.control.calculation =
-        calculation <: SelfConsistentField ? "scf" : "vc-relax"
+        calculation isa SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
         [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",
@@ -105,8 +105,8 @@ function EosFitting._prep_input(calculation, template)
     return template
 end
 
-function EosFitting.analyse(step, s::AbstractString)
-    if calculationtype(step) <: SelfConsistentField
+function EosFitting.analyse(calc, s::AbstractString)
+    if calc isa SelfConsistentField
         return parse(Preamble, s).omega * u"bohr^3" =>
             parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
     else
