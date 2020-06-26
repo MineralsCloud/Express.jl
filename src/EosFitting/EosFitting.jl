@@ -51,9 +51,9 @@ function prep_input(
     template::Input,
     pressure::Number,
     trial_eos::EquationOfState;
-    volume_scale = (eps(), 1.3),
+    kwargs...,
 )
-    return set_press_vol(_prep_input(calc, template), pressure, trial_eos, volume_scale)
+    return set_press_vol(_prep_input(calc, template), pressure, trial_eos; kwargs...)
 end
 
 function write_input(file, object::Input; dry_run = false)
