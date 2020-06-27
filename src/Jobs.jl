@@ -31,13 +31,8 @@ function launchjob(cmds; sleepfor = 5)
         sleep(sleepfor)
         @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-    return JobTracker(pairs(tasks), [], [])
+    return JobTracker(collect(pairs(tasks)), [], [])
 end # function launchjob
-# function launchjob(cmds, environment::DockerEnvironment)
-#     return map(cmds) do cmd
-#         @async exec_run(environment.container, cmd; demux = true)
-#     end
-# end # function launchjob
 
 function update!(x::JobTracker)
     @assert isvalid(x)
@@ -55,6 +50,15 @@ function update!(x::JobTracker)
     end
     return x
 end # function update!
+
+function Base.show(io::IO, x::JobTracker)
+    println(io, "running:")
+    println(io, x.succeeded)
+    println(io, "succeeded:")
+    print(io, x.succeeded)
+    println(io, "failed:")
+    print(io, x.failed)
+end # function Base.show
 
 Base.isvalid(x::JobTracker) =
     x.n == length(x.running) + length(x.succeeded) + length(x.failed)
