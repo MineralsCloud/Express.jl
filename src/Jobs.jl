@@ -1,5 +1,6 @@
 module Jobs
 
+using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 using DockerPy.Containers
 
@@ -9,12 +10,14 @@ struct JobTracker
     running
     succeeded
     failed
-    n::Int
+    n::UInt
+    starttime::DateTime
     JobTracker(running, succeeded, failed) = new(
         running,
         succeeded,
         failed,
         length(running) + length(succeeded) + length(failed),
+        now(),
     )
 end
 
@@ -51,6 +54,7 @@ function update!(x::JobTracker)
 end # function update!
 
 function Base.show(io::IO, x::JobTracker)
+    println(io, "time has passed: ", canonicalize(CompoundPeriod(now() - x.starttime)))
     foreach(
         x -> println(io, x),
         ("running:", x.running, "succeeded:", x.succeeded, "failed:", x.failed),
