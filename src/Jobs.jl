@@ -31,7 +31,7 @@ function launchjob(cmds; sleepfor = 5)
         sleep(sleepfor)
         @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-    return JobTracker(collect(pairs(tasks)), [], [])
+    return JobTracker(Dict(pairs(tasks)), Dict(), Dict())
 end # function launchjob
 
 function update!(x::JobTracker)
@@ -44,7 +44,7 @@ function update!(x::JobTracker)
             else
                 push!(x.succeeded, i => result)
             end
-            deleteat!(x.running, i)
+            pop!(x.running, i)
         end
     end
     return x
