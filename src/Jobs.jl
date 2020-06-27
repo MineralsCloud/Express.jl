@@ -38,26 +38,23 @@ function update!(x::JobTracker)
     @assert isvalid(x)
     for (i, task) in x.running
         if isready(task)
-            try
-                result = fetch(task)
+            result = fetch(task)
+            if result isa RemoteException
+                push!(x.failed, i => result)
+            else
                 push!(x.succeeded, i => result)
-            catch e
-                push!(x.failed, i => e)
-            finally
-                deleteat!(x.running, i)
             end
+            deleteat!(x.running, i)
         end
     end
     return x
 end # function update!
 
 function Base.show(io::IO, x::JobTracker)
-    println(io, "running:")
-    println(io, x.succeeded)
-    println(io, "succeeded:")
-    print(io, x.succeeded)
-    println(io, "failed:")
-    print(io, x.failed)
+    foreach(
+        x -> println(io, x),
+        ("running:", x.running, "succeeded:", x.succeeded, "failed:", x.failed),
+    )
 end # function Base.show
 
 Base.isvalid(x::JobTracker) =
