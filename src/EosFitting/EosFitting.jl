@@ -146,12 +146,13 @@ function process(calc::T, path::AbstractString) where {T<:ALLOWED_CALCULATIONS}
 end
 
 function postprocess(
+    calc::ALLOWED_CALCULATIONS,
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )::EquationOfState
     results = map(outputs) do output
-        analyse(step, read(output, String))  # volume => energy
+        analyse(calc, read(output, String))  # volume => energy
     end
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"

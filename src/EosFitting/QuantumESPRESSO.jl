@@ -105,17 +105,15 @@ function EosFitting._prep_input(calculation, template)
     return template
 end
 
-function EosFitting.analyse(calc, s::AbstractString)
-    if calc isa SelfConsistentField
-        return parse(Preamble, s).omega * u"bohr^3" =>
-            parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
-    else
-        if !isjobdone(s)
-            @warn "Job is not finished!"
-        end
-        return cellvolume(parsefinal(CellParametersCard, s)) * u"bohr^3" =>
-            parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
+EosFitting.analyse(::SelfConsistentField, s::AbstractString) =
+    parse(Preamble, s).omega * u"bohr^3" =>
+        parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
+function EosFitting.analyse(::VariableCellOptimization, s::AbstractString)
+    if !isjobdone(s)
+        @warn "Job is not finished!"
     end
+    return cellvolume(parsefinal(CellParametersCard, s)) * u"bohr^3" =>
+        parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
 end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
