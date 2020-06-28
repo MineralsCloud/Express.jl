@@ -11,7 +11,7 @@ julia>
 """
 module EosFitting
 
-using AbInitioSoftwareBase.Inputs: Input, inputstring
+using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 using AbInitioSoftwareBase.CLI: MpiCmd
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
@@ -56,23 +56,6 @@ function prep_input(
     return set_press_vol(_prep_input(calc, template), pressure, trial_eos; kwargs...)
 end
 
-function write_input(file, object::Input; dry_run = false)
-    if dry_run
-        if isfile(file)
-            @warn "file `$file` will be overwritten!"
-        else
-            @warn "file `$file` will be created!"
-        end
-        print(inputstring(object))
-    else
-        mkpath(dirname(file))
-        open(file, "w") do io
-            write(io, inputstring(object))
-        end
-    end
-    return
-end
-
 function preprocess(
     calc::ALLOWED_CALCULATIONS,
     files,
@@ -85,7 +68,7 @@ function preprocess(
     alert_pressures(pressures)
     map(files, templates, pressures) do file, template, pressure  # `map` will check size mismatch
         object = prep_input(calc, template, pressure, trial_eos; kwargs...)
-        write_input(file, object; dry_run = dry_run)
+        write_input(file, object, dry_run)
     end
     return
 end
