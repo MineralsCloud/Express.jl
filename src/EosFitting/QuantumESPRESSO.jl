@@ -12,7 +12,8 @@ using QuantumESPRESSO.Inputs.PWscf:
     PWInput,
     optconvert,
     set_verbosity,
-    set_structure
+    set_structure,
+    set_press_vol
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using Setfield: @set!
@@ -29,6 +30,9 @@ EosFitting.getpotentials(template::PWInput) =
     [x.pseudopot for x in template.atomic_species.data]
 
 EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
+
+EosFitting._set_press_vol(template::PWInput, pressure, volume) =
+    set_press_vol(template, pressure, volume)
 
 function EosFitting._check_software_settings(settings)
     map(("manager", "bin", "n")) do key

@@ -43,7 +43,7 @@ function set_press_vol(
     ⋁, ⋀ = minimum(volume_scale), maximum(volume_scale)
     @argcheck ⋁ > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, (⋁, ⋀) .* eos.v0)
-    return set_press_vol(template, pressure, volume)
+    return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
 function prep_input(
@@ -244,6 +244,8 @@ function alert_pressures(pressures)
 end # function alert_pressures
 
 function _check_software_settings end
+
+function _set_press_vol end
 
 function _prep_input end
 
