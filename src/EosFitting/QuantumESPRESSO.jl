@@ -12,11 +12,12 @@ using QuantumESPRESSO.Inputs.PWscf:
     PWInput,
     optconvert,
     set_verbosity,
-    set_structure
+    set_structure,
+    set_press_vol
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using Setfield: @set!
-using Unitful: NoUnits, @u_str, ustrip
+using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
@@ -30,18 +31,8 @@ EosFitting.getpotentials(template::PWInput) =
 
 EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
-function EosFitting._set_press_vol(template::PWInput, pressure, volume)::PWInput
-    @set! template.cell.press = ustrip(u"kbar", pressure)
-    factor = cbrt(volume / (cellvolume(template) * u"bohr^3")) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    if template.cell_parameters === nothing || getoption(template.cell_parameters) == "alat"
-        @set! template.system.celldm[1] *= factor
-    else
-        @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters =
-            optconvert("bohr", CellParametersCard(template.cell_parameters.data * factor))
-    end
-    return template
-end # function EosFitting.set_press_vol
+EosFitting._set_press_vol(template::PWInput, pressure, volume) =
+    set_press_vol(template, pressure, volume)
 
 function EosFitting._check_software_settings(settings)
     map(("manager", "bin", "n")) do key
