@@ -89,6 +89,14 @@ function preprocess(
     end
     return
 end
+preprocess(
+    calc::ALLOWED_CALCULATIONS,
+    files,
+    template::Input,
+    pressures,
+    trial_eos::EquationOfState;
+    kwargs...,
+) = preprocess(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
 function preprocess(calc::SelfConsistentField, path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
