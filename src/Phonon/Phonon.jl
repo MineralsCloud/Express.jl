@@ -11,41 +11,20 @@ julia>
 """
 module Phonon
 
-using AbInitioSoftwareBase.Inputs: inputstring
+using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 
-using ..Express: Step, Calculation, SelfConsistentField, DfptMethod, ForceConstant, Prepare
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant
 
-export relay, Step
+export DfptMethod, relay, prep_input, preprocess
 
 function preset end
 
 function relay end
 
-function (::Step{DfptMethod,Prepare{:input}})(template::PhInput, from::PWInput)
-    template = preset(template)
-    return relay(from, template)
-end
-function (::Step{DfptMethod,Prepare{:input}})(
-    input,
-    template::PhInput,
-    from::PWInput;
-    dry_run = false,
-)
-    template = preset(template)
-    object = relay(from, template)
-    if dry_run
-        if isfile(input)
-            @warn "file `$input` will be overwritten!"
-        else
-            @warn "file `$input` will be created!"
-        end
-        print(inputstring(object))
-    else
-        mkpath(dirname(input))
-        open(input, "w") do io
-            write(io, inputstring(object))
-        end
-    end
+function prep_input end
+
+function preprocess(::DfptMethod, input, template::Input, args...; dry_run = false)
+    write_input(input, prep_input(DfptMethod(), template, args...), dry_run)
 end
 
 # function (::Step{ForceConstant,Prepare{:input}})(
@@ -90,5 +69,7 @@ end
 #     end
 #     return
 # end
+
+include("QuantumESPRESSO.jl")
 
 end
