@@ -1,5 +1,6 @@
 module QuantumESPRESSO
 
+using AbInitioSoftwareBase.Inputs: inputstring
 using QuantumESPRESSO.Inputs: InputFile, inputstring
 using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert, set_verbosity
@@ -7,7 +8,15 @@ using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using Setfield: @set!
 
-import Express.Phonon: preset
+using ...Express: DfptMethod, SelfConsistentField
+import ..Phonon: preset, relay, prep_input, preprocess
+
+function prep_input(::DfptMethod, template::PhInput, from::PWInput)
+    template = preset(template)
+    return relay(from, template)
+end
+
+preprocess(::SelfConsistentField, input, template::PWInput) = write_input(input, template)
 
 # This is a helper function and should not be exported.
 function preset(template::PWInput)
@@ -70,17 +79,5 @@ function relay(ph::PhInput, dynmat::DynmatInput)
     @set! dynmat.input.amass = ph.inputph.amass
     return dynmat
 end # function relay
-
-function (::Step{SelfConsistentField,PREPARE_INPUT})(vc_output, template::PWInput)
-    str = open(vc_output, "r") do io
-        read(vc_output, String)
-    end
-    cell = parsefinal(CellParametersCard, str)
-    cell_parameters =
-        CellParametersCard(cell.data / template.system.celldm[1], "alat"), # The result of `parsefinal` must be a `CellParametersCard` with `"bohr"` or `"angstrom"` option, convert it to "bohr" by default
-        atomic_positions = tryparsefinal(AtomicPositionsCard, str)
-    set_structure(template, cell_parameters, atomic_positions)
-    return preset(template)
-end
 
 end
