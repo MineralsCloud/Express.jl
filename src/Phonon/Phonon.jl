@@ -12,10 +12,13 @@ julia>
 module Phonon
 
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
+using OptionalArgChecks: @argcheck
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant, load_settings
+using ..EosFitting: _check_software_settings
+import ..Express
 
-export DfptMethod, relay, prep_input, preprocess
+export DfptMethod, relay, prep_input, preprocess, load_settings
 
 function preset end
 
@@ -23,9 +26,24 @@ function relay end
 
 function prep_input end
 
-function preprocess(::DfptMethod, input, template::Input, args...; dry_run = false)
-    write_input(input, prep_input(DfptMethod(), template, args...), dry_run)
+function preprocess(::DfptMethod, inputs, template::Input, args...; dry_run = false)
+    map(inputs) do input
+        write_input(input, prep_input(DfptMethod(), template, args...), dry_run)
+    end
 end
+function preprocess(calc::DfptMethod, path; kwargs...)
+    settings = load_settings(path)
+    inputs = settings.dirs .* "/ph.in"
+    return preprocess(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+end
+
+function Express._check_settings(settings)
+    map(("template", "pressures", "dir")) do key
+        @argcheck haskey(settings, key)
+    end
+    @assert isdir(settings["dir"])
+    @assert all(isfile.(settings["template"]))
+end # function _check_settings
 
 # function (::Step{ForceConstant,Prepare{:input}})(
 #     q2r_inputs,
