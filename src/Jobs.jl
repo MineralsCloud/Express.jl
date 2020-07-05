@@ -22,9 +22,12 @@ function launchjob(cmds, interval = 3)
         sleep(interval)
         tracker.subjobs[i] = @spawn begin
             tracker.starttime[i] = now()
-            x = run(cmd; wait = true)
-            tracker.endtime[i] = now()
-            x
+            try
+                x = run(cmd; wait = true)
+            finally
+                tracker.endtime[i] = now()
+                x
+            end
         end
     end
     return tracker
