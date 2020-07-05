@@ -3,7 +3,6 @@ module Jobs
 using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 using DockerPy.Containers
-using OptionalArgChecks: @argcheck
 
 export nprocs_task, launchjob, update!
 
@@ -11,15 +10,8 @@ struct JobTracker
     running
     succeeded
     failed
-    n::UInt
     starttime::DateTime
-    JobTracker(running, succeeded, failed) = new(
-        running,
-        succeeded,
-        failed,
-        length(running) + length(succeeded) + length(failed),
-        now(),
-    )
+    JobTracker(running, succeeded, failed) = new(running, succeeded, failed, now())
 end
 
 function nprocs_task(total_num, nsubjob)
@@ -39,7 +31,6 @@ function launchjob(cmds; sleepfor = 5)
 end # function launchjob
 
 function update!(x::JobTracker)
-    @argcheck isvalid(x)
     for (i, task) in x.running
         if isready(task)
             result = fetch(task)
@@ -61,8 +52,5 @@ function Base.show(io::IO, x::JobTracker)
         ("running:", x.running, "succeeded:", x.succeeded, "failed:", x.failed),
     )
 end # function Base.show
-
-Base.isvalid(x::JobTracker) =
-    x.n == length(x.running) + length(x.succeeded) + length(x.failed)
 
 end
