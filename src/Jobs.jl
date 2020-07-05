@@ -4,7 +4,7 @@ using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 using DockerPy.Containers
 
-export nprocs_task, launchjob, running, succeeded, failed
+export div_nprocs, launchjob, running, succeeded, failed
 
 struct JobTracker
     subjobs
@@ -12,13 +12,13 @@ struct JobTracker
     JobTracker(subjobs) = new(subjobs, now())
 end
 
-function nprocs_task(total_num, nsubjob)
+function div_nprocs(total_num, nsubjob)
     quotient, remainder = divrem(total_num, nsubjob)
     if !iszero(remainder)
         @warn "The processes are not fully balanced! Consider the number of subjobs!"
     end
     return quotient
-end # function nprocs_task
+end # function div_nprocs
 
 function launchjob(cmds, interval = 3)
     return JobTracker(map(cmds) do cmd
