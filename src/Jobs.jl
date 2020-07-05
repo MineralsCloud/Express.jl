@@ -13,8 +13,11 @@ struct JobTracker
 end
 
 function launchjob(cmds, interval = 3)
-    tracker =
-        JobTracker(similar(cmds, Future), similar(cmds, DateTime), similar(cmds, DateTime))
+    tracker = JobTracker(
+        vec(similar(cmds, Future)),
+        vec(similar(cmds, DateTime)),
+        vec(similar(cmds, DateTime)),
+    )
     for (i, cmd) in enumerate(cmds)
         sleep(interval)
         tracker.subjobs[i] = @spawn begin
@@ -58,26 +61,30 @@ function usetime(x::JobTracker)
 end # function usetime
 
 function Base.show(io::IO, x::JobTracker)
-    print(
-        io,
-        join(
-            (
-                "\033[34mrunning:\033[0m ",  # Blue text
-                running(x),
-                "\033[32msucceeded:\033[0m ",  # Green text
-                succeeded(x),
-                "\033[31mfailed:\033[0m ",  # Red text
-                failed(x),
-                "\033[34mtime used:\033[0m ",  # Green text
-                map(
-                    y -> y !== nothing ? canonicalize(CompoundPeriod(y)) : nothing,
-                    usetime(x),
-                ),
-            ),
-            '\n',
-        ),
-    )
+    n = length(x.subjobs)
+    println(io, "# $n subjobs in this job:")
+    for (i, (starttime, endtime, subjob)) in
+        enumerate(zip(x.starttime, x.endtime, x.subjobs))
+        println(io, " [", lpad(i, ndigits(n)), "] ", subjob)
+        print(io, ' '^(ndigits(n) + 4))
+        if !isready(subjob)
+            println(io, "\033[34mrunning for:\033[0m ", _readabletime(now() - starttime))  # Blue text
+        else
+            res = fetch(subjob)
+            if res isa RemoteException
+                println(io, "\033[31mfailed!\033[0m ")  # Red text
+            else
+                println(
+                    io,
+                    "\033[32msucceeded after:\033[0m ",
+                    _readabletime(endtime - starttime),
+                )  # Green text
+            end
+        end
+    end
 end # function Base.show
+
+_readabletime(t) = canonicalize(CompoundPeriod(t))  # Do not export!
 
 function div_nprocs(np, nj)
     quotient, remainder = divrem(np, nj)
