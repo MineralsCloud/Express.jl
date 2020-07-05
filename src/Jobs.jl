@@ -46,10 +46,21 @@ function update!(x::JobTracker)
 end # function update!
 
 function Base.show(io::IO, x::JobTracker)
-    println(io, "time has passed: ", canonicalize(CompoundPeriod(now() - x.starttime)))
-    foreach(
-        x -> println(io, x),
-        ("running:", x.running, "succeeded:", x.succeeded, "failed:", x.failed),
+    print(
+        io,
+        join(
+            (
+                "\033[34mtime elapsed:\033[0m ",  # Green text
+                canonicalize(CompoundPeriod(now() - x.starttime)),
+                "\033[34mrunning:\033[0m ",
+                x.running,
+                "\033[32msucceeded:\033[0m ",
+                x.succeeded,
+                "\033[31mfailed:\033[0m ",
+                x.failed,
+            ),
+            '\n',
+        ),
     )
 end # function Base.show
 
