@@ -20,12 +20,11 @@ function nprocs_task(total_num, nsubjob)
     return quotient
 end # function nprocs_task
 
-function launchjob(cmds; sleepfor = 5)
-    subjobs = map(cmds) do cmd
-        sleep(sleepfor)
+function launchjob(cmds, interval = 3)
+    return JobTracker(map(cmds) do cmd
+        sleep(interval)
         @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
-    end
-    return JobTracker(subjobs)
+    end)
 end # function launchjob
 
 running(x::JobTracker) = filter(!isready, x.subjobs)
