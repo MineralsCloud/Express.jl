@@ -71,16 +71,30 @@ function Base.show(io::IO, x::JobTracker)
         println(io, " [", lpad(i, ndigits(n)), "] ", subjob)
         print(io, ' '^(ndigits(n) + 4))
         if !isready(subjob)
-            println(io, "\033[34mrunning for:\033[0m ", _readabletime(now() - starttime))  # Blue text
+            printstyled(
+                io,
+                "running for: ",
+                _readabletime(now() - starttime),
+                '\n';
+                color = :blue,
+            )  # Blue text
         else
             res = fetch(subjob)
             if res isa RemoteException
-                println(io, "\033[31mfailed!\033[0m ")  # Red text
-            else
-                println(
+                printstyled(
                     io,
-                    "\033[32msucceeded after:\033[0m ",
+                    "failed after: ",
                     _readabletime(endtime - starttime),
+                    '\n';
+                    color = :red,
+                )  # Red text
+            else
+                printstyled(
+                    io,
+                    "succeeded after: ",
+                    _readabletime(endtime - starttime),
+                    '\n';
+                    color = :green,
                 )  # Green text
             end
         end
