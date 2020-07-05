@@ -19,7 +19,7 @@ using EquationsOfState.Find: findvolume
 using OptionalArgChecks: @argcheck
 
 using ..Express: SelfConsistentField, VariableCellOptimization, load_settings
-using ..Jobs: nprocs_task, launchjob
+using ..Jobs: div_nprocs, launchjob
 
 import ..Express
 
@@ -116,7 +116,7 @@ function process(
     kwargs...,
 )
     # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(n, length(inputs))
+    n = div_nprocs(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
         f = MpiCmd(n; kwargs...) ∘ softwarecmd
         f(stdin = input, stdout = output)

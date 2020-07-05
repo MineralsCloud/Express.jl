@@ -3,66 +3,95 @@ module Jobs
 using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 using DockerPy.Containers
-using OptionalArgChecks: @argcheck
 
-export nprocs_task, launchjob, update!
+export div_nprocs, launchjob, running, succeeded, failed, starttime, endtime, usetime
 
 struct JobTracker
-    running
-    succeeded
-    failed
-    n::UInt
-    starttime::DateTime
-    JobTracker(running, succeeded, failed) = new(
-        running,
-        succeeded,
-        failed,
-        length(running) + length(succeeded) + length(failed),
-        now(),
-    )
+    subjobs::Vector{Future}
+    starttime::Vector{DateTime}
+    endtime::Vector{DateTime}
 end
 
-function nprocs_task(total_num, nsubjob)
-    quotient, remainder = divrem(total_num, nsubjob)
+function launchjob(cmds, interval = 3)
+    tracker = JobTracker(
+        vec(similar(cmds, Future)),
+        vec(similar(cmds, DateTime)),
+        vec(similar(cmds, DateTime)),
+    )
+    for (i, cmd) in enumerate(cmds)
+        sleep(interval)
+        tracker.subjobs[i] = @spawn begin
+            tracker.starttime[i] = now()
+            x = run(cmd; wait = true)
+            tracker.endtime[i] = now()
+            x
+        end
+    end
+    return tracker
+end # function launchjob
+
+running(x::JobTracker) = filter(!isready, x.subjobs)
+
+succeeded(x::JobTracker) =
+    filter(y -> !isa(y, RemoteException), map(fetch, filter(isready, x.subjobs)))
+
+failed(x::JobTracker) =
+    filter(y -> y isa RemoteException, map(fetch, filter(isready, x.subjobs)))
+
+starttime(x::JobTracker) = x.starttime
+
+function endtime(x::JobTracker)
+    return map(x.subjobs, x.endtime) do subjob, endtime
+        if isready(subjob)
+            endtime
+        else
+            nothing
+        end
+    end
+end # function endtime
+
+function usetime(x::JobTracker)
+    return map(x.subjobs, x.endtime, x.starttime) do subjob, endtime, starttime
+        if isready(subjob)
+            endtime - starttime
+        else
+            nothing
+        end
+    end
+end # function usetime
+
+function Base.show(io::IO, x::JobTracker)
+    n = length(x.subjobs)
+    println(io, "# $n subjobs in this job:")
+    for (i, (starttime, endtime, subjob)) in
+        enumerate(zip(x.starttime, x.endtime, x.subjobs))
+        println(io, " [", lpad(i, ndigits(n)), "] ", subjob)
+        print(io, ' '^(ndigits(n) + 4))
+        if !isready(subjob)
+            println(io, "\033[34mrunning for:\033[0m ", _readabletime(now() - starttime))  # Blue text
+        else
+            res = fetch(subjob)
+            if res isa RemoteException
+                println(io, "\033[31mfailed!\033[0m ")  # Red text
+            else
+                println(
+                    io,
+                    "\033[32msucceeded after:\033[0m ",
+                    _readabletime(endtime - starttime),
+                )  # Green text
+            end
+        end
+    end
+end # function Base.show
+
+_readabletime(t) = canonicalize(CompoundPeriod(t))  # Do not export!
+
+function div_nprocs(np, nj)
+    quotient, remainder = divrem(np, nj)
     if !iszero(remainder)
         @warn "The processes are not fully balanced! Consider the number of subjobs!"
     end
     return quotient
-end # function nprocs_task
-
-function launchjob(cmds; sleepfor = 5)
-    tasks = map(cmds) do cmd
-        sleep(sleepfor)
-        @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
-    end
-    return JobTracker(Dict(pairs(tasks)), Dict(), Dict())
-end # function launchjob
-
-function update!(x::JobTracker)
-    @argcheck isvalid(x)
-    for (i, task) in x.running
-        if isready(task)
-            result = fetch(task)
-            if result isa RemoteException
-                push!(x.failed, i => result)
-            else
-                push!(x.succeeded, i => result)
-            end
-            pop!(x.running, i)
-        end
-    end
-    return x
-end # function update!
-
-function Base.show(io::IO, x::JobTracker)
-    println(io, "time has passed: ", canonicalize(CompoundPeriod(now() - x.starttime)))
-    foreach(
-        x -> println(io, x),
-        ("running:", x.running, "succeeded:", x.succeeded, "failed:", x.failed),
-    )
-end # function Base.show
-
-Base.isvalid(x::JobTracker) =
-    x.n == length(x.running) + length(x.succeeded) + length(x.failed)
+end # function div_nprocs
 
 end
