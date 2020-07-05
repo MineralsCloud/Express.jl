@@ -41,8 +41,8 @@ function Express._check_settings(settings)
     map(("template", "pressures", "dir")) do key
         @argcheck haskey(settings, key)
     end
-    @assert isdir(settings["dir"])
-    @assert all(isfile.(settings["template"]))
+    @argcheck isdir(settings["dir"])
+    @argcheck all(isfile.(settings["template"]))
 end # function _check_settings
 
 # function (::Step{ForceConstant,Prepare{:input}})(
