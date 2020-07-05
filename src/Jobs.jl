@@ -4,14 +4,12 @@ using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 using DockerPy.Containers
 
-export nprocs_task, launchjob, update!
+export nprocs_task, launchjob, jobrunning, jobsuccess, jobfailure
 
 struct JobTracker
-    running
-    succeeded
-    failed
+    subjobs
     starttime::DateTime
-    JobTracker(running, succeeded, failed) = new(running, succeeded, failed, now())
+    JobTracker(subjobs) = new(subjobs, now())
 end
 
 function nprocs_task(total_num, nsubjob)
@@ -23,27 +21,16 @@ function nprocs_task(total_num, nsubjob)
 end # function nprocs_task
 
 function launchjob(cmds; sleepfor = 5)
-    tasks = map(cmds) do cmd
+    subjobs = map(cmds) do cmd
         sleep(sleepfor)
         @spawn run(cmd; wait = true)  # Must wait, or else lose I/O streams
     end
-    return JobTracker(Dict(pairs(tasks)), Dict(), Dict())
+    return JobTracker(subjobs)
 end # function launchjob
 
-function update!(x::JobTracker)
-    for (i, task) in x.running
-        if isready(task)
-            result = fetch(task)
-            if result isa RemoteException
-                push!(x.failed, i => result)
-            else
-                push!(x.succeeded, i => result)
-            end
-            pop!(x.running, i)
-        end
-    end
-    return x
-end # function update!
+jobrunning(x::JobTracker) = filter(!isready, x.subjobs)
+jobsuccess(x::JobTracker) = filter(success, map(fetch, filter(isready, x.subjobs)))
+jobfailure(x::JobTracker) = filter(!success, map(fetch, filter(isready, x.subjobs)))
 
 function Base.show(io::IO, x::JobTracker)
     print(
@@ -53,11 +40,11 @@ function Base.show(io::IO, x::JobTracker)
                 "\033[34mtime elapsed:\033[0m ",  # Green text
                 canonicalize(CompoundPeriod(now() - x.starttime)),
                 "\033[34mrunning:\033[0m ",
-                x.running,
+                jobrunning(x),
                 "\033[32msucceeded:\033[0m ",
-                x.succeeded,
+                jobsuccess(x),
                 "\033[31mfailed:\033[0m ",
-                x.failed,
+                jobfailure(x),
             ),
             '\n',
         ),
