@@ -4,7 +4,7 @@ using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 using DockerPy.Containers
 
-export nprocs_task, launchjob, jobrunning, jobsuccess, jobfailure
+export nprocs_task, launchjob, running, succeeded, failed
 
 struct JobTracker
     subjobs
@@ -28,9 +28,9 @@ function launchjob(cmds; sleepfor = 5)
     return JobTracker(subjobs)
 end # function launchjob
 
-jobrunning(x::JobTracker) = filter(!isready, x.subjobs)
-jobsuccess(x::JobTracker) = filter(success, map(fetch, filter(isready, x.subjobs)))
-jobfailure(x::JobTracker) = filter(!success, map(fetch, filter(isready, x.subjobs)))
+running(x::JobTracker) = filter(!isready, x.subjobs)
+succeeded(x::JobTracker) = filter(success, map(fetch, filter(isready, x.subjobs)))
+failed(x::JobTracker) = filter(!success, map(fetch, filter(isready, x.subjobs)))
 
 function Base.show(io::IO, x::JobTracker)
     print(
@@ -40,11 +40,11 @@ function Base.show(io::IO, x::JobTracker)
                 "\033[34mtime elapsed:\033[0m ",  # Green text
                 canonicalize(CompoundPeriod(now() - x.starttime)),
                 "\033[34mrunning:\033[0m ",
-                jobrunning(x),
+                running(x),
                 "\033[32msucceeded:\033[0m ",
-                jobsuccess(x),
+                succeeded(x),
                 "\033[31mfailed:\033[0m ",
-                jobfailure(x),
+                failed(x),
             ),
             '\n',
         ),
