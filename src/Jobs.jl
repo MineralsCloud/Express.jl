@@ -29,9 +29,11 @@ end # function launchjob
 
 running(x::JobTracker) = filter(!isready, x.subjobs)
 
-succeeded(x::JobTracker) = filter(success, map(fetch, filter(isready, x.subjobs)))
+succeeded(x::JobTracker) =
+    filter(y -> !isa(y, RemoteException), map(fetch, filter(isready, x.subjobs)))
 
-failed(x::JobTracker) = filter(!success, map(fetch, filter(isready, x.subjobs)))
+failed(x::JobTracker) =
+    filter(y -> y isa RemoteException, map(fetch, filter(isready, x.subjobs)))
 
 starttime(x::JobTracker) = x.starttime
 
@@ -67,7 +69,10 @@ function Base.show(io::IO, x::JobTracker)
                 "\033[31mfailed:\033[0m ",  # Red text
                 failed(x),
                 "\033[34mtime used:\033[0m ",  # Green text
-                canonicalize.(CompoundPeriod.(usetime(x))),
+                map(
+                    y -> y !== nothing ? canonicalize(CompoundPeriod(y)) : nothing,
+                    usetime(x),
+                ),
             ),
             '\n',
         ),
