@@ -3,14 +3,31 @@ module Jobs
 using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 
-export div_nprocs, launchjob, starttime, stoptime, usetime, status
+export div_nprocs,
+    launchjob,
+    starttime,
+    stoptime,
+    usetime,
+    status,
+    running,
+    succeeded,
+    failed,
+    getstdin,
+    getstdout,
+    getstderr
+
+@enum JobStatus begin
+    RUNNING
+    SUCCEEDED
+    FAILED
+end
 
 mutable struct OneShot
     cmd::Base.AbstractCmd
     ref::Future
     starttime::DateTime
     stoptime::DateTime
-    status::Symbol
+    status::JobStatus
     OneShot(cmd) = new(cmd)
 end
 
@@ -22,14 +39,14 @@ function launchjob(cmds, interval = 3)
     subjobs = map(enumerate(cmds)) do (i, cmd)
         sleep(interval)
         x = OneShot(cmd)
-        x.status = :running
+        x.status = RUNNING
         x.ref = @spawn begin
             x.starttime = now()
             try
                 z = run(cmd; wait = true)
-                x.status = :succeeded
+                x.status = SUCCEEDED
             catch
-                x.status = :failed
+                x.status = FAILED
             finally
                 x.stoptime = now()
                 z
@@ -46,11 +63,19 @@ status(x::JobTracker) = map(status, x.subjobs)
 starttime(x::OneShot) = x.starttime
 starttime(x::JobTracker) = map(starttime, x.subjobs)
 
-stoptime(x::OneShot) = status(x) == :running ? nothing : x.stoptime
+stoptime(x::OneShot) = status(x) == RUNNING ? nothing : x.stoptime
 stoptime(x::JobTracker) = map(stoptime, x.subjobs)
 
-usetime(x::OneShot) = status(x) == :running ? nothing : x.stoptime - x.starttime
+usetime(x::OneShot) = status(x) == RUNNING ? nothing : x.stoptime - x.starttime
 usetime(x::JobTracker) = map(usetime, x.subjobs)
+
+running(x::JobTracker) =
+    map(Base.Fix1(getindex, x.subjobs), findall(==(RUNNING), status(x)))
+
+succeeded(x::JobTracker) =
+    map(Base.Fix1(getindex, x.subjobs), findall(==(SUCCEEDED), status(x)))
+
+failed(x::JobTracker) = map(Base.Fix1(getindex, x.subjobs), findall(==(FAILED), status(x)))
 
 function Base.show(io::IO, x::JobTracker)
     n = length(x.subjobs)
@@ -58,8 +83,8 @@ function Base.show(io::IO, x::JobTracker)
     for (i, subjob) in enumerate(x.subjobs)
         println(io, lpad("[$i", ndigits(n) + 1), "] ", subjob.cmd)
         print(io, ' '^(ndigits(n) + 4))
-        status = subjob.status
-        if status == :running
+        status = status(subjob)
+        if status == RUNNING
             printstyled(
                 io,
                 "running for: ",
@@ -67,7 +92,7 @@ function Base.show(io::IO, x::JobTracker)
                 '\n';
                 color = :blue,
             )  # Blue text
-        elseif status == :failed
+        elseif status == FAILED
             printstyled(
                 io,
                 "failed after: ",
@@ -75,7 +100,7 @@ function Base.show(io::IO, x::JobTracker)
                 '\n';
                 color = :red,
             )  # Red text
-        elseif status == :succeeded
+        elseif status == SUCCEEDED
             printstyled(
                 io,
                 "succeeded after: ",
