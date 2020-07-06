@@ -12,7 +12,6 @@ julia>
 module Phonon
 
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
-using OptionalArgChecks: @argcheck
 
 using ..Express: SelfConsistentField, DfptMethod, ForceConstant, load_settings
 using ..EosFitting: _check_software_settings
@@ -39,10 +38,10 @@ end
 
 function Express._check_settings(settings)
     map(("template", "pressures", "dir")) do key
-        @argcheck haskey(settings, key)
+        @assert haskey(settings, key)
     end
-    @argcheck isdir(settings["dir"])
-    @argcheck all(isfile.(settings["template"]))
+    @assert isdir(settings["dir"])
+    @assert all(isfile.(settings["template"]))
 end # function _check_settings
 
 # function (::Step{ForceConstant,Prepare{:input}})(

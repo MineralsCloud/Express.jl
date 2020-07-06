@@ -16,7 +16,6 @@ using AbInitioSoftwareBase.CLI: MpiCmd
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using OptionalArgChecks: @argcheck
 
 using ..Express: SelfConsistentField, VariableCellOptimization, load_settings
 using ..Jobs: div_nprocs, launchjob
@@ -41,7 +40,7 @@ function set_press_vol(
     volume_scale = (eps(), 1.3),
 )::Input
     ⋁, ⋀ = minimum(volume_scale), maximum(volume_scale)
-    @argcheck ⋁ > zero(eltype(volume_scale))  # No negative volume
+    @assert ⋁ > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, (⋁, ⋀) .* eos.v0)
     return _set_press_vol(template, pressure, volume)
 end # function set_press_vol
@@ -205,14 +204,14 @@ end
 
 function Express._check_settings(settings)
     map(("template", "pressures", "trial_eos", "dir")) do key
-        @argcheck haskey(settings, key)
+        @assert haskey(settings, key)
     end
     _check_software_settings(settings["qe"])
-    @argcheck isdir(settings["dir"])
-    @argcheck isfile(settings["template"])
+    @assert isdir(settings["dir"])
+    @assert isfile(settings["template"])
     alert_pressures(settings["pressures"])
     map(("type", "parameters", "units")) do key
-        @argcheck haskey(settings["trial_eos"], key)
+        @assert haskey(settings["trial_eos"], key)
     end
 end # function _check_settings
 
