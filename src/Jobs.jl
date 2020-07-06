@@ -3,99 +3,88 @@ module Jobs
 using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
 
-export div_nprocs, launchjob, running, succeeded, failed, starttime, endtime, usetime
+export div_nprocs, launchjob, starttime, stoptime, usetime, status
+
+mutable struct OneShot
+    cmd::Base.AbstractCmd
+    ref::Future
+    starttime::DateTime
+    stoptime::DateTime
+    status::Symbol
+    OneShot(cmd) = new(cmd)
+end
 
 struct JobTracker
-    subjobs::Vector{Future}
-    starttime::Vector{DateTime}
-    endtime::Vector{DateTime}
+    subjobs::Vector{OneShot}
 end
 
 function launchjob(cmds, interval = 3)
-    tracker = JobTracker(
-        vec(similar(cmds, Future)),
-        vec(similar(cmds, DateTime)),
-        vec(similar(cmds, DateTime)),
-    )
-    for (i, cmd) in enumerate(cmds)
+    subjobs = map(enumerate(cmds)) do (i, cmd)
         sleep(interval)
-        tracker.subjobs[i] = @spawn begin
-            tracker.starttime[i] = now()
+        x = OneShot(cmd)
+        x.status = :running
+        x.ref = @spawn begin
+            x.starttime = now()
             try
-                x = run(cmd; wait = true)
+                z = run(cmd; wait = true)
+                x.status = :succeeded
+            catch
+                x.status = :failed
             finally
-                tracker.endtime[i] = now()
-                x
+                x.stoptime = now()
+                z
             end
         end
+        x
     end
-    return tracker
+    return JobTracker(vec(subjobs))
 end # function launchjob
 
-running(x::JobTracker) = filter(!isready, x.subjobs)
+status(x::OneShot) = x.status
+status(x::JobTracker) = map(status, x.subjobs)
 
-succeeded(x::JobTracker) =
-    filter(y -> !isa(y, RemoteException), map(fetch, filter(isready, x.subjobs)))
+starttime(x::OneShot) = x.starttime
+starttime(x::JobTracker) = map(starttime, x.subjobs)
 
-failed(x::JobTracker) =
-    filter(y -> y isa RemoteException, map(fetch, filter(isready, x.subjobs)))
+stoptime(x::OneShot) = status(x) == :running ? nothing : x.stoptime
+stoptime(x::JobTracker) = map(stoptime, x.subjobs)
 
-starttime(x::JobTracker) = x.starttime
-
-function endtime(x::JobTracker)
-    return map(x.subjobs, x.endtime) do subjob, endtime
-        if isready(subjob)
-            endtime
-        else
-            nothing
-        end
-    end
-end # function endtime
-
-function usetime(x::JobTracker)
-    return map(x.subjobs, x.endtime, x.starttime) do subjob, endtime, starttime
-        if isready(subjob)
-            endtime - starttime
-        else
-            nothing
-        end
-    end
-end # function usetime
+usetime(x::OneShot) = status(x) == :running ? nothing : x.stoptime - x.starttime
+usetime(x::JobTracker) = map(usetime, x.subjobs)
 
 function Base.show(io::IO, x::JobTracker)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
-    for (i, (starttime, endtime, subjob)) in
-        enumerate(zip(x.starttime, x.endtime, x.subjobs))
-        println(io, " [", lpad(i, ndigits(n)), "] ", subjob)
+    for (i, subjob) in enumerate(x.subjobs)
+        println(io, lpad("[$i", ndigits(n) + 1), "] ", subjob.cmd)
         print(io, ' '^(ndigits(n) + 4))
-        if !isready(subjob)
+        status = subjob.status
+        if status == :running
             printstyled(
                 io,
                 "running for: ",
-                _readabletime(now() - starttime),
+                _readabletime(now() - subjob.starttime),
                 '\n';
                 color = :blue,
             )  # Blue text
+        elseif status == :failed
+            printstyled(
+                io,
+                "failed after: ",
+                _readabletime(subjob.stoptime - subjob.starttime),
+                '\n';
+                color = :red,
+            )  # Red text
+        elseif status == :succeeded
+            printstyled(
+                io,
+                "succeeded after: ",
+                _readabletime(subjob.stoptime - subjob.starttime),
+                '\n';
+                color = :green,
+            )  # Green text
         else
-            res = fetch(subjob)
-            if res isa RemoteException
-                printstyled(
-                    io,
-                    "failed after: ",
-                    _readabletime(endtime - starttime),
-                    '\n';
-                    color = :red,
-                )  # Red text
-            else
-                printstyled(
-                    io,
-                    "succeeded after: ",
-                    _readabletime(endtime - starttime),
-                    '\n';
-                    color = :green,
-                )  # Green text
-            end
+            error("unknown status!")  # This should never happen!
         end
     end
 end # function Base.show
@@ -109,5 +98,14 @@ function div_nprocs(np, nj)
     end
     return quotient
 end # function div_nprocs
+
+getstdin(x::Base.CmdRedirect) = x.stream_no == 0 ? x.handle.filename : getstdin(x.cmd)
+getstdin(::Base.AbstractCmd) = nothing
+
+getstdout(x::Base.CmdRedirect) = x.stream_no == 1 ? x.handle.filename : getstdout(x.cmd)
+getstdout(::Base.AbstractCmd) = nothing
+
+getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
+getstderr(::Base.AbstractCmd) = nothing
 
 end
