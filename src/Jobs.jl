@@ -2,7 +2,6 @@ module Jobs
 
 using Dates: DateTime, CompoundPeriod, now, canonicalize
 using Distributed
-using DockerPy.Containers
 
 export div_nprocs, launchjob, running, succeeded, failed, starttime, endtime, usetime
 
