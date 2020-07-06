@@ -56,8 +56,7 @@ function Base.show(io::IO, x::JobTracker)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
     for (i, subjob) in enumerate(x.subjobs)
-        print(io, lpad("[$i", ndigits(n) + 1), "] ")
-        printstyled(io, subjob.cmd, '\n'; color = :light_black, bold = true)
+        println(io, lpad("[$i", ndigits(n) + 1), "] ", subjob.cmd)
         print(io, ' '^(ndigits(n) + 4))
         status = subjob.status
         if status == :running
