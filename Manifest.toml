@@ -147,14 +147,6 @@ git-tree-sha1 = "55e1de79bd2c397e048ca47d251f8fa70e530550"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.22.6"
 
-[[DockerPy]]
-deps = ["PyCall", "VersionParsing"]
-git-tree-sha1 = "5111591f42020bf0d3482859e60bf1095eeb798c"
-repo-rev = "master"
-repo-url = "git@github.com:singularitti/DockerPy.jl.git"
-uuid = "7b2ae67c-a082-49fb-8801-fe9170dc9342"
-version = "0.1.0"
-
 [[EponymTuples]]
 deps = ["Test"]
 git-tree-sha1 = "beb267f768b829fedf7562da883354066977c809"
