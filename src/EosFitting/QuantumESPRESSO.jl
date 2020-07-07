@@ -20,7 +20,6 @@ using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
-import ...Express
 import ..EosFitting
 
 export safe_exit
@@ -55,7 +54,7 @@ const EosMap = (
     v = Vinet,
 )
 
-function Express.Settings(settings)
+function EosFitting._expand_settings(settings)
     template = parse(PWInput, read(expanduser(settings["template"]), String))
     qe = settings["qe"]
     if qe["manager"] == "local"
@@ -82,7 +81,7 @@ function Express.Settings(settings)
         bin = bin,
         manager = manager,
     )
-end # function Settings
+end # function _expand_settings
 
 function EosFitting._prep_input(calculation, template)
     template = set_verbosity(template, "high")

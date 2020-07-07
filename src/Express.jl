@@ -1,6 +1,5 @@
 module Express
 
-using AbInitioSoftwareBase: load
 using Unitful
 using UnitfulAtomic
 
@@ -26,16 +25,6 @@ struct PhononDispersion <: VibrationalProperty end
 struct PhononDensityOfStates <: VibrationalProperty end
 
 _uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
-
-function _check_settings end
-
-function Settings end
-
-function load_settings(path)
-    settings = load(path)
-    _check_settings(settings)  # Errors will be thrown if exist
-    return Settings(settings)
-end # function load_settings
 
 Base.show(io::IO, ::SelfConsistentField) = print(io, "scf calculation")
 Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf calculation")
