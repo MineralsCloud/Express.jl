@@ -32,7 +32,7 @@ function preset(template::PhInput)
     return template
 end # function preset
 
-function Express.Settings(settings)
+function Phonon._expand_settings(settings)
     templatetexts = [read(expanduser(f), String) for f in settings["template"]]
     template = parse(PWInput, templatetexts[1]), parse(PhInput, templatetexts[2])
     qe = settings["qe"]
@@ -58,7 +58,7 @@ function Express.Settings(settings)
         bin = bin,
         manager = manager,
     )
-end # function Settings
+end # function _expand_settings
 
 """
     relay(from::PWInput, to::PhInput)
