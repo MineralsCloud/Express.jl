@@ -43,23 +43,9 @@ struct JobTracker
 end
 
 function launchjob(cmds, interval = 3)
-    subjobs = map(enumerate(cmds)) do (i, cmd)
+    subjobs = map(cmds) do cmd
         sleep(interval)
-        x = OneShot(cmd)
-        x.status = RUNNING
-        x.ref = @spawn begin
-            x.starttime = now()
-            try
-                z = run(cmd; wait = true)
-                x.status = SUCCEEDED
-            catch
-                x.status = FAILED
-            finally
-                x.stoptime = now()
-                z
-            end
-        end
-        x
+        _launch(cmd)
     end
     return JobTracker(vec(subjobs))
 end # function launchjob
@@ -69,24 +55,30 @@ function launchjob(tracker::JobTracker, interval = 3)
             subjob
         else
             sleep(interval)
-            x = OneShot(subjob.cmd)
-            x.status = RUNNING
-            x.ref = @spawn begin
-                x.starttime = now()
-                try
-                    z = run(subjob.cmd; wait = true)
-                    x.status = SUCCEEDED
-                catch
-                    x.status = FAILED
-                finally
-                    x.stoptime = now()
-                    z
-                end
-            end
-            x
+            _launch(subjob)
         end
     end)
 end # function launchjob
+
+function _launch(cmd::Base.AbstractCmd)
+    x = OneShot(cmd)
+    x.status = RUNNING
+    x.ref = @spawn begin
+        try
+            x.starttime = now()
+            ref = run(cmd; wait = true)  # Must wait
+            x.stoptime = now()
+            x.status = SUCCEEDED
+        catch
+            x.stoptime = now()
+            x.status = FAILED
+        finally
+            ref
+        end
+    end
+    return x
+end # function _launch
+_launch(x::OneShot) = _launch(x.cmd)
 
 getstatus(x::OneShot) = x.status
 getstatus(x::JobTracker) = map(getstatus, x.subjobs)
