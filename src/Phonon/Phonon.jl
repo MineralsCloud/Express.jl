@@ -11,9 +11,10 @@ julia>
 """
 module Phonon
 
+using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant, load_settings
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant
 using ..EosFitting: _check_software_settings
 import ..Express
 
@@ -35,14 +36,6 @@ function preprocess(calc::DfptMethod, path; kwargs...)
     inputs = settings.dirs .* "/ph.in"
     return preprocess(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
-
-function Express._check_settings(settings)
-    map(("template", "pressures", "dir")) do key
-        @assert haskey(settings, key)
-    end
-    @assert isdir(settings["dir"])
-    @assert all(isfile.(settings["template"]))
-end # function _check_settings
 
 # function (::Step{ForceConstant,Prepare{:input}})(
 #     q2r_inputs,
@@ -86,6 +79,22 @@ end # function _check_settings
 #     end
 #     return
 # end
+
+function _expand_settings end
+
+function _check_settings(settings)
+    map(("template", "pressures", "dir")) do key
+        @assert haskey(settings, key)
+    end
+    @assert isdir(settings["dir"])
+    @assert all(isfile.(settings["template"]))
+end # function _check_settings
+
+function load_settings(path)
+    settings = load(path)
+    _check_settings(settings)  # Errors will be thrown if exist
+    return _expand_settings(settings)
+end # function load_settings
 
 include("QuantumESPRESSO.jl")
 

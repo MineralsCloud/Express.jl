@@ -11,13 +11,14 @@ julia>
 """
 module EosFitting
 
+using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 using AbInitioSoftwareBase.CLI: MpiCmd
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 
-using ..Express: SelfConsistentField, VariableCellOptimization, load_settings
+using ..Express: SelfConsistentField, VariableCellOptimization
 using ..Jobs: div_nprocs, launchjob
 
 import ..Express
@@ -29,7 +30,8 @@ export SelfConsistentField,
     inputstring,
     preprocess,
     process,
-    postprocess
+    postprocess,
+    set_structure
 
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
@@ -202,19 +204,6 @@ end
 #     Step{typeof(T),Analyse}(outputs, trial_eos)
 # end
 
-function Express._check_settings(settings)
-    map(("template", "pressures", "trial_eos", "dir")) do key
-        @assert haskey(settings, key)
-    end
-    _check_software_settings(settings["qe"])
-    @assert isdir(settings["dir"])
-    @assert isfile(settings["template"])
-    alert_pressures(settings["pressures"])
-    map(("type", "parameters", "units")) do key
-        @assert haskey(settings["trial_eos"], key)
-    end
-end # function _check_settings
-
 # _generate_cmds(n, input, output, env::DockerEnvironment) = join(
 #     [
 #         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
@@ -233,8 +222,6 @@ function alert_pressures(pressures)
     end
 end # function alert_pressures
 
-function _check_software_settings end
-
 function _set_press_vol end
 
 function _prep_input end
@@ -250,6 +237,29 @@ function analyse end
 function set_structure end
 
 function parsecell end
+
+function _expand_settings end
+
+function _check_software_settings end
+
+function _check_settings(settings)
+    map(("template", "pressures", "trial_eos", "dir")) do key
+        @assert haskey(settings, key)
+    end
+    _check_software_settings(settings["qe"])
+    @assert isdir(settings["dir"])
+    @assert isfile(settings["template"])
+    alert_pressures(settings["pressures"])
+    map(("type", "parameters", "units")) do key
+        @assert haskey(settings["trial_eos"], key)
+    end
+end # function _check_settings
+
+function load_settings(path)
+    settings = load(path)
+    _check_settings(settings)  # Errors will be thrown if exist
+    return _expand_settings(settings)
+end # function load_settings
 
 include("QuantumESPRESSO.jl")
 
