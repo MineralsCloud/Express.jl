@@ -139,12 +139,12 @@ function process(
         return launchjob(cmds)
     end
 end
-function process(calc::T, path::AbstractString) where {T<:ALLOWED_CALCULATIONS}
+function process(calc::T, path::AbstractString; kwargs...) where {T<:ALLOWED_CALCULATIONS}
     settings = load_settings(path)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return process(calc, outputs, inputs, settings.manager.np, settings.bin)
+    return process(calc, outputs, inputs, settings.manager.np, settings.bin, kwargs...)
 end
 
 function postprocess(
