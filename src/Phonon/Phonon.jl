@@ -80,7 +80,7 @@ end
 #     return
 # end
 
-function expand_settings end
+function _expand_settings end
 
 function _check_settings(settings)
     map(("template", "pressures", "dir")) do key
@@ -93,7 +93,7 @@ end # function _check_settings
 function load_settings(path)
     settings = load(path)
     _check_settings(settings)  # Errors will be thrown if exist
-    return expand_settings(settings)
+    return _expand_settings(settings)
 end # function load_settings
 
 include("QuantumESPRESSO.jl")

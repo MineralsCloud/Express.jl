@@ -12,8 +12,7 @@ using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: DfptMethod, SelfConsistentField
-import ...Express
-import ..Phonon: preset, relay, prep_input, preprocess
+import ..Phonon: preset, relay, prep_input, preprocess, _expand_settings
 
 function prep_input(::DfptMethod, template::PhInput, from::PWInput)
     template = preset(template)
@@ -32,7 +31,7 @@ function preset(template::PhInput)
     return template
 end # function preset
 
-function Phonon._expand_settings(settings)
+function _expand_settings(settings)
     templatetexts = [read(expanduser(f), String) for f in settings["template"]]
     template = parse(PWInput, templatetexts[1]), parse(PhInput, templatetexts[2])
     qe = settings["qe"]
