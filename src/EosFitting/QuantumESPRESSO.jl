@@ -15,6 +15,7 @@ using QuantumESPRESSO.Inputs.PWscf:
     set_press_vol
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
+using QuantumESPRESSO.CLI: PWCmd
 using Setfield: @set!
 using Unitful: @u_str
 using UnitfulAtomic
@@ -87,7 +88,7 @@ function _expand_settings(settings)
                 "p" * string(pressure),
             ))
         end,
-        bin = bin,
+        bin = PWCmd(; bin = bin),
         manager = manager,
     )
 end # function _expand_settings
