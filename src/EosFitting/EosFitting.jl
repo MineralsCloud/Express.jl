@@ -14,11 +14,12 @@ module EosFitting
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 using AbInitioSoftwareBase.CLI: MpiCmd
+using Dates: DateTime, now, format
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 
-using ..Express: SelfConsistentField, VariableCellOptimization
+using ..Express: SelfConsistentField, VariableCellOptimization, Calculation
 using ..Jobs: div_nprocs, launchjob
 
 import ..Express
@@ -34,6 +35,11 @@ export SelfConsistentField,
     set_structure
 
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
+
+@enum StepStatus::Bool begin
+    SUCCEEDED
+    FAILED
+end
 
 function set_press_vol(
     template::Input,
@@ -71,6 +77,8 @@ function preprocess(
         object = prep_input(calc, template, pressure, trial_eos; kwargs...)
         write_input(file, object, dry_run)
     end
+    STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
+        Context(files, nothing, SUCCEEDED, now(), calc)
     return
 end
 preprocess(
@@ -108,7 +116,7 @@ function preprocess(calc::VariableCellOptimization, path; kwargs...)
 end
 
 function process(
-    ::ALLOWED_CALCULATIONS,
+    calc::ALLOWED_CALCULATIONS,
     outputs,
     inputs,
     n,
@@ -126,6 +134,8 @@ function process(
         @warn "the following commands will be run:"
         return cmds
     else
+        STEP_TRACKER[calc isa SelfConsistentField ? 2 : 5] =
+            Context(inputs, outputs, SUCCEEDED, now(), calc)
         return launchjob(cmds)
     end
 end
@@ -149,6 +159,8 @@ function postprocess(
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
+    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
+        Context(nothing, outputs, SUCCEEDED, now(), calc)
     if fit_e
         return lsqfit(trial_eos(Energy()), first.(results), last.(results))
     else
@@ -190,19 +202,30 @@ function prep_potential(template)
     end
 end
 
-# function (::T)(
-#     outputs,
-#     inputs,
-#     template,
-#     pressures,
-#     trial_eos,
-#     environment,
-#     cmd,
-# ) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
-#     Step{typeof(T),Prepare{:input}}(inputs, template, pressures, trial_eos)
-#     Step{typeof(T),Launch{:job}}(outputs, inputs, environment, cmd)
-#     Step{typeof(T),Analyse}(outputs, trial_eos)
-# end
+mutable struct Context
+    inputs
+    outputs
+    status::StepStatus
+    time::DateTime
+    calc::Calculation
+end
+
+STEP_TRACKER = [
+    Context(nothing, nothing, FAILED, now(), SelfConsistentField()),
+    Context(nothing, nothing, FAILED, now(), SelfConsistentField()),
+    Context(nothing, nothing, FAILED, now(), SelfConsistentField()),
+    Context(nothing, nothing, FAILED, now(), VariableCellOptimization()),
+    Context(nothing, nothing, FAILED, now(), VariableCellOptimization()),
+    Context(nothing, nothing, FAILED, now(), VariableCellOptimization()),
+]
+
+function Base.show(io::IO, x::Context)
+    print(io, _emoji(x.status), ' ')
+    printstyled(io, x.calc; bold = true)
+    printstyled(io, " @ ", format(x.time, "Y/mm/dd H:M:S"); color = :light_black)
+end # function Base.show
+
+_emoji(step) = step == SUCCEEDED ? '✅' : '❌'
 
 # _generate_cmds(n, input, output, env::DockerEnvironment) = join(
 #     [
