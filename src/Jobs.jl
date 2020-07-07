@@ -64,17 +64,19 @@ function _launch(cmd::Base.AbstractCmd)
     x = OneShot(cmd)
     x.status = RUNNING
     x.ref = @spawn begin
-        try
-            x.starttime = now()
-            ref = run(cmd; wait = true)  # Must wait
-            x.stoptime = now()
-            x.status = SUCCEEDED
-        catch
-            x.stoptime = now()
-            x.status = FAILED
-        finally
-            ref
+        x.starttime = now()
+        ref = try
+            run(cmd; wait = true)  # Must wait
+        catch e
+            e
         end
+        x.stoptime = now()
+        if ref isa Exception  # Include all cases?
+            x.status = FAILED
+        else
+            x.status = SUCCEEDED
+        end
+        ref
     end
     return x
 end # function _launch
