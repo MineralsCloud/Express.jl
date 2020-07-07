@@ -188,4 +188,13 @@ getstdout(::Base.AbstractCmd) = nothing
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
 
+Base.iterate(x::JobTracker) = iterate(x.subjobs)
+Base.iterate(x::JobTracker, state) = iterate(x.subjobs, state)
+
+Base.getindex(x::JobTracker, i) = getindex(x.subjobs, i)
+
+Base.firstindex(x::JobTracker) = 1
+
+Base.lastindex(x::JobTracker) = length(x.subjobs)
+
 end
