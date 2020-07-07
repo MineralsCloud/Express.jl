@@ -7,14 +7,18 @@ export div_nprocs,
     launchjob,
     starttime,
     stoptime,
-    usetime,
-    status,
-    running,
-    succeeded,
-    failed,
+    timecost,
+    getstatus,
+    isrunning,
+    issucceeded,
+    isfailed,
     getstdin,
     getstdout,
-    getstderr
+    getstderr,
+    getresult,
+    getrunning,
+    getsucceeded,
+    getfailed
 
 @enum JobStatus begin
     RUNNING
@@ -56,26 +60,67 @@ function launchjob(cmds, interval = 3)
     end
     return JobTracker(vec(subjobs))
 end # function launchjob
+function launchjob(tracker::JobTracker, interval = 3)
+    return JobTracker(map(tracker.subjobs) do subjob
+        if getstatus(subjob) ∈ (RUNNING, SUCCEEDED)
+            subjob
+        else
+            sleep(interval)
+            x = OneShot(subjob.cmd)
+            x.status = RUNNING
+            x.ref = @spawn begin
+                x.starttime = now()
+                try
+                    z = run(subjob.cmd; wait = true)
+                    x.status = SUCCEEDED
+                catch
+                    x.status = FAILED
+                finally
+                    x.stoptime = now()
+                    z
+                end
+            end
+            x
+        end
+    end)
+end # function launchjob
 
-status(x::OneShot) = x.status
-status(x::JobTracker) = map(status, x.subjobs)
+getstatus(x::OneShot) = x.status
+getstatus(x::JobTracker) = map(getstatus, x.subjobs)
 
 starttime(x::OneShot) = x.starttime
 starttime(x::JobTracker) = map(starttime, x.subjobs)
 
-stoptime(x::OneShot) = status(x) == RUNNING ? nothing : x.stoptime
+stoptime(x::OneShot) = isrunning(x) ? nothing : x.stoptime
 stoptime(x::JobTracker) = map(stoptime, x.subjobs)
 
-usetime(x::OneShot) = status(x) == RUNNING ? nothing : x.stoptime - x.starttime
-usetime(x::JobTracker) = map(usetime, x.subjobs)
+timecost(x::OneShot) = isrunning(x) ? nothing : x.stoptime - x.starttime
+timecost(x::JobTracker) = map(timecost, x.subjobs)
 
-running(x::JobTracker) =
-    map(Base.Fix1(getindex, x.subjobs), findall(==(RUNNING), status(x)))
+getresult(x::OneShot) = isrunning(x) ? nothing : fetch(x.ref)
+getresult(x::JobTracker) = map(getresult, x.subjobs)
 
-succeeded(x::JobTracker) =
-    map(Base.Fix1(getindex, x.subjobs), findall(==(SUCCEEDED), status(x)))
+isrunning(x::OneShot) = getstatus(x) === RUNNING
 
-failed(x::JobTracker) = map(Base.Fix1(getindex, x.subjobs), findall(==(FAILED), status(x)))
+issucceeded(x::OneShot) = getstatus(x) === SUCCEEDED
+
+isfailed(x::OneShot) = getstatus(x) === FAILED
+
+getrunning(x::JobTracker) = JobTracker(_selectby(x, RUNNING))
+
+getsucceeded(x::JobTracker) = JobTracker(_selectby(x, SUCCEEDED))
+
+getfailed(x::JobTracker) = JobTracker(_selectby(x, FAILED))
+
+function _selectby(j::JobTracker, st::JobStatus)  # Do not export!
+    res = OneShot[]
+    for subjob in j.subjobs
+        if getstatus(subjob) === st
+            push!(res, subjob)
+        end
+    end
+    return res
+end # function _selectby
 
 function Base.show(io::IO, x::JobTracker)
     n = length(x.subjobs)
@@ -83,8 +128,7 @@ function Base.show(io::IO, x::JobTracker)
     for (i, subjob) in enumerate(x.subjobs)
         println(io, lpad("[$i", ndigits(n) + 1), "] ", subjob.cmd)
         print(io, ' '^(ndigits(n) + 4))
-        status = status(subjob)
-        if status == RUNNING
+        if isrunning(subjob)
             printstyled(
                 io,
                 "running for: ",
@@ -92,7 +136,7 @@ function Base.show(io::IO, x::JobTracker)
                 '\n';
                 color = :blue,
             )  # Blue text
-        elseif status == FAILED
+        elseif isfailed(subjob)
             printstyled(
                 io,
                 "failed after: ",
@@ -100,7 +144,7 @@ function Base.show(io::IO, x::JobTracker)
                 '\n';
                 color = :red,
             )  # Red text
-        elseif status == SUCCEEDED
+        elseif issucceeded(subjob)
             printstyled(
                 io,
                 "succeeded after: ",
