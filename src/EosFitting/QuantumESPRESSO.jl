@@ -20,19 +20,28 @@ using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
-import ..EosFitting
+using ..EosFitting: set_press_vol
+import ..EosFitting:
+    getpotentials,
+    getpotentialdir,
+    _set_press_vol,
+    _check_software_settings,
+    _expand_settings,
+    _prep_input,
+    analyse,
+    parsecell,
+    set_structure
 
 export safe_exit
 
-EosFitting.getpotentials(template::PWInput) =
-    [x.pseudopot for x in template.atomic_species.data]
+getpotentials(template::PWInput) = [x.pseudopot for x in template.atomic_species.data]
 
-EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
+getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
-EosFitting._set_press_vol(template::PWInput, pressure, volume) =
+_set_press_vol(template::PWInput, pressure, volume) =
     set_press_vol(template, pressure, volume)
 
-function EosFitting._check_software_settings(settings)
+function _check_software_settings(settings)
     map(("manager", "bin", "n")) do key
         @assert haskey(settings, key) "key `$key` not found!"
     end
@@ -54,7 +63,7 @@ const EosMap = (
     v = Vinet,
 )
 
-function EosFitting._expand_settings(settings)
+function _expand_settings(settings)
     template = parse(PWInput, read(expanduser(settings["template"]), String))
     qe = settings["qe"]
     if qe["manager"] == "local"
@@ -83,7 +92,7 @@ function EosFitting._expand_settings(settings)
     )
 end # function _expand_settings
 
-function EosFitting._prep_input(calculation, template)
+function _prep_input(calculation, template)
     template = set_verbosity(template, "high")
     @set! template.control.calculation =
         calculation isa SelfConsistentField ? "scf" : "vc-relax"
@@ -94,10 +103,10 @@ function EosFitting._prep_input(calculation, template)
     return template
 end
 
-EosFitting.analyse(::SelfConsistentField, s::AbstractString) =
+analyse(::SelfConsistentField, s::AbstractString) =
     parse(Preamble, s).omega * u"bohr^3" =>
         parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
-function EosFitting.analyse(::VariableCellOptimization, s::AbstractString)
+function analyse(::VariableCellOptimization, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
@@ -107,9 +116,7 @@ end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
-EosFitting.parsecell(str::AbstractString) =
+parsecell(str::AbstractString) =
     tryparsefinal(CellParametersCard, str), tryparsefinal(AtomicPositionsCard, str)
-
-EosFitting.set_structure(template::PWInput, c, a) = set_structure(template, c, a)
 
 end # module QuantumESPRESSO

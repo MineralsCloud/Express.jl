@@ -30,7 +30,8 @@ export SelfConsistentField,
     inputstring,
     preprocess,
     process,
-    postprocess
+    postprocess,
+    set_structure
 
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
