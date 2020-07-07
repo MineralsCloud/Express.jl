@@ -18,7 +18,10 @@ export div_nprocs,
     getresult,
     getrunning,
     getsucceeded,
-    getfailed
+    getfailed,
+    peepstdin,
+    peepstdout,
+    peepstderr
 
 @enum JobStatus begin
     RUNNING
@@ -151,6 +154,30 @@ function div_nprocs(np, nj)
     end
     return quotient
 end # function div_nprocs
+
+function peepstdout(x::OneShot)
+    out = getstdout(x.cmd)
+    if out !== nothing
+        println(read(out, String))
+    end
+end # function peepstdout
+peepstdout(x::JobTracker) = foreach(peepstdout, x.subjobs)
+
+function peepstdin(x::OneShot)
+    out = getstdin(x.cmd)
+    if out !== nothing
+        println(read(out, String))
+    end
+end # function peepstdin
+peepstdin(x::JobTracker) = foreach(peepstdin, x.subjobs)
+
+function peepstderr(x::OneShot)
+    out = getstderr(x.cmd)
+    if out !== nothing
+        println(read(out, String))
+    end
+end # function peepstdin
+peepstderr(x::JobTracker) = foreach(peepstderr, x.subjobs)
 
 getstdin(x::Base.CmdRedirect) = x.stream_no == 0 ? x.handle.filename : getstdin(x.cmd)
 getstdin(::Base.AbstractCmd) = nothing
