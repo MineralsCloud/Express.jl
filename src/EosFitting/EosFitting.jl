@@ -104,7 +104,7 @@ end
 function preprocess(calc::VariableCellOptimization, path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = preprocess(SelfConsistentField(), path)
+    new_eos = postprocess(SelfConsistentField(), path)
     return preprocess(
         calc,
         inputs,
