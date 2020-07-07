@@ -1,6 +1,6 @@
 module Jobs
 
-using Dates: DateTime, CompoundPeriod, now, canonicalize
+using Dates: DateTime, CompoundPeriod, now, canonicalize, format
 using Distributed
 
 export div_nprocs,
@@ -94,7 +94,7 @@ starttime(x::JobTracker) = map(starttime, x.subjobs)
 stoptime(x::OneShot) = isrunning(x) ? nothing : x.stoptime
 stoptime(x::JobTracker) = map(stoptime, x.subjobs)
 
-timecost(x::OneShot) = isrunning(x) ? nothing : x.stoptime - x.starttime
+timecost(x::OneShot) = isrunning(x) ? now() - x.starttime : x.stoptime - x.starttime
 timecost(x::JobTracker) = map(timecost, x.subjobs)
 
 getresult(x::OneShot) = isrunning(x) ? nothing : fetch(x.ref)
@@ -126,37 +126,21 @@ function Base.show(io::IO, x::JobTracker)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
     for (i, subjob) in enumerate(x.subjobs)
-        println(io, lpad("[$i", ndigits(n) + 1), "] ", subjob.cmd)
-        print(io, ' '^(ndigits(n) + 4))
-        if isrunning(subjob)
-            printstyled(
-                io,
-                "running for: ",
-                _readabletime(now() - subjob.starttime),
-                '\n';
-                color = :blue,
-            )  # Blue text
-        elseif isfailed(subjob)
-            printstyled(
-                io,
-                "failed after: ",
-                _readabletime(subjob.stoptime - subjob.starttime),
-                '\n';
-                color = :red,
-            )  # Red text
-        elseif issucceeded(subjob)
-            printstyled(
-                io,
-                "succeeded after: ",
-                _readabletime(subjob.stoptime - subjob.starttime),
-                '\n';
-                color = :green,
-            )  # Green text
-        else
-            error("unknown status!")  # This should never happen!
-        end
+        print(io, lpad("[$i", ndigits(n) + 2), "] ", _emoji(subjob))
+        printstyled(io, " ", subjob.cmd; bold = true)
+        printstyled(
+            io,
+            " @ ",
+            format(subjob.starttime, "Y/mm/dd H:M:S"),
+            ", uses ",
+            timecost(subjob),
+            '\n';
+            color = :light_black,
+        )
     end
 end # function Base.show
+
+_emoji(subjob) = isrunning(subjob) ? '🚧' : issucceeded(subjob) ? '✅' : '❌'
 
 _readabletime(t) = canonicalize(CompoundPeriod(t))  # Do not export!
 
