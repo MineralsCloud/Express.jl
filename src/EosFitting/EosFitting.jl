@@ -227,15 +227,6 @@ end # function Base.show
 
 _emoji(step) = step == SUCCEEDED ? '✅' : '❌'
 
-# _generate_cmds(n, input, output, env::DockerEnvironment) = join(
-#     [
-#         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
-#         string('"', pwcmd(bin = env.bin).exec..., '"'),
-#         "-inp \"$input\"'",
-#     ],
-#     " ",
-# )
-
 function alert_pressures(pressures)
     if length(pressures) <= 5
         @info "pressures <= 5 may give unreliable results, consider more if possible!"
