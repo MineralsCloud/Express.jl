@@ -130,7 +130,7 @@ function Base.show(io::IO, x::JobTracker)
             " @ ",
             format(subjob.starttime, "Y/mm/dd H:M:S"),
             ", uses ",
-            timecost(subjob),
+            _readabletime(timecost(subjob)),
             '\n';
             color = :light_black,
         )
