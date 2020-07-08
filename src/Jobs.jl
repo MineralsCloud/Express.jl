@@ -23,11 +23,11 @@ export div_nprocs,
     peepstdout,
     peepstderr
 
-@enum JobStatus begin
-    RUNNING
-    SUCCEEDED
-    FAILED
-end
+abstract type JobStatus end
+struct Running <: JobStatus end
+abstract type Finished <: JobStatus end
+struct Succeeded <: Finished end
+struct Failed <: Finished end
 
 mutable struct OneShot
     cmd::Base.AbstractCmd
@@ -51,7 +51,7 @@ function launchjob(cmds, interval = 3)
 end # function launchjob
 function launchjob(tracker::JobTracker, interval = 3)
     return JobTracker(map(tracker.subjobs) do subjob
-        if getstatus(subjob) ∈ (RUNNING, SUCCEEDED)
+        if getstatus(subjob) ∈ (Running(), Succeeded())
             subjob
         else
             sleep(interval)
@@ -62,7 +62,7 @@ end # function launchjob
 
 function _launch(cmd::Base.AbstractCmd)
     x = OneShot(cmd)
-    x.status = RUNNING
+    x.status = Running()
     x.ref = @spawn begin
         x.starttime = now()
         ref = try
@@ -72,9 +72,9 @@ function _launch(cmd::Base.AbstractCmd)
         end
         x.stoptime = now()
         if ref isa Exception  # Include all cases?
-            x.status = FAILED
+            x.status = Failed()
         else
-            x.status = SUCCEEDED
+            x.status = Succeeded()
         end
         ref
     end
@@ -97,17 +97,17 @@ timecost(x::JobTracker) = map(timecost, x.subjobs)
 getresult(x::OneShot) = isrunning(x) ? nothing : fetch(x.ref)
 getresult(x::JobTracker) = map(getresult, x.subjobs)
 
-isrunning(x::OneShot) = getstatus(x) === RUNNING
+isrunning(x::OneShot) = getstatus(x) === Running()
 
-issucceeded(x::OneShot) = getstatus(x) === SUCCEEDED
+issucceeded(x::OneShot) = getstatus(x) === Succeeded()
 
-isfailed(x::OneShot) = getstatus(x) === FAILED
+isfailed(x::OneShot) = getstatus(x) === Failed()
 
-getrunning(x::JobTracker) = JobTracker(_selectby(x, RUNNING))
+getrunning(x::JobTracker) = JobTracker(_selectby(x, Running()))
 
-getsucceeded(x::JobTracker) = JobTracker(_selectby(x, SUCCEEDED))
+getsucceeded(x::JobTracker) = JobTracker(_selectby(x, Succeeded()))
 
-getfailed(x::JobTracker) = JobTracker(_selectby(x, FAILED))
+getfailed(x::JobTracker) = JobTracker(_selectby(x, Failed()))
 
 function _selectby(j::JobTracker, st::JobStatus)  # Do not export!
     res = OneShot[]
