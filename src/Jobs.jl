@@ -29,28 +29,44 @@ abstract type Finished <: JobStatus end
 struct Succeeded <: Finished end
 struct Failed <: Finished end
 
-mutable struct OneShot
+abstract type AbstractJob end
+
+mutable struct AtomicJob <: AbstractJob
     cmd::Base.AbstractCmd
     ref::Future
     starttime::DateTime
     stoptime::DateTime
     status::JobStatus
-    OneShot(cmd) = new(cmd)
+    AtomicJob(cmd) = new(cmd)
 end
 
-struct JobTracker
-    subjobs::Vector{OneShot}
+struct SerialJobs{T<:AbstractJob} <: AbstractJob
+    subjobs::Vector{T}
 end
+
+struct ParallelJobs{T<:AbstractJob} <: AbstractJob
+    subjobs::Vector{T}
+end
+
+Base.:∘(a::AtomicJob, b::AtomicJob) = SerialJobs([a, b])
+Base.:∘(a::SerialJobs, b::AtomicJob) = SerialJobs(push!(a.subjobs, b))
+Base.:∘(a::AtomicJob, b::SerialJobs) = SerialJobs(pushfirst!(b.subjobs, a))
+Base.:∘(a::SerialJobs, b::SerialJobs) = SerialJobs(append!(a.subjobs, b.subjobs))
+Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
+Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
+∥(a::AtomicJob, b::AtomicJob) = ParallelJobs([a, b])
+
+DiamondJob(a::AtomicJob, b::ParallelJobs, c::AtomicJob) = a ∘ b ∘ c
 
 function launchjob(cmds, interval = 3)
     subjobs = map(cmds) do cmd
         sleep(interval)
         _launch(cmd)
     end
-    return JobTracker(vec(subjobs))
+    return ParallelJobs(vec(subjobs))
 end # function launchjob
-function launchjob(tracker::JobTracker, interval = 3)
-    return JobTracker(map(tracker.subjobs) do subjob
+function launchjob(tracker::ParallelJobs, interval = 3)
+    return ParallelJobs(map(tracker.subjobs) do subjob
         if getstatus(subjob) ∈ (Running(), Succeeded())
             subjob
         else
@@ -61,7 +77,7 @@ function launchjob(tracker::JobTracker, interval = 3)
 end # function launchjob
 
 function _launch(cmd::Base.AbstractCmd)
-    x = OneShot(cmd)
+    x = AtomicJob(cmd)
     x.status = Running()
     x.ref = @spawn begin
         x.starttime = now()
@@ -80,37 +96,41 @@ function _launch(cmd::Base.AbstractCmd)
     end
     return x
 end # function _launch
-_launch(x::OneShot) = _launch(x.cmd)
+_launch(x::AtomicJob) = _launch(x.cmd)
+_launch(x::ParallelJobs) = map(_launch, x.subjobs)
+function _launch(x::SerialJobs) end # function _launch
 
-getstatus(x::OneShot) = x.status
-getstatus(x::JobTracker) = map(getstatus, x.subjobs)
+Base.run(x::AtomicJob) = _launch(x)
 
-starttime(x::OneShot) = x.starttime
-starttime(x::JobTracker) = map(starttime, x.subjobs)
+getstatus(x::AtomicJob) = x.status
+getstatus(x::ParallelJobs) = map(getstatus, x.subjobs)
 
-stoptime(x::OneShot) = isrunning(x) ? nothing : x.stoptime
-stoptime(x::JobTracker) = map(stoptime, x.subjobs)
+starttime(x::AtomicJob) = x.starttime
+starttime(x::ParallelJobs) = map(starttime, x.subjobs)
 
-timecost(x::OneShot) = isrunning(x) ? now() - x.starttime : x.stoptime - x.starttime
-timecost(x::JobTracker) = map(timecost, x.subjobs)
+stoptime(x::AtomicJob) = isrunning(x) ? nothing : x.stoptime
+stoptime(x::ParallelJobs) = map(stoptime, x.subjobs)
 
-getresult(x::OneShot) = isrunning(x) ? nothing : fetch(x.ref)
-getresult(x::JobTracker) = map(getresult, x.subjobs)
+timecost(x::AtomicJob) = isrunning(x) ? now() - x.starttime : x.stoptime - x.starttime
+timecost(x::ParallelJobs) = map(timecost, x.subjobs)
 
-isrunning(x::OneShot) = getstatus(x) === Running()
+getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x.ref)
+getresult(x::ParallelJobs) = map(getresult, x.subjobs)
 
-issucceeded(x::OneShot) = getstatus(x) === Succeeded()
+isrunning(x::AtomicJob) = getstatus(x) === Running()
 
-isfailed(x::OneShot) = getstatus(x) === Failed()
+issucceeded(x::AtomicJob) = getstatus(x) === Succeeded()
 
-getrunning(x::JobTracker) = JobTracker(_selectby(x, Running()))
+isfailed(x::AtomicJob) = getstatus(x) === Failed()
 
-getsucceeded(x::JobTracker) = JobTracker(_selectby(x, Succeeded()))
+getrunning(x::ParallelJobs) = ParallelJobs(_selectby(x, Running()))
 
-getfailed(x::JobTracker) = JobTracker(_selectby(x, Failed()))
+getsucceeded(x::ParallelJobs) = ParallelJobs(_selectby(x, Succeeded()))
 
-function _selectby(j::JobTracker, st::JobStatus)  # Do not export!
-    res = OneShot[]
+getfailed(x::ParallelJobs) = ParallelJobs(_selectby(x, Failed()))
+
+function _selectby(j::ParallelJobs, st::JobStatus)  # Do not export!
+    res = AtomicJob[]
     for subjob in j.subjobs
         if getstatus(subjob) === st
             push!(res, subjob)
@@ -119,7 +139,7 @@ function _selectby(j::JobTracker, st::JobStatus)  # Do not export!
     return res
 end # function _selectby
 
-function Base.show(io::IO, x::JobTracker)
+function Base.show(io::IO, x::ParallelJobs)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
     for (i, subjob) in enumerate(x.subjobs)
@@ -149,29 +169,29 @@ function div_nprocs(np, nj)
     return quotient
 end # function div_nprocs
 
-function peepstdout(x::OneShot)
+function peepstdout(x::AtomicJob)
     out = getstdout(x.cmd)
     if out !== nothing
         println(read(out, String))
     end
 end # function peepstdout
-peepstdout(x::JobTracker) = foreach(peepstdout, x.subjobs)
+peepstdout(x::ParallelJobs) = foreach(peepstdout, x.subjobs)
 
-function peepstdin(x::OneShot)
+function peepstdin(x::AtomicJob)
     out = getstdin(x.cmd)
     if out !== nothing
         println(read(out, String))
     end
 end # function peepstdin
-peepstdin(x::JobTracker) = foreach(peepstdin, x.subjobs)
+peepstdin(x::ParallelJobs) = foreach(peepstdin, x.subjobs)
 
-function peepstderr(x::OneShot)
+function peepstderr(x::AtomicJob)
     out = getstderr(x.cmd)
     if out !== nothing
         println(read(out, String))
     end
 end # function peepstdin
-peepstderr(x::JobTracker) = foreach(peepstderr, x.subjobs)
+peepstderr(x::ParallelJobs) = foreach(peepstderr, x.subjobs)
 
 getstdin(x::Base.CmdRedirect) = x.stream_no == 0 ? x.handle.filename : getstdin(x.cmd)
 getstdin(::Base.AbstractCmd) = nothing
@@ -182,13 +202,13 @@ getstdout(::Base.AbstractCmd) = nothing
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
 
-Base.iterate(x::JobTracker) = iterate(x.subjobs)
-Base.iterate(x::JobTracker, state) = iterate(x.subjobs, state)
+Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
+Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)
 
-Base.getindex(x::JobTracker, i) = getindex(x.subjobs, i)
+Base.getindex(x::ParallelJobs, i) = getindex(x.subjobs, i)
 
-Base.firstindex(x::JobTracker) = 1
+Base.firstindex(x::ParallelJobs) = 1
 
-Base.lastindex(x::JobTracker) = length(x.subjobs)
+Base.lastindex(x::ParallelJobs) = length(x.subjobs)
 
 end
