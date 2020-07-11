@@ -15,7 +15,8 @@ function mpicmd(
     env = ENV,
 )
     options = String[]
-    for (f, v) in zip((:host, :arch, :wdir, :file, :configfile), (host, arch, wdir, file, configfile))
+    for (f, v) in
+        zip((:host, :arch, :wdir, :file, :configfile), (host, arch, wdir, file, configfile))
         if !isempty(v)
             push!(options, "-$f", v)
         end

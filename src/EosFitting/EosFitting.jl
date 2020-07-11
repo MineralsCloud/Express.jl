@@ -50,9 +50,9 @@ export Step,
     actiontype
 
 mutable struct WorkingFiles
-    pending
-    running
-    finished
+    pending::Any
+    running::Any
+    finished::Any
 end
 
 function set_press_vol(
