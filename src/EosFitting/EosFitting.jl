@@ -11,7 +11,7 @@ julia>
 """
 module EosFitting
 
-using AbInitioSoftwareBase: load
+using AbInitioSoftwareBase: FilePath, load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 using AbInitioSoftwareBase.CLI: MpiCmd
 using Dates: DateTime, now, format
@@ -181,16 +181,16 @@ function postprocess(::VariableCellOptimization, path)
     return postprocess(VariableCellOptimization(), outputs, new_eos)
 end
 
-function set_structure(::VariableCellOptimization, output, template::Input)
+function set_structure(::VariableCellOptimization, output::FilePath, template::Input)
     cell = open(output, "r") do io
         str = read(io, String)
         parsecell(str)
     end
-    return set_structure(template, cell...)
+    return _set_structure(template, cell...)
 end
 function set_structure(::VariableCellOptimization, outputs, templates)
     return map(templates, outputs) do template, output  # `map` will check size mismatch
-        step(output, template)
+        set_structure(VariableCellOptimization(), output, template)
     end
 end
 
@@ -237,6 +237,8 @@ function alert_pressures(pressures)
 end # function alert_pressures
 
 function _set_press_vol end
+
+function _set_structure end
 
 function _prep_input end
 
