@@ -48,15 +48,13 @@ struct ParallelJobs{T<:AbstractJob} <: AbstractJob
     subjobs::Vector{T}
 end
 
-Base.:∘(a::AtomicJob, b::AtomicJob) = SerialJobs([a, b])
-Base.:∘(a::SerialJobs, b::AtomicJob) = SerialJobs(push!(a.subjobs, b))
+Base.:∘(a::AtomicJob, b::AtomicJob...) = SerialJobs([a, b...])
+Base.:∘(a::SerialJobs, b::AtomicJob...) = SerialJobs(push!(a.subjobs, b...))
 Base.:∘(a::AtomicJob, b::SerialJobs) = SerialJobs(pushfirst!(b.subjobs, a))
 Base.:∘(a::SerialJobs, b::SerialJobs) = SerialJobs(append!(a.subjobs, b.subjobs))
 Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
 Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
-∥(a::AtomicJob, b::AtomicJob) = ParallelJobs([a, b])
-
-DiamondJob(a::AtomicJob, b::ParallelJobs, c::AtomicJob) = a ∘ b ∘ c
+∥(a::AtomicJob, b::AtomicJob...) = ParallelJobs([a, b...])
 
 function launchjob(cmds, interval = 3)
     subjobs = map(cmds) do cmd
