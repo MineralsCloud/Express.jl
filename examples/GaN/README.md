@@ -10,7 +10,6 @@ using Pkg
 pkg"add git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 pkg"add git@github.com:MineralsCloud/Pseudopotentials.jl.git"
 pkg"add git@github.com:MineralsCloud/Crystallography.jl.git"
-pkg"add git@github.com:singularitti/DockerPy.jl.git"
 pkg"add git@github.com:singularitti/PyFortran90Namelists.jl.git"
 pkg"add git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 pkg"add git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
