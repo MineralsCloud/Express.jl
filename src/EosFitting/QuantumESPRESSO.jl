@@ -26,6 +26,7 @@ import ..EosFitting:
     getpotentials,
     getpotentialdir,
     _set_press_vol,
+    _set_structure,
     _check_software_settings,
     _expand_settings,
     _prep_input,
@@ -41,6 +42,9 @@ getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
 _set_press_vol(template::PWInput, pressure, volume) =
     set_press_vol(template, pressure, volume)
+
+_set_structure(template::PWInput, cell_parameters, atomic_positions) =
+    set_structure(template, cell_parameters, atomic_positions)
 
 function _check_software_settings(settings)
     map(("manager", "bin", "n")) do key
@@ -117,7 +121,7 @@ end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
-parsecell(str::AbstractString) =
+parsecell(str) =
     tryparsefinal(CellParametersCard, str), tryparsefinal(AtomicPositionsCard, str)
 
 end # module QuantumESPRESSO
