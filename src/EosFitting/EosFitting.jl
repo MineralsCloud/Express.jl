@@ -19,33 +19,37 @@ using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 
-using ..Express: SelfConsistentField, VariableCellOptimization, Calculation
+using ..Express: SelfConsistentField, VariableCellOptimization, Calculation, Action, Step
 using ..Jobs: div_nprocs, launchjob
 
 import ..Express
 
 export SelfConsistentField,
     VariableCellOptimization,
+    Action,
+    Step,
     load_settings,
     set_pressure_volume,
     inputstring,
     preprocess,
     process,
     postprocess,
-    set_structure
+    set_structure,
+    PREPARE_INPUT,
+    FIT_EOS,
+    SET_STRUCTURE
 
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
-@enum StepStatus::Bool begin
-    SUCCEEDED
-    FAILED
-end
+abstract type StepStatus end
+struct Pending <: StepStatus end
+abstract type Finished <: StepStatus end
+struct Succeeded <: Finished end
+struct Failed <: Finished end
 
-struct Prepare end
-
-struct Analyse end
-
-struct Step{A,B} end
+const PREPARE_INPUT = Action{:prepare_input}()
+const FIT_EOS = Action{:fit_eos}()
+const SET_STRUCTURE = Action{:set_structure}()
 
 function set_pressure_volume(
     template::Input,
@@ -59,14 +63,13 @@ function set_pressure_volume(
     return _set_pressure_volume(template, pressure, volume)
 end # function set_pressure_volume
 
-function prep_input(
-    calc::ALLOWED_CALCULATIONS,
+function (step::Step{<:ALLOWED_CALCULATIONS,Action{:prepare_input}})(
     template::Input,
     pressure::Number,
     trial_eos::EquationOfState;
     kwargs...,
 )
-    return set_pressure_volume(_prep_input(calc, template), pressure, trial_eos; kwargs...)
+    return set_pressure_volume(step(template), pressure, trial_eos; kwargs...)
 end
 
 function preprocess(
@@ -80,11 +83,11 @@ function preprocess(
 )
     alert_pressures(pressures)
     map(files, templates, pressures) do file, template, pressure  # `map` will check size mismatch
-        object = prep_input(calc, template, pressure, trial_eos; kwargs...)
+        object = Step(calc, PREPARE_INPUT)(template, pressure, trial_eos; kwargs...)
         write_input(file, object, dry_run)
     end
     STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
-        Context(files, nothing, SUCCEEDED, now(), calc)
+        Context(files, nothing, Succeeded(), now(), calc)
     return
 end
 preprocess(
@@ -141,7 +144,7 @@ function process(
         return cmds
     else
         STEP_TRACKER[calc isa SelfConsistentField ? 2 : 5] =
-            Context(inputs, outputs, SUCCEEDED, now(), calc)
+            Context(inputs, outputs, Succeeded(), now(), calc)
         return launchjob(cmds)
     end
 end
@@ -153,25 +156,42 @@ function process(calc::T, path::AbstractString; kwargs...) where {T<:ALLOWED_CAL
     return process(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
-function postprocess(
-    calc::ALLOWED_CALCULATIONS,
+function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
-)::EquationOfState
+)
     results = map(outputs) do output
         analyse(calc, read(output, String))  # volume => energy
     end
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
-        Context(nothing, outputs, SUCCEEDED, now(), calc)
     if fit_e
         return lsqfit(trial_eos(Energy()), first.(results), last.(results))
     else
         return lsqfit(trial_eos(Pressure()), first.(results), last.(results))
     end
+end
+function (step::Step{T,Action{:set_structure}})(
+    outputs,
+    trial_eos::EquationOfState,
+) where {T<:ALLOWED_CALCULATIONS}
+    map(outputs) do output
+        set_structure(T(), outputs, trial_eos)
+    end
+end
+
+function postprocess(
+    calc::ALLOWED_CALCULATIONS,
+    outputs,
+    trial_eos::EquationOfState,
+    fit_e::Bool = true,
+)
+    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
+        Context(nothing, outputs, Succeeded(), now(), calc)
+    return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e),
+    Step(calc, SET_STRUCTURE)(outputs, trial_eos)
 end
 function postprocess(calc::SelfConsistentField, path)
     settings = load_settings(path)
@@ -213,25 +233,39 @@ mutable struct Context
     outputs
     status::StepStatus
     time::DateTime
-    calc::Calculation
+    step::Step
 end
 
 STEP_TRACKER = [
-    Context(nothing, nothing, FAILED, now(), SelfConsistentField()),
-    Context(nothing, nothing, FAILED, now(), SelfConsistentField()),
-    Context(nothing, nothing, FAILED, now(), SelfConsistentField()),
-    Context(nothing, nothing, FAILED, now(), VariableCellOptimization()),
-    Context(nothing, nothing, FAILED, now(), VariableCellOptimization()),
-    Context(nothing, nothing, FAILED, now(), VariableCellOptimization()),
+    Context(nothing, nothing, PENDING, now(), Step(SelfConsistentField(), PREPARE_INPUT)),
+    Context(nothing, nothing, PENDING, now(), Step(SelfConsistentField(), LAUNCH_JOB)),
+    Context(nothing, nothing, PENDING, now(), Step(SelfConsistentField(), ANALYSE_OUTPUT)),
+    Context(
+        nothing,
+        nothing,
+        PENDING,
+        now(),
+        Step(VariableCellOptimization(), PREPARE_INPUT),
+    ),
+    Context(nothing, nothing, PENDING, now(), Step(VariableCellOptimization(), LAUNCH_JOB)),
+    Context(
+        nothing,
+        nothing,
+        PENDING,
+        now(),
+        Step(VariableCellOptimization(), ANALYSE_OUTPUT),
+    ),
 ]
 
 function Base.show(io::IO, x::Context)
     print(io, _emoji(x.status), ' ')
-    printstyled(io, x.calc; bold = true)
+    printstyled(io, x.step; bold = true)
     printstyled(io, " @ ", format(x.time, "Y/mm/dd H:M:S"); color = :light_black)
 end # function Base.show
 
-_emoji(step) = step == SUCCEEDED ? '✅' : '❌'
+_emoji(::Pending) = ''
+_emoji(::Succeeded) = '✅'
+_emoji(::Failed) = '❌'
 
 function alert_pressures(pressures)
     if length(pressures) <= 5
