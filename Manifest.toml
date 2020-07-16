@@ -432,7 +432,7 @@ version = "2.4.0"
 
 [[QuantumESPRESSO]]
 deps = ["QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "5c4c5574ab096c58684aa281a5a14336db330ec1"
+git-tree-sha1 = "c4368b1ae2f1a42af8cbcb42550b0ed12f92e77c"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
