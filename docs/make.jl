@@ -13,6 +13,9 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Manual" => ["Installation" => "install.md", "Development" => "develop.md"],
+        "Examples" => ["hcp-GaN example" => "examples/GaN.md"],
+        "API by module" => [],
     ],
 )
 
