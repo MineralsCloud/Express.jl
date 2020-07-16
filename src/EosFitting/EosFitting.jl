@@ -91,7 +91,7 @@ function preprocess(
         write_input(file, object, dry_run)
     end
     STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
-        Context(files, nothing, Succeeded(), now(), calc)
+        Context(files, nothing, Succeeded(), now(), Step(calc, PREPARE_INPUT))
     return
 end
 preprocess(
@@ -148,7 +148,7 @@ function process(
         return cmds
     else
         STEP_TRACKER[calc isa SelfConsistentField ? 2 : 5] =
-            Context(inputs, outputs, Succeeded(), now(), calc)
+            Context(inputs, outputs, Succeeded(), now(), Step(calc, LAUNCH_JOB))
         return launchjob(cmds)
     end
 end
