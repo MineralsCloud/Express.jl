@@ -12,7 +12,7 @@ using QuantumESPRESSO.Inputs.PWscf:
     optconvert,
     set_verbosity,
     set_structure,
-    set_press_vol
+    set_pressure_volume
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using QuantumESPRESSO.CLI: PWCmd
@@ -21,11 +21,11 @@ using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
-using ..EosFitting: set_press_vol
+using ..EosFitting: set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
-    _set_press_vol,
+    _set_pressure_volume,
     _set_structure,
     _check_software_settings,
     _expand_settings,
@@ -40,8 +40,8 @@ getpotentials(template::PWInput) = [x.pseudopot for x in template.atomic_species
 
 getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
-_set_press_vol(template::PWInput, pressure, volume) =
-    set_press_vol(template, pressure, volume)
+_set_pressure_volume(template::PWInput, pressure, volume) =
+    set_pressure_volume(template, pressure, volume)
 
 _set_structure(template::PWInput, cell_parameters, atomic_positions) =
     set_structure(template, cell_parameters, atomic_positions)

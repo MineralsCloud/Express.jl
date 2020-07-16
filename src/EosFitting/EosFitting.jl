@@ -27,7 +27,7 @@ import ..Express
 export SelfConsistentField,
     VariableCellOptimization,
     load_settings,
-    set_press_vol,
+    set_pressure_volume,
     inputstring,
     preprocess,
     process,
@@ -41,7 +41,13 @@ const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
     FAILED
 end
 
-function set_press_vol(
+struct Prepare end
+
+struct Analyse end
+
+struct Step{A,B} end
+
+function set_pressure_volume(
     template::Input,
     pressure,
     eos::EquationOfState;
@@ -50,8 +56,8 @@ function set_press_vol(
     ⋁, ⋀ = minimum(volume_scale), maximum(volume_scale)
     @assert ⋁ > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, (⋁, ⋀) .* eos.v0)
-    return _set_press_vol(template, pressure, volume)
-end # function set_press_vol
+    return _set_pressure_volume(template, pressure, volume)
+end # function set_pressure_volume
 
 function prep_input(
     calc::ALLOWED_CALCULATIONS,
@@ -60,7 +66,7 @@ function prep_input(
     trial_eos::EquationOfState;
     kwargs...,
 )
-    return set_press_vol(_prep_input(calc, template), pressure, trial_eos; kwargs...)
+    return set_pressure_volume(_prep_input(calc, template), pressure, trial_eos; kwargs...)
 end
 
 function preprocess(
@@ -236,7 +242,7 @@ function alert_pressures(pressures)
     end
 end # function alert_pressures
 
-function _set_press_vol end
+function _set_pressure_volume end
 
 function _set_structure end
 
