@@ -13,7 +13,7 @@ module EosFitting
 
 using AbInitioSoftwareBase: FilePath, load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
-using AbInitioSoftwareBase.CLI: MpiCmd
+using AbInitioSoftwareBase.CLI: MpiLauncher
 using Dates: DateTime, now, format
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
@@ -136,7 +136,7 @@ function process(
     # `map` guarantees they are of the same size, no need to check.
     n = div_nprocs(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        f = MpiCmd(n; kwargs...) ∘ softwarecmd
+        f = MpiLauncher(n; kwargs...) ∘ softwarecmd
         f(stdin = input, stdout = output)
     end
     if dry_run
