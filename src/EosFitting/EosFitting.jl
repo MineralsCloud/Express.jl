@@ -193,7 +193,7 @@ function postprocess(
     fit_e::Bool = true,
 )
     STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
-        Context(nothing, outputs, Succeeded(), now(), calc)
+        Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e),
     Step(calc, SET_STRUCTURE)(outputs, trial_eos)
 end
