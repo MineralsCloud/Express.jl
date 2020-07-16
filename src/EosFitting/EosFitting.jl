@@ -41,15 +41,6 @@ export SelfConsistentField,
 
 const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 
-abstract type StepStatus end
-struct Pending <: StepStatus end
-abstract type Finished <: StepStatus end
-struct Succeeded <: Finished end
-struct Failed <: Finished end
-
-const PREPARE_INPUT = Action{:prepare_input}()
-const LAUNCH_JOB = Action{:launch_job}()
-const ANALYSE_OUTPUT = Action{:analysis_output}()
 const FIT_EOS = Action{:fit_eos}()
 const SET_STRUCTURE = Action{:set_structure}()
 
@@ -275,10 +266,6 @@ function Base.show(io::IO, x::Context)
     printstyled(io, x.step; bold = true)
     printstyled(io, " @ ", format(x.time, "Y/mm/dd H:M:S"); color = :light_black)
 end # function Base.show
-
-_emoji(::Pending) = '🚧'
-_emoji(::Succeeded) = '✅'
-_emoji(::Failed) = '❌'
 
 function alert_pressures(pressures)
     if length(pressures) <= 5
