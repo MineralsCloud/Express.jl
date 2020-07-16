@@ -57,9 +57,8 @@ function set_pressure_volume(
     eos::EquationOfState;
     volume_scale = (eps(), 1.3),
 )::Input
-    ⋁, ⋀ = minimum(volume_scale), maximum(volume_scale)
-    @assert ⋁ > zero(eltype(volume_scale))  # No negative volume
-    volume = findvolume(eos(Pressure()), pressure, (⋁, ⋀) .* eos.v0)
+    @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
+    volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
     return _set_pressure_volume(template, pressure, volume)
 end # function set_pressure_volume
 
