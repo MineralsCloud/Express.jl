@@ -48,6 +48,8 @@ struct Succeeded <: Finished end
 struct Failed <: Finished end
 
 const PREPARE_INPUT = Action{:prepare_input}()
+const LAUNCH_JOB = Action{:launch_job}()
+const ANALYSE_OUTPUT = Action{:analysis_output}()
 const FIT_EOS = Action{:fit_eos}()
 const SET_STRUCTURE = Action{:set_structure}()
 
@@ -236,21 +238,33 @@ mutable struct Context
 end
 
 STEP_TRACKER = [
-    Context(nothing, nothing, PENDING, now(), Step(SelfConsistentField(), PREPARE_INPUT)),
-    Context(nothing, nothing, PENDING, now(), Step(SelfConsistentField(), LAUNCH_JOB)),
-    Context(nothing, nothing, PENDING, now(), Step(SelfConsistentField(), ANALYSE_OUTPUT)),
+    Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), PREPARE_INPUT)),
+    Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
     Context(
         nothing,
         nothing,
-        PENDING,
+        Pending(),
+        now(),
+        Step(SelfConsistentField(), ANALYSE_OUTPUT),
+    ),
+    Context(
+        nothing,
+        nothing,
+        Pending(),
         now(),
         Step(VariableCellOptimization(), PREPARE_INPUT),
     ),
-    Context(nothing, nothing, PENDING, now(), Step(VariableCellOptimization(), LAUNCH_JOB)),
     Context(
         nothing,
         nothing,
-        PENDING,
+        Pending(),
+        now(),
+        Step(VariableCellOptimization(), LAUNCH_JOB),
+    ),
+    Context(
+        nothing,
+        nothing,
+        Pending(),
         now(),
         Step(VariableCellOptimization(), ANALYSE_OUTPUT),
     ),
@@ -262,7 +276,7 @@ function Base.show(io::IO, x::Context)
     printstyled(io, " @ ", format(x.time, "Y/mm/dd H:M:S"); color = :light_black)
 end # function Base.show
 
-_emoji(::Pending) = ''
+_emoji(::Pending) = '🚧'
 _emoji(::Succeeded) = '✅'
 _emoji(::Failed) = '❌'
 
