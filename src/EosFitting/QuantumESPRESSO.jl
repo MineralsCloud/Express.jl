@@ -21,7 +21,7 @@ using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
-using ..EosFitting: set_pressure_volume
+using ..EosFitting: Step, Action, set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
@@ -29,7 +29,6 @@ import ..EosFitting:
     _set_structure,
     _check_software_settings,
     _expand_settings,
-    _prep_input,
     _readdata,
     parsecell,
     set_structure
@@ -97,10 +96,9 @@ function _expand_settings(settings)
     )
 end # function _expand_settings
 
-function _prep_input(calculation, template)
+function (::Step{T,Action{:prepare_input}})(template) where {T}
     template = set_verbosity(template, "high")
-    @set! template.control.calculation =
-        calculation isa SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.calculation = T === SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
         [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",

@@ -280,8 +280,6 @@ function _set_pressure_volume end
 
 function _set_structure end
 
-function _prep_input end
-
 function getpotentials end
 
 function getpotentialdir end
