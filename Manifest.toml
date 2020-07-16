@@ -2,7 +2,7 @@
 
 [[AbInitioSoftwareBase]]
 deps = ["FilePathsBase", "JSON", "Pkg", "YAML"]
-git-tree-sha1 = "b427c261387137a86e3909975b5c67276b200daa"
+git-tree-sha1 = "4917934b6efd17245f4684eb54711c2e1203c763"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -440,7 +440,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["AbInitioSoftwareBase", "Compat", "Crystallography", "Formatting", "LinearAlgebra", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "acc4c595d543fa2d5f05193cb97ecdb4a725390d"
+git-tree-sha1 = "4f7b4331792f846882c15bb2f4634945e331fdcf"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
