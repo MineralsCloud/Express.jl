@@ -166,7 +166,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
     fit_e::Bool = true,
 )
     results = map(outputs) do output
-        _readdata(read(output, String))  # volume => energy
+        _readdata(step, read(output, String))  # volume => energy
     end
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"

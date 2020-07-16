@@ -106,10 +106,10 @@ function (::Step{T,Action{:prepare_input}})(template) where {T}
     return template
 end
 
-_readdata(::SelfConsistentField, s::AbstractString) =
+_readdata(::Step{SelfConsistentField}, s::AbstractString) =
     parse(Preamble, s).omega * u"bohr^3" =>
         parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
-function _readdata(::VariableCellOptimization, s::AbstractString)
+function _readdata(::Step{VariableCellOptimization}, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
