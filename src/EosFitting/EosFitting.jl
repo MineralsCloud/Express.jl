@@ -14,12 +14,24 @@ module EosFitting
 using AbInitioSoftwareBase: FilePath, load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 using AbInitioSoftwareBase.CLI: MpiLauncher
-using Dates: DateTime, now, format
+using Dates: now
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 
-using ..Express: SelfConsistentField, VariableCellOptimization, Calculation, Action, Step
+using ..Express:
+    SelfConsistentField,
+    VariableCellOptimization,
+    Calculation,
+    Action,
+    Step,
+    Succeeded,
+    Pending,
+    Context,
+    PREPARE_INPUT,
+    LAUNCH_JOB,
+    ANALYSE_OUTPUT,
+    _emoji
 using ..Jobs: div_nprocs, launchjob
 
 import ..Express
@@ -220,14 +232,6 @@ function prep_potential(template)
     end
 end
 
-mutable struct Context
-    inputs
-    outputs
-    status::StepStatus
-    time::DateTime
-    step::Step
-end
-
 STEP_TRACKER = [
     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), PREPARE_INPUT)),
     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
@@ -260,12 +264,6 @@ STEP_TRACKER = [
         Step(VariableCellOptimization(), ANALYSE_OUTPUT),
     ),
 ]
-
-function Base.show(io::IO, x::Context)
-    print(io, _emoji(x.status), ' ')
-    printstyled(io, x.step; bold = true)
-    printstyled(io, " @ ", format(x.time, "Y/mm/dd H:M:S"); color = :light_black)
-end # function Base.show
 
 function alert_pressures(pressures)
     if length(pressures) <= 5
