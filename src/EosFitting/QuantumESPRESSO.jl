@@ -30,7 +30,7 @@ import ..EosFitting:
     _check_software_settings,
     _expand_settings,
     _prep_input,
-    analyse,
+    _readdata,
     parsecell,
     set_structure
 
@@ -108,10 +108,10 @@ function _prep_input(calculation, template)
     return template
 end
 
-analyse(::SelfConsistentField, s::AbstractString) =
+_readdata(::SelfConsistentField, s::AbstractString) =
     parse(Preamble, s).omega * u"bohr^3" =>
         parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
-function analyse(::VariableCellOptimization, s::AbstractString)
+function _readdata(::VariableCellOptimization, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end

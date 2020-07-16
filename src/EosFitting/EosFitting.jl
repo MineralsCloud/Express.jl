@@ -162,7 +162,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
     fit_e::Bool = true,
 )
     results = map(outputs) do output
-        analyse(calc, read(output, String))  # volume => energy
+        _readdata(read(output, String))  # volume => energy
     end
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
@@ -288,7 +288,7 @@ function getpotentialdir end
 
 function download_potential end
 
-function analyse end
+function _readdata end
 
 function set_structure end
 
