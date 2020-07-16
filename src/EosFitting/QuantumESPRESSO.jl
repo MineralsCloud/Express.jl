@@ -12,7 +12,7 @@ using QuantumESPRESSO.Inputs.PWscf:
     optconvert,
     set_verbosity,
     set_structure,
-    set_press_vol
+    set_pressure_volume
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using QuantumESPRESSO.CLI: PWCmd
@@ -21,16 +21,15 @@ using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
-using ..EosFitting: set_press_vol
+using ..EosFitting: Step, Action, set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
-    _set_press_vol,
+    _set_pressure_volume,
     _set_structure,
     _check_software_settings,
     _expand_settings,
-    _prep_input,
-    analyse,
+    _readdata,
     parsecell,
     set_structure
 
@@ -40,8 +39,8 @@ getpotentials(template::PWInput) = [x.pseudopot for x in template.atomic_species
 
 getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
-_set_press_vol(template::PWInput, pressure, volume) =
-    set_press_vol(template, pressure, volume)
+_set_pressure_volume(template::PWInput, pressure, volume) =
+    set_pressure_volume(template, pressure, volume)
 
 _set_structure(template::PWInput, cell_parameters, atomic_positions) =
     set_structure(template, cell_parameters, atomic_positions)
@@ -97,10 +96,9 @@ function _expand_settings(settings)
     )
 end # function _expand_settings
 
-function _prep_input(calculation, template)
+function (::Step{T,Action{:prepare_input}})(template) where {T}
     template = set_verbosity(template, "high")
-    @set! template.control.calculation =
-        calculation isa SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.calculation = T === SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
         [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",
@@ -108,10 +106,10 @@ function _prep_input(calculation, template)
     return template
 end
 
-analyse(::SelfConsistentField, s::AbstractString) =
+_readdata(::SelfConsistentField, s::AbstractString) =
     parse(Preamble, s).omega * u"bohr^3" =>
         parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
-function analyse(::VariableCellOptimization, s::AbstractString)
+function _readdata(::VariableCellOptimization, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
