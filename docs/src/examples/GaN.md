@@ -90,7 +90,7 @@ then write a `job.sh` with
 #SBATCH -N 1
 #SBATCH --tasks-per-node=24
 #SBATCH -J job
-#SBATCH --time=00:02:00
+#SBATCH --time=02:00:00
 
 julia <PATH-TO-GaN.jl>
 ```
