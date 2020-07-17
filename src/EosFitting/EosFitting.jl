@@ -224,17 +224,26 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(
     end
 end
 
+"""
+    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, outputs, trial_eos::EquationOfState, fit_e::Bool = true)
+
+Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
+"""
 function postprocess(
     calc::Union{SelfConsistentField,VariableCellOptimization},
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )
-    println(outputs)
     STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
         Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
 end
+"""
+    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, path)
+
+Do the same thing of `postprocess`, but from a configuration file.
+"""
 function postprocess(calc::SelfConsistentField, path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
