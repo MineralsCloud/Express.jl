@@ -316,4 +316,17 @@ end # function load_settings
 
 include("QuantumESPRESSO.jl")
 
+function Base.show(io::IO, eos::EquationOfState)  # Ref: https://github.com/mauro3/Parameters.jl/blob/3c1d72b/src/Parameters.jl#L542-L549
+    if get(io, :compact, false)
+        Base.show_default(IOContext(io, :limit => true), eos)
+    else
+        # just dumping seems to give ok output, in particular for big data-sets:
+        T = typeof(eos)
+        println(io, T)
+        for f in fieldnames(T)
+            println(io, " ", f, " = ", getfield(eos, f))
+        end
+    end
+end # function Base.show
+
 end
