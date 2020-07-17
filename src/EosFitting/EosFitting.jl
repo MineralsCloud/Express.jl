@@ -168,6 +168,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
     results = map(outputs) do output
         _readdata(step, read(output, String))  # volume => energy
     end
+    results = filter(Base.Fix2(!==, nothing), results)
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
@@ -177,39 +178,34 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
         return lsqfit(trial_eos(Pressure()), first.(results), last.(results))
     end
 end
-function (step::Step{T,Action{:set_structure}})(
+
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(
     outputs,
     template::Input,
-) where {T<:ALLOWED_CALCULATIONS}
+)
     map(outputs) do output
         cell = open(output, "r") do io
             str = read(io, String)
             parsecell(str)
         end
-        return _set_structure(template, cell...)
+        if any(x === nothing for x in cell)
+            return
+        else
+            return _set_structure(template, cell...)
+        end
     end
 end
 
 function postprocess(
-    calc::SelfConsistentField,
+    calc::Union{SelfConsistentField,VariableCellOptimization},
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )
-    STEP_TRACKER[3] =
+    println(outputs)
+    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
         Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
-end
-function postprocess(
-    calc::VariableCellOptimization,
-    outputs,
-    trial_eos::EquationOfState,
-    fit_e::Bool = true,
-)
-    STEP_TRACKER[6] =
-        Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
-    return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e),
-    Step(calc, SET_STRUCTURE)(outputs, trial_eos)
 end
 function postprocess(calc::SelfConsistentField, path)
     settings = load_settings(path)

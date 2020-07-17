@@ -113,8 +113,13 @@ function _readdata(::Step{VariableCellOptimization}, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
-    return cellvolume(parsefinal(CellParametersCard, s)) * u"bohr^3" =>
-        parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
+    x = tryparsefinal(CellParametersCard, s)
+    if x !== nothing
+        return cellvolume(parsefinal(CellParametersCard, s)) * u"bohr^3" =>
+            parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
+    else
+        return
+    end
 end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
