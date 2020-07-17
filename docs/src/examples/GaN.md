@@ -96,5 +96,3 @@ julia <PATH-TO-GaN.jl>
 ```
 
 Then submit it using `sbatch job.sh`.
-
-## Troubleshooting
