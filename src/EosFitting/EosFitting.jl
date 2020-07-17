@@ -191,25 +191,15 @@ function (step::Step{T,Action{:set_structure}})(
 end
 
 function postprocess(
-    calc::SelfConsistentField,
+    calc::Union{SelfConsistentField,VariableCellOptimization},
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )
-    STEP_TRACKER[3] =
+    println(outputs)
+    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
         Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
-end
-function postprocess(
-    calc::VariableCellOptimization,
-    outputs,
-    trial_eos::EquationOfState,
-    fit_e::Bool = true,
-)
-    STEP_TRACKER[6] =
-        Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
-    return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e),
-    Step(calc, SET_STRUCTURE)(outputs, trial_eos)
 end
 function postprocess(calc::SelfConsistentField, path)
     settings = load_settings(path)
