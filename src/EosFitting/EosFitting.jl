@@ -154,19 +154,10 @@ function process(
     dry_run = false,
     kwargs...,
 )
-    # `map` guarantees they are of the same size, no need to check.
-    n = div_nprocs(n, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        f = MpiLauncher(n; kwargs...) ∘ softwarecmd
-        f(stdin = input, stdout = output)
-    end
-    if dry_run
-        @warn "the following commands will be run:"
-        return cmds
-    else
+    if !dry_run
         STEP_TRACKER[calc isa SelfConsistentField ? 2 : 5] =
             Context(inputs, outputs, Succeeded(), now(), Step(calc, LAUNCH_JOB))
-        return launchjob(cmds)
+        return Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
     end
 end
 function process(calc::T, path::AbstractString; kwargs...) where {T<:ALLOWED_CALCULATIONS}
@@ -209,6 +200,17 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(
             return
         else
             return _set_structure(template, cell...)
+        end
+    end
+end
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(path)
+    settings = load_settings(path)
+    inputs = settings.dirs .* "/vc-relax.in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    new_inputs = settings.dirs .* "/new.in"
+    for (st, input) in zip(step(outputs, settings.template), new_inputs)
+        if st !== nothing
+            write(input, inputstring(st))
         end
     end
 end
