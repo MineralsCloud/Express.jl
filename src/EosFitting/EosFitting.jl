@@ -154,19 +154,10 @@ function process(
     dry_run = false,
     kwargs...,
 )
-    # `map` guarantees they are of the same size, no need to check.
-    n = div_nprocs(n, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        f = MpiLauncher(n; kwargs...) ∘ softwarecmd
-        f(stdin = input, stdout = output)
-    end
-    if dry_run
-        @warn "the following commands will be run:"
-        return cmds
-    else
+    if !dry_run
         STEP_TRACKER[calc isa SelfConsistentField ? 2 : 5] =
             Context(inputs, outputs, Succeeded(), now(), Step(calc, LAUNCH_JOB))
-        return launchjob(cmds)
+        return Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
     end
 end
 function process(calc::T, path::AbstractString; kwargs...) where {T<:ALLOWED_CALCULATIONS}

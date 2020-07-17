@@ -14,7 +14,7 @@ module Phonon
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant, Step, LAUNCH_JOB
 using ..EosFitting: _check_software_settings
 import ..Express
 
@@ -35,6 +35,27 @@ function preprocess(calc::DfptMethod, path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/ph.in"
     return preprocess(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+end
+
+function process(
+    calc,
+    outputs,
+    inputs,
+    n,
+    softwarecmd;
+    dry_run = false,
+    kwargs...,
+)
+    if !dry_run
+        Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
+    end
+end
+function process(calc::T, path::AbstractString; kwargs...) where {T}
+    settings = load_settings(path)
+    inputs =
+        @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    return process(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
 # function (::Step{ForceConstant,Prepare{:input}})(
