@@ -177,16 +177,21 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
         return lsqfit(trial_eos(Pressure()), first.(results), last.(results))
     end
 end
-function (step::Step{T,Action{:set_structure}})(
+
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(
     outputs,
     template::Input,
-) where {T<:ALLOWED_CALCULATIONS}
+)
     map(outputs) do output
         cell = open(output, "r") do io
             str = read(io, String)
             parsecell(str)
         end
-        return _set_structure(template, cell...)
+        if any(x === nothing for x in cell)
+            return
+        else
+            return _set_structure(template, cell...)
+        end
     end
 end
 
