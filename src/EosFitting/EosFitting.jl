@@ -179,20 +179,34 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
 end
 function (step::Step{T,Action{:set_structure}})(
     outputs,
-    trial_eos::EquationOfState,
+    template::Input,
 ) where {T<:ALLOWED_CALCULATIONS}
     map(outputs) do output
-        set_structure(T(), outputs, trial_eos)
+        cell = open(output, "r") do io
+            str = read(io, String)
+            parsecell(str)
+        end
+        return _set_structure(template, cell...)
     end
 end
 
 function postprocess(
-    calc::ALLOWED_CALCULATIONS,
+    calc::SelfConsistentField,
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )
-    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
+    STEP_TRACKER[3] =
+        Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
+    return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
+end
+function postprocess(
+    calc::VariableCellOptimization,
+    outputs,
+    trial_eos::EquationOfState,
+    fit_e::Bool = true,
+)
+    STEP_TRACKER[6] =
         Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e),
     Step(calc, SET_STRUCTURE)(outputs, trial_eos)
@@ -209,19 +223,6 @@ function postprocess(::VariableCellOptimization, path)
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     new_eos = postprocess(SelfConsistentField(), path)
     return postprocess(VariableCellOptimization(), outputs, new_eos)
-end
-
-function set_structure(::VariableCellOptimization, output::FilePath, template::Input)
-    cell = open(output, "r") do io
-        str = read(io, String)
-        parsecell(str)
-    end
-    return _set_structure(template, cell...)
-end
-function set_structure(::VariableCellOptimization, outputs, templates)
-    return map(templates, outputs) do template, output  # `map` will check size mismatch
-        set_structure(VariableCellOptimization(), output, template)
-    end
 end
 
 function prep_potential(template)
