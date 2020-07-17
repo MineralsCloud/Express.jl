@@ -1,14 +1,3 @@
-"""
-# module EosFitting
-
-
-
-# Examples
-
-```jldoctest
-julia>
-```
-"""
 module EosFitting
 
 using AbInitioSoftwareBase: FilePath, load
@@ -56,6 +45,14 @@ const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
 const FIT_EOS = Action{:fit_eos}()
 const SET_STRUCTURE = Action{:set_structure}()
 
+"""
+    set_pressure_volume(template::Input, pressure, eos::EquationOfState; volume_scale = (eps(), 1.3))
+
+Set the volume of `template` at a `pressure` according to `eos`.
+
+The `volume_scale` gives a trial of the minimum and maximum scales for the `eos`. It
+times the zero-pressure volume of the `eos` will be the trial volumes.
+"""
 function set_pressure_volume(
     template::Input,
     pressure,
@@ -67,6 +64,13 @@ function set_pressure_volume(
     return _set_pressure_volume(template, pressure, volume)
 end # function set_pressure_volume
 
+"""
+    (step::Step{<:Union{SelfConsistentField,VariableCellOptimization},Action{:prepare_input}})(template::Input, pressure, trial_eos::EquationOfState; kwargs...,)
+
+Generate input files from a given `template`, `pressure` and `trial_eos`, with some preset values.
+
+See also: [`set_pressure_volume`](@ref)
+"""
 function (step::Step{<:ALLOWED_CALCULATIONS,Action{:prepare_input}})(
     template::Input,
     pressure::Number,
@@ -76,6 +80,14 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:prepare_input}})(
     return set_pressure_volume(step(template), pressure, trial_eos; kwargs...)
 end
 
+"""
+    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, files, template::Input, pressures, trial_eos::EquationOfState; kwargs...)
+    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, files, templates, pressures, trial_eos::EquationOfState; dry_run, kwargs...)
+
+Prepare the input `files` from a certain `template` / a series of `templates` at `pressures` from a `trial_eos`.
+
+Set `dry_run = true` to see what will happen instead of actual happening.
+"""
 function preprocess(
     calc::ALLOWED_CALCULATIONS,
     files,
@@ -102,6 +114,11 @@ preprocess(
     trial_eos::EquationOfState;
     kwargs...,
 ) = preprocess(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
+"""
+    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, path; kwargs...)
+
+Do the same thing of `preprocess`, but from a configuration file.
+"""
 function preprocess(calc::SelfConsistentField, path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
@@ -196,17 +213,26 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(
     end
 end
 
+"""
+    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, outputs, trial_eos::EquationOfState, fit_e::Bool = true)
+
+Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
+"""
 function postprocess(
     calc::Union{SelfConsistentField,VariableCellOptimization},
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )
-    println(outputs)
     STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
         Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
 end
+"""
+    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, path)
+
+Do the same thing of `postprocess`, but from a configuration file.
+"""
 function postprocess(calc::SelfConsistentField, path)
     settings = load_settings(path)
     inputs = settings.dirs .* "/scf.in"
