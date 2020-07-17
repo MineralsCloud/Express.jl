@@ -2,6 +2,8 @@
 
 ## Fitting equations of state
 
+### Run interactively
+
 Install the latest version of Julia (as new as you can). Install this package as instructed
 in "[Installation](@ref)" section.
 
@@ -59,4 +61,38 @@ calculation will take about 2 minutes on 2 processors, and each vc-relax calcula
 take about 6-9 minutes. So it might need 2-3 hours to run the whole workflow, depending on
 how good your computer is.
 
-## Troubleshooting
+### Run using a script
+
+When running on a high performance computer, it is always recommended to first start
+a debugging/developing environment, do a small test to make sure that inputs can be
+generated and job can be submitted. Then to scale your calculation, write the above commands
+in a Julia script and submit it to a schedule manager. That is, write
+
+```julia
+using Express.EosFitting
+
+config = "<PATH-TO-EXPRESS>/examples/GaN/eos.yaml"
+preprocess(SelfConsistentField(), config)  # Step 1
+scfjobs = process(SelfConsistentField(), config)  # Step 2
+print(postprocess(SelfConsistentField(), config))  # Step 3
+preprocess(VariableCellOptimization(), config)  # Step 4
+vcjobs = process(VariableCellOptimization(), config)  # Step 5
+print(postprocess(VariableCellOptimization(), config))  # Step 6
+```
+
+to a `.jl` file, say `GaN.jl`.
+If you are using [Slurm](https://slurm.schedmd.com/documentation.html),
+then write a `job.sh` with
+
+```sh
+#!/bin/sh
+#SBATCH -A <your-account>
+#SBATCH -N 1
+#SBATCH --tasks-per-node=24
+#SBATCH -J job
+#SBATCH --time=00:02:00
+
+julia <PATH-TO-GaN.jl>
+```
+
+Then submit it using `sbatch job.sh`.
