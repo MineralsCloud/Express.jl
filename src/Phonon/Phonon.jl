@@ -30,6 +30,7 @@ function preprocess(::DfptMethod, inputs, template::Input, args...; dry_run = fa
     map(inputs) do input
         write_input(input, prep_input(DfptMethod(), template, args...), dry_run)
     end
+    return
 end
 function preprocess(calc::DfptMethod, path; kwargs...)
     settings = load_settings(path)
