@@ -203,6 +203,17 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(
         end
     end
 end
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(path)
+    settings = load_settings(path)
+    inputs = settings.dirs .* "/vc-relax.in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    new_inputs = settings.dirs .* "/new.in"
+    for (st, input) in zip(step(outputs, settings.template), new_inputs)
+        if st !== nothing
+            write(input, inputstring(st))
+        end
+    end
+end
 
 """
     postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, outputs, trial_eos::EquationOfState, fit_e::Bool = true)
