@@ -168,6 +168,7 @@ function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
     results = map(outputs) do output
         _readdata(step, read(output, String))  # volume => energy
     end
+    results = filter(Base.Fix2(!==, nothing), results)
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
