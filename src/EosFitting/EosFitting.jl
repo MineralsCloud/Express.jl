@@ -1,14 +1,3 @@
-"""
-# module EosFitting
-
-
-
-# Examples
-
-```jldoctest
-julia>
-```
-"""
 module EosFitting
 
 using AbInitioSoftwareBase: FilePath, load

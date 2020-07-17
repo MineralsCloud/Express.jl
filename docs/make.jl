@@ -15,7 +15,9 @@ makedocs(;
         "Home" => "index.md",
         "Manual" => ["Installation" => "install.md", "Development" => "develop.md"],
         "Examples" => ["hcp-GaN example" => "examples/GaN.md"],
-        "API by module" => [],
+        "API by module" => [
+            "`EosFitting` module" => "api/EosFitting.md",
+        ],
     ],
 )
 
