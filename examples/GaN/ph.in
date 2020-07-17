@@ -1,0 +1,15 @@
+Phonon
+&INPUTPH
+    verbosity = 'high'
+    fildyn = 'dyn'
+    outdir = './tmp'
+    prefix = 'GaN'
+    recover = .true.
+    ldisp = .true.
+    tr2_ph = 1.0e-14
+    nq1 = 1
+    nq2 = 1
+    nq3 = 1
+    amass(1) = 69.723
+    amass(2) = 14.0067
+/
