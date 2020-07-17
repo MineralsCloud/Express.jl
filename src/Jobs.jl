@@ -1,7 +1,10 @@
 module Jobs
 
+using AbInitioSoftwareBase.CLI: MpiLauncher
 using Dates: DateTime, CompoundPeriod, now, canonicalize, format
 using Distributed
+
+using ..Express: Action, Step
 
 export div_nprocs,
     launchjob,
@@ -199,6 +202,28 @@ getstdout(::Base.AbstractCmd) = nothing
 
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
+
+function (::Step{T,Action{:launch_job}})(
+    outputs,
+    inputs,
+    n,
+    softwarecmd;
+    dry_run = false,
+    kwargs...,
+) where {T}
+    # `map` guarantees they are of the same size, no need to check.
+    n = div_nprocs(n, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+        f = MpiLauncher(n; kwargs...) ∘ softwarecmd
+        f(stdin = input, stdout = output)
+    end
+    if dry_run
+        @warn "the following commands will be run:"
+        return cmds
+    else
+        return launchjob(cmds)
+    end
+end
 
 Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
 Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)
