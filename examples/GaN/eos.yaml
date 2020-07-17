@@ -20,9 +20,7 @@ trial_eos:
     - 317
     - 210
     - 4
-    - -612.43
   units:
     - bohr^3
     - GPa
     - "1"
-    - Ry
