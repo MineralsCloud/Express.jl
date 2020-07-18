@@ -115,12 +115,12 @@ preprocess(
     kwargs...,
 ) = preprocess(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
 """
-    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, path; kwargs...)
+    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile; kwargs...)
 
 Do the same thing of `preprocess`, but from a configuration file.
 """
-function preprocess(calc::SelfConsistentField, path; kwargs...)
-    settings = load_settings(path)
+function preprocess(calc::SelfConsistentField, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
     return preprocess(
         calc,
@@ -131,10 +131,10 @@ function preprocess(calc::SelfConsistentField, path; kwargs...)
         kwargs...,
     )
 end
-function preprocess(calc::VariableCellOptimization, path; kwargs...)
-    settings = load_settings(path)
+function preprocess(calc::VariableCellOptimization, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = postprocess(SelfConsistentField(), path)
+    new_eos = postprocess(SelfConsistentField(), configfile)
     return preprocess(
         calc,
         inputs,
@@ -160,8 +160,8 @@ function process(
         return Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
     end
 end
-function process(calc::T, path::AbstractString; kwargs...) where {T<:ALLOWED_CALCULATIONS}
-    settings = load_settings(path)
+function process(calc::T, configfile::AbstractString; kwargs...) where {T<:ALLOWED_CALCULATIONS}
+    settings = load_settings(configfile)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
@@ -203,8 +203,8 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(
         end
     end
 end
-function (step::Step{VariableCellOptimization,Action{:set_structure}})(path)
-    settings = load_settings(path)
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(configfile)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     new_inputs = settings.dirs .* "/new.in"
@@ -231,21 +231,21 @@ function postprocess(
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
 end
 """
-    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, path)
+    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile)
 
 Do the same thing of `postprocess`, but from a configuration file.
 """
-function postprocess(calc::SelfConsistentField, path)
-    settings = load_settings(path)
+function postprocess(calc::SelfConsistentField, configfile)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return postprocess(calc, outputs, settings.trial_eos)
 end
-function postprocess(::VariableCellOptimization, path)
-    settings = load_settings(path)
+function postprocess(::VariableCellOptimization, configfile)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_eos = postprocess(SelfConsistentField(), path)
+    new_eos = postprocess(SelfConsistentField(), configfile)
     return postprocess(VariableCellOptimization(), outputs, new_eos)
 end
 
@@ -332,8 +332,8 @@ function _check_settings(settings)
     end
 end # function _check_settings
 
-function load_settings(path)
-    settings = load(path)
+function load_settings(configfile)
+    settings = load(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end # function load_settings
