@@ -18,3 +18,9 @@ to the Julia executable. If `/usr/local/bin/` is not in your `$PATH`, modify you
 Some clusters, like `Habanero`, `Comet` already have Julia installed as a module, you may
 just `module load julia` to use it. If not, either install by yourself or contact your
 administrator.
+
+## Loading settings
+
+See
+"[Loading settings](https://mineralscloud.github.io/AbInitioSoftwareBase.jl/dev/troubleshooting/#Loading-settings)"
+for detailed information.
