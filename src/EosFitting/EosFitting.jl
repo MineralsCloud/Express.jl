@@ -77,6 +77,19 @@ function (step::Step{<:ScfOrOptim,Action{:prepare_input}})(
     return set_pressure_volume(step(template), pressure, trial_eos; kwargs...)
 end
 
+function (step::Step{T,Action{:write_input}})(
+    file,
+    template::Input,
+    pressure::Number,
+    trial_eos::EquationOfState;
+    dry_run = false,
+    kwargs...,
+) where {T<:ScfOrOptim}
+    object = Step(T(), PREPARE_INPUT)(template, pressure, trial_eos; kwargs...)
+    write_input(file, object, dry_run)
+    return  # Always return `nothing` no matter `dry_run` is `true` or `false`.
+end
+
 """
     preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, files, template::Input, pressures, trial_eos::EquationOfState; kwargs...)
     preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, files, templates, pressures, trial_eos::EquationOfState; dry_run, kwargs...)
@@ -95,9 +108,9 @@ function preprocess(
     kwargs...,
 )
     alert_pressures(pressures)
-    map(files, templates, pressures) do file, template, pressure  # `map` will check size mismatch
-        object = Step(calc, PREPARE_INPUT)(template, pressure, trial_eos; kwargs...)
-        write_input(file, object, dry_run)
+    step = Step(calc, WRITE_INPUT)
+    for (file, template, pressure) in zip(files, templates, pressures)
+        step(file, template, pressure, trial_eos; kwargs...)
     end
     STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
         Context(files, nothing, Succeeded(), now(), Step(calc, PREPARE_INPUT))
