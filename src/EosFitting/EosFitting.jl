@@ -31,8 +31,8 @@ export SelfConsistentField,
     set_pressure_volume,
     inputstring,
     prepare,
-    process,
-    postprocess,
+    launchjob,
+    analyse,
     set_structure
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
@@ -40,6 +40,7 @@ const PREPARE_INPUT = Action{:prepare_input}()
 const LAUNCH_JOB = Action{:launch_job}()
 const WRITE_INPUT = Action{:write_input}()
 const FIT_EOS = Action{:fit_eos}()
+const ANALYSE_OUTPUT = FIT_EOS
 const SET_STRUCTURE = Action{:set_structure}()
 
 """
@@ -144,15 +145,8 @@ end
 function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = postprocess(SelfConsistentField(), configfile)
-    return prepare(
-        calc,
-        inputs,
-        settings.template,
-        settings.pressures,
-        new_eos;
-        kwargs...,
-    )
+    new_eos = analyse(SelfConsistentField(), configfile)
+    return prepare(calc, inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
 function launchjob(calc::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
@@ -215,14 +209,14 @@ end
 
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
-function postprocess(
-    calc::Union{SelfConsistentField,VariableCellOptimization},
+function analyse(
+    calc::Union{SelfConsistentField,Optimization},
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
 )
-    STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
-        Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
+    # STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
+    #     Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
 end
 """
@@ -230,18 +224,18 @@ end
 
 Do the same thing of `postprocess`, but from a configuration file.
 """
-function postprocess(calc::SelfConsistentField, configfile)
+function analyse(calc::SelfConsistentField, configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return postprocess(calc, outputs, settings.trial_eos)
+    return analyse(calc, outputs, settings.trial_eos)
 end
-function postprocess(::VariableCellOptimization, configfile)
+function analyse(::VariableCellOptimization, configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_eos = postprocess(SelfConsistentField(), configfile)
-    return postprocess(VariableCellOptimization(), outputs, new_eos)
+    new_eos = analyse(SelfConsistentField(), configfile)
+    return analyse(VariableCellOptimization(), outputs, new_eos)
 end
 
 function prep_potential(template)
