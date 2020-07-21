@@ -27,10 +27,6 @@ struct PhononDensityOfStates <: VibrationalProperty end
 
 struct Action{T} end
 
-const PREPARE_INPUT = Action{:prepare_input}()
-const LAUNCH_JOB = Action{:launch_job}()
-const ANALYSE_OUTPUT = Action{:analysis_output}()
-
 struct Step{S<:Calculation,T<:Action} end
 Step(c::Calculation, a::Action) = Step{typeof(c),typeof(a)}()
 (c::Calculation)(a::Action) = Step(c, a)

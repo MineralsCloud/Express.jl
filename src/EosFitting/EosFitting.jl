@@ -10,38 +10,35 @@ using EquationsOfState.Find: findvolume
 
 using ..Express:
     Optimization,
-    SelfConsistentField,
+    StructuralOptimization,
     VariableCellOptimization,
+    SelfConsistentField,
     Calculation,
     Action,
     Step,
     Succeeded,
     Pending,
     Context,
-    PREPARE_INPUT,
-    LAUNCH_JOB,
-    ANALYSE_OUTPUT,
     _emoji
 using ..Jobs: div_nprocs, launchjob
 
 import ..Express
 
 export SelfConsistentField,
+    StructuralOptimization,
     VariableCellOptimization,
-    Action,
-    Step,
     load_settings,
     set_pressure_volume,
     inputstring,
     preprocess,
     process,
     postprocess,
-    set_structure,
-    PREPARE_INPUT,
-    FIT_EOS,
-    SET_STRUCTURE
+    set_structure
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
+const PREPARE_INPUT = Action{:prepare_input}()
+const LAUNCH_JOB = Action{:launch_job}()
+const WRITE_INPUT = Action{:write_input}()
 const FIT_EOS = Action{:fit_eos}()
 const SET_STRUCTURE = Action{:set_structure}()
 
@@ -65,7 +62,7 @@ function set_pressure_volume(
 end # function set_pressure_volume
 
 """
-    (step::Step{<:Union{SelfConsistentField,VariableCellOptimization},Action{:prepare_input}})(template::Input, pressure, trial_eos::EquationOfState; kwargs...,)
+    (step::Step{<:Union{SelfConsistentField,Optimization},Action{:prepare_input}})(template::Input, pressure, trial_eos::EquationOfState; kwargs...,)
 
 Generate input files from a given `template`, `pressure` and `trial_eos`, with some preset values.
 
