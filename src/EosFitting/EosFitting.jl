@@ -9,6 +9,7 @@ using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 
 using ..Express:
+    Optimization,
     SelfConsistentField,
     VariableCellOptimization,
     Calculation,
@@ -40,8 +41,7 @@ export SelfConsistentField,
     FIT_EOS,
     SET_STRUCTURE
 
-const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
-
+const ScfOrOptim = Union{SelfConsistentField,Optimization}
 const FIT_EOS = Action{:fit_eos}()
 const SET_STRUCTURE = Action{:set_structure}()
 
@@ -71,7 +71,7 @@ Generate input files from a given `template`, `pressure` and `trial_eos`, with s
 
 See also: [`set_pressure_volume`](@ref)
 """
-function (step::Step{<:ALLOWED_CALCULATIONS,Action{:prepare_input}})(
+function (step::Step{<:ScfOrOptim,Action{:prepare_input}})(
     template::Input,
     pressure::Number,
     trial_eos::EquationOfState;
@@ -89,7 +89,7 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 Set `dry_run = true` to see what will happen instead of actual happening.
 """
 function preprocess(
-    calc::ALLOWED_CALCULATIONS,
+    calc::ScfOrOptim,
     files,
     templates,
     pressures,
@@ -107,7 +107,7 @@ function preprocess(
     return
 end
 preprocess(
-    calc::ALLOWED_CALCULATIONS,
+    calc::ScfOrOptim,
     files,
     template::Input,
     pressures,
@@ -146,7 +146,7 @@ function preprocess(calc::VariableCellOptimization, configfile; kwargs...)
 end
 
 function process(
-    calc::ALLOWED_CALCULATIONS,
+    calc::ScfOrOptim,
     outputs,
     inputs,
     n,
@@ -160,7 +160,7 @@ function process(
         return Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
     end
 end
-function process(calc::T, configfile::AbstractString; kwargs...) where {T<:ALLOWED_CALCULATIONS}
+function process(calc::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(configfile)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
@@ -168,7 +168,7 @@ function process(calc::T, configfile::AbstractString; kwargs...) where {T<:ALLOW
     return process(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
-function (step::Step{<:ALLOWED_CALCULATIONS,Action{:fit_eos}})(
+function (step::Step{<:ScfOrOptim,Action{:fit_eos}})(
     outputs,
     trial_eos::EquationOfState,
     fit_e::Bool = true,
