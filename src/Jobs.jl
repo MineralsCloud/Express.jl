@@ -1,6 +1,6 @@
 module Jobs
 
-using AbInitioSoftwareBase.CLI: MpiLauncher
+using AbInitioSoftwareBase.CLI: MpiExec
 using Dates: DateTime, CompoundPeriod, now, canonicalize, format
 using Distributed
 
@@ -214,7 +214,7 @@ function (::Step{T,Action{:launch_job}})(
     # `map` guarantees they are of the same size, no need to check.
     n = div_nprocs(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        f = MpiLauncher(n; kwargs...) ∘ softwarecmd
+        f = MpiExec(n; kwargs...) ∘ softwarecmd
         f(stdin = input, stdout = output)
     end
     if dry_run

@@ -2,7 +2,7 @@ module EosFitting
 
 using AbInitioSoftwareBase: FilePath, load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
-using AbInitioSoftwareBase.CLI: MpiLauncher
+using AbInitioSoftwareBase.CLI: MpiExec
 using Dates: now
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
