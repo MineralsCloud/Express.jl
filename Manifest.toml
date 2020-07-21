@@ -2,7 +2,7 @@
 
 [[AbInitioSoftwareBase]]
 deps = ["FilePathsBase", "JSON", "Pkg", "YAML"]
-git-tree-sha1 = "49e6427091a4cc93b7e51837fb48d191f017eaac"
+git-tree-sha1 = "cb776903d3773ade742c7f7fa7ce650ee387ab5e"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -10,9 +10,9 @@ version = "0.1.0"
 
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "0eccdcbe27fd6bd9cba3be31c67bdd435a21e865"
+git-tree-sha1 = "066d1e7a9eb4873660791db7f0d8c7902600b81c"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "2.9.1"
+version = "2.11.0"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -211,9 +211,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[Intervals]]
 deps = ["Dates", "Printf", "RecipesBase", "Serialization", "TimeZones"]
-git-tree-sha1 = "8ffd41e6ddb0b569744aac36f8f5a4c92d28fc9e"
+git-tree-sha1 = "f8fd8065b6bccfbc2f9e7dd1fa5c0dde81d09185"
 uuid = "d8418881-c3e1-53bb-8760-2df7ec849ed5"
-version = "1.4.0"
+version = "1.4.1"
 
 [[InvertedIndices]]
 deps = ["Test"]
@@ -422,7 +422,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["AbInitioSoftwareBase", "Compat", "Crystallography", "Formatting", "LinearAlgebra", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "4573e83aa07a055f2d327796c80d7518c3c0af06"
+git-tree-sha1 = "84de3980ed2116953ac43b7c917cec159287bda0"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
