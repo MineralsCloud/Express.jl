@@ -155,27 +155,12 @@ function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     )
 end
 
-function process(
-    calc::ScfOrOptim,
-    outputs,
-    inputs,
-    n,
-    softwarecmd;
-    dry_run = false,
-    kwargs...,
-)
-    if !dry_run
-        STEP_TRACKER[calc isa SelfConsistentField ? 2 : 5] =
-            Context(inputs, outputs, Succeeded(), now(), Step(calc, LAUNCH_JOB))
-        return Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
-    end
-end
-function process(calc::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
+function launchjob(calc::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(configfile)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return process(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
+    return launchjob(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
 function (step::Step{<:ScfOrOptim,Action{:fit_eos}})(
