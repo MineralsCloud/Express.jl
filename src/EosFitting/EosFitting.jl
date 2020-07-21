@@ -30,7 +30,7 @@ export SelfConsistentField,
     load_settings,
     set_pressure_volume,
     inputstring,
-    preprocess,
+    prepare,
     process,
     postprocess,
     set_structure
@@ -98,7 +98,7 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 
 Set `dry_run = true` to see what will happen instead of actual happening.
 """
-function preprocess(
+function prepare(
     calc::ScfOrOptim,
     files,
     templates,
@@ -116,23 +116,23 @@ function preprocess(
         Context(files, nothing, Succeeded(), now(), Step(calc, PREPARE_INPUT))
     return
 end
-preprocess(
+prepare(
     calc::ScfOrOptim,
     files,
     template::Input,
     pressures,
     trial_eos::EquationOfState;
     kwargs...,
-) = preprocess(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
+) = prepare(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
 """
     preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile; kwargs...)
 
 Do the same thing of `preprocess`, but from a configuration file.
 """
-function preprocess(calc::SelfConsistentField, configfile; kwargs...)
+function prepare(calc::SelfConsistentField, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
-    return preprocess(
+    return prepare(
         calc,
         inputs,
         settings.template,
@@ -141,11 +141,11 @@ function preprocess(calc::SelfConsistentField, configfile; kwargs...)
         kwargs...,
     )
 end
-function preprocess(calc::VariableCellOptimization, configfile; kwargs...)
+function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     new_eos = postprocess(SelfConsistentField(), configfile)
-    return preprocess(
+    return prepare(
         calc,
         inputs,
         settings.template,
