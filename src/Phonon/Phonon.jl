@@ -12,7 +12,7 @@ julia>
 module Phonon
 
 using AbInitioSoftwareBase: load
-using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
+using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 
 using ..Express: SelfConsistentField, DfptMethod, ForceConstant, Step, LAUNCH_JOB
 using ..EosFitting: _check_software_settings
@@ -56,7 +56,7 @@ end
 
 function preprocess(::DfptMethod, inputs, template::Input, args...; dry_run = false)
     map(inputs) do input
-        write_input(input, prep_input(DfptMethod(), template, args...), dry_run)
+        writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
     end
     return
 end
