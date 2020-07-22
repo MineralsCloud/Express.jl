@@ -36,12 +36,10 @@ export SelfConsistentField,
     set_structure
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
-const PREPARE_INPUT = Action{:prepare_input}()
+const UPDATE_TEMPLATE = Action{:update_template}()
 const LAUNCH_JOB = Action{:launch_job}()
-const WRITE_INPUT = Action{:write_input}()
-const FIT_EOS = Action{:fit_eos}()
-const ANALYSE_OUTPUT = FIT_EOS
-const SET_STRUCTURE = Action{:set_structure}()
+const READ_OUTPUT = Action{:read_output}()
+const ANALYSE_DATA = Action{:analyse_data}()
 
 """
     set_pressure_volume(template::Input, pressure, eos::EquationOfState; volume_scale = (eps(), 1.3))
@@ -63,32 +61,25 @@ function set_pressure_volume(
 end # function set_pressure_volume
 
 """
-    (step::Step{<:Union{SelfConsistentField,Optimization},Action{:prepare_input}})(template::Input, pressure, trial_eos::EquationOfState; kwargs...,)
+    (step::Step{<:Union{SelfConsistentField,Optimization},Action{:update_template}})(template::Input, pressure, trial_eos::EquationOfState; kwargs...,)
 
 Generate input files from a given `template`, `pressure` and `trial_eos`, with some preset values.
 
 See also: [`set_pressure_volume`](@ref)
 """
-function (step::Step{<:ScfOrOptim,Action{:prepare_input}})(
+function preset_template(
+    calc,
     template::Input,
     pressure::Number,
     trial_eos::EquationOfState;
     kwargs...,
 )
-    return set_pressure_volume(step(template), pressure, trial_eos; kwargs...)
-end
-
-function (step::Step{T,Action{:write_input}})(
-    file,
-    template::Input,
-    pressure::Number,
-    trial_eos::EquationOfState;
-    dry_run = false,
-    kwargs...,
-) where {T<:ScfOrOptim}
-    object = Step(T(), PREPARE_INPUT)(template, pressure, trial_eos; kwargs...)
-    write_input(file, object, dry_run)
-    return  # Always return `nothing` no matter `dry_run` is `true` or `false`.
+    return set_pressure_volume(
+        preset_template(calc, template),
+        pressure,
+        trial_eos;
+        kwargs...,
+    )
 end
 
 """
@@ -109,12 +100,12 @@ function prepare(
     kwargs...,
 )
     alert_pressures(pressures)
-    step = Step(calc, WRITE_INPUT)
     for (file, template, pressure) in zip(files, templates, pressures)
-        step(file, template, pressure, trial_eos; kwargs...)
+        object = preset_template(calc, template, pressure, trial_eos; kwargs...)
+        write_input(file, object, dry_run)
     end
-    STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
-        Context(files, nothing, Succeeded(), now(), Step(calc, PREPARE_INPUT))
+    # STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
+    #     Context(files, nothing, Succeeded(), now(), Step(calc, UPDATE_TEMPLATE))
     return
 end
 prepare(
@@ -289,6 +280,8 @@ function alert_pressures(pressures)
 end # function alert_pressures
 
 function _set_pressure_volume end
+
+function preset_template end
 
 function _set_structure end
 
