@@ -1,6 +1,6 @@
 module EosFitting
 
-using AbInitioSoftwareBase: FilePath, load
+using AbInitioSoftwareBase: FilePath, loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using AbInitioSoftwareBase.CLI: MpiExec
 using Dates: now
@@ -278,7 +278,7 @@ function _check_settings(settings)
 end # function _check_settings
 
 function load_settings(configfile)
-    settings = load(configfile)
+    settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end # function load_settings
