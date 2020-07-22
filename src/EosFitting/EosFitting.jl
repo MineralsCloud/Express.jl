@@ -136,7 +136,7 @@ end
 function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = analyse(SelfConsistentField(), configfile)
+    new_eos = finish(SelfConsistentField(), configfile)
     return prepare(calc, inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
@@ -200,7 +200,7 @@ end
 
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
-function analyse(
+function finish(
     calc::Union{SelfConsistentField,Optimization},
     outputs,
     trial_eos::EquationOfState,
@@ -215,18 +215,18 @@ end
 
 Do the same thing of `postprocess`, but from a configuration file.
 """
-function analyse(calc::SelfConsistentField, configfile)
+function finish(calc::SelfConsistentField, configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return analyse(calc, outputs, settings.trial_eos)
+    return finish(calc, outputs, settings.trial_eos)
 end
-function analyse(::VariableCellOptimization, configfile)
+function finish(::VariableCellOptimization, configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_eos = analyse(SelfConsistentField(), configfile)
-    return analyse(VariableCellOptimization(), outputs, new_eos)
+    new_eos = finish(SelfConsistentField(), configfile)
+    return finish(VariableCellOptimization(), outputs, new_eos)
 end
 
 function prep_potential(template)
