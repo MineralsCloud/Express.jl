@@ -23,6 +23,7 @@ using ..Express:
 using ..Jobs: div_nprocs, launchjob
 
 import ..Express
+import ..Express.Jobs: launchjob
 
 export SelfConsistentField,
     StructuralOptimization,
@@ -32,14 +33,10 @@ export SelfConsistentField,
     inputstring,
     prepare,
     launchjob,
-    analyse,
-    set_structure
+    finish,
+    writeinput
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
-const UPDATE_TEMPLATE = Action{:update_template}()
-const LAUNCH_JOB = Action{:launch_job}()
-const READ_OUTPUT = Action{:read_output}()
-const ANALYSE_DATA = Action{:analyse_data}()
 
 """
     set_pressure_volume(template::Input, pressure, eos::EquationOfState; volume_scale = (eps(), 1.3))
