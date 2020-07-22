@@ -4,8 +4,6 @@ using AbInitioSoftwareBase.CLI: MpiExec
 using Dates: DateTime, CompoundPeriod, now, canonicalize, format
 using Distributed
 
-using ..Express: Action, Step
-
 export div_nprocs,
     launchjob,
     starttime,
@@ -203,14 +201,7 @@ getstdout(::Base.AbstractCmd) = nothing
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
 
-function (::Step{T,Action{:launch_job}})(
-    outputs,
-    inputs,
-    n,
-    softwarecmd;
-    dry_run = false,
-    kwargs...,
-) where {T}
+function launchjob(calc, outputs, inputs, n, softwarecmd; dry_run = false, kwargs...)
     # `map` guarantees they are of the same size, no need to check.
     n = div_nprocs(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -224,17 +215,6 @@ function (::Step{T,Action{:launch_job}})(
         return launchjob(cmds)
     end
 end
-
-function launchjob(calc, outputs, inputs, n, softwarecmd; dry_run = false, kwargs...)
-    Step(calc, Action{:launch_job}())(
-        outputs,
-        inputs,
-        n,
-        softwarecmd;
-        dry_run = dry_run,
-        kwargs...,
-    )
-end # function launchjob
 
 Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
 Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)

@@ -21,7 +21,7 @@ using Unitful
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization
-using ..EosFitting: Step, Action, set_pressure_volume
+using ..EosFitting: set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
