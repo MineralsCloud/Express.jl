@@ -99,9 +99,9 @@ function _expand_settings(settings)
     )
 end # function _expand_settings
 
-function (::Step{T,Action{:prepare_input}})(template) where {T}
+function preset_template(calc, template)
     template = set_verbosity(template, "high")
-    @set! template.control.calculation = T === SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.calculation = calc isa SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
         [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",

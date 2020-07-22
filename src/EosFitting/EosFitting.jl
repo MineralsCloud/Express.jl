@@ -68,7 +68,7 @@ Generate input files from a given `template`, `pressure` and `trial_eos`, with s
 See also: [`set_pressure_volume`](@ref)
 """
 function preset_template(
-    calc,
+    calc::ScfOrOptim,
     template::Input,
     pressure::Number,
     trial_eos::EquationOfState;
