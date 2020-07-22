@@ -26,6 +26,34 @@ function relay end
 
 function prep_input end
 
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(
+    outputs,
+    template::Input,
+)
+    map(outputs) do output
+        cell = open(output, "r") do io
+            str = read(io, String)
+            parsecell(str)
+        end
+        if any(x === nothing for x in cell)
+            return
+        else
+            return _set_structure(template, cell...)
+        end
+    end
+end
+function (step::Step{VariableCellOptimization,Action{:set_structure}})(configfile)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/vc-relax.in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    new_inputs = settings.dirs .* "/new.in"
+    for (st, input) in zip(step(outputs, settings.template), new_inputs)
+        if st !== nothing
+            write(input, inputstring(st))
+        end
+    end
+end
+
 function preprocess(::DfptMethod, inputs, template::Input, args...; dry_run = false)
     map(inputs) do input
         write_input(input, prep_input(DfptMethod(), template, args...), dry_run)

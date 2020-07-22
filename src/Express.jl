@@ -1,8 +1,6 @@
 module Express
 
 using Dates: DateTime, format
-using Unitful
-using UnitfulAtomic
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
@@ -26,10 +24,6 @@ struct PhononDispersion <: VibrationalProperty end
 struct PhononDensityOfStates <: VibrationalProperty end
 
 struct Action{T} end
-
-const PREPARE_INPUT = Action{:prepare_input}()
-const LAUNCH_JOB = Action{:launch_job}()
-const ANALYSE_OUTPUT = Action{:analysis_output}()
 
 struct Step{S<:Calculation,T<:Action} end
 Step(c::Calculation, a::Action) = Step{typeof(c),typeof(a)}()
@@ -58,8 +52,6 @@ end
 _emoji(::Pending) = '🚧'
 _emoji(::Succeeded) = '✅'
 _emoji(::Failed) = '❌'
-
-_uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 Base.show(io::IO, ::SelfConsistentField) = print(io, "scf calculation")
 Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf calculation")

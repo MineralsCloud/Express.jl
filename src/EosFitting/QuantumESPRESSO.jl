@@ -17,21 +17,18 @@ using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using QuantumESPRESSO.CLI: PWCmd
 using Setfield: @set!
-using Unitful: @u_str
+using Unitful
 using UnitfulAtomic
 
-using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
+using ...Express: SelfConsistentField, VariableCellOptimization
 using ..EosFitting: Step, Action, set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
     _set_pressure_volume,
-    _set_structure,
     _check_software_settings,
     _expand_settings,
-    _readdata,
-    parsecell,
-    set_structure
+    _readoutput
 
 export safe_exit
 
@@ -41,9 +38,6 @@ getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
 _set_pressure_volume(template::PWInput, pressure, volume) =
     set_pressure_volume(template, pressure, volume)
-
-_set_structure(template::PWInput, cell_parameters, atomic_positions) =
-    set_structure(template, cell_parameters, atomic_positions)
 
 function _check_software_settings(settings)
     map(("manager", "bin", "n")) do key
@@ -82,8 +76,11 @@ function _expand_settings(settings)
     return (
         template = template,
         pressures = settings["pressures"] .* u"GPa",
-        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
-                                                                  _uparse.(settings["trial_eos"]["units"])...),
+        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](
+            settings["trial_eos"]["parameters"] .*
+            uparse.(settings["trial_eos"]["units"])...;
+            unit_context = [Unitful, UnitfulAtomic],
+        ),
         dirs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
@@ -96,9 +93,9 @@ function _expand_settings(settings)
     )
 end # function _expand_settings
 
-function (::Step{T,Action{:prepare_input}})(template) where {T}
+function preset_template(calc, template)
     template = set_verbosity(template, "high")
-    @set! template.control.calculation = T === SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.calculation = calc isa SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = join(
         [template.control.prefix, template.control.calculation, now(), rand(UInt)],
         "_",
@@ -106,10 +103,10 @@ function (::Step{T,Action{:prepare_input}})(template) where {T}
     return template
 end
 
-_readdata(::Step{SelfConsistentField}, s::AbstractString) =
+_readoutput(::SelfConsistentField, s::AbstractString) =
     parse(Preamble, s).omega * u"bohr^3" =>
         parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
-function _readdata(::Step{VariableCellOptimization}, s::AbstractString)
+function _readoutput(::VariableCellOptimization, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
     end
@@ -123,8 +120,5 @@ function _readdata(::Step{VariableCellOptimization}, s::AbstractString)
 end
 
 safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
-
-parsecell(str) =
-    tryparsefinal(CellParametersCard, str), tryparsefinal(AtomicPositionsCard, str)
 
 end # module QuantumESPRESSO
