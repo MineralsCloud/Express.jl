@@ -17,10 +17,10 @@ using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using QuantumESPRESSO.CLI: PWCmd
 using Setfield: @set!
-using Unitful: @u_str
+using Unitful
 using UnitfulAtomic
 
-using ...Express: SelfConsistentField, VariableCellOptimization, _uparse
+using ...Express: SelfConsistentField, VariableCellOptimization
 using ..EosFitting: Step, Action, set_pressure_volume
 import ..EosFitting:
     getpotentials,
@@ -82,8 +82,11 @@ function _expand_settings(settings)
     return (
         template = template,
         pressures = settings["pressures"] .* u"GPa",
-        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
-                                                                  _uparse.(settings["trial_eos"]["units"])...),
+        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](
+            settings["trial_eos"]["parameters"] .*
+            uparse.(settings["trial_eos"]["units"])...;
+            unit_context = [Unitful, UnitfulAtomic],
+        ),
         dirs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),

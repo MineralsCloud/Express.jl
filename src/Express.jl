@@ -1,8 +1,6 @@
 module Express
 
 using Dates: DateTime, format
-using Unitful
-using UnitfulAtomic
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
@@ -54,8 +52,6 @@ end
 _emoji(::Pending) = '🚧'
 _emoji(::Succeeded) = '✅'
 _emoji(::Failed) = '❌'
-
-_uparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
 
 Base.show(io::IO, ::SelfConsistentField) = print(io, "scf calculation")
 Base.show(io::IO, ::NonSelfConsistentField) = print(io, "nscf calculation")
