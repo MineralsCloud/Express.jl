@@ -114,9 +114,9 @@ prepare(
     kwargs...,
 ) = prepare(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
 """
-    preprocess(calc, configfile; kwargs...)
+    prepare(calc, configfile; kwargs...)
 
-Do the same thing of `preprocess`, but from a configuration file.
+Do the same thing of `prepare`, but from a configuration file.
 """
 function prepare(calc::SelfConsistentField, configfile; kwargs...)
     settings = load_settings(configfile)
@@ -145,6 +145,11 @@ function launchjob(calc::T, configfile::AbstractString; kwargs...) where {T<:Scf
     return launchjob(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
+"""
+    fiteos(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
+
+Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
+"""
 function fiteos(
     calc::ScfOrOptim,
     outputs,
@@ -166,7 +171,7 @@ function fiteos(
 end
 
 """
-    finish(calc, outputs, trial_eos::EquationOfState, fit_e::Bool = true)
+    finish(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
 
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
@@ -183,7 +188,7 @@ end
 """
     finish(calc, configfile)
 
-Do the same thing of `postprocess`, but from a configuration file.
+Do the same thing of `finish`, but from a configuration file.
 """
 function finish(calc::SelfConsistentField, configfile)
     settings = load_settings(configfile)
