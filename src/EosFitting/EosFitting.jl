@@ -200,14 +200,14 @@ end
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
 function finish(
-    calc::Union{SelfConsistentField,Optimization},
+    calc::ScfOrOptim,
     outputs,
     trial_eos::EquationOfState,
-    fit_e::Bool = true,
+    fit_energy::Bool = true,
 )
     # STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
     #     Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
-    return fiteos(read_output(calc, outputs), trial_eos, fit_e)
+    return fiteos(calc, outputs, trial_eos, fit_energy)
 end
 """
     postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile)
