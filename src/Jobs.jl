@@ -225,6 +225,17 @@ function (::Step{T,Action{:launch_job}})(
     end
 end
 
+function launchjob(calc, outputs, inputs, n, softwarecmd; dry_run = false, kwargs...)
+    Step(calc, Action{:launch_job}())(
+        outputs,
+        inputs,
+        n,
+        softwarecmd;
+        dry_run = dry_run,
+        kwargs...,
+    )
+end # function launchjob
+
 Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
 Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)
 
