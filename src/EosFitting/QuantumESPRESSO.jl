@@ -76,11 +76,11 @@ function _expand_settings(settings)
     return (
         template = template,
         pressures = settings["pressures"] .* u"GPa",
-        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](
-            settings["trial_eos"]["parameters"] .*
-            uparse.(settings["trial_eos"]["units"])...;
+        trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
+                                                                  uparse.(
+            settings["trial_eos"]["units"];
             unit_context = [Unitful, UnitfulAtomic],
-        ),
+        )...),
         dirs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
