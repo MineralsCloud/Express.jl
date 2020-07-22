@@ -148,19 +148,19 @@ function launchjob(calc::T, configfile::AbstractString; kwargs...) where {T<:Scf
     return launchjob(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
-function (step::Step{<:ScfOrOptim,Action{:fit_eos}})(
-    outputs,
-    trial_eos::EquationOfState,
-    fit_e::Bool = true,
-)
+function read_output(calc, outputs)
     results = map(outputs) do output
-        _readdata(step, read(output, String))  # volume => energy
+        _readdata(calc, read(output, String))  # volume => energy
     end
     results = filter(Base.Fix2(!==, nothing), results)
     if length(results) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    if fit_e
+    return results
+end
+
+function fiteos(results, trial_eos::EquationOfState, fit_energy::Bool = true)
+    if fit_energy
         return lsqfit(trial_eos(Energy()), first.(results), last.(results))
     else
         return lsqfit(trial_eos(Pressure()), first.(results), last.(results))
@@ -208,7 +208,7 @@ function finish(
 )
     # STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
     #     Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
-    return Step(calc, FIT_EOS)(outputs, trial_eos, fit_e)
+    return fiteos(read_output(calc, outputs), trial_eos, fit_e)
 end
 """
     postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile)
