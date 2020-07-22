@@ -1,7 +1,7 @@
 module EosFitting
 
 using AbInitioSoftwareBase: FilePath, load
-using AbInitioSoftwareBase.Inputs: Input, inputstring, write_input
+using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using AbInitioSoftwareBase.CLI: MpiExec
 using Dates: now
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
@@ -102,7 +102,7 @@ function prepare(
     alert_pressures(pressures)
     for (file, template, pressure) in zip(files, templates, pressures)
         object = preset_template(calc, template, pressure, trial_eos; kwargs...)
-        write_input(file, object, dry_run)
+        writeinput(file, object, dry_run)
     end
     # STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
     #     Context(files, nothing, Succeeded(), now(), Step(calc, UPDATE_TEMPLATE))
