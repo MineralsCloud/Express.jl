@@ -58,7 +58,7 @@ function set_pressure_volume(
 end # function set_pressure_volume
 
 """
-    (step::Step{<:Union{SelfConsistentField,Optimization},Action{:update_template}})(template::Input, pressure, trial_eos::EquationOfState; kwargs...,)
+    preset_template(calc, template::Input, pressure, trial_eos::EquationOfState; kwargs...)
 
 Generate input files from a given `template`, `pressure` and `trial_eos`, with some preset values.
 
@@ -80,12 +80,12 @@ function preset_template(
 end
 
 """
-    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, files, template::Input, pressures, trial_eos::EquationOfState; kwargs...)
-    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, files, templates, pressures, trial_eos::EquationOfState; dry_run, kwargs...)
+    prepare(calc, files, template::Input, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
+    prepare(calc, files, templates, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
 
 Prepare the input `files` from a certain `template` / a series of `templates` at `pressures` from a `trial_eos`.
 
-Set `dry_run = true` to see what will happen instead of actual happening.
+Set `dry_run = true` to preview changes.
 """
 function prepare(
     calc::ScfOrOptim,
@@ -114,7 +114,7 @@ prepare(
     kwargs...,
 ) = prepare(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
 """
-    preprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile; kwargs...)
+    preprocess(calc, configfile; kwargs...)
 
 Do the same thing of `preprocess`, but from a configuration file.
 """
@@ -166,7 +166,7 @@ function fiteos(
 end
 
 """
-    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, outputs, trial_eos::EquationOfState, fit_e::Bool = true)
+    finish(calc, outputs, trial_eos::EquationOfState, fit_e::Bool = true)
 
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
@@ -181,7 +181,7 @@ function finish(
     return fiteos(calc, outputs, trial_eos, fit_energy)
 end
 """
-    postprocess(calc::Union{SelfConsistentField,VariableCellOptimization}, configfile)
+    finish(calc, configfile)
 
 Do the same thing of `postprocess`, but from a configuration file.
 """
