@@ -148,24 +148,22 @@ function launchjob(calc::T, configfile::AbstractString; kwargs...) where {T<:Scf
     return launchjob(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
-function read_output(calc, outputs)
-    results = map(outputs) do output
-        _readdata(calc, read(output, String))  # volume => energy
-    end
-    results = filter(Base.Fix2(!==, nothing), results)
-    if length(results) <= 5
+function fiteos(
+    calc::ScfOrOptim,
+    outputs,
+    trial_eos::EquationOfState,
+    fit_energy::Bool = true,
+)
+    data = Iterators.filter(
+        x -> x !== nothing,
+        (_readoutput(calc, read(output, String)) for output in outputs),
+    )  # volume => energy
+    if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return results
-end
-
-function fiteos(results, trial_eos::EquationOfState, fit_energy::Bool = true)
     if fit_energy
-        return lsqfit(trial_eos(Energy()), first.(results), last.(results))
+        return lsqfit(trial_eos(Energy()), first.(data), last.(data))
     else
-        return lsqfit(trial_eos(Pressure()), first.(results), last.(results))
-    end
-end
 
 function (step::Step{VariableCellOptimization,Action{:set_structure}})(
     outputs,
@@ -192,6 +190,7 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(configfil
         if st !== nothing
             write(input, inputstring(st))
         end
+        return lsqfit(trial_eos(Pressure()), first.(data), last.(data))
     end
 end
 
@@ -291,11 +290,11 @@ function getpotentialdir end
 
 function download_potential end
 
-function _readdata end
 
 function set_structure end
 
 function parsecell end
+function _readoutput end
 
 function _expand_settings end
 
