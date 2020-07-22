@@ -212,38 +212,38 @@ function prep_potential(template)
     end
 end
 
-STEP_TRACKER = [
-    Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), PREPARE_INPUT)),
-    Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
-    Context(
-        nothing,
-        nothing,
-        Pending(),
-        now(),
-        Step(SelfConsistentField(), ANALYSE_OUTPUT),
-    ),
-    Context(
-        nothing,
-        nothing,
-        Pending(),
-        now(),
-        Step(VariableCellOptimization(), PREPARE_INPUT),
-    ),
-    Context(
-        nothing,
-        nothing,
-        Pending(),
-        now(),
-        Step(VariableCellOptimization(), LAUNCH_JOB),
-    ),
-    Context(
-        nothing,
-        nothing,
-        Pending(),
-        now(),
-        Step(VariableCellOptimization(), ANALYSE_OUTPUT),
-    ),
-]
+# STEP_TRACKER = [
+#     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), UPDATE_TEMPLATE)),
+#     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(SelfConsistentField(), ANALYSE_OUTPUT),
+#     ),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(VariableCellOptimization(), UPDATE_TEMPLATE),
+#     ),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(VariableCellOptimization(), LAUNCH_JOB),
+#     ),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(VariableCellOptimization(), ANALYSE_OUTPUT),
+#     ),
+# ]
 
 function alert_pressures(pressures)
     if length(pressures) <= 5
