@@ -25,6 +25,7 @@ export SelfConsistentField,
     load_settings,
     set_pressure_volume,
     inputstring,
+    preset_template,
     prepare,
     launchjob,
     finish,
@@ -154,7 +155,7 @@ function fiteos(
         x -> x !== nothing,
         (_readoutput(calc, read(output, String)) for output in outputs),
     )  # volume => energy
-    if length(data) <= 5
+    if length(collect(data)) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
     if fit_energy

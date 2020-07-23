@@ -25,6 +25,7 @@ using ..EosFitting: set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
+    preset_template,
     _set_pressure_volume,
     _check_software_settings,
     _expand_settings,
@@ -103,9 +104,19 @@ function preset_template(calc, template)
     return template
 end
 
-_readoutput(::SelfConsistentField, s::AbstractString) =
-    parse(Preamble, s).omega * u"bohr^3" =>
-        parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
+function _readoutput(::SelfConsistentField, s::AbstractString)
+    preamble = tryparse(Preamble, s)
+    e = try
+        parse_electrons_energies(s, :converged)
+    catch
+        nothing
+    end
+    if preamble !== nothing && e !== nothing
+        return preamble.omega * u"bohr^3" => e.ε[end] * u"Ry"  # volume, energy
+    else
+        return
+    end
+end # function _readoutput
 function _readoutput(::VariableCellOptimization, s::AbstractString)
     if !isjobdone(s)
         @warn "Job is not finished!"
