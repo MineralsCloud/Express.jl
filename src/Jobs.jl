@@ -59,38 +59,20 @@ Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
 Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
 ∥(a::AtomicJob, b::AtomicJob...) = ParallelJobs([a, b...])
 
-function launchjob(cmds; interval = 3, wait = true)
-    subjobs = if wait
-        @sync map(cmds) do cmd
-            sleep(interval)
-            _launch(cmd)
-        end
-    else
-        map(cmds) do cmd
-            sleep(interval)
-            _launch(cmd)
-        end
+function launchjob(cmds, interval = 3)
+    subjobs = map(cmds) do cmd
+        sleep(interval)
+        _launch(cmd)
     end
     return ParallelJobs(vec(subjobs))
 end # function launchjob
-function launchjob(tracker::ParallelJobs; interval = 3, wait = true)
-    subjobs = if wait
-        @sync map(tracker.subjobs) do subjob
-            if getstatus(subjob) ∈ (Running(), Succeeded())
-                subjob
-            else
-                sleep(interval)
-                _launch(subjob)
-            end
-        end
-    else
-        map(tracker.subjobs) do subjob
-            if getstatus(subjob) ∈ (Running(), Succeeded())
-                subjob
-            else
-                sleep(interval)
-                _launch(subjob)
-            end
+function launchjob(tracker::ParallelJobs, interval = 3)
+    subjobs = map(tracker.subjobs) do subjob
+        if getstatus(subjob) ∈ (Running(), Succeeded())
+            subjob
+        else
+            sleep(interval)
+            _launch(subjob)
         end
     end
     return ParallelJobs(subjobs)
@@ -101,7 +83,6 @@ function launchjob(
     n,
     softwarecmd;
     dry_run = false,
-    wait = true,
     interval = 3,
     kwargs...,
 )
@@ -115,7 +96,7 @@ function launchjob(
         @warn "the following commands will be run:"
         return cmds
     else
-        return launchjob(cmds; interval = interval, wait = wait)
+        return launchjob(cmds, interval)
     end
 end
 
