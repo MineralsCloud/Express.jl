@@ -132,12 +132,12 @@ function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     return prepare(calc, inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
-function launchjob(calc::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
+function launchjob(::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(configfile)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return launchjob(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
+    return launchjob(outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
 """
