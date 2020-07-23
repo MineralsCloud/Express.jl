@@ -25,6 +25,7 @@ using ..EosFitting: set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
+    preset_template,
     _set_pressure_volume,
     _check_software_settings,
     _expand_settings,
