@@ -57,22 +57,41 @@ Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
 Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
 ∥(a::AtomicJob, b::AtomicJob...) = ParallelJobs([a, b...])
 
-function launchjob(cmds, interval = 3)
-    subjobs = map(cmds) do cmd
-        sleep(interval)
-        _launch(cmd)
+function launchjob(cmds, interval = 3, wait = true)
+    subjobs = if wait
+        @sync map(cmds) do cmd
+            sleep(interval)
+            _launch(cmd)
+        end
+    else
+        map(cmds) do cmd
+            sleep(interval)
+            _launch(cmd)
+        end
     end
     return ParallelJobs(vec(subjobs))
 end # function launchjob
-function launchjob(tracker::ParallelJobs, interval = 3)
-    return ParallelJobs(map(tracker.subjobs) do subjob
-        if getstatus(subjob) ∈ (Running(), Succeeded())
-            subjob
-        else
-            sleep(interval)
-            _launch(subjob)
+function launchjob(tracker::ParallelJobs, interval = 3, wait = true)
+    subjobs = if wait
+        @sync map(tracker.subjobs) do subjob
+            if getstatus(subjob) ∈ (Running(), Succeeded())
+                subjob
+            else
+                sleep(interval)
+                _launch(subjob)
+            end
         end
-    end)
+    else
+        map(tracker.subjobs) do subjob
+            if getstatus(subjob) ∈ (Running(), Succeeded())
+                subjob
+            else
+                sleep(interval)
+                _launch(subjob)
+            end
+        end
+    end
+    return ParallelJobs(subjobs)
 end # function launchjob
 
 function _launch(cmd::Base.AbstractCmd)
