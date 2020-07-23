@@ -95,6 +95,29 @@ function launchjob(tracker::ParallelJobs; interval = 3, wait = true)
     end
     return ParallelJobs(subjobs)
 end # function launchjob
+function launchjob(
+    outputs,
+    inputs,
+    n,
+    softwarecmd;
+    dry_run = false,
+    wait = true,
+    interval = 3,
+    kwargs...,
+)
+    # `map` guarantees they are of the same size, no need to check.
+    n = div_nprocs(n, length(inputs))
+    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
+        f = MpiExec(n; kwargs...) ∘ softwarecmd
+        f(stdin = input, stdout = output)
+    end
+    if dry_run
+        @warn "the following commands will be run:"
+        return cmds
+    else
+        return launchjob(cmds; interval = interval, wait = wait)
+    end
+end
 
 function _launch(cmd::Base.AbstractCmd)
     x = AtomicJob(cmd)
@@ -221,30 +244,6 @@ getstdout(::Base.AbstractCmd) = nothing
 
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
-
-function launchjob(
-    outputs,
-    inputs,
-    n,
-    softwarecmd;
-    dry_run = false,
-    wait = true,
-    interval = 3,
-    kwargs...,
-)
-    # `map` guarantees they are of the same size, no need to check.
-    n = div_nprocs(n, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        f = MpiExec(n; kwargs...) ∘ softwarecmd
-        f(stdin = input, stdout = output)
-    end
-    if dry_run
-        @warn "the following commands will be run:"
-        return cmds
-    else
-        return launchjob(cmds; interval = interval, wait = wait)
-    end
-end
 
 Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
 Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)
