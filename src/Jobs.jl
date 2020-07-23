@@ -68,7 +68,7 @@ function launchjob(cmds, interval = 3)
 end # function launchjob
 function launchjob(tracker::ParallelJobs, interval = 3)
     subjobs = map(tracker.subjobs) do subjob
-        if getstatus(subjob) ∈ (Running(), Succeeded())
+        if getstatus(subjob) isa Succeeded
             subjob
         else
             sleep(interval)
