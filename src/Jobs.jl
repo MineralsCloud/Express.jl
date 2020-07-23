@@ -4,6 +4,8 @@ using AbInitioSoftwareBase.CLI: MpiExec
 using Dates: DateTime, CompoundPeriod, now, canonicalize, format
 using Distributed
 
+using ..Express: Calculation
+
 export div_nprocs,
     launchjob,
     starttime,
@@ -57,7 +59,7 @@ Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
 Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
 ∥(a::AtomicJob, b::AtomicJob...) = ParallelJobs([a, b...])
 
-function launchjob(cmds, interval = 3, wait = true)
+function launchjob(cmds; interval = 3, wait = true)
     subjobs = if wait
         @sync map(cmds) do cmd
             sleep(interval)
@@ -71,7 +73,7 @@ function launchjob(cmds, interval = 3, wait = true)
     end
     return ParallelJobs(vec(subjobs))
 end # function launchjob
-function launchjob(tracker::ParallelJobs, interval = 3, wait = true)
+function launchjob(tracker::ParallelJobs; interval = 3, wait = true)
     subjobs = if wait
         @sync map(tracker.subjobs) do subjob
             if getstatus(subjob) ∈ (Running(), Succeeded())
@@ -220,7 +222,16 @@ getstdout(::Base.AbstractCmd) = nothing
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
 
-function launchjob(calc, outputs, inputs, n, softwarecmd; dry_run = false, kwargs...)
+function launchjob(
+    outputs,
+    inputs,
+    n,
+    softwarecmd;
+    dry_run = false,
+    wait = true,
+    interval = 3,
+    kwargs...,
+)
     # `map` guarantees they are of the same size, no need to check.
     n = div_nprocs(n, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
@@ -231,7 +242,7 @@ function launchjob(calc, outputs, inputs, n, softwarecmd; dry_run = false, kwarg
         @warn "the following commands will be run:"
         return cmds
     else
-        return launchjob(cmds)
+        return launchjob(cmds; interval = interval, wait = wait)
     end
 end
 
