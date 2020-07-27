@@ -8,6 +8,11 @@ repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
 version = "0.1.0"
 
+[[ArgCheck]]
+git-tree-sha1 = "dedbbb2ddb876f899585c4ec4433265e3017215a"
+uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+version = "2.1.0"
+
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
 git-tree-sha1 = "066d1e7a9eb4873660791db7f0d8c7902600b81c"
@@ -195,9 +200,15 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[HTTP]]
 deps = ["Base64", "Dates", "IniFile", "MbedTLS", "Sockets"]
-git-tree-sha1 = "eca61b35cdd8cd2fcc5eec1eda766424a995b02f"
+git-tree-sha1 = "2ac03263ce44be4222342bca1c51c36ce7566161"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "0.8.16"
+version = "0.8.17"
+
+[[IRTools]]
+deps = ["InteractiveUtils", "MacroTools", "Test"]
+git-tree-sha1 = "6875ae3cfcb9a50af80553d5cc825f406e8d13bc"
+uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
+version = "0.4.0"
 
 [[IniFile]]
 deps = ["Test"]
@@ -335,6 +346,12 @@ git-tree-sha1 = "4c26a757fbb5b1893b7df19a44e21762d8f8e470"
 uuid = "87e2bd06-a317-5318-96d9-3ecbac512eee"
 version = "2.0.1"
 
+[[OptionalArgChecks]]
+deps = ["ArgCheck", "IRTools", "MacroTools"]
+git-tree-sha1 = "1b129ee694bda4f9a21e3484f9ed2888184100b7"
+uuid = "dfbeeb84-381a-44da-9ec9-a723abf299c7"
+version = "0.3.1"
+
 [[OrderedCollections]]
 git-tree-sha1 = "293b70ac1780f9584c89268a6e2a560d938a7065"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
@@ -386,7 +403,7 @@ version = "1.3.2"
 
 [[Pseudopotentials]]
 deps = ["DataFrames", "EzXML", "JLD2", "Parameters", "REPL", "UrlDownload"]
-git-tree-sha1 = "84f5a2028036e1cb07ec10aa5a86f0ade2a54e51"
+git-tree-sha1 = "2212985c3defd3b7d529366fcd88d30cba4a5a9c"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/Pseudopotentials.jl.git"
 uuid = "1b2dc2e6-48aa-4f00-b8f4-19d1a71d7a0e"
@@ -421,8 +438,8 @@ uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
-deps = ["AbInitioSoftwareBase", "Compat", "Crystallography", "Formatting", "LinearAlgebra", "Parameters", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "52fb74badd03aa9a732437cf9f05575cb4d7c29d"
+deps = ["AbInitioSoftwareBase", "Compat", "ConstructionBase", "Crystallography", "Formatting", "LinearAlgebra", "OptionalArgChecks", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
+git-tree-sha1 = "41260191616e993f7bcb6ae0f2fb0e55d88a62cc"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -475,9 +492,9 @@ version = "0.2.2+1"
 
 [[Roots]]
 deps = ["Printf"]
-git-tree-sha1 = "7bd9d7eee602f0413f24c394386a18cb0d515f36"
+git-tree-sha1 = "069e68c2173b4e4d0c37ffb3268d37f168ad719c"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.0.3"
+version = "1.0.4"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -548,9 +565,9 @@ version = "1.0.0"
 
 [[Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "c45dcc27331febabc20d86cb3974ef095257dcf3"
+git-tree-sha1 = "b7f762e9820b7fab47544c36f26f54ac59cf8abf"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.0.4"
+version = "1.0.5"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
