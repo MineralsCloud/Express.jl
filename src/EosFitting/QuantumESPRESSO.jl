@@ -4,7 +4,7 @@ using Crystallography: Cell, eachatom, cellvolume
 using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
-using QuantumESPRESSO.Inputs: inputstring, getoption
+using QuantumESPRESSO.Inputs: inputstring, optionof
 using QuantumESPRESSO.Inputs.PWscf:
     CellParametersCard,
     AtomicPositionsCard,
