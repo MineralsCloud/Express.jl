@@ -34,7 +34,7 @@ export SelfConsistentField,
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 """
-    set_pressure_volume(template::Input, pressure, eos::EquationOfState; volume_scale = (eps(), 1.3))
+    set_pressure_volume(template::Input, pressure, eos::EquationOfState; volume_scale = (0.5, 1.5))
 
 Set the volume of `template` at a `pressure` according to `eos`.
 
@@ -45,7 +45,7 @@ function set_pressure_volume(
     template::Input,
     pressure,
     eos::EquationOfState;
-    volume_scale = (eps(), 1.3),
+    volume_scale = (0.5, 1.5),
 )::Input
     @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
