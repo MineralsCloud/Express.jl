@@ -80,14 +80,14 @@ end # function launchjob
 function launchjob(
     outputs,
     inputs,
-    n,
+    np,
     softwarecmd;
     dry_run = false,
     interval = 3,
     kwargs...,
 )
     # `map` guarantees they are of the same size, no need to check.
-    n = div_nprocs(n, length(inputs))
+    n = div_nprocs(np, length(inputs))
     cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
         f = MpiExec(n; kwargs...) ∘ softwarecmd
         f(stdin = input, stdout = output)
