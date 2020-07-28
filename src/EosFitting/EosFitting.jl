@@ -29,6 +29,7 @@ export SelfConsistentField,
     prepare,
     launchjob,
     finish,
+    fiteos,
     writeinput
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
