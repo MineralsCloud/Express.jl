@@ -24,3 +24,28 @@ administrator.
 See
 "[Loading settings](https://mineralscloud.github.io/AbInitioSoftwareBase.jl/dev/troubleshooting/#Loading-settings)"
 for detailed information.
+
+## Loading
+
+### Why is Julia compiling/loading modules so slow? What can I do?
+
+If you just want Julia do a simple task and only once, you could start Julia REPL with
+
+```shell
+$ julia --compile=min
+```
+
+to minimize compilation or
+
+```shell
+$ julia --optimize=0
+```
+
+to minimize optimizations, or just use both. Or you could make a system image
+and run with
+
+```shell
+$ julia --sysimage custom-image.so
+```
+
+See [Fredrik Ekre's talk](https://youtu.be/IuwxE3m0_QQ?t=313) for details.
