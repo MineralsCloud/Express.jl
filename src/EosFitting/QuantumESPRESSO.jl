@@ -1,7 +1,6 @@
 module QuantumESPRESSO
 
 using Crystallography: Cell, eachatom, cellvolume
-using Dates: now
 using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, optionof
@@ -97,10 +96,7 @@ end # function _expand_settings
 function preset_template(calc, template)
     template = set_verbosity(template, "high")
     @set! template.control.calculation = calc isa SelfConsistentField ? "scf" : "vc-relax"
-    @set! template.control.outdir = join(
-        [template.control.prefix, template.control.calculation, now(), rand(UInt)],
-        "_",
-    )
+    @set! template.control.outdir = mktempdir()
     return template
 end
 
