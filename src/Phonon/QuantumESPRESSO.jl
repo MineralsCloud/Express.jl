@@ -15,7 +15,7 @@ import ...EosFitting: parsecell
 import ..Phonon: preset, prep_input, preprocess, _expand_settings
 
 function prep_input(::DfptMethod, template::PhInput, from::PWInput)
-    template = preset(template)
+    template = preset_template(template)
     return relay(from, template)
 end
 
@@ -32,18 +32,20 @@ prepare(::SelfConsistentField, input, template::PWInput) = writeinput(input, tem
 # end
 
 # This is a helper function and should not be exported.
-function preset(template::PWInput)
+function preset_template(template::PWInput)
     @set! template.control.calculation = "scf"
     return set_verbosity(template, "high")
 end # function preset
-function preset(template::PhInput)
+function preset_template(template::PhInput)
     @set! template.inputph.verbosity = "high"
     return template
 end # function preset
 
 function _expand_settings(settings)
     templatetexts = [read(expanduser(f), String) for f in settings["template"]]
-    template = parse(PWInput, templatetexts[1]), parse(PhInput, templatetexts[2]), parse(Q2rInput, templatetexts[3])
+    template = parse(PWInput, templatetexts[1]),
+    parse(PhInput, templatetexts[2]),
+    parse(Q2rInput, templatetexts[3])
     qe = settings["qe"]
     if qe["manager"] == "local"
         bin = qe["bin"]
