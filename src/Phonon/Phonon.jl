@@ -25,9 +25,7 @@ export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
 
 function relay end
 
-function prep_input end
-
-function (step::Step{VariableCellOptimization,Action{:set_structure}})(
+function set_structure(
     outputs,
     template::Input,
 )
@@ -43,7 +41,7 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(
         end
     end
 end
-function (step::Step{VariableCellOptimization,Action{:set_structure}})(configfile)
+function set_structure(configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
@@ -91,25 +89,13 @@ function process(
         Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
     end
 end
-function process(calc::T, path::AbstractString; kwargs...) where {T}
+function process(calc::T, path::AbstractString; kwargs...) where {T<:Union{SelfConsistentField,DfptMethod}}
     settings = load_settings(path)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return process(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
+    return process(calc, outputs, inputs, settings.manager.np, settings.bin[T <: SelfConsistentField ? 1 : 2]; kwargs...)
 end
-
-# function (::Step{ForceConstant,Prepare{:input}})(
-#     q2r_inputs,
-#     phonon_inputs,
-#     template::Q2rInput,
-# )
-#     map(q2r_inputs, phonon_inputs) do q2r_input, phonon_input
-#         object = parse(PhInput, read(InputFile(phonon_input)))
-#         write(InputFile(q2r_input), relay(object, template))
-#     end
-#     return
-# end
 
 # function (::Step{PhononDispersion,Prepare{:input}})(
 #     matdyn_inputs,
@@ -143,6 +129,8 @@ end
 # end
 
 function _expand_settings end
+
+function parsecell end
 
 function _check_settings(settings)
     map(("template", "pressures", "dir")) do key
