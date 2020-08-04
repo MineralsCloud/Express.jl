@@ -11,93 +11,100 @@ julia>
 """
 module Phonon
 
-using AbInitioSoftwareBase: load
+using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant, Step, LAUNCH_JOB
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant
 using ..EosFitting: _check_software_settings
+
+import AbInitioSoftwareBase.Inputs: set_structure
 import ..Express
 
-export DfptMethod, relay, prep_input, preprocess, load_settings
+export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
 
-function preset end
-
-function relay end
-
-function prep_input end
-
-function (step::Step{VariableCellOptimization,Action{:set_structure}})(
-    outputs,
-    template::Input,
-)
+function set_structure(outputs, template::Input)
     map(outputs) do output
         cell = open(output, "r") do io
             str = read(io, String)
             parsecell(str)
         end
         if any(x === nothing for x in cell)
-            return
+            return  # Not work for relax only
         else
-            return _set_structure(template, cell...)
+            return set_structure(template, cell...)
         end
     end
 end
-function (step::Step{VariableCellOptimization,Action{:set_structure}})(configfile)
+function set_structure(configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     new_inputs = settings.dirs .* "/new.in"
-    for (st, input) in zip(step(outputs, settings.template), new_inputs)
+    for (st, input) in zip(set_structure(outputs, settings.template), new_inputs)
         if st !== nothing
             write(input, inputstring(st))
         end
     end
 end
 
-function preprocess(::DfptMethod, inputs, template::Input, args...; dry_run = false)
+function prepare(::SelfConsistentField, files, templates, structures; dry_run = false)
+    for (file, template, structure) in zip(files, templates, structures)
+        object = preset_template(SelfConsistentField(), template)
+        object = set_structure(object, structure)
+        writeinput(file, object, dry_run)
+    end
+    return
+end
+function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
+    for (file, template, output) in zip(files, templates, outputs)
+        object = preset_template(SelfConsistentField(), template)
+        object = set_structure(outputs, object)
+        writeinput(file, object, dry_run)
+    end
+    return
+end
+prepare(::SelfConsistentField, files, outputs, template::Input; kwargs...) =
+    prepare(SelfConsistentField(), files, fill(template, size(files)), outputs)
+function prepare(::DfptMethod, inputs, template::Input, args...; dry_run = false)
     map(inputs) do input
         writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
     end
     return
 end
-function preprocess(calc::DfptMethod, path; kwargs...)
+function prepare(calc::DfptMethod, path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/ph.in"
-    return preprocess(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
-
-function process(
-    calc,
-    outputs,
-    inputs,
-    n,
-    softwarecmd;
-    dry_run = false,
-    kwargs...,
-)
-    if !dry_run
-        Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
+function prepare(::ForceConstant, inputs, template::Input, args...; dry_run = false)
+    map(inputs) do input
+        Step(ForceConstant(), PREPARE_INPUT)(input, template, args...)
     end
+    return
 end
-function process(calc::T, path::AbstractString; kwargs...) where {T}
+function prepare(calc::ForceConstant, path; kwargs...)
     settings = load_settings(path)
-    inputs =
-        @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return process(calc, outputs, inputs, settings.manager.np, settings.bin; kwargs...)
+    inputs = settings.dirs .* "/q2r.in"
+    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
 
-# function (::Step{ForceConstant,Prepare{:input}})(
-#     q2r_inputs,
-#     phonon_inputs,
-#     template::Q2rInput,
-# )
-#     map(q2r_inputs, phonon_inputs) do q2r_input, phonon_input
-#         object = parse(PhInput, read(InputFile(phonon_input)))
-#         write(InputFile(q2r_input), relay(object, template))
-#     end
-#     return
-# end
+function launchjob(
+    ::T,
+    configfile;
+    kwargs...,
+) where {T<:Union{SelfConsistentField,DfptMethod}}
+    settings = load_settings(configfile)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
+    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+    return launchjob(
+        outputs,
+        inputs,
+        settings.manager.np,
+        settings.bin[T <: SelfConsistentField ? 1 : 2],
+        T isa SelfConsistentField ? PWCmd() : PhCmd();
+        kwargs...,
+    )
+end
 
 # function (::Step{PhononDispersion,Prepare{:input}})(
 #     matdyn_inputs,
@@ -132,6 +139,8 @@ end
 
 function _expand_settings end
 
+function parsecell end
+
 function _check_settings(settings)
     map(("template", "pressures", "dir")) do key
         @assert haskey(settings, key)
@@ -141,7 +150,7 @@ function _check_settings(settings)
 end # function _check_settings
 
 function load_settings(path)
-    settings = load(path)
+    settings = loadfile(path)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end # function load_settings
