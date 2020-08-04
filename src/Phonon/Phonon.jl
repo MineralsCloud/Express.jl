@@ -23,8 +23,6 @@ import ..Express
 
 export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
 
-function relay end
-
 function set_structure(
     outputs,
     template::Input,
