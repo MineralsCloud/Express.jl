@@ -19,7 +19,17 @@ function prep_input(::DfptMethod, template::PhInput, from::PWInput)
     return relay(from, template)
 end
 
-preprocess(::SelfConsistentField, input, template::PWInput) = write_input(input, template)
+prepare(::SelfConsistentField, input, template::PWInput) = writeinput(input, template)
+
+# function (::Step{ForceConstant,Action{:prepare_input}})(
+#     q2r_input,
+#     phonon_input,
+#     template::Q2rInput,
+# )
+#     object = parse(PhInput, read(phonon_input, String))
+#     write(q2r_input, inputstring(relay(object, template)))
+#     return
+# end
 
 # This is a helper function and should not be exported.
 function preset(template::PWInput)
@@ -33,7 +43,7 @@ end # function preset
 
 function _expand_settings(settings)
     templatetexts = [read(expanduser(f), String) for f in settings["template"]]
-    template = parse(PWInput, templatetexts[1]), parse(PhInput, templatetexts[2])
+    template = parse(PWInput, templatetexts[1]), parse(PhInput, templatetexts[2]), parse(Q2rInput, templatetexts[3])
     qe = settings["qe"]
     if qe["manager"] == "local"
         bin = qe["bin"]
@@ -110,5 +120,8 @@ function relay(ph::PhInput, dynmat::DynmatInput)
     @set! dynmat.input.amass = ph.inputph.amass
     return dynmat
 end # function relay
+
+parsecell(str) =
+    tryparsefinal(CellParametersCard, str), tryparsefinal(AtomicPositionsCard, str)
 
 end
