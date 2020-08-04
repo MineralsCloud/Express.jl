@@ -1,8 +1,7 @@
 module QuantumESPRESSO
 
-using AbInitioSoftwareBase.Inputs: inputstring, write_input
+using AbInitioSoftwareBase.Inputs: inputstring, writeinput
 using Distributed: LocalManager
-using QuantumESPRESSO.Inputs: InputFile, inputstring
 using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert, set_verbosity
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
@@ -11,8 +10,9 @@ using Setfield: @set!
 using Unitful: @u_str
 using UnitfulAtomic
 
-using ...Express: DfptMethod, SelfConsistentField
-import ..Phonon: preset, relay, prep_input, preprocess, _expand_settings
+using ...Express: DfptMethod, SelfConsistentField, ForceConstant
+import ...EosFitting: parsecell
+import ..Phonon: preset, relay, prep_input, preprocess, _expand_settings, Step
 
 function prep_input(::DfptMethod, template::PhInput, from::PWInput)
     template = preset(template)
