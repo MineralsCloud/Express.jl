@@ -101,9 +101,9 @@ version = "0.21.5"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "edad9434967fdc0a2631a65d902228400642120c"
+git-tree-sha1 = "88d48e133e6d3dd68183309877eac74393daa7eb"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.19"
+version = "0.17.20"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -436,7 +436,7 @@ version = "2.4.0"
 
 [[QuantumESPRESSO]]
 deps = ["QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "310602165db114f0eb5dc79216edc6d8facf099d"
+git-tree-sha1 = "e93f8c2b1a8b6eeacdd5b48eaec2b1a51b29c346"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -444,7 +444,7 @@ version = "0.1.0"
 
 [[QuantumESPRESSOBase]]
 deps = ["AbInitioSoftwareBase", "AutoHashEquals", "Compat", "ConstructionBase", "Crystallography", "Formatting", "LinearAlgebra", "OptionalArgChecks", "Pseudopotentials", "PyFortran90Namelists", "Setfield", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "13c5b153a90d1ebeee8272633c5d6270156765f0"
+git-tree-sha1 = "f2cea93d02c02554c9e1f6e8f475679257f4300e"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
 uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
@@ -452,7 +452,7 @@ version = "0.1.2"
 
 [[QuantumESPRESSOParsers]]
 deps = ["Compat", "DataFrames", "DataStructures", "Parameters", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
-git-tree-sha1 = "55d96033381c4417d9186fe6f691b5ecb530bbed"
+git-tree-sha1 = "a13b52ce87717d06150534904c961b016c195a91"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
