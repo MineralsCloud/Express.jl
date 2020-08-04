@@ -20,7 +20,8 @@ using ..EosFitting: _check_software_settings
 import AbInitioSoftwareBase.Inputs: set_structure
 import ..Express
 
-export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
+export SelfConsistentField,
+    DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
 
 function set_structure(outputs, template::Input)
     map(outputs) do output

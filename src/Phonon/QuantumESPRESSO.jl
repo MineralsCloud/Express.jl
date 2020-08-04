@@ -5,14 +5,13 @@ using Distributed: LocalManager
 using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput, relayinfo
-using QuantumESPRESSO.Outputs.PWscf: parsefinal
+using QuantumESPRESSO.Outputs.PWscf: tryparsefinal
 using Setfield: @set!
 using Unitful: @u_str
 using UnitfulAtomic
 
 using ...Express: DfptMethod, SelfConsistentField, ForceConstant
-import ...EosFitting: parsecell
-import ..Phonon: preset_template, prep_input, preprocess, _expand_settings
+import ..Phonon: preset_template, _expand_settings, parsecell
 
 # This is a helper function and should not be exported.
 function preset_template(::DfptMethod, template::PhInput, pw::PWInput)
