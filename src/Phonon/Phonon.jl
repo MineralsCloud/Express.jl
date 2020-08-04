@@ -14,10 +14,7 @@ module Phonon
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 
-using ..Express:
-    SelfConsistentField,
-    DfptMethod,
-    ForceConstant
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: set_structure
@@ -50,6 +47,24 @@ function set_structure(configfile)
     end
 end
 
+function prepare(::SelfConsistentField, files, templates, structures; dry_run = false)
+    for (file, template, structure) in zip(files, templates, structures)
+        object = preset_template(SelfConsistentField(), template)
+        object = set_structure(object, structure)
+        writeinput(file, object, dry_run)
+    end
+    return
+end
+function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
+    for (file, template, output) in zip(files, templates, outputs)
+        object = preset_template(SelfConsistentField(), template)
+        object = set_structure(outputs, object)
+        writeinput(file, object, dry_run)
+    end
+    return
+end
+prepare(::SelfConsistentField, files, outputs, template::Input; kwargs...) =
+    prepare(SelfConsistentField(), files, fill(template, size(files)), outputs)
 function prepare(::DfptMethod, inputs, template::Input, args...; dry_run = false)
     map(inputs) do input
         writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
@@ -73,25 +88,22 @@ function prepare(calc::ForceConstant, path; kwargs...)
     return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
 
-function process(
-    calc,
-    outputs,
-    inputs,
-    n,
-    softwarecmd;
-    dry_run = false,
+function launchjob(
+    ::T,
+    configfile;
     kwargs...,
-)
-    if !dry_run
-        Step(calc, LAUNCH_JOB)(outputs, inputs, n, softwarecmd)
-    end
-end
-function process(calc::T, path::AbstractString; kwargs...) where {T<:Union{SelfConsistentField,DfptMethod}}
-    settings = load_settings(path)
-    inputs =
-        @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
+) where {T<:Union{SelfConsistentField,DfptMethod}}
+    settings = load_settings(configfile)
+    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return process(calc, outputs, inputs, settings.manager.np, settings.bin[T <: SelfConsistentField ? 1 : 2]; kwargs...)
+    return launchjob(
+        outputs,
+        inputs,
+        settings.manager.np,
+        settings.bin[T <: SelfConsistentField ? 1 : 2],
+        T isa SelfConsistentField ? PWCmd() : PhCmd();
+        kwargs...,
+    )
 end
 
 # function (::Step{PhononDispersion,Prepare{:input}})(
