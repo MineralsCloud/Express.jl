@@ -138,6 +138,8 @@ end
 
 function _expand_settings end
 
+function preset_template end
+
 function parsecell end
 
 function _check_settings(settings)

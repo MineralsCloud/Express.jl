@@ -12,7 +12,7 @@ using UnitfulAtomic
 
 using ...Express: DfptMethod, SelfConsistentField, ForceConstant
 import ...EosFitting: parsecell
-import ..Phonon: preset, prep_input, preprocess, _expand_settings
+import ..Phonon: preset_template, prep_input, preprocess, _expand_settings
 
 # This is a helper function and should not be exported.
 function preset_template(::DfptMethod, template::PhInput, pw::PWInput)
