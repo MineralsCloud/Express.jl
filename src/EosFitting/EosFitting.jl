@@ -16,6 +16,7 @@ using ..Express:
     Calculation
 using ..Jobs: div_nprocs, launchjob
 
+import AbInitioSoftwareBase.Inputs: set_pressure_volume
 import ..Express
 import ..Express.Jobs: launchjob
 
@@ -50,7 +51,7 @@ function set_pressure_volume(
 )::Input
     @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
-    return _set_pressure_volume(template, pressure, volume)
+    return set_pressure_volume(template, pressure, volume)
 end # function set_pressure_volume
 
 """
@@ -249,8 +250,6 @@ function alert_pressures(pressures)
         @warn "for better fitting, we need at least 1 negative pressure!"
     end
 end # function alert_pressures
-
-function _set_pressure_volume end
 
 function preset_template end
 

@@ -1,17 +1,12 @@
 module QuantumESPRESSO
 
+using AbInitioSoftwareBase.Inputs: set_verbosity
 using Crystallography: Cell, eachatom, cellvolume
 using Distributed: LocalManager
 using EquationsOfState.Collections
 using QuantumESPRESSO.Inputs: inputstring, optionof
 using QuantumESPRESSO.Inputs.PWscf:
-    CellParametersCard,
-    AtomicPositionsCard,
-    PWInput,
-    optconvert,
-    set_verbosity,
-    set_structure,
-    set_pressure_volume
+    CellParametersCard, AtomicPositionsCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs.PWscf:
     Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
 using QuantumESPRESSO.CLI: PWCmd
@@ -20,12 +15,10 @@ using Unitful
 using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization
-using ..EosFitting: set_pressure_volume
 import ..EosFitting:
     getpotentials,
     getpotentialdir,
     preset_template,
-    _set_pressure_volume,
     _check_software_settings,
     _expand_settings,
     _readoutput
@@ -35,9 +28,6 @@ export safe_exit
 getpotentials(template::PWInput) = [x.pseudopot for x in template.atomic_species.data]
 
 getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
-
-_set_pressure_volume(template::PWInput, pressure, volume) =
-    set_pressure_volume(template, pressure, volume)
 
 function _check_software_settings(settings)
     map(("manager", "bin", "n")) do key
