@@ -1,10 +1,10 @@
 module QuantumESPRESSO
 
-using AbInitioSoftwareBase.Inputs: inputstring, writeinput
+using AbInitioSoftwareBase.Inputs: inputstring, writeinput, set_verbosity
 using Distributed: LocalManager
 using QuantumESPRESSO.Inputs.PWscf:
-    AtomicPositionsCard, CellParametersCard, PWInput, optconvert, set_verbosity
-using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput
+    AtomicPositionsCard, CellParametersCard, PWInput, optconvert
+using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput, relayinfo
 using QuantumESPRESSO.Outputs.PWscf: parsefinal
 using Setfield: @set!
 using Unitful: @u_str
@@ -14,12 +14,16 @@ using ...Express: DfptMethod, SelfConsistentField, ForceConstant
 import ...EosFitting: parsecell
 import ..Phonon: preset, prep_input, preprocess, _expand_settings
 
-function prep_input(::DfptMethod, template::PhInput, from::PWInput)
-    template = preset_template(template)
-    return relay(from, template)
+# This is a helper function and should not be exported.
+function preset_template(::DfptMethod, template::PhInput, pw::PWInput)
+    @set! template.inputph.verbosity = "high"
+    return relayinfo(pw, template)
 end
-
-prepare(::SelfConsistentField, input, template::PWInput) = writeinput(input, template)
+function preset_template(::SelfConsistentField, template::PWInput)
+    @set! template.control.calculation = "scf"
+    @set! template.control.outdir = mktempdir()
+    return set_verbosity(template, "high")
+end
 
 # function (::Step{ForceConstant,Action{:prepare_input}})(
 #     q2r_input,
@@ -30,16 +34,6 @@ prepare(::SelfConsistentField, input, template::PWInput) = writeinput(input, tem
 #     write(q2r_input, inputstring(relay(object, template)))
 #     return
 # end
-
-# This is a helper function and should not be exported.
-function preset_template(template::PWInput)
-    @set! template.control.calculation = "scf"
-    return set_verbosity(template, "high")
-end # function preset
-function preset_template(template::PhInput)
-    @set! template.inputph.verbosity = "high"
-    return template
-end # function preset
 
 function _expand_settings(settings)
     templatetexts = [read(expanduser(f), String) for f in settings["template"]]
