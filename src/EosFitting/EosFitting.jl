@@ -16,6 +16,7 @@ using ..Express:
     Calculation
 using ..Jobs: div_nprocs, launchjob
 
+import AbInitioSoftwareBase.Inputs: set_pressure_volume
 import ..Express
 import ..Express.Jobs: launchjob
 
@@ -50,30 +51,8 @@ function set_pressure_volume(
 )::Input
     @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
-    return _set_pressure_volume(template, pressure, volume)
+    return set_pressure_volume(template, pressure, volume)
 end # function set_pressure_volume
-
-"""
-    preset_template(calc, template::Input, pressure, trial_eos::EquationOfState; kwargs...)
-
-Generate input files from a given `template`, `pressure` and `trial_eos`, with some preset values.
-
-See also: [`set_pressure_volume`](@ref)
-"""
-function preset_template(
-    calc::ScfOrOptim,
-    template::Input,
-    pressure::Number,
-    trial_eos::EquationOfState;
-    kwargs...,
-)
-    return set_pressure_volume(
-        preset_template(calc, template),
-        pressure,
-        trial_eos;
-        kwargs...,
-    )
-end
 
 """
     prepare(calc, files, template::Input, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
@@ -93,13 +72,15 @@ function prepare(
     kwargs...,
 )
     alert_pressures(pressures)
-    for (file, template, pressure) in zip(files, templates, pressures)
-        object = preset_template(calc, template, pressure, trial_eos; kwargs...)
+    objects = map(files, templates, pressures) do file, template, pressure
+        object = preset_template(calc, template)
+        object = set_pressure_volume(object, pressure, trial_eos; kwargs...)
         writeinput(file, object, dry_run)
+        object
     end
     # STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
     #     Context(files, nothing, Succeeded(), now(), Step(calc, UPDATE_TEMPLATE))
-    return
+    return objects
 end
 prepare(
     calc::ScfOrOptim,
@@ -249,8 +230,6 @@ function alert_pressures(pressures)
         @warn "for better fitting, we need at least 1 negative pressure!"
     end
 end # function alert_pressures
-
-function _set_pressure_volume end
 
 function preset_template end
 
