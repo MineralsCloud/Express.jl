@@ -67,16 +67,20 @@ function prepare(calc::DfptMethod, configfile; kwargs...)
     inputs = settings.dirs .* "/ph.in"
     return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
-function prepare(::ForceConstant, inputs, template::Input, args...; dry_run = false)
-    map(inputs) do input
-        Step(ForceConstant(), PREPARE_INPUT)(input, template, args...)
+function prepare(::ForceConstant, files, templates, args...; dry_run = false)
+    objects = map(files, templates) do file, template
+        object = preset_template(ForceConstant(), template, args...)
+        writeinput(file, object, dry_run)
+        object
     end
-    return
+    return objects
 end
-function prepare(calc::ForceConstant, path; kwargs...)
-    settings = load_settings(path)
+prepare(::ForceConstant, files, template::Input, args...; kwargs...) =
+    prepare(ForceConstant(), files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::ForceConstant, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/q2r.in"
-    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+    return prepare(calc, inputs, settings.template[3], settings.template[2]; kwargs...)
 end
 
 function launchjob(

@@ -18,6 +18,9 @@ function preset_template(::DfptMethod, template::PhInput, pw::PWInput)
     @set! template.inputph.verbosity = "high"
     return relayinfo(pw, template)
 end
+function preset_template(::ForceConstant, template::Q2rInput, ph::PhInput)
+    return relayinfo(ph, template)
+end
 function preset_template(::SelfConsistentField, template::PWInput)
     @set! template.control.calculation = "scf"
     @set! template.control.outdir = mktempdir()
