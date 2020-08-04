@@ -182,14 +182,6 @@ function finish(::VariableCellOptimization, configfile)
     return finish(VariableCellOptimization(), outputs, new_eos)
 end
 
-function prep_potential(template)
-    required = getpotentials(template)
-    path = getpotentialdir(template)
-    return map(required) do potential
-        download_potential(potential, path)
-    end
-end
-
 # STEP_TRACKER = [
 #     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), UPDATE_TEMPLATE)),
 #     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
@@ -233,12 +225,6 @@ function alert_pressures(pressures)
 end # function alert_pressures
 
 function preset_template end
-
-function getpotentials end
-
-function getpotentialdir end
-
-function download_potential end
 
 function _readoutput end
 

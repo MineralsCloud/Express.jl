@@ -16,18 +16,12 @@ using UnitfulAtomic
 
 using ...Express: SelfConsistentField, VariableCellOptimization
 import ..EosFitting:
-    getpotentials,
-    getpotentialdir,
     preset_template,
     _check_software_settings,
     _expand_settings,
     _readoutput
 
 export safe_exit
-
-getpotentials(template::PWInput) = [x.pseudopot for x in template.atomic_species.data]
-
-getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
 
 function _check_software_settings(settings)
     map(("manager", "bin", "n")) do key
