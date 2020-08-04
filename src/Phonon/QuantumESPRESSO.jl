@@ -10,7 +10,7 @@ using Setfield: @set!
 using Unitful: @u_str
 using UnitfulAtomic
 
-using ...Express: DfptMethod, SelfConsistentField, ForceConstant
+using ...Express: DfptMethod, SelfConsistentField, ForceConstant, PhononDispersion
 import ..Phonon: preset_template, _expand_settings, parsecell
 
 # This is a helper function and should not be exported.
@@ -20,6 +20,14 @@ function preset_template(::DfptMethod, template::PhInput, pw::PWInput)
 end
 function preset_template(::ForceConstant, template::Q2rInput, ph::PhInput)
     return relayinfo(ph, template)
+end
+function preset_template(
+    ::PhononDispersion,
+    template::MatdynInput,
+    q2r::Q2rInput,
+    ph::PhInput,
+)
+    return relayinfo(q2r, relayinfo(ph, template))
 end
 function preset_template(::SelfConsistentField, template::PWInput)
     @set! template.control.calculation = "scf"
@@ -41,7 +49,8 @@ function _expand_settings(settings)
     templatetexts = [read(expanduser(f), String) for f in settings["template"]]
     template = parse(PWInput, templatetexts[1]),
     parse(PhInput, templatetexts[2]),
-    parse(Q2rInput, templatetexts[3])
+    parse(Q2rInput, templatetexts[3]),
+    parse(MatdynInput, templatetexts[4])
     qe = settings["qe"]
     if qe["manager"] == "local"
         bin = qe["bin"]

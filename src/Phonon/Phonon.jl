@@ -14,14 +14,20 @@ module Phonon
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: set_structure
 import ..Express
 
 export SelfConsistentField,
-    DfptMethod, ForceConstant, prepare, process, load_settings, inputstring
+    DfptMethod,
+    ForceConstant,
+    PhononDispersion,
+    prepare,
+    process,
+    load_settings,
+    inputstring
 
 function set_structure(output, template::Input)
     cell = open(output, "r") do io
@@ -81,6 +87,21 @@ function prepare(calc::ForceConstant, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/q2r.in"
     return prepare(calc, inputs, settings.template[3], settings.template[2]; kwargs...)
+end
+function prepare(::PhononDispersion, files, templates, args...; dry_run = false)
+    objects = map(files, templates) do file, template
+        object = preset_template(PhononDispersion(), template, args...)
+        writeinput(file, object, dry_run)
+        object
+    end
+    return objects
+end
+prepare(::PhononDispersion, files, template::Input, args...; kwargs...) =
+    prepare(PhononDispersion(), files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::PhononDispersion, configfile; kwargs...)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/disp.in"
+    return prepare(calc, inputs, settings.template[4:-1:2]...; kwargs...)
 end
 
 function launchjob(
