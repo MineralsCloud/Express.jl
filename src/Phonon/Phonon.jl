@@ -13,79 +13,96 @@ module Phonon
 
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant
+using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: set_structure
-import ..Express
+import ..Jobs: launchjob
 
-export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
+export SelfConsistentField,
+    DfptMethod,
+    ForceConstant,
+    PhononDispersion,
+    prepare,
+    launchjob,
+    load_settings,
+    inputstring
 
-function set_structure(outputs, template::Input)
-    map(outputs) do output
-        cell = open(output, "r") do io
-            str = read(io, String)
-            parsecell(str)
-        end
-        if any(x === nothing for x in cell)
-            return  # Not work for relax only
-        else
-            return set_structure(template, cell...)
-        end
+function set_structure(output, template::Input)
+    cell = open(output, "r") do io
+        str = read(io, String)
+        parsecell(str)
     end
-end
-function set_structure(configfile)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/vc-relax.in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_inputs = settings.dirs .* "/new.in"
-    for (st, input) in zip(set_structure(outputs, settings.template), new_inputs)
-        if st !== nothing
-            write(input, inputstring(st))
-        end
+    if any(x === nothing for x in cell)
+        return  # Not work for relax only
+    else
+        return set_structure(template, cell...)
     end
 end
 
-function prepare(::SelfConsistentField, files, templates, structures; dry_run = false)
-    for (file, template, structure) in zip(files, templates, structures)
-        object = preset_template(SelfConsistentField(), template)
-        object = set_structure(object, structure)
-        writeinput(file, object, dry_run)
-    end
-    return
-end
 function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
-    for (file, template, output) in zip(files, templates, outputs)
+    objects = map(files, templates, outputs) do file, template, output
         object = preset_template(SelfConsistentField(), template)
-        object = set_structure(outputs, object)
+        object = set_structure(output, object)
         writeinput(file, object, dry_run)
+        object
     end
-    return
+    return objects
 end
 prepare(::SelfConsistentField, files, outputs, template::Input; kwargs...) =
-    prepare(SelfConsistentField(), files, fill(template, size(files)), outputs)
-function prepare(::DfptMethod, inputs, template::Input, args...; dry_run = false)
-    map(inputs) do input
-        writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
-    end
-    return
+    prepare(SelfConsistentField(), files, outputs, fill(template, size(files)))
+function prepare(::SelfConsistentField, configfile; kwargs...)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/phscf.in"
+    outputs = settings.dirs .* "/vc-relax.out"
+    return prepare(SelfConsistentField(), inputs, outputs, settings.template[1]; kwargs...)
 end
-function prepare(calc::DfptMethod, path; kwargs...)
-    settings = load_settings(path)
+function prepare(::DfptMethod, files, templates, args...; dry_run = false)
+    objects = map(files, templates) do file, template
+        object = preset_template(DfptMethod(), template, args...)
+        writeinput(file, object, dry_run)
+        object
+    end
+    return objects
+end
+prepare(::DfptMethod, files, template::Input, args...; kwargs...) =
+    prepare(DfptMethod(), files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::DfptMethod, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/ph.in"
     return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
-function prepare(::ForceConstant, inputs, template::Input, args...; dry_run = false)
-    map(inputs) do input
-        Step(ForceConstant(), PREPARE_INPUT)(input, template, args...)
+function prepare(::ForceConstant, files, templates, args...; dry_run = false)
+    objects = map(files, templates) do file, template
+        object = preset_template(ForceConstant(), template, args...)
+        writeinput(file, object, dry_run)
+        object
     end
-    return
+    return objects
 end
-function prepare(calc::ForceConstant, path; kwargs...)
-    settings = load_settings(path)
+prepare(::ForceConstant, files, template::Input, args...; kwargs...) =
+    prepare(ForceConstant(), files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::ForceConstant, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/q2r.in"
-    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+    return prepare(calc, inputs, settings.template[3], settings.template[2]; kwargs...)
+end
+function prepare(::PhononDispersion, files, templates, args...; dry_run = false)
+    objects = map(files, templates) do file, template
+        object = preset_template(PhononDispersion(), template, args...)
+        writeinput(file, object, dry_run)
+        object
+    end
+    return objects
+end
+prepare(::PhononDispersion, files, template::Input, args...; kwargs...) =
+    prepare(PhononDispersion(), files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::PhononDispersion, configfile; kwargs...)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/disp.in"
+    return prepare(calc, inputs, settings.template[4:-1:2]...; kwargs...)
 end
 
 function launchjob(
@@ -101,7 +118,7 @@ function launchjob(
         inputs,
         settings.manager.np,
         settings.bin[T <: SelfConsistentField ? 1 : 2],
-        T isa SelfConsistentField ? PWCmd() : PhCmd();
+        T <: SelfConsistentField ? PWCmd(settings.bin[1]) : PhCmd(settings.bin[2]);
         kwargs...,
     )
 end
@@ -139,6 +156,8 @@ end
 
 function _expand_settings end
 
+function preset_template end
+
 function parsecell end
 
 function _check_settings(settings)
@@ -149,8 +168,8 @@ function _check_settings(settings)
     @assert all(isfile.(settings["template"]))
 end # function _check_settings
 
-function load_settings(path)
-    settings = loadfile(path)
+function load_settings(configfile)
+    settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end # function load_settings
