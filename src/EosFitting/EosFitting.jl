@@ -3,6 +3,7 @@ module EosFitting
 using AbInitioSoftwareBase: FilePath, loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using AbInitioSoftwareBase.CLI: MpiExec
+using Compat: isnothing
 using Dates: now
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
@@ -134,7 +135,7 @@ function fiteos(
     fit_energy::Bool = true,
 )
     data = Iterators.filter(
-        x -> x !== nothing,
+        !isnothing,
         (_readoutput(calc, read(output, String)) for output in outputs),
     )  # volume => energy
     if length(collect(data)) <= 5
