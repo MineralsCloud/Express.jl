@@ -55,16 +55,27 @@ function (step::Step{VariableCellOptimization,Action{:set_structure}})(configfil
     end
 end
 
-function preprocess(::DfptMethod, inputs, template::Input, args...; dry_run = false)
+function prepare(::DfptMethod, inputs, template::Input, args...; dry_run = false)
     map(inputs) do input
         writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
     end
     return
 end
-function preprocess(calc::DfptMethod, path; kwargs...)
+function prepare(calc::DfptMethod, path; kwargs...)
     settings = load_settings(path)
     inputs = settings.dirs .* "/ph.in"
-    return preprocess(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+end
+function prepare(::ForceConstant, inputs, template::Input, args...; dry_run = false)
+    map(inputs) do input
+        Step(ForceConstant(), PREPARE_INPUT)(input, template, args...)
+    end
+    return
+end
+function prepare(calc::ForceConstant, path; kwargs...)
+    settings = load_settings(path)
+    inputs = settings.dirs .* "/q2r.in"
+    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
 
 function process(
@@ -142,7 +153,7 @@ function _check_settings(settings)
 end # function _check_settings
 
 function load_settings(path)
-    settings = load(path)
+    settings = loadfile(path)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end # function load_settings
