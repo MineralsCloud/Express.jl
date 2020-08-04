@@ -19,23 +19,22 @@ using ..Express:
     DfptMethod,
     ForceConstant
 using ..EosFitting: _check_software_settings
+
+import AbInitioSoftwareBase.Inputs: set_structure
 import ..Express
 
 export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
 
-function set_structure(
-    outputs,
-    template::Input,
-)
+function set_structure(outputs, template::Input)
     map(outputs) do output
         cell = open(output, "r") do io
             str = read(io, String)
             parsecell(str)
         end
         if any(x === nothing for x in cell)
-            return
+            return  # Not work for relax only
         else
-            return _set_structure(template, cell...)
+            return set_structure(template, cell...)
         end
     end
 end
@@ -44,7 +43,7 @@ function set_structure(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     new_inputs = settings.dirs .* "/new.in"
-    for (st, input) in zip(step(outputs, settings.template), new_inputs)
+    for (st, input) in zip(set_structure(outputs, settings.template), new_inputs)
         if st !== nothing
             write(input, inputstring(st))
         end
