@@ -21,7 +21,7 @@ import AbInitioSoftwareBase.Inputs: set_structure
 import ..Express
 
 export SelfConsistentField,
-    DfptMethod, ForceConstant, prep_input, prepare, process, load_settings, inputstring
+    DfptMethod, ForceConstant, prepare, process, load_settings, inputstring
 
 function set_structure(output, template::Input)
     cell = open(output, "r") do io
@@ -52,14 +52,18 @@ function prepare(::SelfConsistentField, configfile; kwargs...)
     outputs = settings.dirs .* "/vc-relax.out"
     return prepare(SelfConsistentField(), inputs, outputs, settings.template[1]; kwargs...)
 end
-function prepare(::DfptMethod, inputs, template::Input, args...; dry_run = false)
-    map(inputs) do input
-        writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
+function prepare(::DfptMethod, files, templates, args...; dry_run = false)
+    objects = map(files, templates) do file, template
+        object = preset_template(DfptMethod(), template, args...)
+        writeinput(file, object, dry_run)
+        object
     end
-    return
+    return objects
 end
-function prepare(calc::DfptMethod, path; kwargs...)
-    settings = load_settings(path)
+prepare(::DfptMethod, files, template::Input, args...; kwargs...) =
+    prepare(DfptMethod(), files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::DfptMethod, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/ph.in"
     return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
 end
