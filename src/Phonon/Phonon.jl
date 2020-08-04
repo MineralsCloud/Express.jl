@@ -13,19 +13,20 @@ module Phonon
 
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
 using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: set_structure
-import ..Express
+import ..Jobs: launchjob
 
 export SelfConsistentField,
     DfptMethod,
     ForceConstant,
     PhononDispersion,
     prepare,
-    process,
+    launchjob,
     load_settings,
     inputstring
 
@@ -117,7 +118,7 @@ function launchjob(
         inputs,
         settings.manager.np,
         settings.bin[T <: SelfConsistentField ? 1 : 2],
-        T isa SelfConsistentField ? PWCmd() : PhCmd();
+        T <: SelfConsistentField ? PWCmd(settings.bin[1]) : PhCmd(settings.bin[2]);
         kwargs...,
     )
 end
@@ -167,8 +168,8 @@ function _check_settings(settings)
     @assert all(isfile.(settings["template"]))
 end # function _check_settings
 
-function load_settings(path)
-    settings = loadfile(path)
+function load_settings(configfile)
+    settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end # function load_settings
