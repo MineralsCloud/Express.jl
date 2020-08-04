@@ -47,24 +47,23 @@ function set_structure(configfile)
     end
 end
 
-function prepare(::SelfConsistentField, files, templates, structures; dry_run = false)
-    for (file, template, structure) in zip(files, templates, structures)
-        object = preset_template(SelfConsistentField(), template)
-        object = set_structure(object, structure)
-        writeinput(file, object, dry_run)
-    end
-    return
-end
 function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
-    for (file, template, output) in zip(files, templates, outputs)
+    objects = map(files, templates, outputs) do file, template, output
         object = preset_template(SelfConsistentField(), template)
         object = set_structure(outputs, object)
         writeinput(file, object, dry_run)
+        object
     end
-    return
+    return objects
 end
 prepare(::SelfConsistentField, files, outputs, template::Input; kwargs...) =
-    prepare(SelfConsistentField(), files, fill(template, size(files)), outputs)
+    prepare(SelfConsistentField(), files, outputs, fill(template, size(files)))
+function prepare(::SelfConsistentField, configfile; kwargs...)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/scf.in"
+    outputs = settings.dirs .* "/vc-relax.out"
+    return prepare(SelfConsistentField(), inputs, outputs, settings.template[1]; kwargs...)
+end
 function prepare(::DfptMethod, inputs, template::Input, args...; dry_run = false)
     map(inputs) do input
         writeinput(input, prep_input(DfptMethod(), template, args...), dry_run)
