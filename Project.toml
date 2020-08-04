@@ -5,6 +5,7 @@ version = "0.3.0"
 
 [deps]
 AbInitioSoftwareBase = "df5135bc-470e-46c6-b451-292e27ca5b84"
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 Crystallography = "3bff3928-7a76-11e9-2089-d112443085a5"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
