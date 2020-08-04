@@ -21,37 +21,24 @@ import AbInitioSoftwareBase.Inputs: set_structure
 import ..Express
 
 export SelfConsistentField,
-    DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
+    DfptMethod, ForceConstant, prep_input, prepare, process, load_settings, inputstring
 
-function set_structure(outputs, template::Input)
-    map(outputs) do output
-        cell = open(output, "r") do io
-            str = read(io, String)
-            parsecell(str)
-        end
-        if any(x === nothing for x in cell)
-            return  # Not work for relax only
-        else
-            return set_structure(template, cell...)
-        end
+function set_structure(output, template::Input)
+    cell = open(output, "r") do io
+        str = read(io, String)
+        parsecell(str)
     end
-end
-function set_structure(configfile)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/vc-relax.in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_inputs = settings.dirs .* "/new.in"
-    for (st, input) in zip(set_structure(outputs, settings.template), new_inputs)
-        if st !== nothing
-            write(input, inputstring(st))
-        end
+    if any(x === nothing for x in cell)
+        return  # Not work for relax only
+    else
+        return set_structure(template, cell...)
     end
 end
 
 function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
     objects = map(files, templates, outputs) do file, template, output
         object = preset_template(SelfConsistentField(), template)
-        object = set_structure(outputs, object)
+        object = set_structure(output, object)
         writeinput(file, object, dry_run)
         object
     end
