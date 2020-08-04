@@ -48,7 +48,7 @@ prepare(::SelfConsistentField, files, outputs, template::Input; kwargs...) =
     prepare(SelfConsistentField(), files, outputs, fill(template, size(files)))
 function prepare(::SelfConsistentField, configfile; kwargs...)
     settings = load_settings(configfile)
-    inputs = settings.dirs .* "/scf.in"
+    inputs = settings.dirs .* "/phscf.in"
     outputs = settings.dirs .* "/vc-relax.out"
     return prepare(SelfConsistentField(), inputs, outputs, settings.template[1]; kwargs...)
 end
