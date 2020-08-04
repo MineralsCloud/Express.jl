@@ -11,16 +11,17 @@ julia>
 """
 module Phonon
 
-using AbInitioSoftwareBase: load
+using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant, Step, LAUNCH_JOB
+using ..Express:
+    SelfConsistentField,
+    DfptMethod,
+    ForceConstant
 using ..EosFitting: _check_software_settings
 import ..Express
 
-export DfptMethod, relay, prep_input, preprocess, load_settings
-
-function preset end
+export DfptMethod, ForceConstant, prep_input, prepare, process, load_settings
 
 function relay end
 

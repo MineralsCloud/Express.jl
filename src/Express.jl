@@ -32,7 +32,7 @@ include("Jobs.jl")
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting/EosFitting.jl")
-# include("Phonon/Phonon.jl")
+include("Phonon/Phonon.jl")
 # include("Wizard/Wizard.jl")
 
 end # module
