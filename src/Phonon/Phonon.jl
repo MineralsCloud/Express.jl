@@ -13,6 +13,7 @@ module Phonon
 
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
 using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
@@ -60,8 +61,8 @@ function prepare(::SelfConsistentField, configfile; kwargs...)
     return prepare(SelfConsistentField(), inputs, outputs, settings.template[1]; kwargs...)
 end
 function prepare(::DfptMethod, files, templates, args...; dry_run = false)
-    objects = map(files, templates) do file, template
-        object = preset_template(DfptMethod(), template, args...)
+    objects = map(files, templates, args[1]) do file, template, pw
+        object = preset_template(DfptMethod(), template, pw)
         writeinput(file, object, dry_run)
         object
     end
@@ -72,7 +73,10 @@ prepare(::DfptMethod, files, template::Input, args...; kwargs...) =
 function prepare(calc::DfptMethod, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/ph.in"
-    return prepare(calc, inputs, settings.template[2], settings.template[1]; kwargs...)
+    pws = map(settings.dirs .* "/phscf.in") do f
+        parse(PWInput, read(f, String))
+    end
+    return prepare(calc, inputs, settings.template[2], pws; kwargs...)
 end
 function prepare(::ForceConstant, files, templates, args...; dry_run = false)
     objects = map(files, templates) do file, template
