@@ -46,6 +46,12 @@ mutable struct _AtomicJobRef
     _AtomicJobRef() = new()
 end
 
+mutable struct _AtomicJobLogger
+    stdout::Pipe
+    stderr::Pipe
+    _AtomicJobLogger() = new(Pipe(), Pipe())
+end
+
 abstract type AtomicJob <: AbstractJob end
 
 struct ExternalAtomicJob <: AtomicJob
@@ -53,8 +59,14 @@ struct ExternalAtomicJob <: AtomicJob
     hash::UInt
     _timer::_AtomicJobTimer
     _ref::_AtomicJobRef
-    ExternalAtomicJob(cmd) =
-        new(cmd, hash((now(), cmd, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
+    _logger::_AtomicJobLogger
+    ExternalAtomicJob(cmd) = new(
+        cmd,
+        hash((now(), cmd, rand(UInt))),
+        _AtomicJobTimer(),
+        _AtomicJobRef(),
+        _AtomicJobLogger(),
+    )
 end
 
 struct InternalAtomicJob <: AtomicJob
