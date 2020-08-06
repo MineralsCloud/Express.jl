@@ -34,13 +34,36 @@ struct Failed <: Finished end
 
 abstract type AbstractJob end
 
-mutable struct AtomicJob <: AbstractJob
-    cmd::Base.AbstractCmd
-    ref::Future
-    starttime::DateTime
-    stoptime::DateTime
+mutable struct _AtomicJobTimer
+    start::DateTime
+    stop::DateTime
+    _AtomicJobTimer() = new()
+end
+
+mutable struct _AtomicJobRef
+    ref::Distributed.AbstractRemoteRef
     status::JobStatus
-    AtomicJob(cmd) = new(cmd)
+    _AtomicJobRef() = new()
+end
+
+abstract type AtomicJob <: AbstractJob end
+
+struct ExternalAtomicJob <: AtomicJob
+    cmd::Base.AbstractCmd
+    hash::UInt
+    _timer::_AtomicJobTimer
+    _ref::_AtomicJobRef
+    ExternalAtomicJob(cmd) =
+        new(cmd, hash((now(), cmd, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
+end
+
+struct InternalAtomicJob <: AtomicJob
+    fn::Function
+    hash::UInt
+    _timer::_AtomicJobTimer
+    _ref::_AtomicJobRef
+    InternalAtomicJob(fn) =
+        new(fn, hash((now(), fn, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
 end
 
 struct SerialJobs{T<:AbstractJob} <: AbstractJob
@@ -101,20 +124,40 @@ function launchjob(
 end
 
 function _launch(cmd::Base.AbstractCmd)
-    x = AtomicJob(cmd)
-    x.status = Running()
-    x.ref = @spawn begin
-        x.starttime = now()
+    x = ExternalAtomicJob(cmd)
+    x._ref.status = Running()
+    x._ref.ref = @spawn begin
+        x._timer.start = now()
         ref = try
             run(cmd; wait = true)  # Must wait
         catch e
             e
         end
-        x.stoptime = now()
+        x._timer.stop = now()
         if ref isa Exception  # Include all cases?
-            x.status = Failed()
+            x._ref.status = Failed()
         else
-            x.status = Succeeded()
+            x._ref.status = Succeeded()
+        end
+        ref
+    end
+    return x
+end # function _launch
+function _launch(cmd::Function, args...; kwargs...)
+    x = InternalAtomicJob(cmd)
+    x._ref.status = Running()
+    x._ref.ref = @spawn begin
+        x._timer.start = now()
+        ref = try
+            x.fn(args...; kwargs...)
+        catch e
+            e
+        end
+        x._timer.stop = now()
+        if ref isa Exception  # Include all cases?
+            x._ref.status = Failed()
+        else
+            x._ref.status = Succeeded()
         end
         ref
     end
