@@ -137,15 +137,24 @@ end
 
 function _launch(cmd::Base.AbstractCmd)
     x = ExternalAtomicJob(cmd)
-    x._ref.status = Running()
     x._ref.ref = @spawn begin
+        x._ref.status = Running()
         x._timer.start = now()
         ref = try
-            run(cmd; wait = true)  # Must wait
+            run(
+                pipeline(
+                    cmd,
+                    stdin = devnull,
+                    stdout = x._logger.stdout,
+                    stderr = x._logger.stderr,
+                );
+                wait = false,
+            )
         catch e
             e
+        finally
+            x._timer.stop = now()
         end
-        x._timer.stop = now()
         if ref isa Exception  # Include all cases?
             x._ref.status = Failed()
         else
