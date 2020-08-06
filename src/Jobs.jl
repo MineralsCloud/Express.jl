@@ -41,7 +41,7 @@ mutable struct _AtomicJobTimer
 end
 
 mutable struct _AtomicJobRef
-    ref::Distributed.AbstractRemoteRef
+    ref::Future
     status::JobStatus
     _AtomicJobRef() = new()
 end
