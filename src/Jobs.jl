@@ -141,15 +141,7 @@ function _launch(cmd::Base.AbstractCmd)
         x._ref.status = Running()
         x._timer.start = now()
         ref = try
-            run(
-                pipeline(
-                    cmd,
-                    stdin = devnull,
-                    stdout = x._logger.stdout,
-                    stderr = x._logger.stderr,
-                );
-                wait = false,
-            )
+            run(cmd; wait = true)  # Must wait
         catch e
             e
         finally
