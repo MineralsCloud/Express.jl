@@ -88,10 +88,10 @@ end
 
 Base.:∘(a::AtomicJob, b::AtomicJob...) = SequentialJob([a, b...])
 Base.:∘(a::SequentialJob, b::AtomicJob...) = SequentialJob(push!(a.subjobs, b...))
-Base.:∘(a::AtomicJob, b::SequentialJob) = SequentialJob(pushfirst!(b.subjobs, a))
-Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(append!(a.subjobs, b.subjobs))
-Base.:∘(a::AtomicJob, b::DistributedJob) = SequentialJob([a, b.subjobs])
 Base.:∘(a::DistributedJob, b::AtomicJob) = SequentialJob([a.subjobs, b])
+Base.:∘(a::AtomicJob, b::SequentialJob) = SequentialJob(pushfirst!(b.subjobs, a))
+Base.:∘(a::AtomicJob, b::DistributedJob) = SequentialJob([a, b.subjobs])
+Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(append!(a.subjobs, b.subjobs))
 ∥(a::AtomicJob, b::AtomicJob...) = DistributedJob([a, b...])
 
 function launchjob(cmds, interval = 3)
