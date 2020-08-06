@@ -32,7 +32,7 @@ abstract type Finished <: JobStatus end
 struct Succeeded <: Finished end
 struct Failed <: Finished end
 
-abstract type AbstractJob end
+abstract type Job end
 
 mutable struct _AtomicJobTimer
     start::DateTime
@@ -52,7 +52,7 @@ mutable struct _AtomicJobLogger
     _AtomicJobLogger() = new(Pipe(), Pipe())
 end
 
-abstract type AtomicJob <: AbstractJob end
+abstract type AtomicJob <: Job end
 
 struct ExternalAtomicJob <: AtomicJob
     cmd::Base.AbstractCmd
@@ -78,11 +78,11 @@ struct InternalAtomicJob <: AtomicJob
         new(fn, hash((now(), fn, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
 end
 
-struct SerialJobs{T<:AbstractJob} <: AbstractJob
+struct SerialJobs{T<:Job} <: Job
     subjobs::Vector{T}
 end
 
-struct ParallelJobs{T<:AbstractJob} <: AbstractJob
+struct ParallelJobs{T<:Job} <: Job
     subjobs::Vector{T}
 end
 
