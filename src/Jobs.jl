@@ -78,30 +78,30 @@ struct InternalAtomicJob <: AtomicJob
         new(fn, hash((now(), fn, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
 end
 
-struct SerialJobs{T<:Job} <: Job
+struct SequentialJob{T<:Job} <: Job
     subjobs::Vector{T}
 end
 
-struct ParallelJobs{T<:Job} <: Job
+struct DistributedJob{T<:Job} <: Job
     subjobs::Vector{T}
 end
 
-Base.:∘(a::AtomicJob, b::AtomicJob...) = SerialJobs([a, b...])
-Base.:∘(a::SerialJobs, b::AtomicJob...) = SerialJobs(push!(a.subjobs, b...))
-Base.:∘(a::AtomicJob, b::SerialJobs) = SerialJobs(pushfirst!(b.subjobs, a))
-Base.:∘(a::SerialJobs, b::SerialJobs) = SerialJobs(append!(a.subjobs, b.subjobs))
-Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
-Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
-∥(a::AtomicJob, b::AtomicJob...) = ParallelJobs([a, b...])
+Base.:∘(a::AtomicJob, b::AtomicJob...) = SequentialJob([a, b...])
+Base.:∘(a::SequentialJob, b::AtomicJob...) = SequentialJob(push!(a.subjobs, b...))
+Base.:∘(a::AtomicJob, b::SequentialJob) = SequentialJob(pushfirst!(b.subjobs, a))
+Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(append!(a.subjobs, b.subjobs))
+Base.:∘(a::AtomicJob, b::DistributedJob) = SequentialJob([a, b.subjobs])
+Base.:∘(a::DistributedJob, b::AtomicJob) = SequentialJob([a.subjobs, b])
+∥(a::AtomicJob, b::AtomicJob...) = DistributedJob([a, b...])
 
 function launchjob(cmds, interval = 3)
     subjobs = map(cmds) do cmd
         sleep(interval)
         _launch(cmd)
     end
-    return ParallelJobs(vec(subjobs))
+    return DistributedJob(vec(subjobs))
 end # function launchjob
-function launchjob(tracker::ParallelJobs, interval = 3)
+function launchjob(tracker::DistributedJob, interval = 3)
     subjobs = map(tracker.subjobs) do subjob
         if getstatus(subjob) isa Succeeded
             subjob
@@ -110,7 +110,7 @@ function launchjob(tracker::ParallelJobs, interval = 3)
             _launch(subjob)
         end
     end
-    return ParallelJobs(subjobs)
+    return DistributedJob(subjobs)
 end # function launchjob
 function launchjob(
     outputs,
@@ -177,25 +177,25 @@ function _launch(cmd::Function)
     return x
 end # function _launch
 _launch(x::AtomicJob) = _launch(x.cmd)
-_launch(x::ParallelJobs) = map(_launch, x.subjobs)
-function _launch(x::SerialJobs) end # function _launch
+_launch(x::DistributedJob) = map(_launch, x.subjobs)
+function _launch(x::SequentialJob) end # function _launch
 
 Base.run(x::AtomicJob) = _launch(x)
 
 getstatus(x::AtomicJob) = x.status
-getstatus(x::ParallelJobs) = map(getstatus, x.subjobs)
+getstatus(x::DistributedJob) = map(getstatus, x.subjobs)
 
 starttime(x::AtomicJob) = x.starttime
-starttime(x::ParallelJobs) = map(starttime, x.subjobs)
+starttime(x::DistributedJob) = map(starttime, x.subjobs)
 
 stoptime(x::AtomicJob) = isrunning(x) ? nothing : x.stoptime
-stoptime(x::ParallelJobs) = map(stoptime, x.subjobs)
+stoptime(x::DistributedJob) = map(stoptime, x.subjobs)
 
 timecost(x::AtomicJob) = isrunning(x) ? now() - x.starttime : x.stoptime - x.starttime
-timecost(x::ParallelJobs) = map(timecost, x.subjobs)
+timecost(x::DistributedJob) = map(timecost, x.subjobs)
 
 getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x.ref)
-getresult(x::ParallelJobs) = map(getresult, x.subjobs)
+getresult(x::DistributedJob) = map(getresult, x.subjobs)
 
 isrunning(x::AtomicJob) = getstatus(x) === Running()
 
@@ -203,13 +203,13 @@ issucceeded(x::AtomicJob) = getstatus(x) === Succeeded()
 
 isfailed(x::AtomicJob) = getstatus(x) === Failed()
 
-getrunning(x::ParallelJobs) = ParallelJobs(_selectby(x, Running()))
+getrunning(x::DistributedJob) = DistributedJob(_selectby(x, Running()))
 
-getsucceeded(x::ParallelJobs) = ParallelJobs(_selectby(x, Succeeded()))
+getsucceeded(x::DistributedJob) = DistributedJob(_selectby(x, Succeeded()))
 
-getfailed(x::ParallelJobs) = ParallelJobs(_selectby(x, Failed()))
+getfailed(x::DistributedJob) = DistributedJob(_selectby(x, Failed()))
 
-function _selectby(j::ParallelJobs, st::JobStatus)  # Do not export!
+function _selectby(j::DistributedJob, st::JobStatus)  # Do not export!
     res = AtomicJob[]
     for subjob in j.subjobs
         if getstatus(subjob) === st
@@ -219,7 +219,7 @@ function _selectby(j::ParallelJobs, st::JobStatus)  # Do not export!
     return res
 end # function _selectby
 
-function Base.show(io::IO, x::ParallelJobs)
+function Base.show(io::IO, x::DistributedJob)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
     for (i, subjob) in enumerate(x.subjobs)
@@ -255,7 +255,7 @@ function peepstdout(x::AtomicJob)
         println(read(out, String))
     end
 end # function peepstdout
-peepstdout(x::ParallelJobs) = foreach(peepstdout, x.subjobs)
+peepstdout(x::DistributedJob) = foreach(peepstdout, x.subjobs)
 
 function peepstdin(x::AtomicJob)
     out = getstdin(x.cmd)
@@ -263,7 +263,7 @@ function peepstdin(x::AtomicJob)
         println(read(out, String))
     end
 end # function peepstdin
-peepstdin(x::ParallelJobs) = foreach(peepstdin, x.subjobs)
+peepstdin(x::DistributedJob) = foreach(peepstdin, x.subjobs)
 
 function peepstderr(x::AtomicJob)
     out = getstderr(x.cmd)
@@ -271,7 +271,7 @@ function peepstderr(x::AtomicJob)
         println(read(out, String))
     end
 end # function peepstdin
-peepstderr(x::ParallelJobs) = foreach(peepstderr, x.subjobs)
+peepstderr(x::DistributedJob) = foreach(peepstderr, x.subjobs)
 
 getstdin(x::Base.CmdRedirect) = x.stream_no == 0 ? x.handle.filename : getstdin(x.cmd)
 getstdin(::Base.AbstractCmd) = nothing
@@ -282,13 +282,13 @@ getstdout(::Base.AbstractCmd) = nothing
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
 
-Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
-Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)
+Base.iterate(x::DistributedJob) = iterate(x.subjobs)
+Base.iterate(x::DistributedJob, state) = iterate(x.subjobs, state)
 
-Base.getindex(x::ParallelJobs, i) = getindex(x.subjobs, i)
+Base.getindex(x::DistributedJob, i) = getindex(x.subjobs, i)
 
-Base.firstindex(x::ParallelJobs) = 1
+Base.firstindex(x::DistributedJob) = 1
 
-Base.lastindex(x::ParallelJobs) = length(x.subjobs)
+Base.lastindex(x::DistributedJob) = length(x.subjobs)
 
 end
