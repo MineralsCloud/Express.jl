@@ -143,13 +143,13 @@ function _launch(cmd::Base.AbstractCmd)
     end
     return x
 end # function _launch
-function _launch(cmd::Function, args...; kwargs...)
+function _launch(cmd::Function)
     x = InternalAtomicJob(cmd)
-    x._ref.status = Running()
     x._ref.ref = @spawn begin
+        x._ref.status = Running()
         x._timer.start = now()
         ref = try
-            x.fn(args...; kwargs...)
+            x.fn()
         catch e
             e
         end
