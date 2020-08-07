@@ -6,7 +6,8 @@ using Distributed
 
 using ..Express: Calculation
 
-export div_nprocs,
+export ExternalAtomicJob,
+    div_nprocs,
     launchjob,
     starttime,
     stoptime,
@@ -202,7 +203,7 @@ stoptime(x::ArrayJob) = map(stoptime, x.subjobs)
 timecost(x::AtomicJob) = isrunning(x) ? now() - starttime(x) : stoptime(x) - starttime(x)
 timecost(x::ArrayJob) = map(timecost, x.subjobs)
 
-getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x.ref)
+getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x._ref.ref)
 getresult(x::ArrayJob) = map(getresult, x.subjobs)
 
 isrunning(x::AtomicJob) = getstatus(x) === Running()
