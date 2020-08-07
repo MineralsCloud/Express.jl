@@ -86,26 +86,18 @@ struct DistributedJob{T<:Job} <: Job
     subjobs::Vector{T}  # Cannot use `Set`, it will merge same jobs
 end
 
-const ArrayJob = Union{DistributedJob,SequentialJob}
+const AtomicOrDistributed = Union{AtomicJob,DistributedJob}
+const AtomicOrSequential = Union{AtomicJob,SequentialJob}
 
-Base.:∘(a::AtomicJob, b::AtomicJob) = SequentialJob([a, b])
-Base.:∘(a::AtomicJob, b::DistributedJob) = SequentialJob([a, b])
-Base.:∘(a::DistributedJob, b::AtomicJob) = SequentialJob([a, b])
-Base.:∘(a::DistributedJob, b::DistributedJob) = SequentialJob([a, b])
-Base.:∘(a::AtomicJob, b::SequentialJob) = SequentialJob(vcat(a, b.subjobs))
-Base.:∘(a::SequentialJob, b::AtomicJob) = SequentialJob(vcat(a.subjobs, b))
+# 9 methods
+Base.:∘(a::AtomicOrDistributed, b::AtomicOrDistributed) = SequentialJob([a, b])
+Base.:∘(a::AtomicOrDistributed, b::SequentialJob) = SequentialJob(vcat(a, b.subjobs))
+Base.:∘(a::SequentialJob, b::AtomicOrDistributed) = SequentialJob(vcat(a.subjobs, b))
 Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(vcat(a.subjobs, b.subjobs))
-Base.:∘(a::SequentialJob, b::DistributedJob) = SequentialJob(vcat(a.subjobs, b))
-Base.:∘(a::DistributedJob, b::SequentialJob) = SequentialJob(vcat(a, b.subjobs))
-
-Base.:|(a::AtomicJob, b::AtomicJob) = DistributedJob([a, b])
-Base.:|(a::AtomicJob, b::SequentialJob) = DistributedJob([a, b])
-Base.:|(a::SequentialJob, b::AtomicJob) = DistributedJob([a, b])
-Base.:|(a::SequentialJob, b::SequentialJob) = DistributedJob([a, b])
-Base.:|(a::DistributedJob, b::AtomicJob) = DistributedJob(vcat(a.subjobs, b))
-Base.:|(a::AtomicJob, b::DistributedJob) = b | a
-Base.:|(a::SequentialJob, b::DistributedJob) = DistributedJob(vcat(b.subjobs, a))
-Base.:|(a::DistributedJob, b::SequentialJob) = b | a
+# 9 methods
+Base.:|(a::AtomicOrSequential, b::AtomicOrSequential) = DistributedJob([a, b])
+Base.:|(a::DistributedJob, b::AtomicOrSequential) = DistributedJob(vcat(a.subjobs, b))
+Base.:|(a::AtomicOrSequential, b::DistributedJob) = b | a
 Base.:|(a::DistributedJob, b::DistributedJob) = DistributedJob(vcat(a.subjobs, b.subjobs))
 
 function launchjob(cmds, interval = 3)
