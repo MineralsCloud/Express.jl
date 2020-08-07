@@ -114,7 +114,7 @@ function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     return prepare(calc, inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
-function launchjob(::T, configfile::AbstractString; kwargs...) where {T<:ScfOrOptim}
+function launchjob(::T, configfile; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(configfile)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
