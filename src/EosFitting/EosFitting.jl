@@ -28,7 +28,6 @@ export SelfConsistentField,
     set_press_vol,
     inputstring,
     prepare,
-    launchjob,
     finish,
     fiteos,
     writeinput
