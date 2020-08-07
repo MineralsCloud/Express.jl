@@ -83,16 +83,30 @@ struct SequentialJob{T<:Job} <: Job
 end
 
 struct DistributedJob{T<:Job} <: Job
-    subjobs::Vector{T}
+    subjobs::Vector{T}  # Cannot use `Set`, it will merge same jobs
 end
 
-Base.:∘(a::AtomicJob, b::AtomicJob...) = SequentialJob([a, b...])
-Base.:∘(a::SequentialJob, b::AtomicJob...) = SequentialJob(push!(a.subjobs, b...))
-Base.:∘(a::DistributedJob, b::AtomicJob) = SequentialJob([a.subjobs, b])
-Base.:∘(a::AtomicJob, b::SequentialJob) = SequentialJob(pushfirst!(b.subjobs, a))
-Base.:∘(a::AtomicJob, b::DistributedJob) = SequentialJob([a, b.subjobs])
-Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(append!(a.subjobs, b.subjobs))
-∥(a::AtomicJob, b::AtomicJob...) = DistributedJob([a, b...])
+const ArrayJob = Union{DistributedJob,SequentialJob}
+
+Base.:∘(a::AtomicJob, b::AtomicJob) = SequentialJob([a, b])
+Base.:∘(a::AtomicJob, b::DistributedJob) = SequentialJob([a, b])
+Base.:∘(a::DistributedJob, b::AtomicJob) = SequentialJob([a, b])
+Base.:∘(a::DistributedJob, b::DistributedJob) = SequentialJob([a, b])
+Base.:∘(a::AtomicJob, b::SequentialJob) = SequentialJob(vcat(a, b.subjobs))
+Base.:∘(a::SequentialJob, b::AtomicJob) = SequentialJob(vcat(a.subjobs, b))
+Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(vcat(a.subjobs, b.subjobs))
+Base.:∘(a::SequentialJob, b::DistributedJob) = SequentialJob(vcat(a.subjobs, b))
+Base.:∘(a::DistributedJob, b::SequentialJob) = SequentialJob(vcat(a, b.subjobs))
+
+Base.:|(a::AtomicJob, b::AtomicJob) = DistributedJob([a, b])
+Base.:|(a::AtomicJob, b::SequentialJob) = DistributedJob([a, b])
+Base.:|(a::SequentialJob, b::AtomicJob) = DistributedJob([a, b])
+Base.:|(a::SequentialJob, b::SequentialJob) = DistributedJob([a, b])
+Base.:|(a::DistributedJob, b::AtomicJob) = DistributedJob(vcat(a.subjobs, b))
+Base.:|(a::AtomicJob, b::DistributedJob) = b | a
+Base.:|(a::SequentialJob, b::DistributedJob) = DistributedJob(vcat(b.subjobs, a))
+Base.:|(a::DistributedJob, b::SequentialJob) = b | a
+Base.:|(a::DistributedJob, b::DistributedJob) = DistributedJob(vcat(a.subjobs, b.subjobs))
 
 function launchjob(cmds, interval = 3)
     subjobs = map(cmds) do cmd
