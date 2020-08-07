@@ -78,11 +78,13 @@ struct InternalAtomicJob <: AtomicJob
         new(fn, hash((now(), fn, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
 end
 
-struct SequentialJob{T<:Job} <: Job
+abstract type ArrayJob <: Job end
+
+struct SequentialJob{T<:Job} <: ArrayJob
     subjobs::Vector{T}
 end
 
-struct DistributedJob{T<:Job} <: Job
+struct DistributedJob{T<:Job} <: ArrayJob
     subjobs::Vector{T}  # Cannot use `Set`, it will merge same jobs
 end
 
@@ -188,20 +190,20 @@ function _launch(x::SequentialJob) end # function _launch
 
 Base.run(x::AtomicJob) = _launch(x)
 
-getstatus(x::AtomicJob) = x.status
-getstatus(x::DistributedJob) = map(getstatus, x.subjobs)
+getstatus(x::AtomicJob) = x._ref.status
+getstatus(x::ArrayJob) = map(getstatus, x.subjobs)
 
-starttime(x::AtomicJob) = x.starttime
-starttime(x::DistributedJob) = map(starttime, x.subjobs)
+starttime(x::AtomicJob) = x._timer.start
+starttime(x::ArrayJob) = map(starttime, x.subjobs)
 
-stoptime(x::AtomicJob) = isrunning(x) ? nothing : x.stoptime
-stoptime(x::DistributedJob) = map(stoptime, x.subjobs)
+stoptime(x::AtomicJob) = isrunning(x) ? nothing : x._timer.stop
+stoptime(x::ArrayJob) = map(stoptime, x.subjobs)
 
-timecost(x::AtomicJob) = isrunning(x) ? now() - x.starttime : x.stoptime - x.starttime
-timecost(x::DistributedJob) = map(timecost, x.subjobs)
+timecost(x::AtomicJob) = isrunning(x) ? now() - starttime(x) : stoptime(x) - starttime(x)
+timecost(x::ArrayJob) = map(timecost, x.subjobs)
 
 getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x.ref)
-getresult(x::DistributedJob) = map(getresult, x.subjobs)
+getresult(x::ArrayJob) = map(getresult, x.subjobs)
 
 isrunning(x::AtomicJob) = getstatus(x) === Running()
 
@@ -209,11 +211,11 @@ issucceeded(x::AtomicJob) = getstatus(x) === Succeeded()
 
 isfailed(x::AtomicJob) = getstatus(x) === Failed()
 
-getrunning(x::DistributedJob) = DistributedJob(_selectby(x, Running()))
+# getrunning(x::Job) = DistributedJob(_selectby(x, Running()))
 
-getsucceeded(x::DistributedJob) = DistributedJob(_selectby(x, Succeeded()))
+# getsucceeded(x::Job) = DistributedJob(_selectby(x, Succeeded()))
 
-getfailed(x::DistributedJob) = DistributedJob(_selectby(x, Failed()))
+# getfailed(x::Job) = DistributedJob(_selectby(x, Failed()))
 
 function _selectby(j::DistributedJob, st::JobStatus)  # Do not export!
     res = AtomicJob[]
@@ -225,21 +227,24 @@ function _selectby(j::DistributedJob, st::JobStatus)  # Do not export!
     return res
 end # function _selectby
 
-function Base.show(io::IO, x::DistributedJob)
+function Base.show(io::IO, job::AtomicJob)
+    printstyled(io, " ", job.cmd; bold = true)
+    printstyled(
+        io,
+        " @ ",
+        format(job._timer.start, "Y/mm/dd H:M:S"),
+        ", uses ",
+        _readabletime(timecost(job)),
+        '\n';
+        color = :light_black,
+    )
+end
+function Base.show(io::IO, x::ArrayJob)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
     for (i, subjob) in enumerate(x.subjobs)
         print(io, lpad("[$i", ndigits(n) + 2), "] ", _emoji(subjob))
-        printstyled(io, " ", subjob.cmd; bold = true)
-        printstyled(
-            io,
-            " @ ",
-            format(subjob.starttime, "Y/mm/dd H:M:S"),
-            ", uses ",
-            _readabletime(timecost(subjob)),
-            '\n';
-            color = :light_black,
-        )
+        show(io, subjob)
     end
 end # function Base.show
 
