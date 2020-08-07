@@ -17,7 +17,7 @@ using ..Express:
     Calculation
 using ..Jobs: div_nprocs, launchjob
 
-import AbInitioSoftwareBase.Inputs: set_pressure_volume
+import AbInitioSoftwareBase.Inputs: set_press_vol
 import ..Express
 import ..Express.Jobs: launchjob
 
@@ -25,7 +25,7 @@ export SelfConsistentField,
     StructuralOptimization,
     VariableCellOptimization,
     load_settings,
-    set_pressure_volume,
+    set_press_vol,
     inputstring,
     prepare,
     launchjob,
@@ -36,14 +36,14 @@ export SelfConsistentField,
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 """
-    set_pressure_volume(template::Input, pressure, eos::EquationOfState; volume_scale = (0.5, 1.5))
+    set_press_vol(template::Input, pressure, eos::EquationOfState; volume_scale = (0.5, 1.5))
 
 Set the volume of `template` at a `pressure` according to `eos`.
 
 The `volume_scale` gives a trial of the minimum and maximum scales for the `eos`. It
 times the zero-pressure volume of the `eos` will be the trial volumes.
 """
-function set_pressure_volume(
+function set_press_vol(
     template::Input,
     pressure,
     eos::EquationOfState;
@@ -51,8 +51,8 @@ function set_pressure_volume(
 )::Input
     @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
-    return set_pressure_volume(template, pressure, volume)
-end # function set_pressure_volume
+    return set_press_vol(template, pressure, volume)
+end # function set_press_vol
 
 """
     prepare(calc, files, template::Input, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
@@ -74,7 +74,7 @@ function prepare(
     alert_pressures(pressures)
     objects = map(files, templates, pressures) do file, template, pressure
         object = preset_template(calc, template)
-        object = set_pressure_volume(object, pressure, trial_eos; kwargs...)
+        object = set_press_vol(object, pressure, trial_eos; kwargs...)
         writeinput(file, object, dry_run)
         object
     end

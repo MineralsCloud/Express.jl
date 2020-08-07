@@ -1,6 +1,6 @@
 module QuantumESPRESSO
 
-using AbInitioSoftwareBase.Inputs: inputstring, writeinput, set_verbosity
+using AbInitioSoftwareBase.Inputs: inputstring, writeinput, setverbosity
 using Distributed: LocalManager
 using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert
@@ -32,7 +32,7 @@ end
 function preset_template(::SelfConsistentField, template::PWInput)
     @set! template.control.calculation = "scf"
     @set! template.control.outdir = mktempdir()
-    return set_verbosity(template, "high")
+    return setverbosity(template, "high")
 end
 
 # function (::Step{ForceConstant,Action{:prepare_input}})(

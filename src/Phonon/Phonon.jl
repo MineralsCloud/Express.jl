@@ -19,7 +19,7 @@ using QuantumESPRESSO.CLI: PWCmd, PhCmd
 using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
 using ..EosFitting: _check_software_settings
 
-import AbInitioSoftwareBase.Inputs: set_structure
+import AbInitioSoftwareBase.Inputs: setcell
 import ..Jobs: launchjob
 
 export SelfConsistentField,
@@ -31,7 +31,7 @@ export SelfConsistentField,
     load_settings,
     inputstring
 
-function set_structure(output, template::Input)
+function setcell(output, template::Input)
     cell = open(output, "r") do io
         str = read(io, String)
         parsecell(str)
@@ -39,14 +39,14 @@ function set_structure(output, template::Input)
     if any(x === nothing for x in cell)
         return  # Not work for relax only
     else
-        return set_structure(template, cell...)
+        return setcell(template, cell...)
     end
 end
 
 function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
     objects = map(files, templates, outputs) do file, template, output
         object = preset_template(SelfConsistentField(), template)
-        object = set_structure(output, object)
+        object = setcell(output, object)
         writeinput(file, object, dry_run)
         object
     end
