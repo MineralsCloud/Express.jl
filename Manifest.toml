@@ -330,9 +330,9 @@ version = "0.7.1"
 
 [[NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
-git-tree-sha1 = "7c4e66c47848562003250f28b579c584e55becc0"
+git-tree-sha1 = "ae1cbe7f1de1c443f44a5a3404140f11fe0d2610"
 uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
-version = "7.6.1"
+version = "7.6.2"
 
 [[NaNMath]]
 git-tree-sha1 = "c84c576296d0e2fbb3fc134d3e09086b3ea617cd"
@@ -436,7 +436,7 @@ version = "2.4.0"
 
 [[QuantumESPRESSO]]
 deps = ["QuantumESPRESSOBase", "QuantumESPRESSOParsers"]
-git-tree-sha1 = "337077e36af9b8d95832b8d301c685f9075512e6"
+git-tree-sha1 = "80ddf2a232e6bf69434c236a4b8577a7701f6400"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
 uuid = "95228164-aa68-11e9-35aa-d79ea5c4658d"
@@ -451,8 +451,8 @@ uuid = "51b62caa-b28f-11e9-38c2-1f67cb498e05"
 version = "0.1.2"
 
 [[QuantumESPRESSOParsers]]
-deps = ["Compat", "DataFrames", "DataStructures", "Parameters", "PyFortran90Namelists", "QuantumESPRESSOBase", "VersionParsing"]
-git-tree-sha1 = "881bc96b85b9ae20ebf847f1da97c66a13732695"
+deps = ["Compat", "DataFrames", "DataStructures", "Parameters", "PyFortran90Namelists", "QuantumESPRESSOBase", "ReadableRegex", "VersionParsing"]
+git-tree-sha1 = "a7beb48260cafeb36aaf9cdcb75baee7073ca72f"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
 uuid = "a780ab42-b33a-11e9-16c1-a92d75b2a626"
@@ -465,6 +465,11 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [[Random]]
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[ReadableRegex]]
+git-tree-sha1 = "74c7507f283ebcc6a3828ead30d27fb5710a4cfd"
+uuid = "cbbcb084-453d-4c4c-b292-e315607ba6a4"
+version = "0.2.0"
 
 [[RecipesBase]]
 git-tree-sha1 = "58de8f7e33b7fda6ee39eff65169cd1e19d0c107"
