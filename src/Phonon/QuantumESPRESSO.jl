@@ -6,11 +6,12 @@ using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert
 using QuantumESPRESSO.Inputs.PHonon: PhInput, Q2rInput, MatdynInput, DynmatInput, relayinfo
 using QuantumESPRESSO.Outputs.PWscf: tryparsefinal
-using Setfield: @set!
+using Setfield: @set!, @set
 using Unitful: @u_str
 using UnitfulAtomic
 
-using ...Express: DfptMethod, SelfConsistentField, ForceConstant, PhononDispersion
+using ...Express:
+    DfptMethod, SelfConsistentField, ForceConstant, PhononDispersion, PhononDensityOfStates
 import ..Phonon: preset_template, _expand_settings, parsecell
 
 # This is a helper function and should not be exported.
@@ -27,7 +28,17 @@ function preset_template(
     q2r::Q2rInput,
     ph::PhInput,
 )
-    return relayinfo(q2r, relayinfo(ph, template))
+    template = relayinfo(q2r, relayinfo(ph, template))
+    return @set template.input.dos = false
+end
+function preset_template(
+    ::PhononDensityOfStates,
+    template::MatdynInput,
+    q2r::Q2rInput,
+    ph::PhInput,
+)
+    template = relayinfo(q2r, relayinfo(ph, template))
+    return @set template.input.dos = true
 end
 function preset_template(::SelfConsistentField, template::PWInput)
     @set! template.control.calculation = "scf"

@@ -14,9 +14,12 @@ module Phonon
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using QuantumESPRESSO.Inputs.PWscf: PWInput
+using QuantumESPRESSO.Inputs.PHonon: MatdynInput
+using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
 using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
+using ..Express:
+    SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion, PhononDensityOfStates
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: setcell
@@ -26,8 +29,10 @@ export SelfConsistentField,
     DfptMethod,
     ForceConstant,
     PhononDispersion,
+    PhononDensityOfStates,
     prepare,
     launchjob,
+    finish,
     load_settings,
     inputstring
 
@@ -157,6 +162,35 @@ end
 #     end
 #     return
 # end
+
+function finish(::PhononDispersion, outputs::AbstractArray)
+    map(outputs) do output
+        str = read(output, String)
+        parse_frequency(str)
+    end
+end
+function finish(::PhononDispersion, configfile)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/disp.in"
+    outputs = map(inputs, settings.dirs) do input, dir
+        joinpath(dir, parse(MatdynInput, read(input, String)).input.flfrq)
+    end
+    return finish(PhononDispersion(), outputs)
+end
+function finish(::PhononDensityOfStates, outputs::AbstractArray)
+    map(outputs) do output
+        str = read(output, String)
+        parse_dos(str)
+    end
+end
+function finish(::PhononDensityOfStates, configfile)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/disp.in"
+    outputs = map(inputs, settings.dirs) do input, dir
+        joinpath(dir, parse(MatdynInput, read(input, String)).input.fldos)
+    end
+    return finish(PhononDensityOfStates(), outputs)
+end
 
 function _expand_settings end
 
