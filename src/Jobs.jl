@@ -6,7 +6,8 @@ using Distributed
 
 using ..Express: Calculation
 
-export div_nprocs,
+export ExternalAtomicJob,
+    div_nprocs,
     launchjob,
     starttime,
     stoptime,
@@ -32,41 +33,84 @@ abstract type Finished <: JobStatus end
 struct Succeeded <: Finished end
 struct Failed <: Finished end
 
-abstract type AbstractJob end
+abstract type Job end
 
-mutable struct AtomicJob <: AbstractJob
-    cmd::Base.AbstractCmd
+mutable struct _AtomicJobTimer
+    start::DateTime
+    stop::DateTime
+    _AtomicJobTimer() = new()
+end
+
+mutable struct _AtomicJobRef
     ref::Future
-    starttime::DateTime
-    stoptime::DateTime
     status::JobStatus
-    AtomicJob(cmd) = new(cmd)
+    _AtomicJobRef() = new()
 end
 
-struct SerialJobs{T<:AbstractJob} <: AbstractJob
+mutable struct _AtomicJobLogger
+    stdout::Pipe
+    stderr::Pipe
+    _AtomicJobLogger() = new(Pipe(), Pipe())
+end
+
+abstract type AtomicJob <: Job end
+
+struct ExternalAtomicJob <: AtomicJob
+    cmd::Base.AbstractCmd
+    hash::UInt
+    _timer::_AtomicJobTimer
+    _ref::_AtomicJobRef
+    _logger::_AtomicJobLogger
+    ExternalAtomicJob(cmd) = new(
+        cmd,
+        hash((now(), cmd, rand(UInt))),
+        _AtomicJobTimer(),
+        _AtomicJobRef(),
+        _AtomicJobLogger(),
+    )
+end
+
+struct InternalAtomicJob <: AtomicJob
+    fn::Function
+    hash::UInt
+    _timer::_AtomicJobTimer
+    _ref::_AtomicJobRef
+    InternalAtomicJob(fn) =
+        new(fn, hash((now(), fn, rand(UInt))), _AtomicJobTimer(), _AtomicJobRef())
+end
+
+abstract type ArrayJob <: Job end
+
+struct SequentialJob{T<:Job} <: ArrayJob
     subjobs::Vector{T}
 end
 
-struct ParallelJobs{T<:AbstractJob} <: AbstractJob
-    subjobs::Vector{T}
+struct DistributedJob{T<:Job} <: ArrayJob
+    subjobs::Vector{T}  # Cannot use `Set`, it will merge same jobs
 end
 
-Base.:∘(a::AtomicJob, b::AtomicJob...) = SerialJobs([a, b...])
-Base.:∘(a::SerialJobs, b::AtomicJob...) = SerialJobs(push!(a.subjobs, b...))
-Base.:∘(a::AtomicJob, b::SerialJobs) = SerialJobs(pushfirst!(b.subjobs, a))
-Base.:∘(a::SerialJobs, b::SerialJobs) = SerialJobs(append!(a.subjobs, b.subjobs))
-Base.:∘(a::AtomicJob, b::ParallelJobs) = SerialJobs([a, b.subjobs])
-Base.:∘(a::ParallelJobs, b::AtomicJob) = SerialJobs([a.subjobs, b])
-∥(a::AtomicJob, b::AtomicJob...) = ParallelJobs([a, b...])
+const AtomicOrDistributed = Union{AtomicJob,DistributedJob}
+const AtomicOrSequential = Union{AtomicJob,SequentialJob}
+
+# 9 methods
+Base.:∘(a::AtomicOrDistributed, b::AtomicOrDistributed) = SequentialJob([a, b])
+Base.:∘(a::AtomicOrDistributed, b::SequentialJob) = SequentialJob(vcat(a, b.subjobs))
+Base.:∘(a::SequentialJob, b::AtomicOrDistributed) = SequentialJob(vcat(a.subjobs, b))
+Base.:∘(a::SequentialJob, b::SequentialJob) = SequentialJob(vcat(a.subjobs, b.subjobs))
+# 9 methods
+Base.:|(a::AtomicOrSequential, b::AtomicOrSequential) = DistributedJob([a, b])
+Base.:|(a::DistributedJob, b::AtomicOrSequential) = DistributedJob(vcat(a.subjobs, b))
+Base.:|(a::AtomicOrSequential, b::DistributedJob) = b | a
+Base.:|(a::DistributedJob, b::DistributedJob) = DistributedJob(vcat(a.subjobs, b.subjobs))
 
 function launchjob(cmds, interval = 3)
     subjobs = map(cmds) do cmd
         sleep(interval)
         _launch(cmd)
     end
-    return ParallelJobs(vec(subjobs))
+    return DistributedJob(vec(subjobs))
 end # function launchjob
-function launchjob(tracker::ParallelJobs, interval = 3)
+function launchjob(tracker::DistributedJob, interval = 3)
     subjobs = map(tracker.subjobs) do subjob
         if getstatus(subjob) isa Succeeded
             subjob
@@ -75,7 +119,7 @@ function launchjob(tracker::ParallelJobs, interval = 3)
             _launch(subjob)
         end
     end
-    return ParallelJobs(subjobs)
+    return DistributedJob(subjobs)
 end # function launchjob
 function launchjob(
     outputs,
@@ -101,45 +145,66 @@ function launchjob(
 end
 
 function _launch(cmd::Base.AbstractCmd)
-    x = AtomicJob(cmd)
-    x.status = Running()
-    x.ref = @spawn begin
-        x.starttime = now()
+    x = ExternalAtomicJob(cmd)
+    x._ref.ref = @spawn begin
+        x._ref.status = Running()
+        x._timer.start = now()
         ref = try
             run(cmd; wait = true)  # Must wait
         catch e
             e
+        finally
+            x._timer.stop = now()
         end
-        x.stoptime = now()
         if ref isa Exception  # Include all cases?
-            x.status = Failed()
+            x._ref.status = Failed()
         else
-            x.status = Succeeded()
+            x._ref.status = Succeeded()
+        end
+        ref
+    end
+    return x
+end # function _launch
+function _launch(cmd::Function)
+    x = InternalAtomicJob(cmd)
+    x._ref.ref = @spawn begin
+        x._ref.status = Running()
+        x._timer.start = now()
+        ref = try
+            x.fn()
+        catch e
+            e
+        end
+        x._timer.stop = now()
+        if ref isa Exception  # Include all cases?
+            x._ref.status = Failed()
+        else
+            x._ref.status = Succeeded()
         end
         ref
     end
     return x
 end # function _launch
 _launch(x::AtomicJob) = _launch(x.cmd)
-_launch(x::ParallelJobs) = map(_launch, x.subjobs)
-function _launch(x::SerialJobs) end # function _launch
+_launch(x::DistributedJob) = map(_launch, x.subjobs)
+function _launch(x::SequentialJob) end # function _launch
 
 Base.run(x::AtomicJob) = _launch(x)
 
-getstatus(x::AtomicJob) = x.status
-getstatus(x::ParallelJobs) = map(getstatus, x.subjobs)
+getstatus(x::AtomicJob) = x._ref.status
+getstatus(x::ArrayJob) = map(getstatus, x.subjobs)
 
-starttime(x::AtomicJob) = x.starttime
-starttime(x::ParallelJobs) = map(starttime, x.subjobs)
+starttime(x::AtomicJob) = x._timer.start
+starttime(x::ArrayJob) = map(starttime, x.subjobs)
 
-stoptime(x::AtomicJob) = isrunning(x) ? nothing : x.stoptime
-stoptime(x::ParallelJobs) = map(stoptime, x.subjobs)
+stoptime(x::AtomicJob) = isrunning(x) ? nothing : x._timer.stop
+stoptime(x::ArrayJob) = map(stoptime, x.subjobs)
 
-timecost(x::AtomicJob) = isrunning(x) ? now() - x.starttime : x.stoptime - x.starttime
-timecost(x::ParallelJobs) = map(timecost, x.subjobs)
+timecost(x::AtomicJob) = isrunning(x) ? now() - starttime(x) : stoptime(x) - starttime(x)
+timecost(x::ArrayJob) = map(timecost, x.subjobs)
 
-getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x.ref)
-getresult(x::ParallelJobs) = map(getresult, x.subjobs)
+getresult(x::AtomicJob) = isrunning(x) ? nothing : fetch(x._ref.ref)
+getresult(x::ArrayJob) = map(getresult, x.subjobs)
 
 isrunning(x::AtomicJob) = getstatus(x) === Running()
 
@@ -147,13 +212,13 @@ issucceeded(x::AtomicJob) = getstatus(x) === Succeeded()
 
 isfailed(x::AtomicJob) = getstatus(x) === Failed()
 
-getrunning(x::ParallelJobs) = ParallelJobs(_selectby(x, Running()))
+# getrunning(x::Job) = DistributedJob(_selectby(x, Running()))
 
-getsucceeded(x::ParallelJobs) = ParallelJobs(_selectby(x, Succeeded()))
+# getsucceeded(x::Job) = DistributedJob(_selectby(x, Succeeded()))
 
-getfailed(x::ParallelJobs) = ParallelJobs(_selectby(x, Failed()))
+# getfailed(x::Job) = DistributedJob(_selectby(x, Failed()))
 
-function _selectby(j::ParallelJobs, st::JobStatus)  # Do not export!
+function _selectby(j::DistributedJob, st::JobStatus)  # Do not export!
     res = AtomicJob[]
     for subjob in j.subjobs
         if getstatus(subjob) === st
@@ -163,21 +228,24 @@ function _selectby(j::ParallelJobs, st::JobStatus)  # Do not export!
     return res
 end # function _selectby
 
-function Base.show(io::IO, x::ParallelJobs)
+function Base.show(io::IO, job::AtomicJob)
+    printstyled(io, " ", job.cmd; bold = true)
+    printstyled(
+        io,
+        " @ ",
+        format(job._timer.start, "Y/mm/dd H:M:S"),
+        ", uses ",
+        _readabletime(timecost(job)),
+        '\n';
+        color = :light_black,
+    )
+end
+function Base.show(io::IO, x::ArrayJob)
     n = length(x.subjobs)
     println(io, "# $n subjobs in this job:")
     for (i, subjob) in enumerate(x.subjobs)
         print(io, lpad("[$i", ndigits(n) + 2), "] ", _emoji(subjob))
-        printstyled(io, " ", subjob.cmd; bold = true)
-        printstyled(
-            io,
-            " @ ",
-            format(subjob.starttime, "Y/mm/dd H:M:S"),
-            ", uses ",
-            _readabletime(timecost(subjob)),
-            '\n';
-            color = :light_black,
-        )
+        show(io, subjob)
     end
 end # function Base.show
 
@@ -199,7 +267,7 @@ function peepstdout(x::AtomicJob)
         println(read(out, String))
     end
 end # function peepstdout
-peepstdout(x::ParallelJobs) = foreach(peepstdout, x.subjobs)
+peepstdout(x::DistributedJob) = foreach(peepstdout, x.subjobs)
 
 function peepstdin(x::AtomicJob)
     out = getstdin(x.cmd)
@@ -207,7 +275,7 @@ function peepstdin(x::AtomicJob)
         println(read(out, String))
     end
 end # function peepstdin
-peepstdin(x::ParallelJobs) = foreach(peepstdin, x.subjobs)
+peepstdin(x::DistributedJob) = foreach(peepstdin, x.subjobs)
 
 function peepstderr(x::AtomicJob)
     out = getstderr(x.cmd)
@@ -215,7 +283,7 @@ function peepstderr(x::AtomicJob)
         println(read(out, String))
     end
 end # function peepstdin
-peepstderr(x::ParallelJobs) = foreach(peepstderr, x.subjobs)
+peepstderr(x::DistributedJob) = foreach(peepstderr, x.subjobs)
 
 getstdin(x::Base.CmdRedirect) = x.stream_no == 0 ? x.handle.filename : getstdin(x.cmd)
 getstdin(::Base.AbstractCmd) = nothing
@@ -226,13 +294,13 @@ getstdout(::Base.AbstractCmd) = nothing
 getstderr(x::Base.CmdRedirect) = x.stream_no == 2 ? x.handle.filename : getstderr(x.cmd)
 getstderr(::Base.AbstractCmd) = nothing
 
-Base.iterate(x::ParallelJobs) = iterate(x.subjobs)
-Base.iterate(x::ParallelJobs, state) = iterate(x.subjobs, state)
+Base.iterate(x::DistributedJob) = iterate(x.subjobs)
+Base.iterate(x::DistributedJob, state) = iterate(x.subjobs, state)
 
-Base.getindex(x::ParallelJobs, i) = getindex(x.subjobs, i)
+Base.getindex(x::DistributedJob, i) = getindex(x.subjobs, i)
 
-Base.firstindex(x::ParallelJobs) = 1
+Base.firstindex(x::DistributedJob) = 1
 
-Base.lastindex(x::ParallelJobs) = length(x.subjobs)
+Base.lastindex(x::DistributedJob) = length(x.subjobs)
 
 end
