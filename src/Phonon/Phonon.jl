@@ -16,7 +16,8 @@ using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
-using ..Express: SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion
+using ..Express:
+    SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion, PhononDensityOfStates
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: setcell
@@ -26,6 +27,7 @@ export SelfConsistentField,
     DfptMethod,
     ForceConstant,
     PhononDispersion,
+    PhononDensityOfStates,
     prepare,
     launchjob,
     load_settings,
