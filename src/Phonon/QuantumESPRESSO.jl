@@ -10,9 +10,15 @@ using Setfield: @set!, @set
 using Unitful: @u_str
 using UnitfulAtomic
 
-using ...Express:
-    DfptMethod, SelfConsistentField, ForceConstant, PhononDispersion, PhononDensityOfStates
-import ..Phonon: preset_template, _expand_settings, parsecell
+import ..Phonon:
+    DfptMethod,
+    SelfConsistentField,
+    ForceConstant,
+    PhononDispersion,
+    PhononDensityOfStates,
+    preset_template,
+    _expand_settings,
+    parsecell
 
 # This is a helper function and should not be exported.
 function preset_template(::DfptMethod, template::PhInput, pw::PWInput)
