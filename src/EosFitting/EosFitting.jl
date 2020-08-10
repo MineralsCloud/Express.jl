@@ -1,247 +1,232 @@
-"""
-# module EosFitting
-
-
-
-# Examples
-
-```jldoctest
-julia>
-```
-"""
 module EosFitting
 
-using AbInitioSoftwareBase.Inputs: Input, inputstring
+using AbInitioSoftwareBase: loadfile
+using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using Compat: isnothing
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
-using QuantumESPRESSO.CLI: pwcmd
 
-using ..Express:
-    Step,
-    SelfConsistentField,
+using ..Express: ElectronicStructure, Optimization
+
+import AbInitioSoftwareBase.Inputs: set_press_vol
+import ..Express.Jobs: launchjob
+
+export SelfConsistentField,
+    StructuralOptimization,
     VariableCellOptimization,
-    Prepare,
-    Launch,
-    Analyse,
-    PREPARE_POTENTIAL,
-    PREPARE_INPUT,
-    LAUNCH_JOB,
-    ANALYSE_OUTPUT,
-    load_settings,
-    calculationtype,
-    actiontype
-using ..Jobs: nprocs_task, launchjob
-using ..CLI: mpicmd
-
-import ..Express
-
-export Step,
-    SelfConsistentField,
-    VariableCellOptimization,
-    PREPARE_POTENTIAL,
-    PREPARE_INPUT,
-    LAUNCH_JOB,
-    ANALYSE_OUTPUT,
     load_settings,
     set_press_vol,
     inputstring,
-    calculationtype,
-    actiontype
+    prepare,
+    finish,
+    fiteos,
+    writeinput,
+    launchjob
 
-mutable struct WorkingFiles
-    pending
-    running
-    finished
-end
+struct SelfConsistentField <: ElectronicStructure end
+struct StructuralOptimization <: Optimization end
+struct VariableCellOptimization <: Optimization end
 
+const ScfOrOptim = Union{SelfConsistentField,Optimization}
+
+"""
+    set_press_vol(template::Input, pressure, eos::EquationOfState; volume_scale = (0.5, 1.5))
+
+Set the volume of `template` at a `pressure` according to `eos`.
+
+The `volume_scale` gives a trial of the minimum and maximum scales for the `eos`. It
+times the zero-pressure volume of the `eos` will be the trial volumes.
+"""
 function set_press_vol(
-    template,
+    template::Input,
     pressure,
     eos::EquationOfState;
-    minscale = eps(),
-    maxscale = 1.3,
-)
-    @assert minscale > zero(minscale)  # No negative volume
-    volume = findvolume(eos(Pressure()), pressure, (minscale, maxscale) .* eos.v0)
-    return _set_press_vol(template, pressure, volume)
+    volume_scale = (0.5, 1.5),
+)::Input
+    @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
+    volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
+    return set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
-const ALLOWED_CALCULATIONS = Union{SelfConsistentField,VariableCellOptimization}
+"""
+    prepare(calc, files, template::Input, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
+    prepare(calc, files, templates, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
 
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    template::Input,
-    pressure::Number,
-    trial_eos::EquationOfState,
-    args...;
-    minscale = eps(),
-    maxscale = 1.3,
+Prepare the input `files` from a certain `template` / a series of `templates` at `pressures` from a `trial_eos`.
+
+Set `dry_run = true` to preview changes.
+"""
+function prepare(
+    calc::ScfOrOptim,
+    files,
+    templates,
+    pressures,
+    trial_eos::EquationOfState;
+    dry_run = false,
     kwargs...,
 )
-    template = f(step, template, pressure, trial_eos, args...; kwargs...)  # A callback
-    return set_press_vol(
-        template,
-        pressure,
-        trial_eos;
-        minscale = minscale,
-        maxscale = maxscale,
+    alert_pressures(pressures)
+    objects = map(files, templates, pressures) do file, template, pressure
+        object = preset_template(calc, template)
+        object = set_press_vol(object, pressure, trial_eos; kwargs...)
+        writeinput(file, object, dry_run)
+        object
+    end
+    # STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
+    #     Context(files, nothing, Succeeded(), now(), Step(calc, UPDATE_TEMPLATE))
+    return objects
+end
+prepare(
+    calc::ScfOrOptim,
+    files,
+    template::Input,
+    pressures,
+    trial_eos::EquationOfState;
+    kwargs...,
+) = prepare(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
+"""
+    prepare(calc, configfile; kwargs...)
+
+Do the same thing of `prepare`, but from a configuration file.
+"""
+function prepare(calc::SelfConsistentField, configfile; kwargs...)
+    settings = load_settings(configfile)
+    inputs = settings.dirs .* "/scf.in"
+    return prepare(
+        calc,
+        inputs,
+        settings.template,
+        settings.pressures,
+        settings.trial_eos;
+        kwargs...,
     )
 end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    template::Input,
-    pressure::Number,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(preset, template, pressure, trial_eos, args...; kwargs...)
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-)
-    return map(templates, pressures) do template, pressure  # `map` will check size mismatch
-        step(f, template, pressure, trial_eos, args...; kwargs...)
-    end
-end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(preset, templates, pressures, trial_eos, args...; kwargs...)
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    template::Input,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(f, fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    template::Input,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    kwargs...,
-) = step(fill(template, size(pressures)), pressures, trial_eos, args...; kwargs...)
-function (step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    f::Function,
-    inputs,
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    dry_run = false,
-    kwargs...,
-)
-    objects = step(f, templates, pressures, trial_eos, args...; kwargs...)
-    map(inputs, objects) do input, object  # `map` will check size mismatch
-        if dry_run
-            if isfile(input)
-                @warn "file `$input` will be overwritten!"
-            else
-                @warn "file `$input` will be created!"
-            end
-            print(inputstring(object))
-        else
-            mkpath(dirname(input))
-            open(input, "w") do io
-                write(io, inputstring(object))
-            end
-        end
-    end
-    return
-end
-(step::Step{<:ALLOWED_CALCULATIONS,Prepare{:input}})(
-    inputs,
-    templates,
-    pressures,
-    trial_eos::EquationOfState,
-    args...;
-    dry_run = false,
-    kwargs...,
-) = step(preset, inputs, templates, pressures, trial_eos, args...; kwargs...)
-function (step::Step{SelfConsistentField,Prepare{:input}})(path::AbstractString)
-    settings = load_settings(path)
-    inputs = settings.dirs .* "/scf.in"
-    return step(inputs, settings.template, settings.pressures, settings.trial_eos)
-end # function preprocess
-function (step::Step{VariableCellOptimization,Prepare{:input}})(path::AbstractString)
-    settings = load_settings(path)
+function prepare(calc::VariableCellOptimization, configfile; kwargs...)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = SelfConsistentField()(ANALYSE_OUTPUT)(path)
-    return step(inputs, settings.template, settings.pressures, new_eos)
+    new_eos = finish(SelfConsistentField(), configfile)
+    return prepare(calc, inputs, settings.template, settings.pressures, new_eos; kwargs...)
 end
 
-function (::Step{T,Launch{:job}})(outputs, inputs, n, bin; dry_run = false) where {T}
-    # `map` guarantees they are of the same size, no need to check.
-    n = nprocs_task(n, length(inputs))
-    cmds = map(inputs, outputs) do input, output  # A vector of `Cmd`s
-        _generate_cmds(n, input, output, bin)
-    end
-    if dry_run
-        return cmds
-    else
-        return launchjob(cmds)
-    end
-end
-function (step::Step{T,Launch{:job}})(path::AbstractString) where {T}
-    settings = load_settings(path)
+function launchjob(::T, configfile; kwargs...) where {T<:ScfOrOptim}
+    settings = load_settings(configfile)
     inputs =
         @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return step(outputs, inputs, settings.manager.np, settings.bin)
+    return launchjob(outputs, inputs, settings.manager.np, settings.bin; kwargs...)
 end
 
-function (step::Step{T,Analyse{:output}})(outputs, trial_eos) where {T}
-    results = map(outputs) do output
-        str = read(output, String)
-        analyse(step, str)  # volume => energy
+"""
+    fiteos(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
+
+Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
+"""
+function fiteos(
+    calc::ScfOrOptim,
+    outputs,
+    trial_eos::EquationOfState,
+    fit_energy::Bool = true,
+)
+    data = Iterators.filter(
+        !isnothing,
+        (_readoutput(calc, read(output, String)) for output in outputs),
+    )  # volume => energy
+    if length(collect(data)) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return lsqfit(trial_eos(Energy()), first.(results), last.(results))
-end # function postprocess
-function (step::Step{SelfConsistentField,Analyse{:output}})(path::AbstractString)
-    settings = load_settings(path)
+    if fit_energy
+        return lsqfit(trial_eos(Energy()), first.(data), last.(data))
+    else
+        return lsqfit(trial_eos(Pressure()), first.(data), last.(data))
+    end
+end
+
+"""
+    finish(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
+
+Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
+"""
+function finish(
+    calc::ScfOrOptim,
+    outputs,
+    trial_eos::EquationOfState,
+    fit_energy::Bool = true,
+)
+    # STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
+    #     Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
+    return fiteos(calc, outputs, trial_eos, fit_energy)
+end
+"""
+    finish(calc, configfile)
+
+Do the same thing of `finish`, but from a configuration file.
+"""
+function finish(calc::SelfConsistentField, configfile)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return step(outputs, settings.trial_eos)
+    return finish(calc, outputs, settings.trial_eos)
 end
-function (step::Step{VariableCellOptimization,Analyse{:output}})(path::AbstractString)
-    settings = load_settings(path)
+function finish(::VariableCellOptimization, configfile)
+    settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_eos = SelfConsistentField()(ANALYSE_OUTPUT)(path)
-    return step(outputs, new_eos)
-end # function preprocess
-
-function (step::Step{SelfConsistentField,Prepare{:potential}})(template)
-    required = getpotentials(template)
-    path = getpotentialdir(template)
-    return map(required) do potential
-        download_potential(potential, path)
-    end
+    new_eos = finish(SelfConsistentField(), configfile)
+    return finish(VariableCellOptimization(), outputs, new_eos)
 end
 
-# function (::T)(
-#     outputs,
-#     inputs,
-#     template,
-#     pressures,
-#     trial_eos,
-#     environment,
-#     cmd,
-# ) where {T<:Union{SelfConsistentField,VariableCellOptimization}}
-#     Step{typeof(T),Prepare{:input}}(inputs, template, pressures, trial_eos)
-#     Step{typeof(T),Launch{:job}}(outputs, inputs, environment, cmd)
-#     Step{typeof(T),Analyse}(outputs, trial_eos)
-# end
+# STEP_TRACKER = [
+#     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), UPDATE_TEMPLATE)),
+#     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(SelfConsistentField(), ANALYSE_OUTPUT),
+#     ),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(VariableCellOptimization(), UPDATE_TEMPLATE),
+#     ),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(VariableCellOptimization(), LAUNCH_JOB),
+#     ),
+#     Context(
+#         nothing,
+#         nothing,
+#         Pending(),
+#         now(),
+#         Step(VariableCellOptimization(), ANALYSE_OUTPUT),
+#     ),
+# ]
 
-function Express._check_settings(settings)
+function alert_pressures(pressures)
+    if length(pressures) <= 5
+        @info "pressures <= 5 may give unreliable results, consider more if possible!"
+    end
+    if minimum(pressures) >= zero(eltype(pressures))
+        @warn "for better fitting, we need at least 1 negative pressure!"
+    end
+end # function alert_pressures
+
+function preset_template end
+
+function _readoutput end
+
+function _expand_settings end
+
+function _check_software_settings end
+
+function _check_settings(settings)
     map(("template", "pressures", "trial_eos", "dir")) do key
         @assert haskey(settings, key)
     end
@@ -254,40 +239,25 @@ function Express._check_settings(settings)
     end
 end # function _check_settings
 
-# _generate_cmds(n, input, output, env::DockerEnvironment) = join(
-#     [
-#         "sh -c 'mpiexec --mca btl_vader_single_copy_mechanism none -np $n",
-#         string('"', pwcmd(bin = env.bin).exec..., '"'),
-#         "-inp \"$input\"'",
-#     ],
-#     " ",
-# )
-_generate_cmds(n, input, output, bin) =
-    pipeline(mpicmd(n, pwcmd(bin = bin)), stdin = input, stdout = output)
-
-function alert_pressures(pressures)
-    if length(pressures) <= 6
-        @info "pressures <= 6 may give unreliable results, consider more if possible!"
-    end
-    if minimum(pressures) >= zero(eltype(pressures))
-        @warn "for better fitting, we need at least 1 negative pressure!"
-    end
-end # function alert_pressures
-
-function _check_software_settings end
-
-function _set_press_vol end
-
-function preset end
-
-function getpotentials end
-
-function getpotentialdir end
-
-function download_potential end
-
-function analyse end
+function load_settings(configfile)
+    settings = loadfile(configfile)
+    _check_settings(settings)  # Errors will be thrown if exist
+    return _expand_settings(settings)
+end # function load_settings
 
 include("QuantumESPRESSO.jl")
+
+function Base.show(io::IO, eos::EquationOfState)  # Ref: https://github.com/mauro3/Parameters.jl/blob/3c1d72b/src/Parameters.jl#L542-L549
+    if get(io, :compact, false)
+        Base.show_default(IOContext(io, :limit => true), eos)
+    else
+        # just dumping seems to give ok output, in particular for big data-sets:
+        T = typeof(eos)
+        println(io, T)
+        for f in fieldnames(T)
+            println(io, " ", f, " = ", getfield(eos, f))
+        end
+    end
+end # function Base.show
 
 end

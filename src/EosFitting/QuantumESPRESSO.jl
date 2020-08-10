@@ -1,48 +1,29 @@
 module QuantumESPRESSO
 
-using Crystallography: cellvolume
-using Dates: now
+using AbInitioSoftwareBase.Inputs: setverbosity
+using Crystallography: Cell, eachatom, cellvolume
 using Distributed: LocalManager
 using EquationsOfState.Collections
-using QuantumESPRESSO.Inputs: inputstring, getoption
-using QuantumESPRESSO.Inputs.PWscf: CellParametersCard, PWInput, optconvert
+using QuantumESPRESSO.Inputs: inputstring, optionof
+using QuantumESPRESSO.Inputs.PWscf:
+    CellParametersCard, AtomicPositionsCard, PWInput, optconvert
 using QuantumESPRESSO.Outputs.PWscf:
-    Preamble, parse_electrons_energies, parsefinal, isjobdone
+    Preamble, parse_electrons_energies, parsefinal, isjobdone, tryparsefinal
+using QuantumESPRESSO.CLI: PWCmd
 using Setfield: @set!
-using Unitful: NoUnits, @u_str, ustrip
-using UnitfulAtomic: bohr, Ry
+using Unitful
+using UnitfulAtomic
 
-using ...Express:
-    Step,
-    SelfConsistentField,
-    VariableCellOptimization,
-    Prepare,
-    Analyse,
-    _uparse,
-    calculationtype
+import ..EosFitting:
+    SelfConsistentField, VariableCellOptimization,
+    preset_template,
+    _check_software_settings,
+    _expand_settings,
+    _readoutput
 
-import ...Express
-import ..EosFitting
+export safe_exit
 
-EosFitting.getpotentials(template::PWInput) =
-    [x.pseudopot for x in template.atomic_species.data]
-
-EosFitting.getpotentialdir(template::PWInput) = expanduser(template.control.pseudo_dir)
-
-function EosFitting._set_press_vol(template::PWInput, pressure, volume)
-    @set! template.cell.press = ustrip(u"kbar", pressure)
-    factor = cbrt(volume / (cellvolume(template) * bohr^3)) |> NoUnits  # This is dimensionless and `cbrt` works with units.
-    if template.cell_parameters === nothing || getoption(template.cell_parameters) == "alat"
-        @set! template.system.celldm[1] *= factor
-    else
-        @set! template.system.celldm = zeros(6)
-        @set! template.cell_parameters =
-            optconvert("bohr", CellParametersCard(template.cell_parameters.data * factor))
-    end
-    return template
-end # function EosFitting.set_press_vol
-
-function EosFitting._check_software_settings(settings)
+function _check_software_settings(settings)
     map(("manager", "bin", "n")) do key
         @assert haskey(settings, key) "key `$key` not found!"
     end
@@ -64,7 +45,7 @@ const EosMap = (
     v = Vinet,
 )
 
-function Express.Settings(settings)
+function _expand_settings(settings)
     template = parse(PWInput, read(expanduser(settings["template"]), String))
     qe = settings["qe"]
     if qe["manager"] == "local"
@@ -80,7 +61,10 @@ function Express.Settings(settings)
         template = template,
         pressures = settings["pressures"] .* u"GPa",
         trial_eos = EosMap[Symbol(settings["trial_eos"]["type"])](settings["trial_eos"]["parameters"] .*
-                                                                  _uparse.(settings["trial_eos"]["units"])...),
+                                                                  uparse.(
+            settings["trial_eos"]["units"];
+            unit_context = [Unitful, UnitfulAtomic],
+        )...),
         dirs = map(settings["pressures"]) do pressure
             abspath(joinpath(
                 expanduser(settings["dir"]),
@@ -88,42 +72,44 @@ function Express.Settings(settings)
                 "p" * string(pressure),
             ))
         end,
-        bin = bin,
+        bin = PWCmd(; bin = bin),
         manager = manager,
     )
-end # function Settings
+end # function _expand_settings
 
-function EosFitting.preset(step, template, args...)
-    @set! template.control.verbosity = "high"
-    @set! template.control.wf_collect = true
-    @set! template.control.tstress = true
-    @set! template.control.tprnfor = true
-    @set! template.control.disk_io = "high"
-    @set! template.control.calculation =
-        calculationtype(step) <: SelfConsistentField ? "scf" : "vc-relax"
-    @set! template.control.outdir = join(
-        [
-            template.control.prefix,
-            template.control.calculation,
-            string(now()),
-            string(rand(UInt)),
-        ],
-        "_",
-    )
+function preset_template(calc, template)
+    template = setverbosity(template, "high")
+    @set! template.control.calculation = calc isa SelfConsistentField ? "scf" : "vc-relax"
+    @set! template.control.outdir = mktempdir()
     return template
 end
 
-function EosFitting.analyse(step, s::AbstractString)
-    if calculationtype(step) <: SelfConsistentField
-        return parse(Preamble, s).omega * bohr^3 =>
-            parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
+function _readoutput(::SelfConsistentField, s::AbstractString)
+    preamble = tryparse(Preamble, s)
+    e = try
+        parse_electrons_energies(s, :converged)
+    catch
+        nothing
+    end
+    if preamble !== nothing && e !== nothing
+        return preamble.omega * u"bohr^3" => e.ε[end] * u"Ry"  # volume, energy
     else
-        if !isjobdone(s)
-            @warn "Job is not finished!"
-        end
-        return cellvolume(parsefinal(CellParametersCard{Float64}, s)) * bohr^3 =>
-            parse_electrons_energies(s, :converged).ε[end] * Ry  # volume, energy
+        return
+    end
+end # function _readoutput
+function _readoutput(::VariableCellOptimization, s::AbstractString)
+    if !isjobdone(s)
+        @warn "Job is not finished!"
+    end
+    x = tryparsefinal(CellParametersCard, s)
+    if x !== nothing
+        return cellvolume(parsefinal(CellParametersCard, s)) * u"bohr^3" =>
+            parse_electrons_energies(s, :converged).ε[end] * u"Ry"  # volume, energy
+    else
+        return
     end
 end
+
+safe_exit(template::PWInput, dir) = touch(joinpath(dir, template.control.prefix * ".EXIT"))
 
 end # module QuantumESPRESSO

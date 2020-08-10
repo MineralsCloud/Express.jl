@@ -5,10 +5,10 @@ version = "0.3.0"
 
 [deps]
 AbInitioSoftwareBase = "df5135bc-470e-46c6-b451-292e27ca5b84"
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 Crystallography = "3bff3928-7a76-11e9-2089-d112443085a5"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-DockerPy = "7b2ae67c-a082-49fb-8801-fe9170dc9342"
 EquationsOfState = "0438fec6-b81c-52d9-9651-d286848f50a8"
 QuantumESPRESSO = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
