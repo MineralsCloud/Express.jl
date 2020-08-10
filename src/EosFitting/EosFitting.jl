@@ -1,24 +1,15 @@
 module EosFitting
 
-using AbInitioSoftwareBase: FilePath, loadfile
+using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
-using AbInitioSoftwareBase.CLI: MpiExec
 using Compat: isnothing
-using Dates: now
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
 
-using ..Express:
-    Optimization,
-    StructuralOptimization,
-    VariableCellOptimization,
-    SelfConsistentField,
-    Calculation
-using ..Jobs: div_nprocs, launchjob
+using ..Express: ElectronicStructure, Optimization
 
 import AbInitioSoftwareBase.Inputs: set_press_vol
-import ..Express
 import ..Express.Jobs: launchjob
 
 export SelfConsistentField,
@@ -30,7 +21,12 @@ export SelfConsistentField,
     prepare,
     finish,
     fiteos,
-    writeinput
+    writeinput,
+    launchjob
+
+struct SelfConsistentField <: ElectronicStructure end
+struct StructuralOptimization <: Optimization end
+struct VariableCellOptimization <: Optimization end
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 

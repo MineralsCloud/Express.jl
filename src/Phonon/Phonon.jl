@@ -18,8 +18,7 @@ using QuantumESPRESSO.Inputs.PHonon: MatdynInput
 using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
 using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
-using ..Express:
-    SelfConsistentField, DfptMethod, ForceConstant, PhononDispersion, PhononDensityOfStates
+using ..Express: ElectronicStructure, VibrationalProperty
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: setcell
@@ -35,6 +34,12 @@ export SelfConsistentField,
     finish,
     load_settings,
     inputstring
+
+struct SelfConsistentField <: ElectronicStructure end
+struct DfptMethod <: VibrationalProperty end
+struct ForceConstant <: VibrationalProperty end
+struct PhononDispersion <: VibrationalProperty end
+struct PhononDensityOfStates <: VibrationalProperty end
 
 function setcell(output, template::Input)
     cell = open(output, "r") do io

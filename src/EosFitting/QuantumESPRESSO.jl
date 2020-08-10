@@ -14,8 +14,8 @@ using Setfield: @set!
 using Unitful
 using UnitfulAtomic
 
-using ...Express: SelfConsistentField, VariableCellOptimization
 import ..EosFitting:
+    SelfConsistentField, VariableCellOptimization,
     preset_template,
     _check_software_settings,
     _expand_settings,
