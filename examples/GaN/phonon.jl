@@ -23,7 +23,12 @@ bag = Step(2)(
     container = container,
 )
 phononinputs_local = map(x -> x * "/ph.in", scfdirs_local)
-preprocess(Step(2), phononinputs_local, scfinputs_local, PhInput(PhNamelist(nq1 = 2, nq2 = 2, nq3 = 2, tr2_ph = 1e-14, ldisp = true)))
+preprocess(
+    Step(2),
+    phononinputs_local,
+    scfinputs_local,
+    PhInput(PhNamelist(nq1 = 2, nq2 = 2, nq3 = 2, tr2_ph = 1e-14, ldisp = true)),
+)
 bag2 = Step(2)(
     phononinputs_docker,
     phononoutputs_docker,
