@@ -37,9 +37,9 @@ function run_wizard(state::Union{Nothing,WizardState} = nothing)
         while state.step != 0
             if state.step == 1
                 step(1, state)
-            #     state.step = 2
-            # elseif state.step == 2
-            #     step(2, state)
+                #     state.step = 2
+                # elseif state.step == 2
+                #     step(2, state)
                 state.step = 0  # End step
             end
 
@@ -103,12 +103,19 @@ function step(::Val{2}, state::WizardState, ::PWscfCalculation)
             "Vinet",
         ]),
     ))
-    println(terminal, GREEN_FG("Please input parameters for this EOS (separated by spaces):") |> string)
+    println(
+        terminal,
+        GREEN_FG("Please input parameters for this EOS (separated by spaces):") |> string,
+    )
     eos = eval(eos_symb)(map(
         x -> parse(Float64, x),
         split(readline(terminal), " ", keepempty = false),
     ))
-    println(terminal, GREEN_FG("Please input pressures you want to test on (separated by spaces):") |> string)
+    println(
+        terminal,
+        GREEN_FG("Please input pressures you want to test on (separated by spaces):") |>
+        string,
+    )
     pressures =
         map(x -> parse(Float64, x), split(readline(terminal), " ", keepempty = false))
     inputs_from_template =
