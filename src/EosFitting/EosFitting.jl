@@ -6,6 +6,7 @@ using Compat: isnothing
 using EquationsOfState.Collections: Pressure, Energy, EquationOfState
 using EquationsOfState.NonlinearFitting: lsqfit
 using EquationsOfState.Find: findvolume
+using OptionalArgChecks: @argcheck
 
 using ..Express: ElectronicStructure, Optimization
 
@@ -44,7 +45,7 @@ function set_press_vol(
     eos::EquationOfState;
     volume_scale = (0.5, 1.5),
 )::Input
-    @assert minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
+    @argcheck minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
     volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
     return set_press_vol(template, pressure, volume)
 end # function set_press_vol
@@ -228,14 +229,14 @@ function _check_software_settings end
 
 function _check_settings(settings)
     map(("template", "pressures", "trial_eos", "dir")) do key
-        @assert haskey(settings, key)
+        @argcheck haskey(settings, key)
     end
     _check_software_settings(settings["qe"])
-    @assert isdir(settings["dir"])
-    @assert isfile(settings["template"])
+    @argcheck isdir(settings["dir"])
+    @argcheck isfile(settings["template"])
     alert_pressures(settings["pressures"])
     map(("type", "parameters", "units")) do key
-        @assert haskey(settings["trial_eos"], key)
+        @argcheck haskey(settings["trial_eos"], key)
     end
 end # function _check_settings
 

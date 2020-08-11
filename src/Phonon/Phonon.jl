@@ -13,6 +13,7 @@ module Phonon
 
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using OptionalArgChecks: @argcheck
 using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: MatdynInput
 using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
@@ -205,10 +206,10 @@ function parsecell end
 
 function _check_settings(settings)
     map(("template", "pressures", "dir")) do key
-        @assert haskey(settings, key)
+        @argcheck haskey(settings, key)
     end
-    @assert isdir(settings["dir"])
-    @assert all(isfile.(settings["template"]))
+    @argcheck isdir(settings["dir"])
+    @argcheck all(isfile.(settings["template"]))
 end # function _check_settings
 
 function load_settings(configfile)
