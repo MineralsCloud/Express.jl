@@ -1,6 +1,7 @@
 module QuantumESPRESSO
 
 using AbInitioSoftwareBase.Inputs: inputstring, writeinput, setverbosity
+using Dates: format, now
 using Distributed: LocalManager
 using QuantumESPRESSO.Inputs.PWscf:
     AtomicPositionsCard, CellParametersCard, PWInput, optconvert
@@ -48,7 +49,11 @@ function preset_template(
 end
 function preset_template(::SelfConsistentField, template::PWInput)
     @set! template.control.calculation = "scf"
-    @set! template.control.outdir = mktempdir()
+    @set! template.control.outdir = mktempdir(
+        mkpath(template.control.outdir);
+        prefix = template.control.prefix * '_' * format(now(), "Y-m-d_H:M:S_"),
+        cleanup = false,
+    )
     return setverbosity(template, "high")
 end
 
