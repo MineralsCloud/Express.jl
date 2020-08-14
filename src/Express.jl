@@ -10,6 +10,5 @@ include("Jobs.jl")
 # include("BandStructure.jl")
 include("EosFitting/EosFitting.jl")
 include("Phonon/Phonon.jl")
-# include("Wizard/Wizard.jl")
 
 end # module
