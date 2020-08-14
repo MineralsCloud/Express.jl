@@ -1,6 +1,6 @@
 module QuantumESPRESSO
 
-using AbInitioSoftwareBase.Inputs: inputstring, writeinput, setverbosity
+using AbInitioSoftwareBase.Inputs: inputstring, writeinput, set_verbosity
 using Dates: format, now
 using Distributed: LocalManager
 using QuantumESPRESSO.Inputs.PWscf:
@@ -54,7 +54,7 @@ function preset_template(::SelfConsistentField, template::PWInput)
         prefix = template.control.prefix * '_' * format(now(), "Y-m-d_H:M:S_"),
         cleanup = false,
     )
-    return setverbosity(template, "high")
+    return set_verbosity(template, "high")
 end
 
 # function (::Step{ForceConstant,Action{:prepare_input}})(

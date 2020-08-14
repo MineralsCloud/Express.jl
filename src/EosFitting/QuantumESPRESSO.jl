@@ -1,6 +1,6 @@
 module QuantumESPRESSO
 
-using AbInitioSoftwareBase.Inputs: setverbosity
+using AbInitioSoftwareBase.Inputs: set_verbosity
 using Crystallography: Cell, eachatom, cellvolume
 using Dates: format, now
 using Distributed: LocalManager
@@ -81,7 +81,7 @@ function _expand_settings(settings)
 end # function _expand_settings
 
 function preset_template(calc, template)
-    template = setverbosity(template, "high")
+    template = set_verbosity(template, "high")
     @set! template.control.calculation = calc isa SelfConsistentField ? "scf" : "vc-relax"
     @set! template.control.outdir = mktempdir(
         mkpath(template.control.outdir);
