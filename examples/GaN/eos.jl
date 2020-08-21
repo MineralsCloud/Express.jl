@@ -1,4 +1,4 @@
-using EquationsOfState.Collections
+using EquationsOfStateOfSolids.Collections
 using Express.EosFitting
 using QuantumESPRESSO.Inputs.PWscf
 using Unitful, UnitfulAtomic
