@@ -83,11 +83,11 @@ end # function _expand_settings
 function preset_template(calc, template)
     template = set_verbosity(template, "high")
     @set! template.control.calculation = calc isa SelfConsistentField ? "scf" : "vc-relax"
-    @set! template.control.outdir = mktempdir(
+    @set! template.control.outdir = abspath(mktempdir(
         mkpath(template.control.outdir);
         prefix = template.control.prefix * '_' * format(now(), "Y-m-d_H:M:S_"),
         cleanup = false,
-    )
+    ))
     return template
 end
 
