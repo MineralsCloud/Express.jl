@@ -124,11 +124,9 @@ end
 Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
 function fiteos(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
-    data = Iterators.filter(
-        !isnothing,
-        (_readoutput(calc, read(output, String)) for output in outputs),
-    )  # volume => energy
-    if length(collect(data)) <= 5
+    data =
+        filter(!isnothing, [_readoutput(calc, read(output, String)) for output in outputs])  # volume => energy
+    if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
     return linfit(trial_eos, first.(data), last.(data))
