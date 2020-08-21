@@ -3,9 +3,9 @@ module EosFitting
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
-using EquationsOfState.Collections: Pressure, Energy, EquationOfState
-using EquationsOfState.NonlinearFitting: lsqfit
-using EquationsOfState.Find: findvolume
+using EquationsOfStateOfSolids.Collections: EnergyEOS, PressureEOS, Parameters
+using EquationsOfStateOfSolids.Fitting: nonlinfit, linfit
+using EquationsOfStateOfSolids.Volume: findvolume
 using OptionalArgChecks: @argcheck
 
 using ..Express: ElectronicStructure, Optimization
@@ -42,11 +42,11 @@ times the zero-pressure volume of the `eos` will be the trial volumes.
 function set_press_vol(
     template::Input,
     pressure,
-    eos::EquationOfState;
+    eos::PressureEOS;
     volume_scale = (0.5, 1.5),
 )::Input
     @argcheck minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
-    volume = findvolume(eos(Pressure()), pressure, extrema(volume_scale) .* eos.v0)
+    volume = findvolume(eos, pressure, extrema(volume_scale) .* eos.v0)
     return set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
@@ -63,7 +63,7 @@ function prepare(
     files,
     templates,
     pressures,
-    trial_eos::EquationOfState;
+    trial_eos::PressureEOS;
     dry_run = false,
     kwargs...,
 )
@@ -83,7 +83,7 @@ prepare(
     files,
     template::Input,
     pressures,
-    trial_eos::EquationOfState;
+    trial_eos::PressureEOS;
     kwargs...,
 ) = prepare(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
 """
@@ -123,12 +123,7 @@ end
 
 Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
-function fiteos(
-    calc::ScfOrOptim,
-    outputs,
-    trial_eos::EquationOfState,
-    fit_energy::Bool = true,
-)
+function fiteos(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
     data = Iterators.filter(
         !isnothing,
         (_readoutput(calc, read(output, String)) for output in outputs),
@@ -136,11 +131,7 @@ function fiteos(
     if length(collect(data)) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    if fit_energy
-        return lsqfit(trial_eos(Energy()), first.(data), last.(data))
-    else
-        return lsqfit(trial_eos(Pressure()), first.(data), last.(data))
-    end
+    return linfit(trial_eos, first.(data), last.(data))
 end
 
 """
@@ -148,15 +139,10 @@ end
 
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
-function finish(
-    calc::ScfOrOptim,
-    outputs,
-    trial_eos::EquationOfState,
-    fit_energy::Bool = true,
-)
+function finish(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
     # STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
     #     Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
-    return fiteos(calc, outputs, trial_eos, fit_energy)
+    return fiteos(calc, outputs, trial_eos)
 end
 """
     finish(calc, configfile)
@@ -247,18 +233,5 @@ function load_settings(configfile)
 end # function load_settings
 
 include("QuantumESPRESSO.jl")
-
-function Base.show(io::IO, eos::EquationOfState)  # Ref: https://github.com/mauro3/Parameters.jl/blob/3c1d72b/src/Parameters.jl#L542-L549
-    if get(io, :compact, false)
-        Base.show_default(IOContext(io, :limit => true), eos)
-    else
-        # just dumping seems to give ok output, in particular for big data-sets:
-        T = typeof(eos)
-        println(io, T)
-        for f in fieldnames(T)
-            println(io, " ", f, " = ", getfield(eos, f))
-        end
-    end
-end # function Base.show
 
 end

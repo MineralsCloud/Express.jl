@@ -4,7 +4,7 @@ using AbInitioSoftwareBase.Inputs: set_verbosity
 using Crystallography: Cell, eachatom, cellvolume
 using Dates: format, now
 using Distributed: LocalManager
-using EquationsOfState.Collections
+using EquationsOfStateOfSolids.Collections
 using OptionalArgChecks: @argcheck
 using QuantumESPRESSO.Inputs: inputstring, optionof
 using QuantumESPRESSO.Inputs.PWscf:
