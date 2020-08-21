@@ -49,11 +49,11 @@ function preset_template(
 end
 function preset_template(::SelfConsistentField, template::PWInput)
     @set! template.control.calculation = "scf"
-    @set! template.control.outdir = mktempdir(
+    @set! template.control.outdir = abspath(mktempdir(
         mkpath(template.control.outdir);
         prefix = template.control.prefix * '_' * format(now(), "Y-m-d_H:M:S_"),
         cleanup = false,
-    )
+    ))
     return set_verbosity(template, "high")
 end
 
