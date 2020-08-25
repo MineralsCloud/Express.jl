@@ -3,9 +3,9 @@ module EosFitting
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
-using EquationsOfStateOfSolids.Collections: EnergyEOS, PressureEOS, Parameters
-using EquationsOfStateOfSolids.Fitting: nonlinfit, linfit
-using EquationsOfStateOfSolids.Volume: findvolume
+using EquationsOfStateOfSolids.Collections: EnergyEOS, PressureEOS
+using EquationsOfStateOfSolids.Fitting: eosfit
+using EquationsOfStateOfSolids.Volume: mustfindvolume
 using OptionalArgChecks: @argcheck
 
 using ..Express: ElectronicStructure, Optimization
@@ -45,8 +45,7 @@ function set_press_vol(
     eos::PressureEOS;
     volume_scale = (0.5, 1.5),
 )::Input
-    @argcheck minimum(volume_scale) > zero(eltype(volume_scale))  # No negative volume
-    volume = findvolume(eos, pressure, extrema(volume_scale) .* eos.v0)
+    volume = mustfindvolume(eos, pressure; volume_scale = volume_scale)
     return set_press_vol(template, pressure, volume)
 end # function set_press_vol
 
@@ -129,7 +128,7 @@ function fiteos(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return linfit(trial_eos, first.(data), last.(data))
+    return eosfit(trial_eos, first.(data), last.(data))
 end
 
 """
