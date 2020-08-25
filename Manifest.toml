@@ -15,9 +15,9 @@ version = "2.1.0"
 
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "066d1e7a9eb4873660791db7f0d8c7902600b81c"
+git-tree-sha1 = "a2b4a1b7c725297565105f98dcee04e362d955d6"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "2.11.0"
+version = "2.12.0"
 
 [[AutoHashEquals]]
 git-tree-sha1 = "45bb6705d93be619b81451bb2006b7ee5d4e4453"
@@ -148,7 +148,7 @@ version = "0.2.2"
 
 [[EquationsOfStateOfSolids]]
 deps = ["AutoHashEquals", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "c4dcf3f92a9dfa93a0e85118c43865b7f98a18e1"
+git-tree-sha1 = "0eaffc17a472f0b63f13092c7059aaf5bba6feac"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/EquationsOfStateOfSolids.jl.git"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
@@ -179,9 +179,9 @@ version = "0.9.4"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "9a457808000939be5f052291cbed7de409c2839d"
+git-tree-sha1 = "56dc5338eb79a05e5ea120f510ed77efe7e9784d"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.9.4"
+version = "0.9.5"
 
 [[FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
