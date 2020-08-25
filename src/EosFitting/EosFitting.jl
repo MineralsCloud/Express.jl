@@ -98,7 +98,7 @@ function prepare(calc::SelfConsistentField, configfile; kwargs...)
         inputs,
         settings.template,
         settings.pressures,
-        settings.trial_eos;
+        PressureEOS(settings.trial_eos);
         kwargs...,
     )
 end
@@ -106,7 +106,14 @@ function prepare(calc::VariableCellOptimization, configfile; kwargs...)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     new_eos = finish(SelfConsistentField(), configfile)
-    return prepare(calc, inputs, settings.template, settings.pressures, new_eos; kwargs...)
+    return prepare(
+        calc,
+        inputs,
+        settings.template,
+        settings.pressures,
+        PressureEOS(new_eos);
+        kwargs...,
+    )
 end
 
 function launchjob(::T, configfile; kwargs...) where {T<:ScfOrOptim}
@@ -150,14 +157,14 @@ function finish(calc::SelfConsistentField, configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/scf.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return finish(calc, outputs, settings.trial_eos)
+    return finish(calc, outputs, EnergyEOS(settings.trial_eos))
 end
 function finish(::VariableCellOptimization, configfile)
     settings = load_settings(configfile)
     inputs = settings.dirs .* "/vc-relax.in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     new_eos = finish(SelfConsistentField(), configfile)
-    return finish(VariableCellOptimization(), outputs, new_eos)
+    return finish(VariableCellOptimization(), outputs, EnergyEOS(new_eos))
 end
 
 # STEP_TRACKER = [
