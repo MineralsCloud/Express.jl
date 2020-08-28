@@ -117,7 +117,7 @@ prepare(t::PhononBandStructure, files, template::Input, args...; kwargs...) =
     prepare(t, files, fill(template, size(files)), args...; kwargs...)
 function prepare(calc::PhononBandStructure, configfile; kwargs...)
     settings = load_settings(configfile)
-    inputs = settings.dirs .* (calc isa PhononDispersion ? "/disp.in" : "phdos.in")
+    inputs = joinpath.(settings.dirs, calc isa PhononDispersion ? "/disp.in" : "phdos.in")
     return prepare(calc, inputs, settings.template[4:-1:2]...; kwargs...)
 end
 
