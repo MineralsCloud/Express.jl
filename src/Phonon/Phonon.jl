@@ -39,8 +39,9 @@ export SelfConsistentField,
 struct SelfConsistentField <: ElectronicStructure end
 struct DfptMethod <: VibrationalProperty end
 struct ForceConstant <: VibrationalProperty end
-struct PhononDispersion <: VibrationalProperty end
-struct PhononDensityOfStates <: VibrationalProperty end
+abstract type PhononBandStructure <: VibrationalProperty end
+struct PhononDispersion <: PhononBandStructure end
+struct PhononDensityOfStates <: PhononBandStructure end
 
 function set_cell(output, template::Input)
     cell = open(output, "r") do io
@@ -104,19 +105,19 @@ function prepare(calc::ForceConstant, configfile; kwargs...)
     inputs = settings.dirs .* "/q2r.in"
     return prepare(calc, inputs, settings.template[3], settings.template[2]; kwargs...)
 end
-function prepare(::PhononDispersion, files, templates, args...; dry_run = false)
+function prepare(t::PhononBandStructure, files, templates, args...; dry_run = false)
     objects = map(files, templates) do file, template
-        object = preset_template(PhononDispersion(), template, args...)
+        object = preset_template(t, template, args...)
         writeinput(file, object, dry_run)
         object
     end
     return objects
 end
-prepare(::PhononDispersion, files, template::Input, args...; kwargs...) =
-    prepare(PhononDispersion(), files, fill(template, size(files)), args...; kwargs...)
-function prepare(calc::PhononDispersion, configfile; kwargs...)
+prepare(t::PhononBandStructure, files, template::Input, args...; kwargs...) =
+    prepare(t, files, fill(template, size(files)), args...; kwargs...)
+function prepare(calc::PhononBandStructure, configfile; kwargs...)
     settings = load_settings(configfile)
-    inputs = settings.dirs .* "/disp.in"
+    inputs = settings.dirs .* (calc isa PhononDispersion ? "/disp.in" : "phdos.in")
     return prepare(calc, inputs, settings.template[4:-1:2]...; kwargs...)
 end
 
