@@ -159,6 +159,7 @@ end
 #     return
 # end
 # function (::Step{PhononDispersion,Prepare{:input}})(
+
 #     dynmat_inputs,
 #     phonon_inputs,
 #     template::DynmatInput,
@@ -211,13 +212,13 @@ function _check_settings(settings)
     end
     @argcheck isdir(settings["dir"])
     @argcheck all(isfile.(settings["template"]))
-end # function _check_settings
+end
 
 function load_settings(configfile)
     settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
-end # function load_settings
+end
 
 include("QuantumESPRESSO.jl")
 
