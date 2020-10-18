@@ -11,7 +11,6 @@ using OptionalArgChecks: @argcheck
 using ..Express: ElectronicStructure, Optimization
 
 import AbInitioSoftwareBase.Inputs: set_press_vol
-import ..Express.Jobs: launchjob
 
 export SelfConsistentField,
     StructuralOptimization,
@@ -198,7 +197,5 @@ function load_settings(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end
-
-include("QuantumESPRESSO.jl")
 
 end

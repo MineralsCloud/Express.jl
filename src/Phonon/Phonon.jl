@@ -23,7 +23,6 @@ using ..Express: ElectronicStructure, VibrationalProperty
 using ..EosFitting: _check_software_settings
 
 import AbInitioSoftwareBase.Inputs: set_cell
-import ..Jobs: launchjob
 
 export SelfConsistentField,
     DfptMethod,
@@ -219,7 +218,5 @@ function load_settings(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
 end
-
-include("QuantumESPRESSO.jl")
 
 end
