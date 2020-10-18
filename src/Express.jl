@@ -7,7 +7,7 @@ abstract type VibrationalProperty <: Calculation end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
-include("EosFitting/EosFitting.jl")
-include("Phonon/Phonon.jl")
+include("EosFitting.jl")
+include("Phonon.jl")
 
 end # module
