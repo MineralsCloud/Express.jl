@@ -11,11 +11,9 @@ Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 EquationsOfStateOfSolids = "1eaa2786-f833-4167-8397-974edad0881e"
 OptionalArgChecks = "dfbeeb84-381a-44da-9ec9-a723abf299c7"
-QuantumESPRESSO = "95228164-aa68-11e9-35aa-d79ea5c4658d"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 SimpleWorkflow = "6a97d125-85da-4b66-b300-4bba10360563"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
 julia = "1"
