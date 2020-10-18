@@ -11,7 +11,6 @@ using OptionalArgChecks: @argcheck
 using ..Express: ElectronicStructure, Optimization
 
 import AbInitioSoftwareBase.Inputs: set_press_vol
-import ..Express.Jobs: launchjob
 
 export SelfConsistentField,
     StructuralOptimization,
