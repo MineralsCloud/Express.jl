@@ -198,6 +198,4 @@ function load_settings(configfile)
     return _expand_settings(settings)
 end
 
-include("QuantumESPRESSO.jl")
-
 end
