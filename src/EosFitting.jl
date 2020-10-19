@@ -3,7 +3,7 @@ module EosFitting
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
-using EquationsOfStateOfSolids.Collections: EnergyEOS, PressureEOS
+using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using OptionalArgChecks: @argcheck
@@ -52,18 +52,24 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 Set `dry_run = true` to preview changes.
 """
 function prepare_input(calc::ScfOrOptim)
-    function _prepare_input(file, template::Input, pressure, trial_eos; kwargs...)
-        object = customize(standardize(template, calc), pressure, trial_eos; kwargs...)
+    function _prepare_input(file, template::Input, pressure, eos_or_volume; kwargs...)
+        object = customize(standardize(template, calc), pressure, eos_or_volume; kwargs...)
         writeinput(file, object)
         return object
     end
-    function _prepare_input(files, templates, pressures, trial_eos; kwargs...)
+    function _prepare_input(files, templates, pressures, eos_or_volumes; kwargs...)
         _alert(pressures)
         if templates isa Input
             templates = fill(templates, size(files))
         end
-        objects = map(files, templates, pressures) do file, template, pressure
-            _prepare_input(file, template, pressure, trial_eos; kwargs...)
+        objects = if eos_or_volumes isa EquationOfStateOfSolids
+            map(files, templates, pressures) do file, template, pressure
+                _prepare_input(file, template, pressure, eos_or_volumes; kwargs...)
+            end
+        else
+            map(files, templates, pressures, eos_or_volumes) do file, template, pressure, volume
+                _prepare_input(file, template, pressure, volume; kwargs...)
+            end
         end
         return objects
     end
