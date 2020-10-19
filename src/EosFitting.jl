@@ -18,7 +18,7 @@ export SelfConsistentField,
     load_settings,
     set_press_vol,
     inputstring,
-    prepare,
+    prepare_input,
     finish,
     fiteos,
     writeinput,
@@ -51,61 +51,36 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 
 Set `dry_run = true` to preview changes.
 """
-function prepare(
-    calc::ScfOrOptim,
-    files,
-    templates,
-    pressures,
-    trial_eos::PressureEOS;
-    dry_run = false,
-    kwargs...,
-)
-    alert_pressures(pressures)
-    objects = map(files, templates, pressures) do file, template, pressure
-        object = preset_template(calc, template)
-        object = set_press_vol(object, pressure, trial_eos; kwargs...)
-        writeinput(file, object, dry_run)
-        object
+function prepare_input(calc::ScfOrOptim)
+    function _prepare_input(file, template::Input, pressure, trial_eos; kwargs...)
+        object = customize(standardize(template, calc), pressure, trial_eos; kwargs...)
+        writeinput(file, object)
+        return object
     end
-    return objects
-end
-prepare(
-    calc::ScfOrOptim,
-    files,
-    template::Input,
-    pressures,
-    trial_eos::PressureEOS;
-    kwargs...,
-) = prepare(calc, files, fill(template, size(files)), pressures, trial_eos; kwargs...)
-"""
-    prepare(calc, configfile; kwargs...)
-
-Do the same thing of `prepare`, but from a configuration file.
-"""
-function prepare(calc::SelfConsistentField, configfile; kwargs...)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/scf.in"
-    return prepare(
-        calc,
-        inputs,
-        settings.template,
-        settings.pressures,
-        PressureEOS(settings.trial_eos);
-        kwargs...,
-    )
-end
-function prepare(calc::VariableCellOptimization, configfile; kwargs...)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/vc-relax.in"
-    new_eos = finish(SelfConsistentField(), configfile)
-    return prepare(
-        calc,
-        inputs,
-        settings.template,
-        settings.pressures,
-        PressureEOS(new_eos);
-        kwargs...,
-    )
+    function _prepare_input(files, templates, pressures, trial_eos; kwargs...)
+        _alert(pressures)
+        if templates isa Input
+            templates = fill(templates, size(files))
+        end
+        objects = map(files, templates, pressures) do file, template, pressure
+            _prepare_input(file, template, pressure, trial_eos; kwargs...)
+        end
+        return objects
+    end
+    function _prepare_input(cfgfile; kwargs...)
+        settings = load_settings(cfgfile)
+        inputs = settings.dirs .* settings.name
+        _param(::SelfConsistentField) = settings.trial_eos
+        _param(::VariableCellOptimization) = finish(SelfConsistentField(), cfgfile)
+        return _prepare_input(
+            inputs,
+            settings.template,
+            settings.pressures,
+            PressureEOS(_param(calc));
+            kwargs...,
+        )
+    end
+    return _prepare_input
 end
 
 function launchjob(::T, configfile; kwargs...) where {T<:ScfOrOptim}
