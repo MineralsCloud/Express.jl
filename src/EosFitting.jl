@@ -141,7 +141,9 @@ function _alert(pressures)
     end
 end
 
-function preset_template end
+function standardize end
+
+function customize end
 
 function _readoutput end
 
