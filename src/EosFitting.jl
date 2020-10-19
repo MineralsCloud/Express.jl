@@ -11,7 +11,6 @@ using OptionalArgChecks: @argcheck
 using ..Express: ElectronicStructure, Optimization
 
 import AbInitioSoftwareBase.Inputs: set_press_vol
-import ..Express.Jobs: launchjob
 
 export SelfConsistentField,
     StructuralOptimization,
@@ -47,7 +46,7 @@ function set_press_vol(
 )::Input
     volume = mustfindvolume(eos, pressure; volume_scale = volume_scale)
     return set_press_vol(template, pressure, volume)
-end # function set_press_vol
+end
 
 """
     prepare(calc, files, template::Input, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
@@ -73,8 +72,6 @@ function prepare(
         writeinput(file, object, dry_run)
         object
     end
-    # STEP_TRACKER[calc isa SelfConsistentField ? 1 : 4] =
-    #     Context(files, nothing, Succeeded(), now(), Step(calc, UPDATE_TEMPLATE))
     return objects
 end
 prepare(
@@ -144,8 +141,6 @@ end
 Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
 function finish(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
-    # STEP_TRACKER[calc isa SelfConsistentField ? 3 : 6] =
-    #     Context(nothing, outputs, Succeeded(), now(), Step(calc, ANALYSE_OUTPUT))
     return fiteos(calc, outputs, trial_eos)
 end
 """
@@ -167,39 +162,6 @@ function finish(::VariableCellOptimization, configfile)
     return finish(VariableCellOptimization(), outputs, EnergyEOS(new_eos))
 end
 
-# STEP_TRACKER = [
-#     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), UPDATE_TEMPLATE)),
-#     Context(nothing, nothing, Pending(), now(), Step(SelfConsistentField(), LAUNCH_JOB)),
-#     Context(
-#         nothing,
-#         nothing,
-#         Pending(),
-#         now(),
-#         Step(SelfConsistentField(), ANALYSE_OUTPUT),
-#     ),
-#     Context(
-#         nothing,
-#         nothing,
-#         Pending(),
-#         now(),
-#         Step(VariableCellOptimization(), UPDATE_TEMPLATE),
-#     ),
-#     Context(
-#         nothing,
-#         nothing,
-#         Pending(),
-#         now(),
-#         Step(VariableCellOptimization(), LAUNCH_JOB),
-#     ),
-#     Context(
-#         nothing,
-#         nothing,
-#         Pending(),
-#         now(),
-#         Step(VariableCellOptimization(), ANALYSE_OUTPUT),
-#     ),
-# ]
-
 function alert_pressures(pressures)
     if length(pressures) <= 5
         @info "pressures <= 5 may give unreliable results, consider more if possible!"
@@ -207,7 +169,7 @@ function alert_pressures(pressures)
     if minimum(pressures) >= zero(eltype(pressures))
         @warn "for better fitting, we need at least 1 negative pressure!"
     end
-end # function alert_pressures
+end
 
 function preset_template end
 
@@ -228,14 +190,12 @@ function _check_settings(settings)
     map(("type", "parameters", "units")) do key
         @argcheck haskey(settings["trial_eos"], key)
     end
-end # function _check_settings
+end
 
 function load_settings(configfile)
     settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return _expand_settings(settings)
-end # function load_settings
-
-include("QuantumESPRESSO.jl")
+end
 
 end
