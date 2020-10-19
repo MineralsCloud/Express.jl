@@ -157,7 +157,7 @@ function finish(::VariableCellOptimization, configfile)
     return finish(VariableCellOptimization(), outputs, EnergyEOS(new_eos))
 end
 
-function alert_pressures(pressures)
+function _alert(pressures)
     if length(pressures) <= 5
         @info "pressures <= 5 may give unreliable results, consider more if possible!"
     end
@@ -183,7 +183,7 @@ function _check_settings(settings)
     _check_software_settings(settings["qe"])
     @argcheck isdir(settings["dir"])
     @argcheck isfile(settings["template"])
-    alert_pressures(settings["pressures"])
+    _alert(settings["pressures"])
     map(("type", "parameters", "units")) do key
         @argcheck haskey(settings["trial_eos"], key)
     end
