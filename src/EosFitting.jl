@@ -38,13 +38,8 @@ Set the volume of `template` at a `pressure` according to `eos`.
 The `volume_scale` gives a trial of the minimum and maximum scales for the `eos`. It
 times the zero-pressure volume of the `eos` will be the trial volumes.
 """
-function set_press_vol(
-    template::Input,
-    pressure,
-    eos::PressureEOS;
-    volume_scale = (0.5, 1.5),
-)::Input
-    volume = mustfindvolume(eos, pressure; volume_scale = volume_scale)
+function set_press_vol(template::Input, pressure, eos::PressureEOS)::Input
+    volume = mustfindvolume(eos, pressure; volume_scale = vscaling())
     return set_press_vol(template, pressure, volume)
 end
 
@@ -178,6 +173,8 @@ function _readoutput end
 function _expand_settings end
 
 function _check_software_settings end
+
+vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
 function _check_settings(settings)
     map(("template", "pressures", "trial_eos", "dir")) do key
