@@ -88,7 +88,7 @@ function readoutput(calc::ScfOrOptim)
         if isnothing(parser)
             return str
         else
-            return parser(str, calc)
+            return parser(str, calc)  # `parseoutput` will be used here
         end
     end
     function _readoutput(url_or_file::Union{URL,File}, parser = nothing)
@@ -145,9 +145,9 @@ function customize end
 
 function parseoutput end
 
-function _expand_settings end
+function expand_settings end
 
-function _check_software_settings end
+function check_software_settings end
 
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
@@ -155,7 +155,7 @@ function _check_settings(settings)
     map(("template", "pressures", "trial_eos", "dir")) do key
         @argcheck haskey(settings, key)
     end
-    _check_software_settings(settings["qe"])
+    check_software_settings(settings["qe"])
     @argcheck isdir(settings["dir"])
     @argcheck isfile(settings["template"])
     _alert(settings["pressures"])
@@ -167,7 +167,7 @@ end
 function load_settings(configfile)
     settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
-    return _expand_settings(settings)
+    return expand_settings(settings)
 end
 
 end
