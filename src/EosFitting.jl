@@ -6,6 +6,7 @@ using Compat: isnothing
 using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using OptionalArgChecks: @argcheck
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain
 using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization
@@ -86,6 +87,57 @@ end
 abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
 struct ArrayOfJobs <: JobPackaging end
+
+function jobpackaging(::typeof(prepareinput), calc::ScfOrOptim)
+    function _jobpackaging(file, template::Input, pressure, eos_or_volume; kwargs...)
+        f = prepareinput(calc)
+        return InternalAtomicJob(
+            () -> f(file, template, pressure, eos_or_volume; kwargs...),
+            "Prepare $calc input for pressure $pressure",
+        )
+    end
+    function _jobpackaging(
+        files,
+        templates,
+        pressures,
+        eos_or_volumes,
+        ::JobOfTasks;
+        kwargs...,
+    )
+        f = prepareinput(calc)
+        return InternalAtomicJob(
+            () -> f(files, templates, pressures, eos_or_volumes; kwargs...),
+            "Prepare $calc inputs for pressures $pressures",
+        )
+    end
+    function _jobpackaging(
+        files,
+        templates,
+        pressures,
+        eos_or_volumes,
+        ::ArrayOfJobs;
+        kwargs...,
+    )
+        if templates isa Input
+            templates = fill(templates, size(files))
+        end
+        if eos_or_volumes isa EquationOfStateOfSolids
+            map(files, templates, pressures) do file, template, pressure
+                _jobpackaging(file, template, pressure, eos_or_volumes; kwargs...)
+            end
+        else
+            map(
+                files,
+                templates,
+                pressures,
+                eos_or_volumes,
+            ) do file, template, pressure, volume
+                _jobpackaging(file, template, pressure, volume; kwargs...)
+            end
+        end
+    end
+end
+
 function readoutput(calc::ScfOrOptim)
     function _readoutput(str::AbstractString, parser = nothing)
         if isnothing(parser)
