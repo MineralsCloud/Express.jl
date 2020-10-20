@@ -4,27 +4,24 @@ using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
 using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
-using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using OptionalArgChecks: @argcheck
 using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization
 
+import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
 
 export SelfConsistentField,
     StructureOptimization,
     VariableCellOptimization,
     load_settings,
-    set_press_vol,
     inputstring,
-    finish,
     prepareinput,
     readoutput,
-    fiteos,
-    writeinput,
-    launchjob
+    eosfit,
+    writeinput
 
 struct SelfConsistentField <: ElectronicStructure end
 struct StructureOptimization <: Optimization end
@@ -111,40 +108,26 @@ end
 
 Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
 """
-function fiteos(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
-    data =
-        filter(!isnothing, [_readoutput(calc, read(output, String)) for output in outputs])  # volume => energy
-    if length(data) <= 5
-        @info "pressures <= 5 may give unreliable results, run more if possible!"
+function eosfit(calc::ScfOrOptim)
+    function _eosfit(outputs, trial_eos::EnergyEOS)
+        reader = readoutput(calc)
+        raw = (reader(output, parseoutput) for output in outputs)  # `ntuple` cannot work with generators
+        data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
+        if length(data) <= 5
+            @info "pressures <= 5 may give unreliable results, run more if possible!"
+        end
+        return eosfit(trial_eos, first.(data), last.(data))
     end
-    return eosfit(trial_eos, first.(data), last.(data))
-end
-
-"""
-    finish(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
-
-Return the fitted equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
-"""
-function finish(calc::ScfOrOptim, outputs, trial_eos::EnergyEOS)
-    return fiteos(calc, outputs, trial_eos)
-end
-"""
-    finish(calc, configfile)
-
-Do the same thing of `finish`, but from a configuration file.
-"""
-function finish(calc::SelfConsistentField, configfile)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/scf.in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return finish(calc, outputs, EnergyEOS(settings.trial_eos))
-end
-function finish(::VariableCellOptimization, configfile)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/vc-relax.in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    new_eos = finish(SelfConsistentField(), configfile)
-    return finish(VariableCellOptimization(), outputs, EnergyEOS(new_eos))
+    function _eosfit(cfgfile)
+        settings = load_settings(cfgfile)
+        inputs = settings.dirs .* settings.name
+        outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+        eos = EnergyEOS(
+            calc isa SelfConsistentField ? settings.trial_eos :
+            eosfit(SelfConsistentField())(cfgfile),
+        )
+        return _eosfit(outputs, eos)
+    end
 end
 
 function _alert(pressures)
