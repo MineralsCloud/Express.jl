@@ -18,8 +18,8 @@ export SelfConsistentField,
     load_settings,
     set_press_vol,
     inputstring,
-    prepare_input,
     finish,
+    prepareinput,
     fiteos,
     writeinput,
     launchjob
@@ -51,34 +51,34 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 
 Set `dry_run = true` to preview changes.
 """
-function prepare_input(calc::ScfOrOptim)
-    function _prepare_input(file, template::Input, pressure, eos_or_volume; kwargs...)
+function prepareinput(calc::ScfOrOptim)
+    function _prepareinput(file, template::Input, pressure, eos_or_volume; kwargs...)
         object = customize(standardize(template, calc), pressure, eos_or_volume; kwargs...)
         writeinput(file, object)
         return object
     end
-    function _prepare_input(files, templates, pressures, eos_or_volumes; kwargs...)
+    function _prepareinput(files, templates, pressures, eos_or_volumes; kwargs...)
         _alert(pressures)
         if templates isa Input
             templates = fill(templates, size(files))
         end
         objects = if eos_or_volumes isa EquationOfStateOfSolids
             map(files, templates, pressures) do file, template, pressure
-                _prepare_input(file, template, pressure, eos_or_volumes; kwargs...)
+                _prepareinput(file, template, pressure, eos_or_volumes; kwargs...)
             end
         else
             map(files, templates, pressures, eos_or_volumes) do file, template, pressure, volume
-                _prepare_input(file, template, pressure, volume; kwargs...)
+                _prepareinput(file, template, pressure, volume; kwargs...)
             end
         end
         return objects
     end
-    function _prepare_input(cfgfile; kwargs...)
+    function _prepareinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
         inputs = settings.dirs .* settings.name
         _param(::SelfConsistentField) = settings.trial_eos
         _param(::VariableCellOptimization) = finish(SelfConsistentField(), cfgfile)
-        return _prepare_input(
+        return _prepareinput(
             inputs,
             settings.template,
             settings.pressures,
@@ -86,8 +86,6 @@ function prepare_input(calc::ScfOrOptim)
             kwargs...,
         )
     end
-    return _prepare_input
-end
 
 function launchjob(::T, configfile; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(configfile)
