@@ -78,16 +78,13 @@ function prepareinput(calc::ScfOrOptim)
     function _prepareinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
         inputs = settings.dirs .* settings.name
-        _param(::SelfConsistentField) = settings.trial_eos
-        _param(::VariableCellOptimization) = finish(SelfConsistentField(), cfgfile)
-        return _prepareinput(
-            inputs,
-            settings.template,
-            settings.pressures,
-            PressureEOS(_param(calc));
-            kwargs...,
+        eos = PressureEOS(
+            calc isa SelfConsistentField ? settings.trial_eos :
+            eosfit(SelfConsistentField())(cfgfile),
         )
+        return _prepareinput(inputs, settings.template, settings.pressures, eos; kwargs...)
     end
+end
 
 function readoutput(calc::ScfOrOptim)
     function _readoutput(str::AbstractString, parser = nothing)
