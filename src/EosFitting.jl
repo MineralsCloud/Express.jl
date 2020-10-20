@@ -5,8 +5,9 @@ using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
 using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Volume: mustfindvolume
+using Mustache: render
 using OptionalArgChecks: @argcheck
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
 using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization
@@ -157,6 +158,16 @@ function readoutput(calc::ScfOrOptim)
         end
     end
 end
+
+function preparescript(template, view)
+    map((:press, :nprocs, :in, :out, :script)) do key
+        @argcheck haskey(view, key)
+    end
+    str = render(template, view)
+    return Script(str, view[:script])
+end
+preparescript(template, args::Pair...) = preparescript(template, Dict(args))
+preparescript(template; kwargs...) = preparescript(template, Dict(kwargs))
 
 """
     fiteos(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
