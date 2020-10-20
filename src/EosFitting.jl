@@ -132,6 +132,14 @@ function buildjob(::typeof(makeinput), calc::ScfOrOptim)
         end
     end
 end
+function buildjob(::typeof(eosfit), calc::ScfOrOptim)
+    function _buildjob(args...)
+        return InternalAtomicJob(
+            () -> eosfit(calc)(args...),
+            "Prepare $calc inputs for pressures ",
+        )
+    end
+end
 
 function readoutput(calc::ScfOrOptim)
     function _readoutput(str::AbstractString, parser = nothing)
