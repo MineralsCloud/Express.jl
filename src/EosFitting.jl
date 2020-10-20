@@ -20,7 +20,7 @@ export SelfConsistentField,
     VariableCellOptimization,
     load_settings,
     inputstring,
-    prepareinput,
+    makeinput,
     readoutput,
     eosfit,
     writeinput
@@ -52,36 +52,36 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 
 Set `dry_run = true` to preview changes.
 """
-function prepareinput(calc::ScfOrOptim)
-    function _prepareinput(file, template::Input, pressure, eos_or_volume; kwargs...)
+function makeinput(calc::ScfOrOptim)
+    function _makeinput(file, template::Input, pressure, eos_or_volume; kwargs...)
         object = customize(standardize(template, calc), pressure, eos_or_volume; kwargs...)
         writeinput(file, object)
         return object
     end
-    function _prepareinput(files, templates, pressures, eos_or_volumes; kwargs...)
+    function _makeinput(files, templates, pressures, eos_or_volumes; kwargs...)
         _alert(pressures)
         if templates isa Input
             templates = fill(templates, size(files))
         end
         objects = if eos_or_volumes isa EquationOfStateOfSolids
             map(files, templates, pressures) do file, template, pressure
-                _prepareinput(file, template, pressure, eos_or_volumes; kwargs...)
+                _makeinput(file, template, pressure, eos_or_volumes; kwargs...)
             end
         else
             map(files, templates, pressures, eos_or_volumes) do file, template, pressure, volume
-                _prepareinput(file, template, pressure, volume; kwargs...)
+                _makeinput(file, template, pressure, volume; kwargs...)
             end
         end
         return objects
     end
-    function _prepareinput(cfgfile; kwargs...)
+    function _makeinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
         inputs = settings.dirs .* settings.name
         eos = PressureEOS(
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
         )
-        return _prepareinput(inputs, settings.template, settings.pressures, eos; kwargs...)
+        return _makeinput(inputs, settings.template, settings.pressures, eos; kwargs...)
     end
 end
 
@@ -89,9 +89,9 @@ abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
 struct ArrayOfJobs <: JobPackaging end
 
-function jobpackaging(::typeof(prepareinput), calc::ScfOrOptim)
+function jobpackaging(::typeof(makeinput), calc::ScfOrOptim)
     function _jobpackaging(file, template::Input, pressure, eos_or_volume; kwargs...)
-        f = prepareinput(calc)
+        f = makeinput(calc)
         return InternalAtomicJob(
             () -> f(file, template, pressure, eos_or_volume; kwargs...),
             "Prepare $calc input for pressure $pressure",
@@ -105,7 +105,7 @@ function jobpackaging(::typeof(prepareinput), calc::ScfOrOptim)
         ::JobOfTasks;
         kwargs...,
     )
-        f = prepareinput(calc)
+        f = makeinput(calc)
         return InternalAtomicJob(
             () -> f(files, templates, pressures, eos_or_volumes; kwargs...),
             "Prepare $calc inputs for pressures $pressures",
