@@ -159,15 +159,15 @@ function readoutput(calc::ScfOrOptim)
     end
 end
 
-function preparescript(template, view)
+function makescript(template, view)
     map((:press, :nprocs, :in, :out, :script)) do key
         @argcheck haskey(view, key)
     end
     str = render(template, view)
     return Script(str, view[:script])
 end
-preparescript(template, args::Pair...) = preparescript(template, Dict(args))
-preparescript(template; kwargs...) = preparescript(template, Dict(kwargs))
+makescript(template, args::Pair...) = makescript(template, Dict(args))
+makescript(template; kwargs...) = makescript(template, Dict(kwargs))
 
 """
     fiteos(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
