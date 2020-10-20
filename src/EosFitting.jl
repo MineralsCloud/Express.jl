@@ -98,6 +98,12 @@ function readoutput(calc::ScfOrOptim)
         str = urldownload(url_or_file, true; parser = String)
         return _readoutput(str, parser)
     end
+    function _readoutput(file, parser = nothing)
+        open(file, "r") do io
+            str = read(io, String)
+            return _readoutput(str, parser)
+        end
+    end
 end
 
 """
