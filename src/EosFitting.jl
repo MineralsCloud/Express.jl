@@ -13,7 +13,7 @@ using ..Express: ElectronicStructure, Optimization
 import AbInitioSoftwareBase.Inputs: set_press_vol
 
 export SelfConsistentField,
-    StructuralOptimization,
+    StructureOptimization,
     VariableCellOptimization,
     load_settings,
     set_press_vol,
@@ -25,7 +25,7 @@ export SelfConsistentField,
     launchjob
 
 struct SelfConsistentField <: ElectronicStructure end
-struct StructuralOptimization <: Optimization end
+struct StructureOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
