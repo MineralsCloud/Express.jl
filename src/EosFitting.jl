@@ -90,29 +90,22 @@ abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
 struct ArrayOfJobs <: JobPackaging end
 
-function jobpackaging(::typeof(makeinput), calc::ScfOrOptim)
-    function _jobpackaging(file, template::Input, pressure, eos_or_volume; kwargs...)
+function buildjob(::typeof(makeinput), calc::ScfOrOptim)
+    function _buildjob(file, template::Input, pressure, eos_or_volume; kwargs...)
         f = makeinput(calc)
         return InternalAtomicJob(
             () -> f(file, template, pressure, eos_or_volume; kwargs...),
             "Prepare $calc input for pressure $pressure",
         )
     end
-    function _jobpackaging(
-        files,
-        templates,
-        pressures,
-        eos_or_volumes,
-        ::JobOfTasks;
-        kwargs...,
-    )
+    function _buildjob(files, templates, pressures, eos_or_volumes, ::JobOfTasks; kwargs...)
         f = makeinput(calc)
         return InternalAtomicJob(
             () -> f(files, templates, pressures, eos_or_volumes; kwargs...),
             "Prepare $calc inputs for pressures $pressures",
         )
     end
-    function _jobpackaging(
+    function _buildjob(
         files,
         templates,
         pressures,
@@ -125,7 +118,7 @@ function jobpackaging(::typeof(makeinput), calc::ScfOrOptim)
         end
         if eos_or_volumes isa EquationOfStateOfSolids
             map(files, templates, pressures) do file, template, pressure
-                _jobpackaging(file, template, pressure, eos_or_volumes; kwargs...)
+                _buildjob(file, template, pressure, eos_or_volumes; kwargs...)
             end
         else
             map(
@@ -134,7 +127,7 @@ function jobpackaging(::typeof(makeinput), calc::ScfOrOptim)
                 pressures,
                 eos_or_volumes,
             ) do file, template, pressure, volume
-                _jobpackaging(file, template, pressure, volume; kwargs...)
+                _buildjob(file, template, pressure, volume; kwargs...)
             end
         end
     end
