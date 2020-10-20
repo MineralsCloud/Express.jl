@@ -1,6 +1,7 @@
 module EosFitting
 
 using AbInitioSoftwareBase: loadfile
+using AbInitioSoftwareBase.CLI: MpiExec
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
 using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
@@ -168,6 +169,30 @@ function makescript(template, view)
 end
 makescript(template, args::Pair...) = makescript(template, Dict(args))
 makescript(template; kwargs...) = makescript(template, Dict(kwargs))
+
+function distprocs(nprocs, njobs)
+    quotient, remainder = divrem(nprocs, njobs)
+    if !iszero(remainder)
+        @warn "The processes are not fully balanced! Consider the number of subjobs!"
+    end
+    return quotient
+end
+
+function buildjob(::ScfOrOptim)
+    function _buildjob(outputs, inputs, np, exe; kwargs...)
+        # `map` guarantees they are of the same size, no need to check.
+        n = distprocs(np, length(inputs))
+        subjobs = map(outputs, inputs) do output, input
+            f = MpiExec(np; kwargs...) ∘ exe
+            cmd = f(stdin = input, stdout = output)
+            ExternalAtomicJob(cmd)
+        end
+        return subjobs
+    end
+    function _buildjob(template, view)
+        ExternalAtomicJob(makescript(template, view))
+    end
+end
 
 """
     fiteos(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
