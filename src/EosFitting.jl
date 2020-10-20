@@ -7,6 +7,7 @@ using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, 
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using OptionalArgChecks: @argcheck
+using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization
 
@@ -20,6 +21,7 @@ export SelfConsistentField,
     inputstring,
     finish,
     prepareinput,
+    readoutput,
     fiteos,
     writeinput,
     launchjob
@@ -87,12 +89,18 @@ function prepareinput(calc::ScfOrOptim)
         )
     end
 
-function launchjob(::T, configfile; kwargs...) where {T<:ScfOrOptim}
-    settings = load_settings(configfile)
-    inputs =
-        @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "vc-relax") * ".in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return launchjob(outputs, inputs, settings.manager.np, settings.bin; kwargs...)
+function readoutput(calc::ScfOrOptim)
+    function _readoutput(str::AbstractString, parser = nothing)
+        if isnothing(parser)
+            return str
+        else
+            return parser(str, calc)
+        end
+    end
+    function _readoutput(url_or_file::Union{URL,File}, parser = nothing)
+        str = urldownload(url_or_file, true; parser = String)
+        return _readoutput(str, parser)
+    end
 end
 
 """
