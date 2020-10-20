@@ -160,7 +160,7 @@ function standardize end
 
 function customize end
 
-function _readoutput end
+function parseoutput end
 
 function _expand_settings end
 
