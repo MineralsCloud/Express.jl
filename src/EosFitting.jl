@@ -83,6 +83,9 @@ function prepareinput(calc::ScfOrOptim)
     end
 end
 
+abstract type JobPackaging end
+struct JobOfTasks <: JobPackaging end
+struct ArrayOfJobs <: JobPackaging end
 function readoutput(calc::ScfOrOptim)
     function _readoutput(str::AbstractString, parser = nothing)
         if isnothing(parser)
