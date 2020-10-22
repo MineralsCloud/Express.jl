@@ -1,11 +1,14 @@
 module EosFitting
 
 using AbInitioSoftwareBase: loadfile
+using AbInitioSoftwareBase.CLI: MpiExec
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
 using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Volume: mustfindvolume
+using Mustache: render
 using OptionalArgChecks: @argcheck
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
 using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization
@@ -18,7 +21,7 @@ export SelfConsistentField,
     VariableCellOptimization,
     load_settings,
     inputstring,
-    prepareinput,
+    makeinput,
     readoutput,
     eosfit,
     writeinput
@@ -50,36 +53,91 @@ Prepare the input `files` from a certain `template` / a series of `templates` at
 
 Set `dry_run = true` to preview changes.
 """
-function prepareinput(calc::ScfOrOptim)
-    function _prepareinput(file, template::Input, pressure, eos_or_volume; kwargs...)
+function makeinput(calc::ScfOrOptim)
+    function _makeinput(file, template::Input, pressure, eos_or_volume; kwargs...)
         object = customize(standardize(template, calc), pressure, eos_or_volume; kwargs...)
         writeinput(file, object)
         return object
     end
-    function _prepareinput(files, templates, pressures, eos_or_volumes; kwargs...)
+    function _makeinput(files, templates, pressures, eos_or_volumes; kwargs...)
         _alert(pressures)
         if templates isa Input
             templates = fill(templates, size(files))
         end
         objects = if eos_or_volumes isa EquationOfStateOfSolids
             map(files, templates, pressures) do file, template, pressure
-                _prepareinput(file, template, pressure, eos_or_volumes; kwargs...)
+                _makeinput(file, template, pressure, eos_or_volumes; kwargs...)
             end
         else
             map(files, templates, pressures, eos_or_volumes) do file, template, pressure, volume
-                _prepareinput(file, template, pressure, volume; kwargs...)
+                _makeinput(file, template, pressure, volume; kwargs...)
             end
         end
         return objects
     end
-    function _prepareinput(cfgfile; kwargs...)
+    function _makeinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
         inputs = settings.dirs .* settings.name
         eos = PressureEOS(
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
         )
-        return _prepareinput(inputs, settings.template, settings.pressures, eos; kwargs...)
+        return _makeinput(inputs, settings.template, settings.pressures, eos; kwargs...)
+    end
+end
+
+abstract type JobPackaging end
+struct JobOfTasks <: JobPackaging end
+struct ArrayOfJobs <: JobPackaging end
+
+function buildjob(::typeof(makeinput), calc::ScfOrOptim)
+    function _buildjob(file, template::Input, pressure, eos_or_volume; kwargs...)
+        f = makeinput(calc)
+        return InternalAtomicJob(
+            () -> f(file, template, pressure, eos_or_volume; kwargs...),
+            "Prepare $calc input for pressure $pressure",
+        )
+    end
+    function _buildjob(files, templates, pressures, eos_or_volumes, ::JobOfTasks; kwargs...)
+        f = makeinput(calc)
+        return InternalAtomicJob(
+            () -> f(files, templates, pressures, eos_or_volumes; kwargs...),
+            "Prepare $calc inputs for pressures $pressures",
+        )
+    end
+    function _buildjob(
+        files,
+        templates,
+        pressures,
+        eos_or_volumes,
+        ::ArrayOfJobs;
+        kwargs...,
+    )
+        if templates isa Input
+            templates = fill(templates, size(files))
+        end
+        if eos_or_volumes isa EquationOfStateOfSolids
+            map(files, templates, pressures) do file, template, pressure
+                _buildjob(file, template, pressure, eos_or_volumes; kwargs...)
+            end
+        else
+            map(
+                files,
+                templates,
+                pressures,
+                eos_or_volumes,
+            ) do file, template, pressure, volume
+                _buildjob(file, template, pressure, volume; kwargs...)
+            end
+        end
+    end
+end
+function buildjob(::typeof(eosfit), calc::ScfOrOptim)
+    function _buildjob(args...)
+        return InternalAtomicJob(
+            () -> eosfit(calc)(args...),
+            "Prepare $calc inputs for pressures ",
+        )
     end
 end
 
@@ -100,6 +158,40 @@ function readoutput(calc::ScfOrOptim)
             str = read(io, String)
             return _readoutput(str, parser)
         end
+    end
+end
+
+function makescript(template, view)
+    map((:press, :nprocs, :in, :out, :script)) do key
+        @argcheck haskey(view, key)
+    end
+    str = render(template, view)
+    return Script(str, view[:script])
+end
+makescript(template, args::Pair...) = makescript(template, Dict(args))
+makescript(template; kwargs...) = makescript(template, Dict(kwargs))
+
+function distprocs(nprocs, njobs)
+    quotient, remainder = divrem(nprocs, njobs)
+    if !iszero(remainder)
+        @warn "The processes are not fully balanced! Consider the number of subjobs!"
+    end
+    return quotient
+end
+
+function buildjob(::ScfOrOptim)
+    function _buildjob(outputs, inputs, np, exe; kwargs...)
+        # `map` guarantees they are of the same size, no need to check.
+        n = distprocs(np, length(inputs))
+        subjobs = map(outputs, inputs) do output, input
+            f = MpiExec(np; kwargs...) ∘ exe
+            cmd = f(stdin = input, stdout = output)
+            ExternalAtomicJob(cmd)
+        end
+        return subjobs
+    end
+    function _buildjob(template, view)
+        ExternalAtomicJob(makescript(template, view))
     end
 end
 
