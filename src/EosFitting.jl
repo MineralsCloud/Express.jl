@@ -7,7 +7,6 @@ using Compat: isnothing
 using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Mustache: render
-using OptionalArgChecks: @argcheck
 using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
 using UrlDownload: File, URL, urldownload
 
@@ -163,7 +162,7 @@ end
 
 function makescript(template, view)
     map((:press, :nprocs, :in, :out, :script)) do key
-        @argcheck haskey(view, key)
+        @assert haskey(view, key)
     end
     str = render(template, view)
     return Script(str, view[:script])
@@ -245,14 +244,13 @@ vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
 function _check_settings(settings)
     map(("templates", "pressures", "trial_eos", "workdir")) do key
-        @argcheck haskey(settings, key)
+        @assert haskey(settings, key)
     end
-    check_software_settings(settings["qe"])
-    @argcheck isdir(settings["workdir"])
-    @argcheck all(map(isfile, settings["templates"]))
-    _alert(settings["pressures"])
+    @assert isdir(settings["workdir"])
+    @assert all(map(isfile, settings["templates"]))
+    _alert(settings["pressures"]["values"])
     map(("type", "parameters")) do key
-        @argcheck haskey(settings["trial_eos"], key)
+        @assert haskey(settings["trial_eos"], key)
     end
 end
 
