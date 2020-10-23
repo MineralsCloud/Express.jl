@@ -253,8 +253,6 @@ function check_software_settings end
 
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
-const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
-
 function expandeos(settings)
     type = string(lowercase(settings["type"]))
     T = if type in ("m", "murnaghan")
@@ -270,12 +268,12 @@ function expandeos(settings)
     end
     p = map(settings["parameters"]) do x
         @assert length(x) == 2
-        first(x) * uparse(last(x); unit_context = UNIT_CONTEXT)
+        first(x) * uparse(last(x); unit_context = [Unitful, UnitfulAtomic])
     end
     return T(p...)
 end
 
-function _check_settings(settings)
+function check_settings(settings)
     map(("templates", "pressures", "trial_eos", "workdir")) do key
         @assert haskey(settings, key)
     end
@@ -287,9 +285,9 @@ function _check_settings(settings)
     end
 end
 
-function load_settings(configfile)
-    settings = loadfile(configfile)
-    _check_settings(settings)  # Errors will be thrown if exist
+function load_settings(cfgfile)
+    settings = loadfile(cfgfile)
+    check_settings(settings)  # Errors will be thrown if exist
     return expand_settings(settings)
 end
 
