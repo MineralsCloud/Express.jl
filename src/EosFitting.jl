@@ -87,12 +87,22 @@ function makeinput(calc::ScfOrOptim)
     end
     function _makeinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
-        inputs = joinpath.(settings.dirs, settings.name)
+        N = length(settings["templates"])
+        tmplfiles = if N == 1
+            fill(first(settings["templates"]), length(settings.pressures))
+        elseif N != length(settings.pressures)
+            throw(DimensionMismatch("`\"templates\"` should be the same length as `\"pressures\"`!"))
+        else
+            settings["templates"]
+        end
+        files = map(settings.dirs, tmplfiles) do dir, tmplfile
+            joinpath(dir, shortname(calc) * '_' * basename(tmplfile))
+        end
         eos = PressureEOS(
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
         )
-        return _makeinput(inputs, settings.templates, settings.pressures, eos; kwargs...)
+        return _makeinput(files, settings.templates, settings.pressures, eos; kwargs...)
     end
 end
 
@@ -250,6 +260,8 @@ function parseoutput end
 function expand_settings end
 
 function check_software_settings end
+
+function shortname end
 
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
