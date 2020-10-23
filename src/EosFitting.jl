@@ -248,7 +248,7 @@ function _check_settings(settings)
     end
     @assert isdir(settings["workdir"])
     @assert all(map(isfile, settings["templates"]))
-    _alert(settings["pressures"])
+    _alert(settings["pressures"]["values"])
     map(("type", "parameters")) do key
         @assert haskey(settings["trial_eos"], key)
     end
