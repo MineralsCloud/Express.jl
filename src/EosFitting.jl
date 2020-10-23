@@ -4,10 +4,21 @@ using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.CLI: MpiExec
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
-using EquationsOfStateOfSolids.Collections: EquationOfStateOfSolids, EnergyEOS, PressureEOS
+using EquationsOfStateOfSolids.Collections:
+    EquationOfStateOfSolids,
+    EnergyEOS,
+    PressureEOS,
+    Murnaghan,
+    BirchMurnaghan2nd,
+    BirchMurnaghan3rd,
+    BirchMurnaghan4th,
+    Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Mustache: render
 using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
+using Unitful: uparse
+import Unitful
+import UnitfulAtomic
 using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization
@@ -241,6 +252,28 @@ function expand_settings end
 function check_software_settings end
 
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
+
+const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
+
+function expandeos(settings)
+    type = string(lowercase(settings["type"]))
+    T = if type in ("m", "murnaghan")
+        Murnaghan
+    elseif type in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
+        BirchMurnaghan2nd
+    elseif type in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
+        BirchMurnaghan3rd
+    elseif type in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
+        BirchMurnaghan4th
+    elseif type in ("v", "vinet")
+        Vinet
+    end
+    p = map(settings["parameters"]) do x
+        @assert length(x) == 2
+        first(x) * uparse(last(x); unit_context = UNIT_CONTEXT)
+    end
+    return T(p...)
+end
 
 function _check_settings(settings)
     map(("templates", "pressures", "trial_eos", "workdir")) do key
