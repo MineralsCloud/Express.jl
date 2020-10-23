@@ -87,7 +87,7 @@ function makeinput(calc::ScfOrOptim)
     end
     function _makeinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
-        inputs = settings.dirs .* settings.name
+        inputs = joinpath.(settings.dirs, settings.name)
         eos = PressureEOS(
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
