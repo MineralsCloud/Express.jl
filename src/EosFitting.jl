@@ -81,7 +81,7 @@ function makeinput(calc::ScfOrOptim)
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
         )
-        return _makeinput(inputs, settings.template, settings.pressures, eos; kwargs...)
+        return _makeinput(inputs, settings.templates, settings.pressures, eos; kwargs...)
     end
 end
 
