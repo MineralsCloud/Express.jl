@@ -13,6 +13,7 @@ Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 SimpleWorkflow = "6a97d125-85da-4b66-b300-4bba10360563"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 UrlDownload = "856ac37a-3032-4c1c-9122-f86d88358c8b"
 
 [compat]
