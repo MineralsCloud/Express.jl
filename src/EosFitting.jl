@@ -244,14 +244,14 @@ function check_software_settings end
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
 function _check_settings(settings)
-    map(("template", "pressures", "trial_eos", "dir")) do key
+    map(("templates", "pressures", "trial_eos", "workdir")) do key
         @argcheck haskey(settings, key)
     end
     check_software_settings(settings["qe"])
-    @argcheck isdir(settings["dir"])
-    @argcheck isfile(settings["template"])
+    @argcheck isdir(settings["workdir"])
+    @argcheck all(map(isfile, settings["templates"]))
     _alert(settings["pressures"])
-    map(("type", "parameters", "units")) do key
+    map(("type", "parameters")) do key
         @argcheck haskey(settings["trial_eos"], key)
     end
 end
