@@ -212,10 +212,6 @@ function buildjob(calc::ScfOrOptim)
         settings = load_settings(cfgfile)
         inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
         out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        eos = PressureEOS(
-            calc isa SelfConsistentField ? settings.trial_eos :
-            eosfit(SelfConsistentField())(cfgfile),
-        )
         return _buildjob(out, inp, settings.manager.np, settings.bin)
     end
 end
