@@ -34,7 +34,8 @@ export SelfConsistentField,
     makeinput,
     readoutput,
     eosfit,
-    writeinput
+    writeinput,
+    buildworkflow
 
 struct SelfConsistentField <: ElectronicStructure end
 struct StructureOptimization <: Optimization end
@@ -215,6 +216,27 @@ function buildjob(calc::ScfOrOptim)
     end
 end
 
+function buildworkflow(cfgfile)
+    chain(
+        InternalAtomicJob(
+            () -> buildjob(makeinput, SelfConsistentField())(cfgfile),
+            "Generate inputs for software",
+        ),
+        buildjob(SelfConsistentField())(cfgfile),
+        InternalAtomicJob(
+            () -> buildjob(eosfit, SelfConsistentField())(cfgfile),
+            "Fit a rough EOS",
+        ),
+        InternalAtomicJob(
+            () -> buildjob(makeinput, VariableCellOptimization())(cfgfile),
+            "Generate inputs for software",
+        ),
+        buildjob(VariableCellOptimization())(cfgfile),
+        InternalAtomicJob(
+            () -> buildjob(eosfit, VariableCellOptimization())(cfgfile),
+            "Fit a rough EOS",
+        ),
+    )
 end
 
 """
