@@ -15,6 +15,7 @@ using EquationsOfStateOfSolids.Collections:
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Mustache: render
+using Serialization: serialize, deserialize
 using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
 using Unitful: uparse
 import Unitful
@@ -245,10 +246,15 @@ function eosfit(calc::ScfOrOptim)
     function _eosfit(cfgfile)
         settings = load_settings(cfgfile)
         outputs = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        eos = EnergyEOS(
-            calc isa SelfConsistentField ? settings.trial_eos :
-            eosfit(SelfConsistentField())(cfgfile),
-        )
+        settings = loadfile(cfgfile)
+        saveto = settings["save"]
+        if calc isa SelfConsistentField
+            eos = eosfit(calc)(outputs, EnergyEOS(settings.trial_eos))
+            serialize(saveto, eos)
+        else
+            scfeos = deserialize(saveto)
+            eosfit(calc)(outputs, EnergyEOS(scfeos))
+        end
         return _eosfit(outputs, eos)
     end
 end
