@@ -189,7 +189,7 @@ function distprocs(nprocs, njobs)
     return quotient
 end
 
-function buildjob(::ScfOrOptim)
+function buildjob(calc::ScfOrOptim)
     function _buildjob(outputs, inputs, np, exe; kwargs...)
         # `map` guarantees they are of the same size, no need to check.
         n = distprocs(np, length(inputs))
@@ -203,6 +203,18 @@ function buildjob(::ScfOrOptim)
     function _buildjob(template, view)
         ExternalAtomicJob(makescript(template, view))
     end
+    function _buildjob(cfgfile)
+        settings = load_settings(cfgfile)
+        inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+        out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
+        eos = PressureEOS(
+            calc isa SelfConsistentField ? settings.trial_eos :
+            eosfit(SelfConsistentField())(cfgfile),
+        )
+        return _buildjob(out, inp, settings.manager.n, settings.bin)
+    end
+end
+
 end
 
 """
