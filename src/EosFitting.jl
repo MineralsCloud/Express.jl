@@ -212,7 +212,7 @@ function buildjob(calc::ScfOrOptim)
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
         )
-        return _buildjob(out, inp, settings.manager.n, settings.bin)
+        return _buildjob(out, inp, settings.manager.np, settings.bin)
     end
 end
 
