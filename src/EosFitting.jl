@@ -16,7 +16,7 @@ using EquationsOfStateOfSolids.Collections:
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Mustache: render
 using Serialization: serialize, deserialize
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain, parallel
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
@@ -203,7 +203,7 @@ function buildjob(calc::ScfOrOptim)
             cmd = f(stdin = input, stdout = output)
             ExternalAtomicJob(cmd)
         end
-        return subjobs
+        return parallel(subjobs...)
     end
     function _buildjob(template, view)
         ExternalAtomicJob(makescript(template, view))
@@ -217,14 +217,14 @@ function buildjob(calc::ScfOrOptim)
 end
 
 function buildworkflow(cfgfile)
-    return chain(
-        buildjob(makeinput, SelfConsistentField())(cfgfile),
-        buildjob(SelfConsistentField())(cfgfile),
-        buildjob(eosfit, SelfConsistentField())(cfgfile),
-        buildjob(makeinput, VariableCellOptimization())(cfgfile),
-        buildjob(VariableCellOptimization())(cfgfile),
-        buildjob(eosfit, VariableCellOptimization())(cfgfile),
-    )
+    step1 = buildjob(makeinput, SelfConsistentField())(cfgfile)
+    step12 = chain(step1, buildjob(SelfConsistentField())(cfgfile)[1])
+    step123 = chain(step12[end], buildjob(eosfit, SelfConsistentField())(cfgfile))
+    step4 = buildjob(makeinput, VariableCellOptimization())(cfgfile)
+    step45 = chain(step4, buildjob(VariableCellOptimization())(cfgfile)[1])
+    step456 = chain(step45[end], buildjob(eosfit, VariableCellOptimization())(cfgfile))
+    step16 = chain(step123[end], step456[1])
+    return step16
 end
 
 """
