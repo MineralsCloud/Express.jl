@@ -217,25 +217,13 @@ function buildjob(calc::ScfOrOptim)
 end
 
 function buildworkflow(cfgfile)
-    chain(
-        InternalAtomicJob(
-            () -> buildjob(makeinput, SelfConsistentField())(cfgfile),
-            "Generate inputs for software",
-        ),
+    return chain(
+        buildjob(makeinput, SelfConsistentField())(cfgfile),
         buildjob(SelfConsistentField())(cfgfile),
-        InternalAtomicJob(
-            () -> buildjob(eosfit, SelfConsistentField())(cfgfile),
-            "Fit a rough EOS",
-        ),
-        InternalAtomicJob(
-            () -> buildjob(makeinput, VariableCellOptimization())(cfgfile),
-            "Generate inputs for software",
-        ),
+        buildjob(eosfit, SelfConsistentField())(cfgfile),
+        buildjob(makeinput, VariableCellOptimization())(cfgfile),
         buildjob(VariableCellOptimization())(cfgfile),
-        InternalAtomicJob(
-            () -> buildjob(eosfit, VariableCellOptimization())(cfgfile),
-            "Fit a rough EOS",
-        ),
+        buildjob(eosfit, VariableCellOptimization())(cfgfile),
     )
 end
 
