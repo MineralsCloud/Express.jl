@@ -256,8 +256,7 @@ function eosfit(calc::ScfOrOptim)
     end
     function _eosfit(cfgfile)
         settings = load_settings(cfgfile)
-        inputs = settings.dirs .* settings.name
-        outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
+        outputs = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
         eos = EnergyEOS(
             calc isa SelfConsistentField ? settings.trial_eos :
             eosfit(SelfConsistentField())(cfgfile),
