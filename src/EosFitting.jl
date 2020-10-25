@@ -15,6 +15,7 @@ using EquationsOfStateOfSolids.Collections:
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Mustache: render
+using Serialization: serialize, deserialize
 using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain
 using Unitful: uparse
 import Unitful
@@ -217,25 +218,13 @@ function buildjob(calc::ScfOrOptim)
 end
 
 function buildworkflow(cfgfile)
-    chain(
-        InternalAtomicJob(
-            () -> buildjob(makeinput, SelfConsistentField())(cfgfile),
-            "Generate inputs for software",
-        ),
+    return chain(
+        buildjob(makeinput, SelfConsistentField())(cfgfile),
         buildjob(SelfConsistentField())(cfgfile),
-        InternalAtomicJob(
-            () -> buildjob(eosfit, SelfConsistentField())(cfgfile),
-            "Fit a rough EOS",
-        ),
-        InternalAtomicJob(
-            () -> buildjob(makeinput, VariableCellOptimization())(cfgfile),
-            "Generate inputs for software",
-        ),
+        buildjob(eosfit, SelfConsistentField())(cfgfile),
+        buildjob(makeinput, VariableCellOptimization())(cfgfile),
         buildjob(VariableCellOptimization())(cfgfile),
-        InternalAtomicJob(
-            () -> buildjob(eosfit, VariableCellOptimization())(cfgfile),
-            "Fit a rough EOS",
-        ),
+        buildjob(eosfit, VariableCellOptimization())(cfgfile),
     )
 end
 
@@ -257,10 +246,15 @@ function eosfit(calc::ScfOrOptim)
     function _eosfit(cfgfile)
         settings = load_settings(cfgfile)
         outputs = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        eos = EnergyEOS(
-            calc isa SelfConsistentField ? settings.trial_eos :
-            eosfit(SelfConsistentField())(cfgfile),
-        )
+        settings = loadfile(cfgfile)
+        saveto = settings["save"]
+        if calc isa SelfConsistentField
+            eos = eosfit(calc)(outputs, EnergyEOS(settings.trial_eos))
+            serialize(saveto, eos)
+        else
+            scfeos = deserialize(saveto)
+            eosfit(calc)(outputs, EnergyEOS(scfeos))
+        end
         return _eosfit(outputs, eos)
     end
 end
