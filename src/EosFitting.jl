@@ -143,6 +143,9 @@ function buildjob(::typeof(makeinput), calc::ScfOrOptim)
             end
         end
     end
+    function _buildjob(cfgfile)
+        InternalAtomicJob(() -> makeinput(calc)(cfgfile))
+    end
 end
 function buildjob(::typeof(eosfit), calc::ScfOrOptim)
     function _buildjob(args...)
