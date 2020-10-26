@@ -247,14 +247,10 @@ function eosfit(calc::ScfOrOptim)
         outputs = map(dir -> File(joinpath(dir, shortname(calc) * ".out")), settings.dirs)
         rawsettings = loadfile(cfgfile)
         saveto = rawsettings["save"]
-        if calc isa SelfConsistentField
-            eos = eosfit(calc)(outputs, EnergyEOS(settings.trial_eos))
-            serialize(saveto, eos)
-        else
-            scfeos = deserialize(saveto)
-            eos = eosfit(calc)(outputs, EnergyEOS(scfeos))
-        end
-        return _eosfit(outputs, EnergyEOS(eos))
+        trial_eos = calc isa SelfConsistentField ? settings.trial_eos : deserialize(saveto)
+        eos = _eosfit(outputs, EnergyEOS(settings.trial_eos))
+        serialize(saveto, eos)
+        return eos
     end
 end
 
