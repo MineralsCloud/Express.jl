@@ -252,9 +252,9 @@ function eosfit(calc::ScfOrOptim)
             serialize(saveto, eos)
         else
             scfeos = deserialize(saveto)
-            eosfit(calc)(outputs, EnergyEOS(scfeos))
+            eos = eosfit(calc)(outputs, EnergyEOS(scfeos))
         end
-        return _eosfit(outputs, eos)
+        return _eosfit(outputs, EnergyEOS(eos))
     end
 end
 
