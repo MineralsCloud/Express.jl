@@ -244,7 +244,7 @@ function eosfit(calc::ScfOrOptim)
     end
     function _eosfit(cfgfile)
         settings = load_settings(cfgfile)
-        outputs = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
+        outputs = map(dir -> File(joinpath(dir, shortname(calc) * ".out")), settings.dirs)
         rawsettings = loadfile(cfgfile)
         saveto = rawsettings["save"]
         if calc isa SelfConsistentField
