@@ -28,8 +28,14 @@ import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
 
 export SelfConsistentField,
-    StructureOptimization,
+    Scf,
+    FixedIonSelfConsistentField,
+    StructuralOptimization,
+    FixedCellOptimization,
     VariableCellOptimization,
+    StOptim,
+    VcOptim,
+    ScfOrOptim,
     load_settings,
     inputstring,
     makeinput,
@@ -39,9 +45,15 @@ export SelfConsistentField,
     buildworkflow
 
 struct SelfConsistentField <: ElectronicStructure end
-struct StructureOptimization <: Optimization end
+struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 
+# See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
+const Scf = SelfConsistentField
+const FixedIonSelfConsistentField = SelfConsistentField
+const FixedCellOptimization = StructuralOptimization
+const StOptim = StructuralOptimization
+const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 """
