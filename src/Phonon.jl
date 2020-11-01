@@ -24,10 +24,13 @@ using ..EosFitting: _check_software_settings
 import AbInitioSoftwareBase.Inputs: set_cell
 
 export SelfConsistentField,
-    DfptMethod,
-    ForceConstant,
+    DensityFunctionalPerturbationTheory,
+    Dfpt,
+    InteratomicForceConstants,
+    Ifc,
     PhononDispersion,
     PhononDensityOfStates,
+    VDos,
     prepare,
     launchjob,
     finish,
@@ -35,11 +38,14 @@ export SelfConsistentField,
     inputstring
 
 struct SelfConsistentField <: ElectronicStructure end
-struct DfptMethod <: VibrationalProperty end
-struct ForceConstant <: VibrationalProperty end
-abstract type PhononBandStructure <: VibrationalProperty end
-struct PhononDispersion <: PhononBandStructure end
-struct PhononDensityOfStates <: PhononBandStructure end
+struct DensityFunctionalPerturbationTheory <: VibrationalProperty end
+struct InteratomicForceConstants <: VibrationalProperty end
+struct PhononDispersion <: VibrationalProperty end
+struct PhononDensityOfStates <: VibrationalProperty end
+
+const Dfpt = DensityFunctionalPerturbationTheory
+const Ifc = InteratomicForceConstants
+const VDos = PhononDensityOfStates
 
 function set_cell(output, template::Input)
     cell = open(output, "r") do io
