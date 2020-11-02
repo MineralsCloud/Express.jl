@@ -41,7 +41,7 @@ function set_cell(output, template::Input)
     end
 end
 
-function makeinput(calc::Scf)
+function makeinput(calc::Union{Scf,Dfpt,Ifc,PhononDispersion,VDos})
     function _makeinput(file, template::Input, args...; kwargs...)
         object = customize(standardize(template, calc), args...; kwargs...)
         writeinput(file, object)
@@ -59,29 +59,6 @@ function makeinput(calc::Scf)
     function _makeinput(cfgfile; kwargs...)
         settings = load_settings(cfgfile)
         files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        return _makeinput(files, settings.templates, settings.vcoutputs; kwargs...)
-    end
-end
-function makeinput(calc::Union{Dfpt,Ifc,PhononDispersion,VDos})
-    function _makeinput(file, template::Input, args...; kwargs...)
-        object = customize(standardize(template, calc), args...; kwargs...)
-        writeinput(file, object)
-        return object
-    end
-    function _makeinput(files, templates, restargs...; kwargs...)
-        if templates isa Input
-            templates = fill(templates, size(files))
-        end
-        objects = map(files, templates, zip(restargs...)) do file, template, args
-            _makeinput(file, template, args...; kwargs...)
-        end
-        return objects
-    end
-    function _makeinput(cfgfile; kwargs...)
-        settings = load_settings(cfgfile)
-        files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        scfinputs = map(settings.dirs) do dir
-            file = joinpath(dir, shortname(inputtype(calc)()) * ".in")
         previnputs = map(settings.dirs) do dir
             file = joinpath(dir, shortname(calc) * ".in")
             open(file, "r") do io
