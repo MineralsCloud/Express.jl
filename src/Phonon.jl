@@ -13,36 +13,18 @@ module Phonon
 
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
-using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: MatdynInput
 using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
 using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
-using ..Express: ElectronicStructure, VibrationalProperty
-using ..EosFitting: _check_software_settings
+using ..Express: ElectronicStructure, VibrationalProperty, Scf
 
 import AbInitioSoftwareBase.Inputs: set_cell
 
-export SelfConsistentField,
-    DensityFunctionalPerturbationTheory,
-    Dfpt,
-    InteratomicForceConstants,
-    Ifc,
-    PhononDispersion,
-    PhononDensityOfStates,
-    VDos,
-    prepare,
-    launchjob,
-    finish,
-    load_settings,
-    inputstring
-
-struct SelfConsistentField <: ElectronicStructure end
 struct DensityFunctionalPerturbationTheory <: VibrationalProperty end
 struct InteratomicForceConstants <: VibrationalProperty end
 struct PhononDispersion <: VibrationalProperty end
 struct PhononDensityOfStates <: VibrationalProperty end
-
 const Dfpt = DensityFunctionalPerturbationTheory
 const Ifc = InteratomicForceConstants
 const VDos = PhononDensityOfStates
@@ -59,7 +41,7 @@ function set_cell(output, template::Input)
     end
 end
 
-function makeinput(calc::SelfConsistentField)
+function makeinput(calc::Scf)
     function _makeinput(file, template::Input, args...; kwargs...)
         object = customize(standardize(template, calc), args...; kwargs...)
         writeinput(file, object)
@@ -108,20 +90,16 @@ function makeinput(calc::Union{Dfpt,Ifc,PhononDispersion,VDos})
     end
 end
 
-function launchjob(
-    ::T,
-    configfile;
-    kwargs...,
-) where {T<:Union{SelfConsistentField,DfptMethod}}
+function launchjob(::T, configfile; kwargs...) where {T<:Union{Scf,Dfpt}}
     settings = load_settings(configfile)
-    inputs = @. settings.dirs * '/' * (T <: SelfConsistentField ? "scf" : "ph") * ".in"
+    inputs = @. settings.dirs * '/' * (T <: Scf ? "scf" : "ph") * ".in"
     outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
     return launchjob(
         outputs,
         inputs,
         settings.manager.np,
-        settings.bin[T <: SelfConsistentField ? 1 : 2],
-        T <: SelfConsistentField ? PWCmd(settings.bin[1]) : PhCmd(settings.bin[2]);
+        settings.bin[T <: Scf ? 1 : 2],
+        T <: Scf ? PWCmd(settings.bin[1]) : PhCmd(settings.bin[2]);
         kwargs...,
     )
 end

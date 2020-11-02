@@ -22,34 +22,14 @@ import Unitful
 import UnitfulAtomic
 using UrlDownload: File, URL, urldownload
 
-using ..Express: ElectronicStructure, Optimization
+using ..Express: ElectronicStructure, Optimization, SelfConsistentField, Scf
 
 import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
 
-export SelfConsistentField,
-    Scf,
-    FixedIonSelfConsistentField,
-    StructuralOptimization,
-    FixedCellOptimization,
-    VariableCellOptimization,
-    StOptim,
-    VcOptim,
-    ScfOrOptim,
-    load_settings,
-    inputstring,
-    makeinput,
-    readoutput,
-    eosfit,
-    writeinput,
-    buildworkflow
-
-struct SelfConsistentField <: ElectronicStructure end
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
-
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
-const Scf = SelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
 const FixedCellOptimization = StructuralOptimization
 const StOptim = StructuralOptimization
