@@ -80,7 +80,7 @@ function makeinput(calc::SelfConsistentField)
         return _makeinput(files, settings.templates, settings.vcoutputs; kwargs...)
     end
 end
-function makeinput(calc::Dfpt)
+function makeinput(calc::Union{Dfpt,Ifc,PhononDispersion,VDos})
     function _makeinput(file, template::Input, args...; kwargs...)
         object = customize(standardize(template, calc), args...; kwargs...)
         writeinput(file, object)
@@ -99,43 +99,13 @@ function makeinput(calc::Dfpt)
         settings = load_settings(cfgfile)
         files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
         scfinputs = map(settings.dirs) do dir
-            file = joinpath(dir, shortname(SelfConsistentField()) * ".in")
+            file = joinpath(dir, shortname(inputtype(calc)()) * ".in")
             open(file, "r") do io
                 parse(inputtype(calc), read(file, String))
             end
         end
         return _makeinput(files, settings.templates, scfinputs; kwargs...)
     end
-end
-function prepare(::ForceConstant, files, templates, args...; dry_run = false)
-    objects = map(files, templates) do file, template
-        object = preset_template(ForceConstant(), template, args...)
-        writeinput(file, object, dry_run)
-        object
-    end
-    return objects
-end
-prepare(::ForceConstant, files, template::Input, args...; kwargs...) =
-    prepare(ForceConstant(), files, fill(template, size(files)), args...; kwargs...)
-function prepare(calc::ForceConstant, configfile; kwargs...)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/q2r.in"
-    return prepare(calc, inputs, settings.template[3], settings.template[2]; kwargs...)
-end
-function prepare(t::PhononBandStructure, files, templates, args...; dry_run = false)
-    objects = map(files, templates) do file, template
-        object = preset_template(t, template, args...)
-        writeinput(file, object, dry_run)
-        object
-    end
-    return objects
-end
-prepare(t::PhononBandStructure, files, template::Input, args...; kwargs...) =
-    prepare(t, files, fill(template, size(files)), args...; kwargs...)
-function prepare(calc::PhononBandStructure, configfile; kwargs...)
-    settings = load_settings(configfile)
-    inputs = joinpath.(settings.dirs, calc isa PhononDispersion ? "/disp.in" : "phdos.in")
-    return prepare(calc, inputs, settings.template[4:-1:2]...; kwargs...)
 end
 
 function launchjob(
