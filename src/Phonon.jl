@@ -104,38 +104,6 @@ function launchjob(::T, configfile; kwargs...) where {T<:Union{Scf,Dfpt}}
     )
 end
 
-# function (::Step{PhononDispersion,Prepare{:input}})(
-#     matdyn_inputs,
-#     q2r_inputs,
-#     template::MatdynInput,
-# )
-#     map(matdyn_inputs, q2r_inputs) do matdyn_input, q2r_input
-#         object = parse(Q2rInput, read(InputFile(q2r_input)))
-#         template = relay(object, template)
-#         if isfile(template.input.flfrq)
-#             @set! template.input.flfrq *= if template.input.dos == true  # Phonon DOS calculation
-#                 "_dos"  # Append extension `"_dos` to `template.input.flfrq`
-#             else  # Phonon dispersion-relation calculation
-#                 "_disp"  # Append extension `"_disp` to `template.input.flfrq`
-#             end
-#         end
-#         write(InputFile(matdyn_input), template)
-#     end
-#     return
-# end
-# function (::Step{PhononDispersion,Prepare{:input}})(
-
-#     dynmat_inputs,
-#     phonon_inputs,
-#     template::DynmatInput,
-# )
-#     map(dynmat_inputs, phonon_inputs) do dynmat_input, phonon_input
-#         object = parse(PhInput, read(InputFile(phonon_input)))
-#         write(InputFile(dynmat_input), relay(object, template))
-#     end
-#     return
-# end
-
 function finish(::PhononDispersion, outputs::AbstractArray)
     map(outputs) do output
         str = read(output, String)
