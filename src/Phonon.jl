@@ -80,23 +80,32 @@ function makeinput(calc::SelfConsistentField)
         return _makeinput(files, settings.templates, settings.vcoutputs; kwargs...)
     end
 end
-function prepare(::DfptMethod, files, templates, args...; dry_run = false)
-    objects = map(files, templates, args[1]) do file, template, pw
-        object = preset_template(DfptMethod(), template, pw)
-        writeinput(file, object, dry_run)
-        object
+function makeinput(calc::Dfpt)
+    function _makeinput(file, template::Input, args...; kwargs...)
+        object = customize(standardize(template, calc), args...; kwargs...)
+        writeinput(file, object)
+        return object
     end
-    return objects
-end
-prepare(::DfptMethod, files, template::Input, args...; kwargs...) =
-    prepare(DfptMethod(), files, fill(template, size(files)), args...; kwargs...)
-function prepare(calc::DfptMethod, configfile; kwargs...)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/ph.in"
-    pws = map(settings.dirs .* "/phscf.in") do f
-        parse(PWInput, read(f, String))
+    function _makeinput(files, templates, restargs...; kwargs...)
+        if templates isa Input
+            templates = fill(templates, size(files))
+        end
+        objects = map(files, templates, zip(restargs...)) do file, template, args
+            _makeinput(file, template, args...; kwargs...)
+        end
+        return objects
     end
-    return prepare(calc, inputs, settings.template[2], pws; kwargs...)
+    function _makeinput(cfgfile; kwargs...)
+        settings = load_settings(cfgfile)
+        files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+        scfinputs = map(settings.dirs) do dir
+            file = joinpath(dir, shortname(SelfConsistentField()) * ".in")
+            open(file, "r") do io
+                parse(inputtype(calc), read(file, String))
+            end
+        end
+        return _makeinput(files, settings.templates, scfinputs; kwargs...)
+    end
 end
 function prepare(::ForceConstant, files, templates, args...; dry_run = false)
     objects = map(files, templates) do file, template
@@ -208,7 +217,19 @@ function finish(::PhononDensityOfStates, configfile)
     return finish(PhononDensityOfStates(), outputs)
 end
 
-function _expand_settings end
+function standardize end
+
+function customize end
+
+function parseoutput end
+
+function expand_settings end
+
+function check_software_settings end
+
+function shortname end
+
+function inputtype end
 
 function preset_template end
 
@@ -225,7 +246,7 @@ end
 function load_settings(configfile)
     settings = loadfile(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
-    return _expand_settings(settings)
+    return expand_settings(settings)
 end
 
 end
