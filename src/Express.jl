@@ -13,6 +13,6 @@ const Scf = SelfConsistentField
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting.jl")
-# include("Phonon.jl")
+include("Phonon.jl")
 
 end # module
