@@ -82,11 +82,13 @@ function makeinput(calc::Union{Dfpt,Ifc,PhononDispersion,VDos})
         files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
         scfinputs = map(settings.dirs) do dir
             file = joinpath(dir, shortname(inputtype(calc)()) * ".in")
+        previnputs = map(settings.dirs) do dir
+            file = joinpath(dir, shortname(calc) * ".in")
             open(file, "r") do io
-                parse(inputtype(calc), read(file, String))
+                parse(previnputtype(calc), read(file, String))
             end
         end
-        return _makeinput(files, settings.templates, scfinputs; kwargs...)
+        return _makeinput(files, settings.templates, previnputs; kwargs...)
     end
 end
 
@@ -145,7 +147,7 @@ function check_software_settings end
 
 function shortname end
 
-function inputtype end
+function previnputtype end
 
 function preset_template end
 
