@@ -59,22 +59,26 @@ function set_cell(output, template::Input)
     end
 end
 
-function prepare(::SelfConsistentField, files, outputs, templates; dry_run = false)
-    objects = map(files, templates, outputs) do file, template, output
-        object = preset_template(SelfConsistentField(), template)
-        object = set_cell(output, object)
-        writeinput(file, object, dry_run)
-        object
+function makeinput(calc::SelfConsistentField)
+    function _makeinput(file, template::Input, args...; kwargs...)
+        object = customize(standardize(template, calc), args...; kwargs...)
+        writeinput(file, object)
+        return object
     end
-    return objects
-end
-prepare(::SelfConsistentField, files, outputs, template::Input; kwargs...) =
-    prepare(SelfConsistentField(), files, outputs, fill(template, size(files)))
-function prepare(::SelfConsistentField, configfile; kwargs...)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/phscf.in"
-    outputs = settings.dirs .* "/vc-relax.out"
-    return prepare(SelfConsistentField(), inputs, outputs, settings.template[1]; kwargs...)
+    function _makeinput(files, templates, restargs...; kwargs...)
+        if templates isa Input
+            templates = fill(templates, size(files))
+        end
+        objects = map(files, templates, zip(restargs...)) do file, template, args
+            _makeinput(file, template, args...; kwargs...)
+        end
+        return objects
+    end
+    function _makeinput(cfgfile; kwargs...)
+        settings = load_settings(cfgfile)
+        files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+        return _makeinput(files, settings.templates, settings.vcoutputs; kwargs...)
+    end
 end
 function prepare(::DfptMethod, files, templates, args...; dry_run = false)
     objects = map(files, templates, args[1]) do file, template, pw
