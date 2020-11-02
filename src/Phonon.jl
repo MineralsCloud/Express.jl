@@ -13,35 +13,18 @@ module Phonon
 
 using AbInitioSoftwareBase: loadfile
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
-using QuantumESPRESSO.Inputs.PWscf: PWInput
 using QuantumESPRESSO.Inputs.PHonon: MatdynInput
 using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
 using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
-using ..EosFitting: _check_software_settings
 using ..Express: ElectronicStructure, VibrationalProperty, Scf
 
 import AbInitioSoftwareBase.Inputs: set_cell
-
-export SelfConsistentField,
-    DensityFunctionalPerturbationTheory,
-    Dfpt,
-    InteratomicForceConstants,
-    Ifc,
-    PhononDispersion,
-    PhononDensityOfStates,
-    VDos,
-    prepare,
-    launchjob,
-    finish,
-    load_settings,
-    inputstring
 
 struct DensityFunctionalPerturbationTheory <: VibrationalProperty end
 struct InteratomicForceConstants <: VibrationalProperty end
 struct PhononDispersion <: VibrationalProperty end
 struct PhononDensityOfStates <: VibrationalProperty end
-
 const Dfpt = DensityFunctionalPerturbationTheory
 const Ifc = InteratomicForceConstants
 const VDos = PhononDensityOfStates
