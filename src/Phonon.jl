@@ -15,7 +15,6 @@ using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using QuantumESPRESSO.Inputs.PHonon: MatdynInput
 using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
-using QuantumESPRESSO.CLI: PWCmd, PhCmd
 
 using ..Express: ElectronicStructure, VibrationalProperty, Scf
 
@@ -69,19 +68,6 @@ function makeinput(calc::Union{Scf,Dfpt,Ifc,PhononDispersion,VDos})
     end
 end
 
-function launchjob(::T, configfile; kwargs...) where {T<:Union{Scf,Dfpt}}
-    settings = load_settings(configfile)
-    inputs = @. settings.dirs * '/' * (T <: Scf ? "scf" : "ph") * ".in"
-    outputs = map(Base.Fix2(replace, ".in" => ".out"), inputs)
-    return launchjob(
-        outputs,
-        inputs,
-        settings.manager.np,
-        settings.bin[T <: Scf ? 1 : 2],
-        T <: Scf ? PWCmd(settings.bin[1]) : PhCmd(settings.bin[2]);
-        kwargs...,
-    )
-end
 
 function finish(::PhononDispersion, outputs::AbstractArray)
     map(outputs) do output
