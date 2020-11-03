@@ -13,8 +13,6 @@ module Phonon
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
-using QuantumESPRESSO.Inputs.PHonon: MatdynInput
-using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
 
 using ..Express: ElectronicStructure, VibrationalProperty, Scf
 
@@ -68,36 +66,6 @@ function makeinput(calc::Union{Scf,Dfpt,Ifc,PhononDispersion,VDos})
     end
 end
 
-
-function finish(::PhononDispersion, outputs::AbstractArray)
-    map(outputs) do output
-        str = read(output, String)
-        parse_frequency(str)
-    end
-end
-function finish(::PhononDispersion, configfile)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/disp.in"
-    outputs = map(inputs, settings.dirs) do input, dir
-        joinpath(dir, parse(MatdynInput, read(input, String)).input.flfrq)
-    end
-    return finish(PhononDispersion(), outputs)
-end
-function finish(::PhononDensityOfStates, outputs::AbstractArray)
-    map(outputs) do output
-        str = read(output, String)
-        parse_dos(str)
-    end
-end
-function finish(::PhononDensityOfStates, configfile)
-    settings = load_settings(configfile)
-    inputs = settings.dirs .* "/disp.in"
-    outputs = map(inputs, settings.dirs) do input, dir
-        joinpath(dir, parse(MatdynInput, read(input, String)).input.fldos)
-    end
-    return finish(PhononDensityOfStates(), outputs)
-end
-
 function standardize end
 
 function customize end
@@ -111,8 +79,6 @@ function check_software_settings end
 function shortname end
 
 function previnputtype end
-
-function preset_template end
 
 function parsecell end
 
