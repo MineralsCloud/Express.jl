@@ -83,11 +83,12 @@ function previnputtype end
 function parsecell end
 
 function _check_settings(settings)
-    map(("template", "pressures", "dir")) do key
+function check_settings(settings)
+    map(("templates", "pressures", "workdir")) do key
         @assert haskey(settings, key)
     end
-    @assert isdir(settings["dir"])
-    @assert all(isfile.(settings["template"]))
+    @assert isdir(settings["workdir"])
+    @assert all(map(isfile, settings["templates"]))
 end
 
 function load_settings(configfile)
