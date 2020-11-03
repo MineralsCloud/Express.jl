@@ -64,18 +64,7 @@ function makeinput(calc::ScfOrOptim)
     end
     function _makeinput(files, templates, pressures, eos_or_volumes; kwargs...)
         _alert(pressures)
-        if templates isa Input
-            templates = fill(templates, size(files))
-        end
-        objects = if eos_or_volumes isa EquationOfStateOfSolids
-            map(files, templates, pressures) do file, template, pressure
-                _makeinput(file, template, pressure, eos_or_volumes; kwargs...)
-            end
-        else
-            map(files, templates, pressures, eos_or_volumes) do file, template, pressure, volume
-                _makeinput(file, template, pressure, volume; kwargs...)
-            end
-        end
+        objects = @. _makeinput(files, templates, pressures, eos_or_volumes; kwargs...)
         return objects
     end
     function _makeinput(cfgfile; kwargs...)
