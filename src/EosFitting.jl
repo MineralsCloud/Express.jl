@@ -148,26 +148,6 @@ function buildjob(::typeof(eosfit), calc::ScfOrOptim)
     end
 end
 
-function readoutput(calc::ScfOrOptim)
-    function _readoutput(str::AbstractString, parser = nothing)
-        if isnothing(parser)
-            return str
-        else
-            return parser(str, calc)  # `parseoutput` will be used here
-        end
-    end
-    function _readoutput(url_or_file::Union{URL,File}, parser = nothing)
-        str = urldownload(url_or_file, true; parser = String)
-        return _readoutput(str, parser)
-    end
-    function _readoutput(file, parser = nothing)
-        open(file, "r") do io
-            str = read(io, String)
-            return _readoutput(str, parser)
-        end
-    end
-end
-
 function makescript(template, view)
     map((:press, :nprocs, :in, :out, :script)) do key
         @assert haskey(view, key)
