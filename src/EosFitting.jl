@@ -1,6 +1,6 @@
 module EosFitting
 
-using AbInitioSoftwareBase: loadfile
+using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.CLI: MpiExec
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using Compat: isnothing
@@ -20,7 +20,6 @@ using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain, paral
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
-using UrlDownload: File, URL, urldownload
 
 using ..Express: ElectronicStructure, Optimization, SelfConsistentField, Scf
 
@@ -148,26 +147,6 @@ function buildjob(::typeof(eosfit), calc::ScfOrOptim)
     end
 end
 
-function readoutput(calc::ScfOrOptim)
-    function _readoutput(str::AbstractString, parser = nothing)
-        if isnothing(parser)
-            return str
-        else
-            return parser(str, calc)  # `parseoutput` will be used here
-        end
-    end
-    function _readoutput(url_or_file::Union{URL,File}, parser = nothing)
-        str = urldownload(url_or_file, true; parser = String)
-        return _readoutput(str, parser)
-    end
-    function _readoutput(file, parser = nothing)
-        open(file, "r") do io
-            str = read(io, String)
-            return _readoutput(str, parser)
-        end
-    end
-end
-
 function makescript(template, view)
     map((:press, :nprocs, :in, :out, :script)) do key
         @assert haskey(view, key)
@@ -226,8 +205,7 @@ Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determ
 """
 function eosfit(calc::ScfOrOptim)
     function _eosfit(outputs, trial_eos::EnergyEOS)
-        reader = readoutput(calc)
-        raw = (reader(output, parseoutput) for output in outputs)  # `ntuple` cannot work with generators
+        raw = (load(parseoutput(calc), output) for output in outputs)  # `ntuple` cannot work with generators
         data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
         if length(data) <= 5
             @info "pressures <= 5 may give unreliable results, run more if possible!"
@@ -236,8 +214,8 @@ function eosfit(calc::ScfOrOptim)
     end
     function _eosfit(cfgfile)
         settings = load_settings(cfgfile)
-        outputs = map(dir -> File(joinpath(dir, shortname(calc) * ".out")), settings.dirs)
-        rawsettings = loadfile(cfgfile)
+        outputs = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
+        rawsettings = load(cfgfile)
         saveto = rawsettings["save"]
         trial_eos = calc isa SelfConsistentField ? settings.trial_eos : deserialize(saveto)
         eos = _eosfit(outputs, EnergyEOS(settings.trial_eos))
@@ -302,7 +280,7 @@ function check_settings(settings)
 end
 
 function load_settings(cfgfile)
-    settings = loadfile(cfgfile)
+    settings = load(cfgfile)
     check_settings(settings)  # Errors will be thrown if exist
     return expand_settings(settings)
 end

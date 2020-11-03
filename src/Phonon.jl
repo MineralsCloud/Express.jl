@@ -11,7 +11,7 @@ julia>
 """
 module Phonon
 
-using AbInitioSoftwareBase: loadfile
+using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 using QuantumESPRESSO.Inputs.PHonon: MatdynInput
 using QuantumESPRESSO.Outputs.PHonon: parse_frequency, parse_dos
@@ -139,7 +139,7 @@ function _check_settings(settings)
 end
 
 function load_settings(configfile)
-    settings = loadfile(configfile)
+    settings = load(configfile)
     _check_settings(settings)  # Errors will be thrown if exist
     return expand_settings(settings)
 end
