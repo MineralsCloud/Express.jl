@@ -82,7 +82,6 @@ function previnputtype end
 
 function parsecell end
 
-function _check_settings(settings)
 function check_settings(settings)
     map(("templates", "pressures", "workdir")) do key
         @assert haskey(settings, key)
@@ -93,7 +92,7 @@ end
 
 function load_settings(configfile)
     settings = load(configfile)
-    _check_settings(settings)  # Errors will be thrown if exist
+    check_settings(settings)  # Errors will be thrown if exist
     return expand_settings(settings)
 end
 
