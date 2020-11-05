@@ -14,7 +14,8 @@ module Phonon
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
 
-using ..Express: ElectronicStructure, VibrationalProperty, Scf
+using ..Express: Calculation, ElectronicStructure, VibrationalProperty, Scf
+using ..EosFitting: VariableCellOptimization
 
 import AbInitioSoftwareBase.Inputs: set_cell
 
@@ -38,37 +39,49 @@ function set_cell(output, template::Input)
     end
 end
 
-function makeinput(file, template::Input, args...; kwargs...)
-    function (calc)
-        object = customize(standardize(template, calc), args...; kwargs...)
-        writeinput(file, object)
-        return object
-    end
+struct MakeInput{T<:Calculation}
+    calc::T
 end
-function makeinput(files, templates, restargs...; kwargs...)
-    function (calc)
-        if templates isa Input
-            templates = fill(templates, size(files))
-        end
-        objects = map(files, templates, zip(restargs...)) do file, template, args
-            makeinput(file, template, args...; kwargs...)(calc)
-        end
-        return objects
-    end
+function (x::MakeInput{<:VibrationalProperty})(file, template::Input, args...; kwargs...)
+    object = customize(standardize(template, x.calc), args...; kwargs...)
+    writeinput(file, object)
+    return object
 end
-function makeinput(cfgfile; kwargs...)
-    function (calc)
-        settings = load_settings(cfgfile)
-        files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        previnputs = map(settings.dirs) do dir
-            file = joinpath(dir, shortname(calc) * ".in")
-            open(file, "r") do io
-                parse(previnputtype(calc), read(file, String))
-            end
-        end
-        return makeinput(files, settings.templates, previnputs; kwargs...)
+function (x::MakeInput{<:VibrationalProperty})(files, templates, restargs...; kwargs...)
+    if templates isa Input
+        templates = fill(templates, size(files))
     end
+    objects = map(files, templates, zip(restargs...)) do file, template, args
+        x(file, template, args...; kwargs...)
+    end
+    return objects
 end
+function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
+    calc = x.calc
+    settings = load_settings(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+    previnputs = map(settings.dirs) do dir
+        file = joinpath(dir, shortname(calc) * ".in")
+        open(file, "r") do io
+            parse(previnputtype(calc), read(file, String))
+        end
+    end
+    return x(files, settings.templates, previnputs...; kwargs...)
+end
+function (x::MakeInput{Scf})(cfgfile; kwargs...)
+    calc = x.calc
+    settings = load_settings(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+    newcells = map(settings.dirs) do dir
+        file = joinpath(dir, shortname(VariableCellOptimization()) * ".out")
+        open(file, "r") do io
+            parsecell(read(file, String))
+        end
+    end
+    return x(files, settings.templates, newcells...; kwargs...)
+end
+
+makeinput(calc::Calculation) = MakeInput(calc)
 
 function standardize end
 
