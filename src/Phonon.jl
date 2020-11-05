@@ -38,22 +38,26 @@ function set_cell(output, template::Input)
     end
 end
 
-function makeinput(calc::Union{Scf,Dfpt,Ifc,PhononDispersion,VDos})
-    function _makeinput(file, template::Input, args...; kwargs...)
+function makeinput(file, template::Input, args...; kwargs...)
+    function (calc)
         object = customize(standardize(template, calc), args...; kwargs...)
         writeinput(file, object)
         return object
     end
-    function _makeinput(files, templates, restargs...; kwargs...)
+end
+function makeinput(files, templates, restargs...; kwargs...)
+    function (calc)
         if templates isa Input
             templates = fill(templates, size(files))
         end
         objects = map(files, templates, zip(restargs...)) do file, template, args
-            _makeinput(file, template, args...; kwargs...)
+            makeinput(file, template, args...; kwargs...)(calc)
         end
         return objects
     end
-    function _makeinput(cfgfile; kwargs...)
+end
+function makeinput(cfgfile; kwargs...)
+    function (calc)
         settings = load_settings(cfgfile)
         files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
         previnputs = map(settings.dirs) do dir
@@ -62,7 +66,7 @@ function makeinput(calc::Union{Scf,Dfpt,Ifc,PhononDispersion,VDos})
                 parse(previnputtype(calc), read(file, String))
             end
         end
-        return _makeinput(files, settings.templates, previnputs; kwargs...)
+        return makeinput(files, settings.templates, previnputs; kwargs...)
     end
 end
 
