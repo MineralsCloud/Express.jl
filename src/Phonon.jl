@@ -78,7 +78,7 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
             parsecell(read(file, String))
         end
     end
-    return x(files, settings.templates, newcells...; kwargs...)
+    return x(files, settings.templates, newcells; kwargs...)
 end
 
 makeinput(calc::Calculation) = MakeInput(calc)
