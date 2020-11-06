@@ -42,12 +42,22 @@ end
 struct MakeInput{T<:Calculation}
     calc::T
 end
-function (x::MakeInput{<:VibrationalProperty})(file, template::Input, args...; kwargs...)
+function (x::MakeInput{<:Union{Scf,VibrationalProperty}})(
+    file,
+    template::Input,
+    args...;
+    kwargs...,
+)
     object = customize(standardize(template, x.calc), args...; kwargs...)
     writeinput(file, object)
     return object
 end
-function (x::MakeInput{<:VibrationalProperty})(files, templates, restargs...; kwargs...)
+function (x::MakeInput{<:Union{Scf,VibrationalProperty}})(
+    files,
+    templates,
+    restargs...;
+    kwargs...,
+)
     if templates isa Input
         templates = fill(templates, size(files))
     end
