@@ -76,7 +76,7 @@ function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
             parse(previnputtype(calc), read(file, String))
         end
     end
-    return x(files, settings.templates, previnputs...; kwargs...)
+    return x(files, settings.templates[order(calc)], previnputs...; kwargs...)
 end
 function (x::MakeInput{Scf})(cfgfile; kwargs...)
     calc = x.calc
@@ -88,10 +88,16 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
             parsecell(read(file, String))
         end
     end
-    return x(files, settings.templates, newcells; kwargs...)
+    return x(files, settings.templates[1], newcells; kwargs...)
 end
 
 makeinput(calc::Calculation) = MakeInput(calc)
+
+order(::Scf) = 1
+order(::Dfpt) = 2
+order(::Ifc) = 3
+order(::PhononDispersion) = 4
+order(::PhononDensityOfStates) = 4
 
 function standardize end
 
