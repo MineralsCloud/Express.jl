@@ -71,7 +71,8 @@ function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
     previnputs = map(settings.dirs) do dir
-        file = joinpath(dir, shortname(calc) * ".in")
+        T = previnputtype(calc)
+        file = joinpath(dir, shortname(T()) * ".in")
         open(file, "r") do io
             parse(previnputtype(calc), read(file, String))
         end
