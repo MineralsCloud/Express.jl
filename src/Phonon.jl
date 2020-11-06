@@ -114,7 +114,7 @@ function check_settings(settings)
         @assert haskey(settings, key)
     end
     @assert isdir(settings["workdir"])
-    @assert all(map(isfile, settings["templates"]))
+    # @assert all(map(isfile, settings["templates"]))
 end
 
 function load_settings(configfile)
