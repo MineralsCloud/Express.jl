@@ -27,7 +27,7 @@ const Dfpt = DensityFunctionalPerturbationTheory
 const Ifc = InteratomicForceConstants
 const VDos = PhononDensityOfStates
 
-function set_cell(output, template::Input)
+function set_cell(template::Input, output)
     cell = open(output, "r") do io
         str = read(io, String)
         parsecell(str)
