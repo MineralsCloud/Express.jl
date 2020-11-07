@@ -84,7 +84,6 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
     templates = settings.templates[1]
-    println(length(templates))
     templates = if length(templates) == 1
         fill(templates[1], length(settings.pressures))
     elseif length(templates) != length(settings.pressures)
@@ -92,12 +91,10 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
     else
         templates
     end
-    println(length(templates))
     templates = map(settings.dirs, templates) do dir, template
         file = joinpath(dir, shortname(VariableCellOptimization()) * ".out")
         set_cell(template, file)
     end
-    println(length(templates))
     return x(files, templates; kwargs...)
 end
 
