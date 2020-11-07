@@ -83,13 +83,19 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
     calc = x.calc
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-    newcells = map(settings.dirs) do dir
-        file = joinpath(dir, shortname(VariableCellOptimization()) * ".out")
-        open(file, "r") do io
-            parsecell(read(file, String))
-        end
+    templates = settings.templates[1]
+    templates = if length(templates) == 1
+        fill(templates[1], length(settings.pressures))
+    elseif length(templates) != length(settings.pressures)
+        throw(DimensionMismatch("!!!"))
+    else
+        templates
     end
-    return x(files, settings.templates[1], newcells; kwargs...)
+    templates = map(settings.dirs, templates) do dir, template
+        file = joinpath(dir, shortname(VariableCellOptimization()) * ".out")
+        set_cell(template, file)
+    end
+    return x(files, templates; kwargs...)
 end
 
 makeinput(calc::Calculation) = MakeInput(calc)
