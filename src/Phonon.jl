@@ -73,7 +73,7 @@ function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
     previnputs = map(settings.dirs) do dir
         file = joinpath(dir, shortname(prevcalc(calc)) * ".in")
         open(file, "r") do io
-            parse(previnputtype(calc), read(file, String))
+            parse(inputtype(prevcalc(calc)), read(file, String))
         end
     end
     return x(files, settings.templates[order(calc)], previnputs; kwargs...)
@@ -142,8 +142,6 @@ function check_software_settings end
 function shortname end
 
 function inputtype end
-
-function previnputtype end
 
 function parsecell end
 
