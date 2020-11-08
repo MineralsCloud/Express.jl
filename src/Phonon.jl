@@ -143,7 +143,7 @@ function buildjob(calc::Calculation)
         settings = load_settings(cfgfile)
         inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
         out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        return _buildjob(out, inp, settings.manager.np, settings.bin)
+        return _buildjob(out, inp, settings.manager.np, settings.bin[order(calc)])
     end
 end
 
