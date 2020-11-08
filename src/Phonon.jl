@@ -96,6 +96,24 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
     end
     return x(files, templates; kwargs...)
 end
+function (x::MakeInput{Union{PhononDispersion,VDos}})(cfgfile; kwargs...)
+    calc = x.calc
+    settings = load_settings(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+    ifcinputs = map(settings.dirs) do dir
+        file = joinpath(dir, shortname(Ifc()) * ".in")
+        open(file, "r") do io
+            parse(inputtype(Ifc()), read(file, String))
+        end
+    end
+    dfptinputs = map(settings.dirs) do dir
+        file = joinpath(dir, shortname(Dfpt()) * ".in")
+        open(file, "r") do io
+            parse(inputtype(Dfpt()), read(file, String))
+        end
+    end
+    return x(files, settings.templates[order(calc)], ifcinputs, dfptinputs; kwargs...)
+end
 
 makeinput(calc::Calculation) = MakeInput(calc)
 
@@ -122,6 +140,8 @@ function expand_settings end
 function check_software_settings end
 
 function shortname end
+
+function inputtype end
 
 function previnputtype end
 
