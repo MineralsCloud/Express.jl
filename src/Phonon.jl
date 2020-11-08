@@ -76,7 +76,7 @@ function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
             parse(previnputtype(calc), read(file, String))
         end
     end
-    return x(files, settings.templates[order(calc)], previnputs...; kwargs...)
+    return x(files, settings.templates[order(calc)], previnputs; kwargs...)
 end
 function (x::MakeInput{Scf})(cfgfile; kwargs...)
     calc = x.calc
