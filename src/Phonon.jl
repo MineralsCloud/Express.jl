@@ -71,8 +71,7 @@ function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
     previnputs = map(settings.dirs) do dir
-        T = previnputtype(calc)
-        file = joinpath(dir, shortname(T()) * ".in")
+        file = joinpath(dir, shortname(prevcalc(calc)) * ".in")
         open(file, "r") do io
             parse(previnputtype(calc), read(file, String))
         end
@@ -105,6 +104,12 @@ order(::Dfpt) = 2
 order(::Ifc) = 3
 order(::PhononDispersion) = 4
 order(::PhononDensityOfStates) = 4
+
+prevcalc(::Scf) = VariableCellOptimization()
+prevcalc(::Dfpt) = Scf()
+prevcalc(::Ifc) = Dfpt()
+prevcalc(::PhononDispersion) = Ifc()
+prevcalc(::PhononDensityOfStates) = Ifc()
 
 function standardize end
 
