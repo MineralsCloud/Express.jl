@@ -14,14 +14,13 @@ using EquationsOfStateOfSolids.Collections:
     BirchMurnaghan4th,
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
-using Mustache: render
 using Serialization: serialize, deserialize
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain, parallel
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
-using ..Express: ElectronicStructure, Optimization, SelfConsistentField, Scf
+using ..Express: ElectronicStructure, Optimization, SelfConsistentField, Scf, distprocs
 
 import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
@@ -147,24 +146,6 @@ function buildjob(::typeof(eosfit), calc::ScfOrOptim)
             "Prepare $calc inputs for pressures ",
         )
     end
-end
-
-function makescript(template, view)
-    map((:press, :nprocs, :in, :out, :script)) do key
-        @assert haskey(view, key)
-    end
-    str = render(template, view)
-    return Script(str, view[:script])
-end
-makescript(template, args::Pair...) = makescript(template, Dict(args))
-makescript(template; kwargs...) = makescript(template, Dict(kwargs))
-
-function distprocs(nprocs, njobs)
-    quotient, remainder = divrem(nprocs, njobs)
-    if !iszero(remainder)
-        @warn "The processes are not fully balanced! Consider the number of subjobs!"
-    end
-    return quotient
 end
 
 function buildjob(calc::ScfOrOptim)
