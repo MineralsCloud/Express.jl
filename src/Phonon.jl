@@ -96,7 +96,7 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
     end
     return x(files, templates; kwargs...)
 end
-function (x::MakeInput{Union{PhononDispersion,VDos}})(cfgfile; kwargs...)
+function (x::MakeInput{<:Union{PhononDispersion,VDos}})(cfgfile; kwargs...)
     calc = x.calc
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
