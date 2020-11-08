@@ -151,11 +151,11 @@ function buildworkflow(cfgfile)
     step1 = buildjob(makeinput(Scf()))(cfgfile)
     step12 = chain(step1, buildjob(Scf())(cfgfile)[1])
     step123 = chain(step12[end], buildjob(makeinput(Dfpt()))(cfgfile))
-    step1234 = chain(step123[end], buildjob(Dfpt())(cfgfile))
+    step1234 = chain(step123[end], buildjob(Dfpt())(cfgfile)[1])
     step12345 = chain(step1234[end], buildjob(makeinput(Ifc()))(cfgfile))
-    step123456 = chain(step12345[end], buildjob(Ifc())(cfgfile))
+    step123456 = chain(step12345[end], buildjob(Ifc())(cfgfile)[1])
     step1234567 = chain(step123456[end], buildjob(makeinput(PhononDispersion()))(cfgfile))
-    step12345678 = chain(step1234567[end], buildjob(PhononDispersion())(cfgfile))
+    step12345678 = chain(step1234567[end], buildjob(PhononDispersion())(cfgfile)[1])
     return step12345678
 end
 
