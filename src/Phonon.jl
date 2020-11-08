@@ -12,9 +12,12 @@ julia>
 module Phonon
 
 using AbInitioSoftwareBase: load
-using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using AbInitioSoftwareBase.CLI: MpiExec
+using AbInitioSoftwareBase.Inputs: Input, writeinput
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain, parallel
 
-using ..Express: Calculation, ElectronicStructure, VibrationalProperty, Scf
+using ..Express:
+    Calculation, ElectronicStructure, VibrationalProperty, Scf, distprocs, makescript
 using ..EosFitting: VariableCellOptimization
 
 import AbInitioSoftwareBase.Inputs: set_cell
@@ -116,6 +119,45 @@ function (x::MakeInput{<:Union{PhononDispersion,VDos}})(cfgfile; kwargs...)
 end
 
 makeinput(calc::Calculation) = MakeInput(calc)
+
+function buildjob(x::MakeInput)
+    function _buildjob(cfgfile)
+        InternalAtomicJob(() -> x(cfgfile))
+    end
+end
+function buildjob(calc::Calculation)
+    function _buildjob(outputs, inputs, np, exe; kwargs...)
+        # `map` guarantees they are of the same size, no need to check.
+        n = distprocs(np, length(inputs))
+        subjobs = map(outputs, inputs) do output, input
+            f = MpiExec(n; kwargs...) ∘ exe
+            cmd = f(stdin = input, stdout = output)
+            ExternalAtomicJob(cmd)
+        end
+        return parallel(subjobs...)
+    end
+    function _buildjob(template, view)
+        ExternalAtomicJob(makescript(template, view))
+    end
+    function _buildjob(cfgfile)
+        settings = load_settings(cfgfile)
+        inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+        out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
+        return _buildjob(out, inp, settings.manager.np, settings.bin)
+    end
+end
+
+function buildworkflow(cfgfile)
+    step1 = buildjob(makeinput(Scf()))(cfgfile)
+    step12 = chain(step1, buildjob(Scf())(cfgfile)[1])
+    step123 = chain(step12[end], buildjob(makeinput(Dfpt()))(cfgfile))
+    step1234 = chain(step123[end], buildjob(Dfpt())(cfgfile))
+    step12345 = chain(step1234[end], buildjob(makeinput(Ifc()))(cfgfile))
+    step123456 = chain(step12345[end], buildjob(Ifc())(cfgfile))
+    step1234567 = chain(step123456[end], buildjob(makeinput(PhononDispersion()))(cfgfile))
+    step12345678 = chain(step1234567[end], buildjob(PhononDispersion())(cfgfile))
+    return step12345678
+end
 
 order(::Scf) = 1
 order(::Dfpt) = 2
