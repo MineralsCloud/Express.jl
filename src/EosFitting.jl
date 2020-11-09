@@ -20,7 +20,8 @@ using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
-using ..Express: Optimization, SelfConsistentField, Scf, distprocs
+using ..Express:
+    Optimization, SelfConsistentField, Scf, FixedIonSelfConsistentField, distprocs
 
 import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
@@ -43,7 +44,6 @@ export SelfConsistentField,
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
-const FixedIonSelfConsistentField = SelfConsistentField
 const FixedCellOptimization = StructuralOptimization
 const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization

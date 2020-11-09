@@ -17,7 +17,13 @@ using AbInitioSoftwareBase.Inputs: Input, writeinput
 using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
 
 using ..Express:
-    Calculation, VibrationalProperty, SelfConsistentField, Scf, distprocs, makescript
+    Calculation,
+    VibrationalProperty,
+    SelfConsistentField,
+    Scf,
+    FixedIonSelfConsistentField,
+    distprocs,
+    makescript
 using ..EosFitting: VcOptim
 
 import AbInitioSoftwareBase.Inputs: set_cell
@@ -26,6 +32,7 @@ export DensityFunctionalPerturbationTheory,
     Dfpt,
     SelfConsistentField,
     Scf,
+    FixedIonSelfConsistentField,
     InteratomicForceConstants,
     Ifc,
     PhononDispersion,

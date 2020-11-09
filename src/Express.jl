@@ -12,6 +12,7 @@ abstract type VibrationalProperty <: Calculation end
 const Calc = Calculation
 const Optim = Optimization
 const Scf = SelfConsistentField
+const FixedIonSelfConsistentField = SelfConsistentField
 
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)
