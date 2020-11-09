@@ -1,7 +1,7 @@
 module EosFitting
 
 using AbInitioSoftwareBase: load
-using AbInitioSoftwareBase.CLI: MpiExec
+using AbInitioSoftwareBase.CLI: Mpiexec
 using AbInitioSoftwareBase.Inputs: Input, writeinput
 using Compat: isnothing
 using EquationsOfStateOfSolids.Collections:
@@ -168,7 +168,7 @@ function buildjob(calc::ScfOrOptim)
         # `map` guarantees they are of the same size, no need to check.
         n = distprocs(np, length(inputs))
         subjobs = map(outputs, inputs) do output, input
-            f = MpiExec(n; kwargs...) ∘ exe
+            f = Mpiexec(n; kwargs...) ∘ exe
             cmd = f(stdin = input, stdout = output)
             ExternalAtomicJob(cmd)
         end
