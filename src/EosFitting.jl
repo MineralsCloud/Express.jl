@@ -2,7 +2,7 @@ module EosFitting
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.CLI: MpiExec
-using AbInitioSoftwareBase.Inputs: Input, inputstring, writeinput
+using AbInitioSoftwareBase.Inputs: Input, writeinput
 using Compat: isnothing
 using EquationsOfStateOfSolids.Collections:
     EquationOfStateOfSolids,
@@ -20,10 +20,25 @@ using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
-using ..Express: ElectronicStructure, Optimization, SelfConsistentField, Scf, distprocs
+using ..Express: Optimization, SelfConsistentField, Scf, distprocs
 
 import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
+
+export SelfConsistentField,
+    Scf,
+    FixedIonSelfConsistentField,
+    StructuralOptimization,
+    FixedCellOptimization,
+    VariableCellOptimization,
+    StOptim,
+    VcOptim,
+    load_settings,
+    makeinput,
+    eosfit,
+    writeinput,
+    buildjob,
+    buildworkflow
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
