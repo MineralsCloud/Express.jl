@@ -14,13 +14,38 @@ module Phonon
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.CLI: MpiExec
 using AbInitioSoftwareBase.Inputs: Input, writeinput
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, Script, chain, parallel
+using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
 
 using ..Express:
-    Calculation, ElectronicStructure, VibrationalProperty, Scf, distprocs, makescript
-using ..EosFitting: VariableCellOptimization
+    Calculation,
+    VibrationalProperty,
+    SelfConsistentField,
+    Scf,
+    FixedIonSelfConsistentField,
+    distprocs,
+    makescript
+using ..EosFitting: VcOptim
 
 import AbInitioSoftwareBase.Inputs: set_cell
+
+export DensityFunctionalPerturbationTheory,
+    Dfpt,
+    SelfConsistentField,
+    Scf,
+    FixedIonSelfConsistentField,
+    InteratomicForceConstants,
+    Ifc,
+    PhononDispersion,
+    PhononDensityOfStates,
+    VDos,
+    standardize,
+    makeinput,
+    writeinput,
+    standardize,
+    customize,
+    load_settings,
+    buildjob,
+    buildworkflow
 
 struct DensityFunctionalPerturbationTheory <: VibrationalProperty end
 struct InteratomicForceConstants <: VibrationalProperty end
@@ -94,7 +119,7 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
         templates
     end
     templates = map(settings.dirs, templates) do dir, template
-        file = joinpath(dir, shortname(VariableCellOptimization()) * ".out")
+        file = joinpath(dir, shortname(VcOptim()) * ".out")
         set_cell(template, file)
     end
     return x(files, templates; kwargs...)
@@ -165,7 +190,7 @@ order(::Ifc) = 3
 order(::PhononDispersion) = 4
 order(::PhononDensityOfStates) = 4
 
-prevcalc(::Scf) = VariableCellOptimization()
+prevcalc(::Scf) = VcOptim()
 prevcalc(::Dfpt) = Scf()
 prevcalc(::Ifc) = Dfpt()
 prevcalc(::PhononDispersion) = Ifc()
