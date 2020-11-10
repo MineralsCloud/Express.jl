@@ -38,6 +38,8 @@ export DensityFunctionalPerturbationTheory,
     PhononDispersion,
     PhononDensityOfStates,
     VDos,
+    ZoneCenterPhonons,
+    ZoneCentrePhonons,
     standardize,
     makeinput,
     makescript,
@@ -51,9 +53,11 @@ struct DensityFunctionalPerturbationTheory <: LatticeDynamics end
 struct InteratomicForceConstants <: LatticeDynamics end
 struct PhononDispersion <: LatticeDynamics end
 struct PhononDensityOfStates <: LatticeDynamics end
+struct ZoneCenterPhonons <: LatticeDynamics end
 const Dfpt = DensityFunctionalPerturbationTheory
 const Ifc = InteratomicForceConstants
 const VDos = PhononDensityOfStates
+const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
 function set_cell(template::Input, output)
     cell = open(output, "r") do io
