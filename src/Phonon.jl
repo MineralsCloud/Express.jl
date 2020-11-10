@@ -17,7 +17,7 @@ using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
 
 using ..Express:
     Calculation,
-    VibrationalProperty,
+    LatticeDynamics,
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
@@ -47,10 +47,10 @@ export DensityFunctionalPerturbationTheory,
     load_settings,
     buildjob
 
-struct DensityFunctionalPerturbationTheory <: VibrationalProperty end
-struct InteratomicForceConstants <: VibrationalProperty end
-struct PhononDispersion <: VibrationalProperty end
-struct PhononDensityOfStates <: VibrationalProperty end
+struct DensityFunctionalPerturbationTheory <: LatticeDynamics end
+struct InteratomicForceConstants <: LatticeDynamics end
+struct PhononDispersion <: LatticeDynamics end
+struct PhononDensityOfStates <: LatticeDynamics end
 const Dfpt = DensityFunctionalPerturbationTheory
 const Ifc = InteratomicForceConstants
 const VDos = PhononDensityOfStates
@@ -70,7 +70,7 @@ end
 struct MakeInput{T<:Calculation}
     calc::T
 end
-function (x::MakeInput{<:Union{Scf,VibrationalProperty}})(
+function (x::MakeInput{<:Union{Scf,LatticeDynamics}})(
     file,
     template::Input,
     args...;
@@ -80,7 +80,7 @@ function (x::MakeInput{<:Union{Scf,VibrationalProperty}})(
     writeinput(file, object)
     return object
 end
-function (x::MakeInput{<:Union{Scf,VibrationalProperty}})(
+function (x::MakeInput{<:Union{Scf,LatticeDynamics}})(
     files,
     templates,
     restargs...;
@@ -94,7 +94,7 @@ function (x::MakeInput{<:Union{Scf,VibrationalProperty}})(
     end
     return objects
 end
-function (x::MakeInput{<:VibrationalProperty})(cfgfile; kwargs...)
+function (x::MakeInput{<:LatticeDynamics})(cfgfile; kwargs...)
     calc = x.calc
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
