@@ -184,17 +184,19 @@ function buildworkflow(cfgfile)
     return step12345678
 end
 
-order(::Scf) = 1
-order(::Dfpt) = 2
-order(::Ifc) = 3
-order(::PhononDispersion) = 4
-order(::PhononDensityOfStates) = 4
+order(x) = order(typeof(x))
+order(::Type{Scf}) = 1
+order(::Type{Dfpt}) = 2
+order(::Type{RealSpaceForceConstants}) = 3
+order(::Type{PhononDispersion}) = 4
+order(::Type{PhononDensityOfStates}) = 4
 
-prevcalc(::Scf) = VcOptim()
-prevcalc(::Dfpt) = Scf()
-prevcalc(::Ifc) = Dfpt()
-prevcalc(::PhononDispersion) = Ifc()
-prevcalc(::PhononDensityOfStates) = Ifc()
+prevcalc(x) = prevcalc(typeof(x))
+prevcalc(::Type{Scf}) = VcOptim()
+prevcalc(::Type{Dfpt}) = Scf()
+prevcalc(::Type{RealSpaceForceConstants}) = Dfpt()
+prevcalc(::Type{PhononDispersion}) = RealSpaceForceConstants()
+prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
 
 function standardize end
 
