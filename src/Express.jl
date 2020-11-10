@@ -15,6 +15,8 @@ const Optim = Optimization
 const Scf = SelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
 
+abstract type Action{T<:Calculation} end
+
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)
     if !iszero(remainder)
