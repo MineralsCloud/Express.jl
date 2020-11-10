@@ -34,8 +34,7 @@ export DensityFunctionalPerturbationTheory,
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
-    InteratomicForceConstants,
-    Ifc,
+    RealSpaceForceConstants,
     PhononDispersion,
     PhononDensityOfStates,
     VDos,
@@ -51,12 +50,11 @@ export DensityFunctionalPerturbationTheory,
     buildjob
 
 struct DensityFunctionalPerturbationTheory <: LatticeDynamics end
-struct InteratomicForceConstants <: LatticeDynamics end
+struct RealSpaceForceConstants <: LatticeDynamics end
 struct PhononDispersion <: LatticeDynamics end
 struct PhononDensityOfStates <: LatticeDynamics end
 struct ZoneCenterPhonons <: LatticeDynamics end
 const Dfpt = DensityFunctionalPerturbationTheory
-const Ifc = InteratomicForceConstants
 const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
@@ -131,9 +129,9 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
     settings = load_settings(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     ifcinputs = map(settings.dirs) do dir
-        file = joinpath(dir, shortname(Ifc()) * ".in")
+        file = joinpath(dir, shortname(RealSpaceForceConstants()) * ".in")
         open(file, "r") do io
-            parse(inputtype(Ifc()), read(file, String))
+            parse(inputtype(RealSpaceForceConstants()), read(file, String))
         end
     end
     dfptinputs = map(settings.dirs) do dir
@@ -178,9 +176,10 @@ function buildworkflow(cfgfile)
     step12 = chain(step1, buildjob(Scf())(cfgfile)[1])
     step123 = chain(step12[end], buildjob(makeinput(Dfpt()))(cfgfile))
     step1234 = chain(step123[end], buildjob(Dfpt())(cfgfile)[1])
-    step12345 = chain(step1234[end], buildjob(makeinput(Ifc()))(cfgfile))
-    step123456 = chain(step12345[end], buildjob(Ifc())(cfgfile)[1])
     step1234567 = chain(step123456[end], buildjob(makeinput(PhononDispersion()))(cfgfile))
+    step12345 =
+        chain(step1234[end], buildjob(MakeInput(RealSpaceForceConstants()))(cfgfile))
+    step123456 = chain(step12345[end], buildjob(RealSpaceForceConstants())(cfgfile)[1])
     step12345678 = chain(step1234567[end], buildjob(PhononDispersion())(cfgfile)[1])
     return step12345678
 end
