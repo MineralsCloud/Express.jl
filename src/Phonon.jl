@@ -11,7 +11,6 @@ julia>
 """
 module Phonon
 
-using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.CLI: Mpiexec
 using AbInitioSoftwareBase.Inputs: Input, writeinput
 using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
@@ -23,7 +22,8 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     distprocs,
-    makescript
+    makescript,
+    load_settings
 using ..EosFitting: VcOptim
 
 import AbInitioSoftwareBase.Inputs: set_cell
@@ -40,12 +40,12 @@ export DensityFunctionalPerturbationTheory,
     VDos,
     standardize,
     makeinput,
+    makescript,
     writeinput,
     standardize,
     customize,
     load_settings,
-    buildjob,
-    buildworkflow
+    buildjob
 
 struct DensityFunctionalPerturbationTheory <: VibrationalProperty end
 struct InteratomicForceConstants <: VibrationalProperty end
@@ -218,12 +218,6 @@ function check_settings(settings)
     end
     @assert isdir(settings["workdir"])
     # @assert all(map(isfile, settings["templates"]))
-end
-
-function load_settings(configfile)
-    settings = load(configfile)
-    check_settings(settings)  # Errors will be thrown if exist
-    return expand_settings(settings)
 end
 
 end

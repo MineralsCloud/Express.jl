@@ -1,5 +1,6 @@
 module Express
 
+using AbInitioSoftwareBase: load
 using Mustache: render
 using SimpleWorkflow: Script
 
@@ -32,9 +33,31 @@ end
 makescript(template, args::Pair...) = makescript(template, Dict(args))
 makescript(template; kwargs...) = makescript(template, Dict(kwargs))
 
+function whichmodule(name)
+    name = lowercase(name)
+    return if name == "eos"
+        EosFitting
+    elseif name in ("phonon", "eos+phonon")
+        Phonon
+    end
+end
+
+function buildworkflow(cfgfile)
+    settings = load(cfgfile)
+    mod = whichmodule(settings["workflow"])
+    return getproperty(mod, :buildworkflow)(cfgfile)
+end
+
+function load_settings(cfgfile)
+    settings = load(cfgfile)
+    mod = whichmodule(settings["workflow"])
+    getproperty(mod, :check_settings)(settings)  # Errors will be thrown if exist
+    return getproperty(mod, :expand_settings)(settings)
+end
+
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting.jl")
 include("Phonon.jl")
 
-end # module
+end

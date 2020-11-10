@@ -21,7 +21,13 @@ import Unitful
 import UnitfulAtomic
 
 using ..Express:
-    Optimization, SelfConsistentField, Scf, FixedIonSelfConsistentField, distprocs
+    Optimization,
+    SelfConsistentField,
+    Scf,
+    FixedIonSelfConsistentField,
+    distprocs,
+    makescript,
+    load_settings
 
 import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
@@ -36,10 +42,10 @@ export SelfConsistentField,
     VcOptim,
     load_settings,
     makeinput,
+    makescript,
     eosfit,
     writeinput,
-    buildjob,
-    buildworkflow
+    buildjob
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
@@ -275,12 +281,6 @@ function check_settings(settings)
     map(("type", "parameters")) do key
         @assert haskey(settings["trial_eos"], key)
     end
-end
-
-function load_settings(cfgfile)
-    settings = load(cfgfile)
-    check_settings(settings)  # Errors will be thrown if exist
-    return expand_settings(settings)
 end
 
 end
