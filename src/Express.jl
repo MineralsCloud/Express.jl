@@ -37,7 +37,7 @@ function whichmodule(name)
     name = lowercase(name)
     return if name == "eos"
         EosFitting
-    elseif name in ("phonon", "eos+phonon")
+    elseif name in ("phonon dispersion", "vdos")
         Phonon
     end
 end
