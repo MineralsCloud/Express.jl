@@ -21,6 +21,7 @@ using ..Express:
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
+    Action,
     distprocs,
     makescript,
     load_settings
@@ -71,16 +72,16 @@ function set_cell(template::Input, output)
     end
 end
 
-struct MakeInput{T<:Calculation}
-    calc::T
-end
-function (x::MakeInput{<:Union{Scf,LatticeDynamics}})(
+struct MakeInput{T} <: Action{T} end
+MakeInput(T::Type) = MakeInput{T}()
+MakeInput(T::Calculation) = MakeInput(typeof(T))
+function (x::MakeInput{T})(
     file,
     template::Input,
     args...;
     kwargs...,
-)
-    object = customize(standardize(template, x.calc), args...; kwargs...)
+) where {T<:Union{Scf,LatticeDynamics}}
+    object = customize(standardize(template, T()), args...; kwargs...)
     writeinput(file, object)
     return object
 end
@@ -98,22 +99,20 @@ function (x::MakeInput{<:Union{Scf,LatticeDynamics}})(
     end
     return objects
 end
-function (x::MakeInput{<:LatticeDynamics})(cfgfile; kwargs...)
-    calc = x.calc
+function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
     settings = load_settings(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     previnputs = map(settings.dirs) do dir
-        file = joinpath(dir, shortname(prevcalc(calc)) * ".in")
+        file = joinpath(dir, shortname(prevcalc(T)) * ".in")
         open(file, "r") do io
-            parse(inputtype(prevcalc(calc)), read(file, String))
+            parse(inputtype(prevcalc(T)), read(file, String))
         end
     end
-    return x(files, settings.templates[order(calc)], previnputs; kwargs...)
+    return x(files, settings.templates[order(T)], previnputs; kwargs...)
 end
-function (x::MakeInput{Scf})(cfgfile; kwargs...)
-    calc = x.calc
+function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
     settings = load_settings(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     templates = settings.templates[1]
     templates = if length(templates) == 1
         fill(templates[1], length(settings.pressures))
@@ -128,10 +127,9 @@ function (x::MakeInput{Scf})(cfgfile; kwargs...)
     end
     return x(files, templates; kwargs...)
 end
-function (x::MakeInput{<:Union{PhononDispersion,VDos}})(cfgfile; kwargs...)
-    calc = x.calc
+function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,VDos}}
     settings = load_settings(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     ifcinputs = map(settings.dirs) do dir
         file = joinpath(dir, shortname(Ifc()) * ".in")
         open(file, "r") do io
@@ -144,10 +142,9 @@ function (x::MakeInput{<:Union{PhononDispersion,VDos}})(cfgfile; kwargs...)
             parse(inputtype(Dfpt()), read(file, String))
         end
     end
-    return x(files, settings.templates[order(calc)], ifcinputs, dfptinputs; kwargs...)
+    return x(files, settings.templates[order(T)], ifcinputs, dfptinputs; kwargs...)
 end
 
-makeinput(calc::Calculation) = MakeInput(calc)
 
 function buildjob(x::MakeInput)
     function _buildjob(cfgfile)
