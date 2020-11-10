@@ -29,7 +29,7 @@ using ..EosFitting: VcOptim
 
 import AbInitioSoftwareBase.Inputs: set_cell
 
-export DensityFunctionalPerturbationTheory,
+export Dfpt,
     Dfpt,
     SelfConsistentField,
     Scf,
@@ -49,12 +49,11 @@ export DensityFunctionalPerturbationTheory,
     load_settings,
     buildjob
 
-struct DensityFunctionalPerturbationTheory <: LatticeDynamics end
+struct Dfpt <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end
 struct PhononDispersion <: LatticeDynamics end
 struct PhononDensityOfStates <: LatticeDynamics end
 struct ZoneCenterPhonons <: LatticeDynamics end
-const Dfpt = DensityFunctionalPerturbationTheory
 const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
