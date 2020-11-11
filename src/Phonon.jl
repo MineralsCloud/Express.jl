@@ -11,9 +11,8 @@ julia>
 """
 module Phonon
 
-using AbInitioSoftwareBase.CLI: Mpiexec
 using AbInitioSoftwareBase.Inputs: Input, writeinput
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
+using SimpleWorkflow: chain
 
 using ..Express:
     Calculation,
@@ -40,14 +39,13 @@ export Dfpt,
     VDos,
     ZoneCenterPhonons,
     ZoneCentrePhonons,
-    standardize,
-    makeinput,
+    MakeInput,
     makescript,
     writeinput,
     standardize,
+    standardize,
     customize,
-    load_settings,
-    buildjob
+    load_settings
 
 struct Dfpt <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end
@@ -143,32 +141,6 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
 end
 
 
-function buildjob(x::MakeInput)
-    function _buildjob(cfgfile)
-        InternalAtomicJob(() -> x(cfgfile))
-    end
-end
-function buildjob(calc::Calculation)
-    function _buildjob(outputs, inputs, np, exe; kwargs...)
-        # `map` guarantees they are of the same size, no need to check.
-        n = distprocs(np, length(inputs))
-        subjobs = map(outputs, inputs) do output, input
-            f = Mpiexec(n; kwargs...) ∘ exe
-            cmd = f(stdin = input, stdout = output)
-            ExternalAtomicJob(cmd)
-        end
-        return parallel(subjobs...)
-    end
-    function _buildjob(template, view)
-        ExternalAtomicJob(makescript(template, view))
-    end
-    function _buildjob(cfgfile)
-        settings = load_settings(cfgfile)
-        inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        return _buildjob(out, inp, settings.manager.np, settings.bin[order(calc)])
-    end
-end
 
 function buildworkflow(cfgfile)
     step1 = buildjob(makeinput(Scf()))(cfgfile)
