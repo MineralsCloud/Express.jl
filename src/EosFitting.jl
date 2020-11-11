@@ -190,12 +190,12 @@ function expand_settings end
 
 function check_software_settings end
 
-function shortname end
+shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
 function expandeos(settings)
-    type = string(lowercase(settings["type"]))
+    type = lowercase(settings["type"])
     T = if type in ("m", "murnaghan")
         Murnaghan
     elseif type in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
