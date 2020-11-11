@@ -1,19 +1,22 @@
 module Express
 
 using AbInitioSoftwareBase: load
+using AbInitioSoftwareBase.CLI: Mpiexec
 using Mustache: render
-using SimpleWorkflow: Script
+using SimpleWorkflow: Script, ExternalAtomicJob, InternalAtomicJob, chain, parallel
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
 struct SelfConsistentField <: ElectronicStructure end
 abstract type Optimization <: Calculation end
-abstract type VibrationalProperty <: Calculation end
+abstract type LatticeDynamics <: Calculation end
 # Aliases
 const Calc = Calculation
 const Optim = Optimization
 const Scf = SelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
+
+abstract type Action{T<:Calculation} end
 
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)
@@ -37,9 +40,25 @@ function whichmodule(name)
     name = lowercase(name)
     return if name == "eos"
         EosFitting
-    elseif name in ("phonon", "eos+phonon")
+    elseif name in ("phonon dispersion", "vdos")
         Phonon
     end
+end
+
+function buildjob(outputs, inputs, np, exe; kwargs...)
+    # `map` guarantees they are of the same size, no need to check.
+    n = distprocs(np, length(inputs))
+    subjobs = map(outputs, inputs) do output, input
+        f = Mpiexec(n; kwargs...) ∘ exe
+        cmd = f(stdin = input, stdout = output)
+        ExternalAtomicJob(cmd)
+    end
+    return parallel(subjobs...)
+end
+function buildjob(cfgfile)
+    settings = load(cfgfile)
+    mod = whichmodule(settings["workflow"])
+    return getproperty(mod, :buildjob)(cfgfile)
 end
 
 function buildworkflow(cfgfile)
