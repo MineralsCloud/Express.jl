@@ -151,14 +151,16 @@ end
 
 function buildworkflow(cfgfile)
     step1 = buildjob(MakeInput(Scf()), cfgfile)
-    step12 = chain(step1, buildjob(Scf(), cfgfile)[1])
+    step12 = chain(step1, buildjob(MakeCmd(Scf()), cfgfile)[1])
     step123 = chain(step12[end], buildjob(MakeInput(Dfpt()), cfgfile))
-    step1234 = chain(step123[end], buildjob(Dfpt(), cfgfile)[1])
+    step1234 = chain(step123[end], buildjob(MakeCmd(Dfpt()), cfgfile)[1])
     step12345 =
         chain(step1234[end], buildjob(MakeInput(RealSpaceForceConstants()), cfgfile))
-    step123456 = chain(step12345[end], buildjob(RealSpaceForceConstants(), cfgfile)[1])
+    step123456 =
+        chain(step12345[end], buildjob(MakeCmd(RealSpaceForceConstants()), cfgfile)[1])
     step1234567 = chain(step123456[end], buildjob(MakeInput(PhononDispersion()), cfgfile))
-    step12345678 = chain(step1234567[end], buildjob(PhononDispersion(), cfgfile)[1])
+    step12345678 =
+        chain(step1234567[end], buildjob(MakeCmd(PhononDispersion()), cfgfile)[1])
     return step12345678
 end
 

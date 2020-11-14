@@ -156,10 +156,10 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
 end
 
 function buildworkflow(cfgfile)
-    step1 = buildjob(MakeInput(SelfConsistentField(), cfgfile)())
+    step1 = buildjob(MakeInput(SelfConsistentField()), cfgfile)
     step12 = chain(step1, buildjob(MakeCmd(SelfConsistentField()), cfgfile)[1])
     step123 = chain(step12[end], buildjob(EosFit(SelfConsistentField()), cfgfile))
-    step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)()
+    step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)
     step45 = chain(step4, buildjob(MakeCmd(VariableCellOptimization()), cfgfile)[1])
     step456 = chain(step45[end], buildjob(EosFit(VariableCellOptimization()), cfgfile))
     step16 = chain(step123[end], step456[1])
