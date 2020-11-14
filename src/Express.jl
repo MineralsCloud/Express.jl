@@ -4,7 +4,7 @@ using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
 using Mustache: render
-using SimpleWorkflow: Script, parallel
+using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
@@ -62,7 +62,7 @@ function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kw
 end
 
 function buildjob(x::MakeCmd, outputs, inputs, np, exe; kwargs...)
-    jobs = x(outputs, inputs, np, exe; kwargs...)
+    jobs = map(ExternalAtomicJob, x(outputs, inputs, np, exe; kwargs...))
     return parallel(jobs...)
 end
 
