@@ -45,6 +45,8 @@ function whichmodule(name)
         EosFitting
     elseif name in ("phonon dispersion", "vdos")
         Phonon
+    else
+        error("workflow `$name` is not recognized!")
     end
 end
 
