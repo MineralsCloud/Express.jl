@@ -179,6 +179,8 @@ prevcalc(::Type{RealSpaceForceConstants}) = Dfpt()
 prevcalc(::Type{PhononDispersion}) = RealSpaceForceConstants()
 prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
 
+shortname(x::Calculation) = shortname(typeof(x))
+
 function standardize end
 
 function customize end
@@ -188,8 +190,6 @@ function parseoutput end
 function expand_settings end
 
 function check_software_settings end
-
-function shortname end
 
 function inputtype end
 
