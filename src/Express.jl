@@ -2,7 +2,7 @@ module Express
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
-using AbInitioSoftwareBase.CLI: Mpiexec
+using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
 using Mustache: render
 using SimpleWorkflow: Script, parallel
 
@@ -51,8 +51,7 @@ end
 struct MakeCmd{T} <: Action{T} end
 MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
 function (::MakeCmd)(output, input, np, exe; kwargs...)
-    f = Mpiexec(np; kwargs...) ∘ exe
-    return f(stdin = input, stdout = output)
+    return scriptify(Mpiexec(np; kwargs...), exe; stdin = input, stdout = output)
 end
 function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
     # `map` guarantees they are of the same size, no need to check.
