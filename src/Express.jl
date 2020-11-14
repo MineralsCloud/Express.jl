@@ -4,7 +4,7 @@ using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec
 using Mustache: render
-using SimpleWorkflow: Script, ExternalAtomicJob, InternalAtomicJob, chain, parallel
+using SimpleWorkflow: Script, parallel
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
