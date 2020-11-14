@@ -66,11 +66,6 @@ function buildjob(x::MakeCmd, outputs, inputs, np, exe; kwargs...)
     jobs = x(outputs, inputs, np, exe; kwargs...)
     return parallel(jobs...)
 end
-function buildjob(cfgfile)
-    settings = load(cfgfile)
-    mod = whichmodule(settings["workflow"])
-    return getproperty(mod, :buildjob)(cfgfile)
-end
 
 function buildworkflow(cfgfile)
     settings = load(cfgfile)

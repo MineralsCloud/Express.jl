@@ -14,6 +14,7 @@ module Phonon
 using AbInitioSoftwareBase.Inputs: Input, writeinput
 using SimpleWorkflow: InternalAtomicJob, chain
 
+import ..Express
 using ..Express:
     Calculation,
     LatticeDynamics,
@@ -146,7 +147,7 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
     inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
-    return x(out, inp, settings.manager.np, settings.bin[order(T)])
+    return Express.buildjob(x, out, inp, settings.manager.np, settings.bin[order(T)])
 end
 
 function buildworkflow(cfgfile)

@@ -20,6 +20,7 @@ using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
+import ..Express
 using ..Express:
     Calculation,
     Optimization,
@@ -152,7 +153,7 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
     inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
-    return buildjob(x, out, inp, settings.manager.np, settings.bin)
+    return Express.buildjob(x, out, inp, settings.manager.np, settings.bin)
 end
 
 function buildworkflow(cfgfile)
