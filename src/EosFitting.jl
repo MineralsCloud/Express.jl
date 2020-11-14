@@ -74,7 +74,7 @@ function set_press_vol(template::Input, pressure, eos::PressureEOS)::Input
 end
 
 struct MakeInput{T} <: Action{T} end
-MakeInput(T::Calculation) = MakeInput{T}()
+MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
 function (::MakeInput{T})(
     file,
     template::Input,
@@ -121,7 +121,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
 end
 
 struct EosFit{T} <: Action{T} end
-EosFit(T::Calculation) = EosFit{T}()
+EosFit(::T) where {T<:Calculation} = EosFit{T}()
 function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
     raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
     data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs

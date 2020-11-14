@@ -49,6 +49,7 @@ function whichmodule(name)
 end
 
 struct MakeCmd{T} <: Action{T} end
+MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
 function (::MakeCmd)(output, input, np, exe; kwargs...)
     f = Mpiexec(np; kwargs...) ∘ exe
     return f(stdin = input, stdout = output)

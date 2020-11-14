@@ -69,7 +69,7 @@ function set_cell(template::Input, output)
 end
 
 struct MakeInput{T} <: Action{T} end
-MakeInput(T::Calculation) = MakeInput{T}()
+MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
 function (x::MakeInput{T})(
     file,
     template::Input,
