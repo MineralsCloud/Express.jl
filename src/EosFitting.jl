@@ -15,7 +15,7 @@ using EquationsOfStateOfSolids.Collections:
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Serialization: serialize, deserialize
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
+using SimpleWorkflow: InternalAtomicJob, chain
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
@@ -27,6 +27,8 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     Action,
+    MakeCmd,
+    calculation,
     distprocs,
     makescript,
     load_settings
@@ -45,6 +47,7 @@ export SelfConsistentField,
     load_settings,
     MakeInput,
     EosFit,
+    calculation,
     makescript,
     writeinput,
     buildjob
@@ -117,35 +120,27 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     return x(files, settings.templates, settings.pressures, eos; kwargs...)
 end
 
-function buildjob(calc::ScfOrOptim)
-    function _buildjob(outputs, inputs, np, exe; kwargs...)
-        # `map` guarantees they are of the same size, no need to check.
-        n = distprocs(np, length(inputs))
-        subjobs = map(outputs, inputs) do output, input
-            f = Mpiexec(n; kwargs...) ∘ exe
-            cmd = f(stdin = input, stdout = output)
-            ExternalAtomicJob(cmd)
-        end
-        return parallel(subjobs...)
-    end
-    function _buildjob(template, view)
-        ExternalAtomicJob(makescript(template, view))
-    end
-    function _buildjob(cfgfile)
-        settings = load_settings(cfgfile)
-        inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        return _buildjob(out, inp, settings.manager.np, settings.bin)
-    end
+abstract type JobPackaging end
+struct JobOfTasks <: JobPackaging end
+struct ArrayOfJobs <: JobPackaging end
+
+buildjob(x::EosFit, args...) = InternalAtomicJob(() -> x(args...))
+buildjob(::MakeInput{T}, cfgfile) where {T} =
+    InternalAtomicJob(() -> MakeInput(T())(cfgfile))
+function buildjob(x::MakeCmd{T}, cfgfile) where {T}
+    settings = load_settings(cfgfile)
+    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
+    out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    return buildjob(x, out, inp, settings.manager.np, settings.bin)
 end
 
 function buildworkflow(cfgfile)
-    step1 = buildjob(MakeInput(SelfConsistentField())(cfgfile)())
-    step12 = chain(step1, buildjob(SelfConsistentField())(cfgfile)[1])
-    step123 = chain(step12[end], buildjob(EosFit(SelfConsistentField()))(cfgfile))
-    step4 = buildjob(MakeInput(VariableCellOptimization())(cfgfile)())
-    step45 = chain(step4, buildjob(VariableCellOptimization())(cfgfile)[1])
-    step456 = chain(step45[end], buildjob(EosFit(VariableCellOptimization()))(cfgfile))
+    step1 = buildjob(MakeInput(SelfConsistentField(), cfgfile)())
+    step12 = chain(step1, buildjob(MakeCmd(SelfConsistentField()), cfgfile)[1])
+    step123 = chain(step12[end], buildjob(EosFit(SelfConsistentField()), cfgfile))
+    step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)()
+    step45 = chain(step4, buildjob(MakeCmd(VariableCellOptimization()), cfgfile)[1])
+    step456 = chain(step45[end], buildjob(EosFit(VariableCellOptimization()), cfgfile))
     step16 = chain(step123[end], step456[1])
     return step16
 end

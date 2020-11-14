@@ -1,6 +1,7 @@
 module Express
 
 using AbInitioSoftwareBase: load
+using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec
 using Mustache: render
 using SimpleWorkflow: Script, ExternalAtomicJob, InternalAtomicJob, chain, parallel
@@ -17,6 +18,8 @@ const Scf = SelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
 
 abstract type Action{T<:Calculation} end
+
+calculation(::Action{T}) where {T} = T()
 
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)
@@ -45,15 +48,22 @@ function whichmodule(name)
     end
 end
 
-function buildjob(outputs, inputs, np, exe; kwargs...)
+struct MakeCmd{T} <: Action{T} end
+function (::MakeCmd)(output, input, np, exe; kwargs...)
+    f = Mpiexec(np; kwargs...) ∘ exe
+    return f(stdin = input, stdout = output)
+end
+function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
     # `map` guarantees they are of the same size, no need to check.
     n = distprocs(np, length(inputs))
-    subjobs = map(outputs, inputs) do output, input
-        f = Mpiexec(n; kwargs...) ∘ exe
-        cmd = f(stdin = input, stdout = output)
-        ExternalAtomicJob(cmd)
+    return map(outputs, inputs) do output, input
+        x(output, input, n, exe; kwargs...)
     end
-    return parallel(subjobs...)
+end
+
+function buildjob(x::MakeCmd, outputs, inputs, np, exe; kwargs...)
+    jobs = x(outputs, inputs, np, exe; kwargs...)
+    return parallel(jobs...)
 end
 function buildjob(cfgfile)
     settings = load(cfgfile)
