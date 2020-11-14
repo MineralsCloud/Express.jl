@@ -15,16 +15,21 @@ using EquationsOfStateOfSolids.Collections:
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Serialization: serialize, deserialize
-using SimpleWorkflow: ExternalAtomicJob, InternalAtomicJob, chain, parallel
+using SimpleWorkflow: InternalAtomicJob, chain
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
+import ..Express
 using ..Express:
+    Calculation,
     Optimization,
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
+    Action,
+    MakeCmd,
+    calculation,
     distprocs,
     makescript,
     load_settings
@@ -41,9 +46,10 @@ export SelfConsistentField,
     StOptim,
     VcOptim,
     load_settings,
-    makeinput,
+    MakeInput,
+    EosFit,
+    calculation,
     makescript,
-    eosfit,
     writeinput,
     buildjob
 
@@ -68,164 +74,97 @@ function set_press_vol(template::Input, pressure, eos::PressureEOS)::Input
     return set_press_vol(template, pressure, volume)
 end
 
-"""
-    prepare(calc, files, template::Input, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
-    prepare(calc, files, templates, pressures, trial_eos::EquationOfState; dry_run = false, kwargs...)
+struct MakeInput{T} <: Action{T} end
+MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
+function (::MakeInput{T})(
+    file,
+    template::Input,
+    pressure,
+    eos_or_volume;
+    kwargs...,
+) where {T<:ScfOrOptim}
+    object = customize(standardize(template, T()), pressure, eos_or_volume; kwargs...)
+    writeinput(file, object)
+    return object
+end
+function (x::MakeInput{<:ScfOrOptim})(
+    files,
+    templates,
+    pressures,
+    eos_or_volumes;
+    kwargs...,
+)
+    _alert(pressures)
+    if templates isa Input
+        templates = fill(templates, size(files))
+    end
+    if eos_or_volumes isa EquationOfStateOfSolids
+        eos_or_volumes = fill(eos_or_volumes, size(files))
+    end
+    objects = map(
+        files,
+        templates,
+        pressures,
+        eos_or_volumes,
+    ) do file, template, pressure, eos_or_volume
+        x(file, template, pressure, eos_or_volume; kwargs...)
+    end
+    return objects
+end
+function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
+    settings = load_settings(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
+    eos = PressureEOS(
+        T == SelfConsistentField ? settings.trial_eos :
+        EosFit(SelfConsistentField())(cfgfile),
+    )
+    return x(files, settings.templates, settings.pressures, eos; kwargs...)
+end
 
-Prepare the input `files` from a certain `template` / a series of `templates` at `pressures` from a `trial_eos`.
-
-Set `dry_run = true` to preview changes.
-"""
-function makeinput(calc::ScfOrOptim)
-    function _makeinput(file, template::Input, pressure, eos_or_volume; kwargs...)
-        object = customize(standardize(template, calc), pressure, eos_or_volume; kwargs...)
-        writeinput(file, object)
-        return object
+struct EosFit{T} <: Action{T} end
+EosFit(::T) where {T<:Calculation} = EosFit{T}()
+function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
+    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
+    data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
+    if length(data) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    function _makeinput(files, templates, pressures, eos_or_volumes; kwargs...)
-        _alert(pressures)
-        if templates isa Input
-            templates = fill(templates, size(files))
-        end
-        if eos_or_volumes isa EquationOfStateOfSolids
-            eos_or_volumes = fill(eos_or_volumes, size(files))
-        end
-        objects = map(
-            files,
-            templates,
-            pressures,
-            eos_or_volumes,
-        ) do file, template, pressure, eos_or_volume
-            _makeinput(file, template, pressure, eos_or_volume; kwargs...)
-        end
-        return objects
-    end
-    function _makeinput(cfgfile; kwargs...)
-        settings = load_settings(cfgfile)
-        files = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        eos = PressureEOS(
-            calc isa SelfConsistentField ? settings.trial_eos :
-            eosfit(SelfConsistentField())(cfgfile),
-        )
-        return _makeinput(files, settings.templates, settings.pressures, eos; kwargs...)
-    end
+    return eosfit(trial_eos, first.(data), last.(data))
+end
+function (x::EosFit{T})(cfgfile) where {T<:ScfOrOptim}
+    settings = load_settings(cfgfile)
+    outputs = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    rawsettings = load(cfgfile)
+    saveto = rawsettings["save"]
+    trial_eos = T == SelfConsistentField ? settings.trial_eos : deserialize(saveto)
+    eos = x(outputs, EnergyEOS(settings.trial_eos))
+    serialize(saveto, eos)
+    return eos
 end
 
 abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
 struct ArrayOfJobs <: JobPackaging end
 
-function buildjob(::typeof(makeinput), calc::ScfOrOptim)
-    function _buildjob(file, template::Input, pressure, eos_or_volume; kwargs...)
-        f = makeinput(calc)
-        return InternalAtomicJob(
-            () -> f(file, template, pressure, eos_or_volume; kwargs...),
-            "Prepare $calc input for pressure $pressure",
-        )
-    end
-    function _buildjob(files, templates, pressures, eos_or_volumes, ::JobOfTasks; kwargs...)
-        f = makeinput(calc)
-        return InternalAtomicJob(
-            () -> f(files, templates, pressures, eos_or_volumes; kwargs...),
-            "Prepare $calc inputs for pressures $pressures",
-        )
-    end
-    function _buildjob(
-        files,
-        templates,
-        pressures,
-        eos_or_volumes,
-        ::ArrayOfJobs;
-        kwargs...,
-    )
-        if templates isa Input
-            templates = fill(templates, size(files))
-        end
-        if eos_or_volumes isa EquationOfStateOfSolids
-            map(files, templates, pressures) do file, template, pressure
-                _buildjob(file, template, pressure, eos_or_volumes; kwargs...)
-            end
-        else
-            map(
-                files,
-                templates,
-                pressures,
-                eos_or_volumes,
-            ) do file, template, pressure, volume
-                _buildjob(file, template, pressure, volume; kwargs...)
-            end
-        end
-    end
-    function _buildjob(cfgfile)
-        InternalAtomicJob(() -> makeinput(calc)(cfgfile))
-    end
-end
-function buildjob(::typeof(eosfit), calc::ScfOrOptim)
-    function _buildjob(args...)
-        return InternalAtomicJob(
-            () -> eosfit(calc)(args...),
-            "Prepare $calc inputs for pressures ",
-        )
-    end
-end
-
-function buildjob(calc::ScfOrOptim)
-    function _buildjob(outputs, inputs, np, exe; kwargs...)
-        # `map` guarantees they are of the same size, no need to check.
-        n = distprocs(np, length(inputs))
-        subjobs = map(outputs, inputs) do output, input
-            f = Mpiexec(n; kwargs...) ∘ exe
-            cmd = f(stdin = input, stdout = output)
-            ExternalAtomicJob(cmd)
-        end
-        return parallel(subjobs...)
-    end
-    function _buildjob(template, view)
-        ExternalAtomicJob(makescript(template, view))
-    end
-    function _buildjob(cfgfile)
-        settings = load_settings(cfgfile)
-        inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-        out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        return _buildjob(out, inp, settings.manager.np, settings.bin)
-    end
+buildjob(x::EosFit, args...) = InternalAtomicJob(() -> x(args...))
+buildjob(::MakeInput{T}, cfgfile) where {T} =
+    InternalAtomicJob(() -> MakeInput(T())(cfgfile))
+function buildjob(x::MakeCmd{T}, cfgfile) where {T}
+    settings = load_settings(cfgfile)
+    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
+    out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    return Express.buildjob(x, out, inp, settings.manager.np, settings.bin)
 end
 
 function buildworkflow(cfgfile)
-    step1 = buildjob(makeinput, SelfConsistentField())(cfgfile)
-    step12 = chain(step1, buildjob(SelfConsistentField())(cfgfile)[1])
-    step123 = chain(step12[end], buildjob(eosfit, SelfConsistentField())(cfgfile))
-    step4 = buildjob(makeinput, VariableCellOptimization())(cfgfile)
-    step45 = chain(step4, buildjob(VariableCellOptimization())(cfgfile)[1])
-    step456 = chain(step45[end], buildjob(eosfit, VariableCellOptimization())(cfgfile))
+    step1 = buildjob(MakeInput(SelfConsistentField()), cfgfile)
+    step12 = chain(step1, buildjob(MakeCmd(SelfConsistentField()), cfgfile)[1])
+    step123 = chain(step12[end], buildjob(EosFit(SelfConsistentField()), cfgfile))
+    step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)
+    step45 = chain(step4, buildjob(MakeCmd(VariableCellOptimization()), cfgfile)[1])
+    step456 = chain(step45[end], buildjob(EosFit(VariableCellOptimization()), cfgfile))
     step16 = chain(step123[end], step456[1])
     return step16
-end
-
-"""
-    fiteos(calc, outputs, trial_eos::EquationOfState, fit_energy::Bool = true)
-
-Fit an equation of state from `outputs` and a `trial_eos`. Use `fit_e` to determine fit ``E(V)`` or ``P(V)``.
-"""
-function eosfit(calc::ScfOrOptim)
-    function _eosfit(outputs, trial_eos::EnergyEOS)
-        raw = (load(parseoutput(calc), output) for output in outputs)  # `ntuple` cannot work with generators
-        data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
-        if length(data) <= 5
-            @info "pressures <= 5 may give unreliable results, run more if possible!"
-        end
-        return eosfit(trial_eos, first.(data), last.(data))
-    end
-    function _eosfit(cfgfile)
-        settings = load_settings(cfgfile)
-        outputs = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-        rawsettings = load(cfgfile)
-        saveto = rawsettings["save"]
-        trial_eos = calc isa SelfConsistentField ? settings.trial_eos : deserialize(saveto)
-        eos = _eosfit(outputs, EnergyEOS(settings.trial_eos))
-        serialize(saveto, eos)
-        return eos
-    end
 end
 
 function _alert(pressures)
@@ -247,12 +186,12 @@ function expand_settings end
 
 function check_software_settings end
 
-function shortname end
+shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
 function expandeos(settings)
-    type = string(lowercase(settings["type"]))
+    type = lowercase(settings["type"])
     T = if type in ("m", "murnaghan")
         Murnaghan
     elseif type in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")

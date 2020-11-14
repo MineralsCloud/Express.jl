@@ -1,9 +1,10 @@
 module Express
 
 using AbInitioSoftwareBase: load
-using AbInitioSoftwareBase.CLI: Mpiexec
+using AbInitioSoftwareBase.Inputs: Input
+using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
 using Mustache: render
-using SimpleWorkflow: Script, ExternalAtomicJob, InternalAtomicJob, chain, parallel
+using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
@@ -17,6 +18,8 @@ const Scf = SelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
 
 abstract type Action{T<:Calculation} end
+
+calculation(::Action{T}) where {T} = T()
 
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)
@@ -45,20 +48,22 @@ function whichmodule(name)
     end
 end
 
-function buildjob(outputs, inputs, np, exe; kwargs...)
+struct MakeCmd{T} <: Action{T} end
+MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
+function (::MakeCmd)(output, input, np, exe; kwargs...)
+    return scriptify(Mpiexec(np; kwargs...), exe; stdin = input, stdout = output)
+end
+function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
     # `map` guarantees they are of the same size, no need to check.
     n = distprocs(np, length(inputs))
-    subjobs = map(outputs, inputs) do output, input
-        f = Mpiexec(n; kwargs...) ∘ exe
-        cmd = f(stdin = input, stdout = output)
-        ExternalAtomicJob(cmd)
+    return map(outputs, inputs) do output, input
+        x(output, input, n, exe; kwargs...)
     end
-    return parallel(subjobs...)
 end
-function buildjob(cfgfile)
-    settings = load(cfgfile)
-    mod = whichmodule(settings["workflow"])
-    return getproperty(mod, :buildjob)(cfgfile)
+
+function buildjob(x::MakeCmd, outputs, inputs, np, exe; kwargs...)
+    jobs = map(ExternalAtomicJob, x(outputs, inputs, np, exe; kwargs...))
+    return parallel(jobs...)
 end
 
 function buildworkflow(cfgfile)

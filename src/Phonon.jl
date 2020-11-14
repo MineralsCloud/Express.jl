@@ -12,8 +12,9 @@ julia>
 module Phonon
 
 using AbInitioSoftwareBase.Inputs: Input, writeinput
-using SimpleWorkflow: chain
+using SimpleWorkflow: InternalAtomicJob, chain
 
+import ..Express
 using ..Express:
     Calculation,
     LatticeDynamics,
@@ -21,6 +22,7 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     Action,
+    MakeCmd,
     distprocs,
     makescript,
     load_settings
@@ -68,7 +70,7 @@ function set_cell(template::Input, output)
 end
 
 struct MakeInput{T} <: Action{T} end
-MakeInput(T::Calculation) = MakeInput{T}()
+MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
 function (x::MakeInput{T})(
     file,
     template::Input,
@@ -139,25 +141,29 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
     return x(files, settings.templates[order(T)], ifcinputs, dfptinputs; kwargs...)
 end
 
-# function buildjob(cfgfile)
-#     settings = load_settings(cfgfile)
-#     inp = map(dir -> joinpath(dir, shortname(calc) * ".in"), settings.dirs)
-#     out = map(dir -> joinpath(dir, shortname(calc) * ".out"), settings.dirs)
-#     return buildjob(out, inp, settings.manager.np, settings.bin[order(calc)])
-# end
+buildjob(::MakeInput{T}, cfgfile) where {T} =
+    InternalAtomicJob(() -> MakeInput(T())(cfgfile))
+function buildjob(x::MakeCmd{T}, cfgfile) where {T}
+    settings = load_settings(cfgfile)
+    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
+    out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    return Express.buildjob(x, out, inp, settings.manager.np, settings.bin[order(T)])
+end
 
-# function buildworkflow(cfgfile)
-#     step1 = buildjob(MakeInput(Scf()))(cfgfile)
-#     step12 = chain(step1, buildjob(Scf())(cfgfile)[1])
-#     step123 = chain(step12[end], buildjob(MakeInput(Dfpt()))(cfgfile))
-#     step1234 = chain(step123[end], buildjob(Dfpt())(cfgfile)[1])
-#     step12345 =
-#         chain(step1234[end], buildjob(MakeInput(RealSpaceForceConstants()))(cfgfile))
-#     step123456 = chain(step12345[end], buildjob(RealSpaceForceConstants())(cfgfile)[1])
-#     step1234567 = chain(step123456[end], buildjob(MakeInput(PhononDispersion()))(cfgfile))
-#     step12345678 = chain(step1234567[end], buildjob(PhononDispersion())(cfgfile)[1])
-#     return step12345678
-# end
+function buildworkflow(cfgfile)
+    step1 = buildjob(MakeInput(Scf()), cfgfile)
+    step12 = chain(step1, buildjob(MakeCmd(Scf()), cfgfile)[1])
+    step123 = chain(step12[end], buildjob(MakeInput(Dfpt()), cfgfile))
+    step1234 = chain(step123[end], buildjob(MakeCmd(Dfpt()), cfgfile)[1])
+    step12345 =
+        chain(step1234[end], buildjob(MakeInput(RealSpaceForceConstants()), cfgfile))
+    step123456 =
+        chain(step12345[end], buildjob(MakeCmd(RealSpaceForceConstants()), cfgfile)[1])
+    step1234567 = chain(step123456[end], buildjob(MakeInput(PhononDispersion()), cfgfile))
+    step12345678 =
+        chain(step1234567[end], buildjob(MakeCmd(PhononDispersion()), cfgfile)[1])
+    return step12345678
+end
 
 order(x) = order(typeof(x))
 order(::Type{Scf}) = 1
