@@ -148,7 +148,14 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
     inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
-    return Express.buildjob(x, out, inp, settings.manager.np, settings.bin[order(T)])
+    return Express.buildjob(
+        x,
+        out,
+        inp,
+        settings.manager.np,
+        settings.bin[order(T)];
+        use_shell = settings.use_shell,
+    )
 end
 
 function buildworkflow(cfgfile)
@@ -202,7 +209,7 @@ function inputtype end
 function parsecell end
 
 function check_settings(settings)
-    map(("templates", "pressures", "workdir")) do key
+    map(("templates", "pressures", "workdir", "use_shell")) do key
         @assert haskey(settings, key)
     end
     @assert isdir(settings["workdir"])

@@ -153,7 +153,14 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
     inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
-    return Express.buildjob(x, out, inp, settings.manager.np, settings.bin)
+    return Express.buildjob(
+        x,
+        out,
+        inp,
+        settings.manager.np,
+        settings.bin;
+        use_shell = settings.use_shell,
+    )
 end
 
 function buildworkflow(cfgfile)
@@ -211,7 +218,7 @@ function expandeos(settings)
 end
 
 function check_settings(settings)
-    map(("templates", "pressures", "trial_eos", "workdir")) do key
+    map(("templates", "pressures", "trial_eos", "workdir", "use_shell")) do key
         @assert haskey(settings, key)
     end
     @assert isdir(settings["workdir"])
