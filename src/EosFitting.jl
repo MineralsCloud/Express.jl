@@ -120,6 +120,27 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     return x(files, settings.templates, settings.pressures, eos; kwargs...)
 end
 
+struct EosFit{T} <: Action{T} end
+EosFit(T::Calculation) = EosFit{T}()
+function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
+    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
+    data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
+    if length(data) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
+    end
+    return eosfit(trial_eos, first.(data), last.(data))
+end
+function (x::EosFit{T})(cfgfile) where {T<:ScfOrOptim}
+    settings = load_settings(cfgfile)
+    outputs = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    rawsettings = load(cfgfile)
+    saveto = rawsettings["save"]
+    trial_eos = T == SelfConsistentField ? settings.trial_eos : deserialize(saveto)
+    eos = x(outputs, EnergyEOS(settings.trial_eos))
+    serialize(saveto, eos)
+    return eos
+end
+
 abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
 struct ArrayOfJobs <: JobPackaging end
@@ -143,27 +164,6 @@ function buildworkflow(cfgfile)
     step456 = chain(step45[end], buildjob(EosFit(VariableCellOptimization()), cfgfile))
     step16 = chain(step123[end], step456[1])
     return step16
-end
-
-struct EosFit{T} <: Action{T} end
-EosFit(T::Calculation) = EosFit{T}()
-function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
-    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
-    data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
-    if length(data) <= 5
-        @info "pressures <= 5 may give unreliable results, run more if possible!"
-    end
-    return eosfit(trial_eos, first.(data), last.(data))
-end
-function (x::EosFit{T})(cfgfile) where {T<:ScfOrOptim}
-    settings = load_settings(cfgfile)
-    outputs = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
-    rawsettings = load(cfgfile)
-    saveto = rawsettings["save"]
-    trial_eos = T == SelfConsistentField ? settings.trial_eos : deserialize(saveto)
-    eos = x(outputs, EnergyEOS(settings.trial_eos))
-    serialize(saveto, eos)
-    return eos
 end
 
 function _alert(pressures)
