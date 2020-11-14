@@ -11,6 +11,7 @@ julia>
 """
 module Phonon
 
+using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, writeinput
 using SimpleWorkflow: InternalAtomicJob, chain
 
@@ -152,17 +153,22 @@ end
 
 function buildworkflow(cfgfile)
     step1 = buildjob(MakeInput(Scf()), cfgfile)
-    step12 = chain(step1, buildjob(MakeCmd(Scf()), cfgfile)[1])
-    step123 = chain(step12[end], buildjob(MakeInput(Dfpt()), cfgfile))
-    step1234 = chain(step123[end], buildjob(MakeCmd(Dfpt()), cfgfile)[1])
-    step12345 =
-        chain(step1234[end], buildjob(MakeInput(RealSpaceForceConstants()), cfgfile))
-    step123456 =
-        chain(step12345[end], buildjob(MakeCmd(RealSpaceForceConstants()), cfgfile)[1])
-    step1234567 = chain(step123456[end], buildjob(MakeInput(PhononDispersion()), cfgfile))
-    step12345678 =
-        chain(step1234567[end], buildjob(MakeCmd(PhononDispersion()), cfgfile)[1])
-    return step12345678
+    step2 = chain(step1, buildjob(MakeCmd(Scf()), cfgfile)[1])
+    step3 = chain(step2[end], buildjob(MakeInput(Dfpt()), cfgfile))
+    step4 = chain(step3[end], buildjob(MakeCmd(Dfpt()), cfgfile)[1])
+    step5 = chain(step4[end], buildjob(MakeInput(RealSpaceForceConstants()), cfgfile))
+    step6 = chain(step5[end], buildjob(MakeCmd(RealSpaceForceConstants()), cfgfile)[1])
+    settings = load(cfgfile)
+    x = if settings["workflow"] == "phonon dispersion"
+        PhononDispersion()
+    elseif settings["workflow"] == "vdos"
+        VDos()
+    else
+        error("unsupported option!")
+    end
+    step7 = chain(step6[end], buildjob(MakeInput(x), cfgfile))
+    step8 = chain(step7[end], buildjob(MakeCmd(x), cfgfile)[1])
+    return step8
 end
 
 order(x) = order(typeof(x))
