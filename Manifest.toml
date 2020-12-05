@@ -208,9 +208,9 @@ version = "0.2.4"
 
 [[HTTP]]
 deps = ["Base64", "Dates", "IniFile", "MbedTLS", "Sockets", "URIs"]
-git-tree-sha1 = "9634200f8e16554cb1620dfb20501483b873df86"
+git-tree-sha1 = "504ca74f27377a25ebfd63b1f5e6ec3e9fb14690"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "0.9.0"
+version = "0.9.1"
 
 [[Inflate]]
 git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
@@ -365,9 +365,9 @@ version = "0.3.5"
 
 [[OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "9db93b990af57b3a56dca38476832f60d58f777b"
+git-tree-sha1 = "45d5e495ab559357aee8cb1dfb8c12b0787d4545"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.4.0"
+version = "1.4.1"
 
 [[OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -394,9 +394,9 @@ version = "0.10.1"
 
 [[Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "b417be52e8be24e916e34b3d70ec2da7bdf56a68"
+git-tree-sha1 = "9d738ba28afdbd877397fb24d48440244590e039"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.12"
+version = "1.0.13"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -468,9 +468,9 @@ version = "0.2.2+1"
 
 [[Roots]]
 deps = ["Printf"]
-git-tree-sha1 = "166958a00dfbb0573778f5250365b00f13dc8144"
+git-tree-sha1 = "8f743e4f4368d1d753f3806bf635899dad6b4847"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.0.6"
+version = "1.0.7"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
