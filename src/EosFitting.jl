@@ -51,6 +51,7 @@ export SelfConsistentField,
     load_settings,
     makeinput,
     fiteos,
+    iofiles,
     calculation,
     makescript,
     writeinput,
@@ -116,12 +117,12 @@ function (x::MakeInput{<:ScfOrOptim})(
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
+    infiles = first.(iofiles(T(), cfgfile))
     eos = PressureEOS(
         T == SelfConsistentField ? settings.trial_eos :
         FitEos(SelfConsistentField())(cfgfile),
     )
-    return x(files, settings.templates, settings.pressures, eos; kwargs...)
+    return x(infiles, settings.templates, settings.pressures, eos; kwargs...)
 end
 
 const makeinput = MakeInput
@@ -146,11 +147,11 @@ function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
 end
 function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
-    outputs = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    outfiles = last.(iofiles(T(), cfgfile))
     rawsettings = load(cfgfile)
     saveto = rawsettings["save"]
     trial_eos = T == SelfConsistentField ? settings.trial_eos : deserialize(saveto)
-    eos = x(outputs, EnergyEOS(settings.trial_eos))
+    eos = x(outfiles, EnergyEOS(settings.trial_eos))
     serialize(saveto, eos)
     return eos
 end
@@ -166,12 +167,12 @@ buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
-    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
-    out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    io = iofiles(T(), cfgfile)
+    infiles, outfiles = first.(io), last.(io)
     return Express.buildjob(
         x,
-        out,
-        inp,
+        outfiles,
+        infiles,
         settings.manager.np,
         settings.bin;
         use_shell = settings.use_shell,
