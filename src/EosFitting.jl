@@ -14,6 +14,7 @@ using EquationsOfStateOfSolids.Collections:
     BirchMurnaghan4th,
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
+using EquationsOfStateOfSolids.Fitting: eosfit
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob, chain
 using Unitful: uparse
@@ -34,7 +35,6 @@ using ..Express:
     makescript,
     load_settings
 
-import EquationsOfStateOfSolids.Fitting: eosfit
 import AbInitioSoftwareBase.Inputs: set_press_vol
 
 export SelfConsistentField,
