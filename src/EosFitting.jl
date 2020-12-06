@@ -52,6 +52,7 @@ export SelfConsistentField,
     makeinput,
     fiteos,
     iofiles,
+    getdata,
     calculation,
     makescript,
     writeinput,
@@ -135,11 +136,19 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
+struct GetData{T} <: Action{T} end
+GetData(::T) where {T<:Calculation} = GetData{T}()
+function (::GetData{T})(outputs) where {T<:ScfOrOptim}
+    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
+    return collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
+end
+
+const getdata = GetData
+
 struct FitEos{T} <: Action{T} end
 FitEos(::T) where {T<:Calculation} = FitEos{T}()
 function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
-    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
-    data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
+    data = GetData(T())(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
