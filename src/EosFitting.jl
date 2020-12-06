@@ -12,6 +12,9 @@ using EquationsOfStateOfSolids.Collections:
     BirchMurnaghan2nd,
     BirchMurnaghan3rd,
     BirchMurnaghan4th,
+    PoirierTarantola2nd,
+    PoirierTarantola3rd,
+    PoirierTarantola4th,
     Vinet
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using EquationsOfStateOfSolids.Fitting: eosfit
@@ -211,7 +214,7 @@ vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
 
 function expandeos(settings)
     type = lowercase(settings["type"])
-    T = if type in ("m", "murnaghan")
+    constructor = if type in ("m", "murnaghan")
         Murnaghan
     elseif type in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
         BirchMurnaghan2nd
@@ -219,14 +222,20 @@ function expandeos(settings)
         BirchMurnaghan3rd
     elseif type in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
         BirchMurnaghan4th
+    elseif type in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
+        PoirierTarantola2nd
+    elseif type in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
+        PoirierTarantola3rd
+    elseif type in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
+        PoirierTarantola4th
     elseif type in ("v", "vinet")
         Vinet
     end
-    p = map(settings["parameters"]) do x
+    values = map(settings["parameters"]) do x
         @assert length(x) == 2
         first(x) * uparse(last(x); unit_context = [Unitful, UnitfulAtomic])
     end
-    return T(p...)
+    return constructor(values...)
 end
 
 function check_settings(settings)
