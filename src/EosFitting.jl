@@ -47,7 +47,7 @@ export SelfConsistentField,
     VcOptim,
     load_settings,
     MakeInput,
-    EosFit,
+    FitEos,
     calculation,
     makescript,
     writeinput,
@@ -116,7 +116,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     eos = PressureEOS(
         T == SelfConsistentField ? settings.trial_eos :
-        EosFit(SelfConsistentField())(cfgfile),
+        FitEos(SelfConsistentField())(cfgfile),
     )
     return x(files, settings.templates, settings.pressures, eos; kwargs...)
 end
@@ -124,6 +124,9 @@ end
 struct EosFit{T} <: Action{T} end
 EosFit(::T) where {T<:Calculation} = EosFit{T}()
 function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
+struct FitEos{T} <: Action{T} end
+FitEos(::T) where {T<:Calculation} = FitEos{T}()
+function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
     raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
     data = collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
     if length(data) <= 5
@@ -131,7 +134,7 @@ function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
     end
     return eosfit(trial_eos, first.(data), last.(data))
 end
-function (x::EosFit{T})(cfgfile) where {T<:ScfOrOptim}
+function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
     outputs = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
     rawsettings = load(cfgfile)
@@ -146,7 +149,7 @@ abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
 struct ArrayOfJobs <: JobPackaging end
 
-buildjob(x::EosFit, args...) = InternalAtomicJob(() -> x(args...))
+buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
@@ -166,10 +169,10 @@ end
 function buildworkflow(cfgfile)
     step1 = buildjob(MakeInput(SelfConsistentField()), cfgfile)
     step12 = chain(step1, buildjob(MakeCmd(SelfConsistentField()), cfgfile)[1])
-    step123 = chain(step12[end], buildjob(EosFit(SelfConsistentField()), cfgfile))
+    step123 = chain(step12[end], buildjob(FitEos(SelfConsistentField()), cfgfile))
     step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)
     step45 = chain(step4, buildjob(MakeCmd(VariableCellOptimization()), cfgfile)[1])
-    step456 = chain(step45[end], buildjob(EosFit(VariableCellOptimization()), cfgfile))
+    step456 = chain(step45[end], buildjob(FitEos(VariableCellOptimization()), cfgfile))
     step16 = chain(step123[end], step456[1])
     return step16
 end
