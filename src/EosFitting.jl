@@ -230,13 +230,19 @@ function expandeos(settings)
 end
 
 function check_settings(settings)
-    map(("templates", "pressures", "trial_eos", "workdir", "use_shell")) do key
+    for key in ("templates", "pressures", "trial_eos", "workdir", "use_shell")
         @assert haskey(settings, key)
     end
-    @assert isdir(settings["workdir"])
-    @assert all(map(isfile, settings["templates"]))
+    if !isdir(settings["workdir"])
+        @warn "`workdir` is not reachable, be careful!"
+    end
+    for path in settings["templates"]
+        if !isfile(path)
+            @warn "template \"$path\" is not reachable, be careful!"
+        end
+    end
     _alert(settings["pressures"]["values"])
-    map(("type", "parameters")) do key
+    for key in ("type", "parameters")
         @assert haskey(settings["trial_eos"], key)
     end
 end
