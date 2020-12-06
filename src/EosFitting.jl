@@ -46,8 +46,8 @@ export SelfConsistentField,
     StOptim,
     VcOptim,
     load_settings,
-    MakeInput,
-    FitEos,
+    makeinput,
+    fiteos,
     calculation,
     makescript,
     writeinput,
@@ -121,9 +121,16 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     return x(files, settings.templates, settings.pressures, eos; kwargs...)
 end
 
-struct EosFit{T} <: Action{T} end
-EosFit(::T) where {T<:Calculation} = EosFit{T}()
-function (x::EosFit{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
+const makeinput = MakeInput
+
+function iofiles(T::ScfOrOptim, cfgfile)
+    settings = load_settings(cfgfile)
+    return map(settings.dirs) do dir
+        prefix = joinpath(dir, shortname(T))
+        prefix * ".in" => prefix * ".out"
+    end
+end
+
 struct FitEos{T} <: Action{T} end
 FitEos(::T) where {T<:Calculation} = FitEos{T}()
 function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
@@ -144,6 +151,8 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     serialize(saveto, eos)
     return eos
 end
+
+const fiteos = FitEos
 
 abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
