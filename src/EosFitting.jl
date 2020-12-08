@@ -249,10 +249,10 @@ function expandeos(settings)
 end
 
 function check_settings(settings)
-    for key in ("templates", "pressures", "trial_eos", "workdir", "use_shell")
+    for key in ("templates", "pressures", "trial_eos", "workdir")
         @assert haskey(settings, key)
     end
-    if !isdir(settings["workdir"])
+    if !isdir(expanduser(settings["workdir"]))
         @warn "`workdir` is not reachable, be careful!"
     end
     for path in settings["templates"]
