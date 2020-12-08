@@ -64,7 +64,7 @@ function set_cell(template::Input, output)
         parsecell(str)
     end
     if any(x === nothing for x in cell)
-        return  # Not work for relax only
+        error("set cell failed!")
     else
         return set_cell(template, cell...)
     end
