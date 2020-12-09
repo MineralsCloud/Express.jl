@@ -272,6 +272,7 @@ function check_settings(settings)
     for key in ("templates", "pressures", "trial_eos", "workdir")
         @assert haskey(settings, key)
     end
+    @assert haskey(settings, "pressures") || haskey(settings, "volumes")
     if !isdir(expanduser(settings["workdir"]))
         @warn "`workdir` is not reachable, be careful!"
     end
