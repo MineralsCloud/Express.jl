@@ -262,9 +262,8 @@ function expandeos(settings)
     elseif type in ("v", "vinet")
         Vinet
     end
-    values = map(settings["parameters"]) do x
-        @assert length(x) == 2
-        first(x) * uparse(last(x); unit_context = [Unitful, UnitfulAtomic])
+    values = map(settings["parameters"]) do (v, u)
+        v * uparse(u; unit_context = [Unitful, UnitfulAtomic])
     end
     return constructor(values...)
 end
