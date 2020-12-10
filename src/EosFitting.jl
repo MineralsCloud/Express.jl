@@ -69,18 +69,12 @@ const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
-"""
-    set_press_vol(template::Input, pressure, eos::EquationOfState; volume_scale = (0.5, 1.5))
-
-Set the volume of `template` at a `pressure` according to `eos`.
-
-The `volume_scale` gives a trial of the minimum and maximum scales for the `eos`. It
-times the zero-pressure volume of the `eos` will be the trial volumes.
-"""
-function set_press_vol(template::Input, pressure, eos::PressureEOS)::Input
+function set_press_vol(template::Input, pressure, eos::PressureEOS)
     volume = mustfindvolume(eos, pressure; volume_scale = vscaling())
     return set_press_vol(template, pressure, volume)
 end
+set_press_vol(template::Input, pressure, eos::EnergyEOS) =
+    set_press_vol(template, pressure, PressureEOS(getparam(eos)))
 
 struct MakeInput{T} <: Action{T} end
 MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
@@ -126,7 +120,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
         T == SelfConsistentField ? settings.trial_eos :
         FitEos(SelfConsistentField())(cfgfile),
     )
-    return x(infiles, settings.templates, settings.pressures, eos; kwargs...)
+    return x(infiles, settings.templates, settings.pressures_or_volumes, eos; kwargs...)
 end
 
 const makeinput = MakeInput
@@ -262,9 +256,8 @@ function expandeos(settings)
     elseif type in ("v", "vinet")
         Vinet
     end
-    values = map(settings["parameters"]) do x
-        @assert length(x) == 2
-        first(x) * uparse(last(x); unit_context = [Unitful, UnitfulAtomic])
+    values = map(settings["parameters"]) do (v, u)
+        v * uparse(u; unit_context = [Unitful, UnitfulAtomic])
     end
     return constructor(values...)
 end
@@ -273,6 +266,7 @@ function check_settings(settings)
     for key in ("templates", "pressures", "trial_eos", "workdir")
         @assert haskey(settings, key)
     end
+    @assert haskey(settings, "pressures") || haskey(settings, "volumes")
     if !isdir(expanduser(settings["workdir"]))
         @warn "`workdir` is not reachable, be careful!"
     end
