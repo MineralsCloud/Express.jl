@@ -77,10 +77,12 @@ Set the volume of `template` at a `pressure` according to `eos`.
 The `volume_scale` gives a trial of the minimum and maximum scales for the `eos`. It
 times the zero-pressure volume of the `eos` will be the trial volumes.
 """
-function set_press_vol(template::Input, pressure, eos::PressureEOS)::Input
+function set_press_vol(template::Input, pressure, eos::PressureEOS)
     volume = mustfindvolume(eos, pressure; volume_scale = vscaling())
     return set_press_vol(template, pressure, volume)
 end
+set_press_vol(template::Input, pressure, eos::EnergyEOS) =
+    set_press_vol(template, pressure, PressureEOS(getparam(eos)))
 
 struct MakeInput{T} <: Action{T} end
 MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
