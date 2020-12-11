@@ -18,7 +18,6 @@ using EquationsOfStateOfSolids.Collections:
     PoirierTarantola4th,
     Vinet,
     getparam
-using EquationsOfStateOfSolids.Volume: mustfindvolume
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob, chain
@@ -39,8 +38,6 @@ using ..Express:
     distprocs,
     makescript,
     load_settings
-
-import AbInitioSoftwareBase.Inputs: set_press_vol
 
 export SelfConsistentField,
     Scf,
@@ -68,13 +65,6 @@ const FixedCellOptimization = StructuralOptimization
 const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
-
-function set_press_vol(template::Input, pressure, eos::PressureEOS)
-    volume = mustfindvolume(eos, pressure; volume_scale = vscaling())
-    return set_press_vol(template, pressure, volume)
-end
-set_press_vol(template::Input, pressure, eos::EnergyEOS) =
-    set_press_vol(template, pressure, PressureEOS(getparam(eos)))
 
 struct MakeInput{T} <: Action{T} end
 MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
