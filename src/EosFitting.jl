@@ -111,12 +111,18 @@ const getdata = GetData
 
 struct FitEos{T} <: Action{T} end
 FitEos(::T) where {T<:Calculation} = FitEos{T}()
+function (x::FitEos{T})(
+    data::AbstractVector{<:Pair},
+    trial_eos::EnergyEOS,
+) where {T<:ScfOrOptim}
+    return eosfit(trial_eos, first.(data), last.(data))
+end
 function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
     data = GetData(T())(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return eosfit(trial_eos, first.(data), last.(data))
+    return x(data, trial_eos)
 end
 function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
