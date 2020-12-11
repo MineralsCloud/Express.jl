@@ -68,17 +68,10 @@ const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 struct MakeInput{T} <: Action{T} end
 MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
-function (::MakeInput{T})(
-    file,
-    template::Input,
-    pressure,
-    eos_or_volume;
-    kwargs...,
-) where {T<:ScfOrOptim}
-    object = customize(standardize(template, T()), pressure, eos_or_volume; kwargs...)
-    writeinput(file, object)
-    return object
-end
+function (::MakeInput{T})(file, template::Input, args...) where {T<:ScfOrOptim}
+    input = customize(standardize(template, T()), args...)
+    writeinput(file, input)
+    return input
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
@@ -87,7 +80,14 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
         T == SelfConsistentField ? settings.trial_eos :
         FitEos(SelfConsistentField())(cfgfile),
     )
-    return x(infiles, settings.templates, settings.pressures_or_volumes, eos; kwargs...)
+    return broadcast(
+        x,
+        infiles,
+        settings.templates,
+        settings.pressures_or_volumes,
+        fill(eos, length(infiles));
+        kwargs...,
+    )
 end
 
 const makeinput = MakeInput
