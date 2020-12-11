@@ -79,29 +79,6 @@ function (::MakeInput{T})(
     writeinput(file, object)
     return object
 end
-function (x::MakeInput{<:ScfOrOptim})(
-    files,
-    templates,
-    pressures,
-    eos_or_volumes;
-    kwargs...,
-)
-    _alert(pressures)
-    if templates isa Input
-        templates = fill(templates, size(files))
-    end
-    if eos_or_volumes isa EquationOfStateOfSolids
-        eos_or_volumes = fill(eos_or_volumes, size(files))
-    end
-    objects = map(
-        files,
-        templates,
-        pressures,
-        eos_or_volumes,
-    ) do file, template, pressure, eos_or_volume
-        x(file, template, pressure, eos_or_volume; kwargs...)
-    end
-    return objects
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
