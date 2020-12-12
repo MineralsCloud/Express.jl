@@ -79,10 +79,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-abstract type JobPackaging end
-struct JobOfTasks <: JobPackaging end
-struct ArrayOfJobs <: JobPackaging end
-
 buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))
