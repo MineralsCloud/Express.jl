@@ -81,7 +81,7 @@ end
 
 buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
 buildjob(::MakeInput{T}, cfgfile) where {T} =
-    InternalAtomicJob(() -> MakeInput(T())(cfgfile))
+    InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
     io = iofiles(T(), cfgfile)
@@ -97,12 +97,12 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
 end
 
 function buildworkflow(cfgfile)
-    step1 = buildjob(MakeInput(SelfConsistentField()), cfgfile)
-    step12 = chain(step1, buildjob(MakeCmd(SelfConsistentField()), cfgfile)[1])
-    step123 = chain(step12[end], buildjob(FitEos(SelfConsistentField()), cfgfile))
-    step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)
-    step45 = chain(step4, buildjob(MakeCmd(VariableCellOptimization()), cfgfile)[1])
-    step456 = chain(step45[end], buildjob(FitEos(VariableCellOptimization()), cfgfile))
+    step1 = buildjob(MakeInput{Scf}(), cfgfile)
+    step12 = chain(step1, buildjob(MakeCmd{Scf}(), cfgfile)[1])
+    step123 = chain(step12[end], buildjob(FitEos{Scf}(), cfgfile))
+    step4 = buildjob(MakeInput{VcOptim}(), cfgfile)
+    step45 = chain(step4, buildjob(MakeCmd{VcOptim}(), cfgfile)[1])
+    step456 = chain(step45[end], buildjob(FitEos{VcOptim}(), cfgfile))
     step16 = chain(step123[end], step456[1])
     return step16
 end
