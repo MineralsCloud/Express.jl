@@ -2,7 +2,7 @@
 
 [[AbInitioSoftwareBase]]
 deps = ["IsURL", "JSON", "Pkg", "YAML"]
-git-tree-sha1 = "d00a79360ff42209b85e1475e650f193f16f16b2"
+git-tree-sha1 = "51e4869426397b961c7bfb8d3e507474fe2da023"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -394,9 +394,9 @@ version = "0.10.1"
 
 [[Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "6370b5b3cf2ce5a3d2b6f7ab2dc10f374e4d7d2b"
+git-tree-sha1 = "50c9a9ed8c714945e01cd53a21007ed3865ed714"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.14"
+version = "1.0.15"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
