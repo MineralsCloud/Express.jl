@@ -89,7 +89,7 @@ end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
-include("EosFitting.jl")
+include("EosFitting/EosFitting.jl")
 # include("Phonon.jl")
 
 end
