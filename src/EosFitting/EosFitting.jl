@@ -153,6 +153,9 @@ function check_settings(settings)
     for key in ("templates", "pressures", "workdir", "pressures")
         @assert haskey(settings, key) "`\"$key\"` was not found in settings!"
     end
+    if !haskey(settings["pressures"], "unit")
+        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+    end
     @assert haskey(settings, "trial_eos") || haskey(settings, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
     if !isdir(expanduser(settings["workdir"]))
         @warn "`workdir` \"$(settings["workdir"])\" is not reachable, be careful!"
