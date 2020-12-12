@@ -67,6 +67,9 @@ const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 include("makeinput.jl")
+include("getdata.jl")
+include("fiteos.jl")
+include("saveeos.jl")
 
 function iofiles(T::ScfOrOptim, cfgfile)
     settings = load_settings(cfgfile)
@@ -75,18 +78,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
         prefix * ".in" => prefix * ".out"
     end
 end
-
-struct GetData{T} <: Action{T} end
-GetData(::T) where {T<:Calculation} = GetData{T}()
-function (::GetData{T})(outputs) where {T<:ScfOrOptim}
-    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
-    return collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
-end
-
-const getdata = GetData
-
-include("fiteos.jl")
-include("saveeos.jl")
 
 abstract type JobPackaging end
 struct JobOfTasks <: JobPackaging end
@@ -128,8 +119,6 @@ function _alert(pressures)
         @warn "for better fitting, we need at least 1 negative pressure!"
     end
 end
-
-function parseoutput end
 
 function expand_settings end
 
