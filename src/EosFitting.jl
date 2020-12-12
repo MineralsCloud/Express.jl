@@ -68,40 +68,10 @@ const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 struct MakeInput{T} <: Action{T} end
 MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
-function (::MakeInput{T})(
-    file,
-    template::Input,
-    pressure,
-    eos_or_volume;
-    kwargs...,
-) where {T<:ScfOrOptim}
-    object = customize(standardize(template, T()), pressure, eos_or_volume; kwargs...)
-    writeinput(file, object)
-    return object
-end
-function (x::MakeInput{<:ScfOrOptim})(
-    files,
-    templates,
-    pressures,
-    eos_or_volumes;
-    kwargs...,
-)
-    _alert(pressures)
-    if templates isa Input
-        templates = fill(templates, size(files))
-    end
-    if eos_or_volumes isa EquationOfStateOfSolids
-        eos_or_volumes = fill(eos_or_volumes, size(files))
-    end
-    objects = map(
-        files,
-        templates,
-        pressures,
-        eos_or_volumes,
-    ) do file, template, pressure, eos_or_volume
-        x(file, template, pressure, eos_or_volume; kwargs...)
-    end
-    return objects
+function (::MakeInput{T})(file, template::Input, args...) where {T<:ScfOrOptim}
+    input = customize(standardize(template, T()), args...)
+    writeinput(file, input)
+    return input
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
@@ -110,7 +80,14 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
         T == SelfConsistentField ? settings.trial_eos :
         FitEos(SelfConsistentField())(cfgfile),
     )
-    return x(infiles, settings.templates, settings.pressures_or_volumes, eos; kwargs...)
+    return broadcast(
+        x,
+        infiles,
+        settings.templates,
+        settings.pressures_or_volumes,
+        fill(eos, length(infiles));
+        kwargs...,
+    )
 end
 
 const makeinput = MakeInput
@@ -134,12 +111,18 @@ const getdata = GetData
 
 struct FitEos{T} <: Action{T} end
 FitEos(::T) where {T<:Calculation} = FitEos{T}()
+function (x::FitEos{T})(
+    data::AbstractVector{<:Pair},
+    trial_eos::EnergyEOS,
+) where {T<:ScfOrOptim}
+    return eosfit(trial_eos, first.(data), last.(data))
+end
 function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
     data = GetData(T())(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return eosfit(trial_eos, first.(data), last.(data))
+    return x(data, trial_eos)
 end
 function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     settings = load_settings(cfgfile)
