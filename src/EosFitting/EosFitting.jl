@@ -150,12 +150,12 @@ function expandeos(settings)
 end
 
 function check_settings(settings)
-    for key in ("templates", "pressures", "trial_eos", "workdir")
-        @assert haskey(settings, key)
+    for key in ("templates", "pressures", "workdir", "pressures")
+        @assert haskey(settings, key) "`\"$key\"` was not found in settings!"
     end
-    @assert haskey(settings, "pressures") || haskey(settings, "volumes")
+    @assert haskey(settings, "trial_eos") || haskey(settings, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
     if !isdir(expanduser(settings["workdir"]))
-        @warn "`workdir` is not reachable, be careful!"
+        @warn "`workdir` \"$(settings["workdir"])\" is not reachable, be careful!"
     end
     for path in settings["templates"]
         if !isfile(path)
@@ -164,7 +164,7 @@ function check_settings(settings)
     end
     _alert(settings["pressures"]["values"])
     for key in ("type", "parameters")
-        @assert haskey(settings["trial_eos"], key)
+        @assert haskey(settings["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
 end
 
