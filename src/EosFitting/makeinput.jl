@@ -2,6 +2,7 @@ struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(file, template::S, args...)::S where {T,S<:Input}
     update = customize(args...) ∘ standardize(T())
     input = update(template)
+    mkpath(dirname(file))
     writeinput(file, input)
     return input
 end
