@@ -1,5 +1,4 @@
 struct SaveEos{T} <: Action{T} end
-SaveEos(::T) where {T<:Calculation} = SaveEos{T}()
 function (::SaveEos{T})(path, eos::Parameters) where {T<:ScfOrOptim}
     ext = lowercase(extension(path))
     if ext == "jls"
@@ -13,5 +12,3 @@ function (::SaveEos{T})(path, eos::Parameters) where {T<:ScfOrOptim}
     end
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
-
-const saveeos = SaveEos
