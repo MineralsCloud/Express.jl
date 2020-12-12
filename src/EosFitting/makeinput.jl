@@ -1,17 +1,15 @@
-struct MakeInput{T} <: Action{T} end
-MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
-function (::MakeInput{T})(file, template::Input, args...) where {T<:ScfOrOptim}
-    input = customize(standardize(template, T()), args...)
+struct MakeInput{T} <: Action{T}
+    calc::T
+end
+function (x::MakeInput)(file, template::Input, args...)
+    input = customize(standardize(template, x.calc), args...)
     writeinput(file, input)
     return input
 end
-function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
+function (x::MakeInput)(cfgfile; kwargs...)
     settings = load_settings(cfgfile)
-    infiles = first.(iofiles(T(), cfgfile))
-    eos = PressureEOS(
-        T == SelfConsistentField ? settings.trial_eos :
-        FitEos(SelfConsistentField())(cfgfile),
-    )
+    infiles = first.(iofiles(x.calc, cfgfile))
+    eos = PressureEOS(x.calc isa Scf ? settings.trial_eos : FitEos(Scf())(cfgfile))
     return broadcast(
         x,
         infiles,
@@ -21,7 +19,6 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
         kwargs...,
     )
 end
-const makeinput = MakeInput
 
 function standardize end
 
