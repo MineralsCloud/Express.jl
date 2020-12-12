@@ -122,7 +122,7 @@ function check_software_settings end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
-vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
+vscaling() = (0.5, 1.5)
 
 function expandeos(settings)
     type = lowercase(settings["type"])
