@@ -17,8 +17,8 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     outfiles = last.(iofiles(T(), cfgfile))
     rawsettings = load(cfgfile)
     saveto = rawsettings["save"]
-    trial_eos = T == SelfConsistentField ? settings.trial_eos : deserialize(saveto)
-    eos = x(outfiles, EnergyEOS(settings.trial_eos))
+    trial_eos = T <: Scf ? settings.trial_eos : deserialize(saveto)
+    eos = x(outfiles, EnergyEOS(trial_eos))
     serialize(saveto, eos)
     return eos
 end
