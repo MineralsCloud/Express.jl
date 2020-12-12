@@ -1,5 +1,4 @@
 struct FitEos{T} <: Action{T} end
-FitEos(::T) where {T<:Calculation} = FitEos{T}()
 function (x::FitEos{T})(
     data::AbstractVector{<:Pair},
     trial_eos::EnergyEOS,
@@ -7,7 +6,7 @@ function (x::FitEos{T})(
     return eosfit(trial_eos, first.(data), last.(data))
 end
 function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
-    data = GetData(T())(outputs)
+    data = GetData{T}()(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
@@ -23,4 +22,3 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     serialize(saveto, eos)
     return eos
 end
-const fiteos = FitEos
