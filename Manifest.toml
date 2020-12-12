@@ -2,7 +2,7 @@
 
 [[AbInitioSoftwareBase]]
 deps = ["IsURL", "JSON", "Pkg", "YAML"]
-git-tree-sha1 = "51e4869426397b961c7bfb8d3e507474fe2da023"
+git-tree-sha1 = "cc65cbfa57afb2ff98727b1d4f160b84de08f898"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -348,9 +348,9 @@ version = "0.7.1"
 
 [[Mustache]]
 deps = ["Printf", "Tables"]
-git-tree-sha1 = "f5d718790ff475b5b8ab9c1599ed105f0f24f253"
+git-tree-sha1 = "773f6b09547486e9c1905e3749e5c41bcd089189"
 uuid = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
-version = "1.0.8"
+version = "1.0.9"
 
 [[NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
