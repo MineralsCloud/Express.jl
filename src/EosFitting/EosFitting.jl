@@ -47,12 +47,12 @@ export SelfConsistentField,
     VariableCellOptimization,
     StOptim,
     VcOptim,
+    MakeInput,
+    FitEos,
+    GetData,
+    SaveEos,
     load_settings,
-    makeinput,
-    fiteos,
-    saveeos,
     iofiles,
-    getdata,
     calculation,
     makescript,
     writeinput,
@@ -66,31 +66,10 @@ const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
-struct MakeInput{T} <: Action{T} end
-MakeInput(::T) where {T<:Calculation} = MakeInput{T}()
-function (::MakeInput{T})(file, template::Input, args...) where {T<:ScfOrOptim}
-    input = customize(standardize(template, T()), args...)
-    writeinput(file, input)
-    return input
-end
-function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:ScfOrOptim}
-    settings = load_settings(cfgfile)
-    infiles = first.(iofiles(T(), cfgfile))
-    eos = PressureEOS(
-        T == SelfConsistentField ? settings.trial_eos :
-        FitEos(SelfConsistentField())(cfgfile),
-    )
-    return broadcast(
-        x,
-        infiles,
-        settings.templates,
-        settings.pressures_or_volumes,
-        fill(eos, length(infiles));
-        kwargs...,
-    )
-end
-
-const makeinput = MakeInput
+include("makeinput.jl")
+include("getdata.jl")
+include("fiteos.jl")
+include("saveeos.jl")
 
 function iofiles(T::ScfOrOptim, cfgfile)
     settings = load_settings(cfgfile)
@@ -100,68 +79,9 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-struct GetData{T} <: Action{T} end
-GetData(::T) where {T<:Calculation} = GetData{T}()
-function (::GetData{T})(outputs) where {T<:ScfOrOptim}
-    raw = (load(parseoutput(T()), output) for output in outputs)  # `ntuple` cannot work with generators
-    return collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
-end
-
-const getdata = GetData
-
-struct FitEos{T} <: Action{T} end
-FitEos(::T) where {T<:Calculation} = FitEos{T}()
-function (x::FitEos{T})(
-    data::AbstractVector{<:Pair},
-    trial_eos::EnergyEOS,
-) where {T<:ScfOrOptim}
-    return eosfit(trial_eos, first.(data), last.(data))
-end
-function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
-    data = GetData(T())(outputs)
-    if length(data) <= 5
-        @info "pressures <= 5 may give unreliable results, run more if possible!"
-    end
-    return x(data, trial_eos)
-end
-function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
-    settings = load_settings(cfgfile)
-    outfiles = last.(iofiles(T(), cfgfile))
-    rawsettings = load(cfgfile)
-    saveto = rawsettings["save"]
-    trial_eos = T == SelfConsistentField ? settings.trial_eos : deserialize(saveto)
-    eos = x(outfiles, EnergyEOS(settings.trial_eos))
-    serialize(saveto, eos)
-    return eos
-end
-
-const fiteos = FitEos
-
-struct SaveEos{T} <: Action{T} end
-SaveEos(::T) where {T<:Calculation} = SaveEos{T}()
-function (::SaveEos{T})(path, eos::Parameters) where {T<:ScfOrOptim}
-    ext = lowercase(extension(path))
-    if ext == "jls"
-        open(path, "w") do io
-            serialize(io, eos)
-        end
-    elseif ext in ("json", "yaml", "yml", "toml")
-        save(path, eos)
-    else
-        error("unsupported file extension `$ext`!")
-    end
-end
-(x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
-
-const saveeos = SaveEos
-
-abstract type JobPackaging end
-struct JobOfTasks <: JobPackaging end
-struct ArrayOfJobs <: JobPackaging end
-
 buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
 buildjob(::MakeInput{T}, cfgfile) where {T} =
-    InternalAtomicJob(() -> MakeInput(T())(cfgfile))
+    InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = load_settings(cfgfile)
     io = iofiles(T(), cfgfile)
@@ -177,12 +97,12 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
 end
 
 function buildworkflow(cfgfile)
-    step1 = buildjob(MakeInput(SelfConsistentField()), cfgfile)
-    step12 = chain(step1, buildjob(MakeCmd(SelfConsistentField()), cfgfile)[1])
-    step123 = chain(step12[end], buildjob(FitEos(SelfConsistentField()), cfgfile))
-    step4 = buildjob(MakeInput(VariableCellOptimization()), cfgfile)
-    step45 = chain(step4, buildjob(MakeCmd(VariableCellOptimization()), cfgfile)[1])
-    step456 = chain(step45[end], buildjob(FitEos(VariableCellOptimization()), cfgfile))
+    step1 = buildjob(MakeInput{Scf}(), cfgfile)
+    step12 = chain(step1, buildjob(MakeCmd{Scf}(), cfgfile)[1])
+    step123 = chain(step12[end], buildjob(FitEos{Scf}(), cfgfile))
+    step4 = buildjob(MakeInput{VcOptim}(), cfgfile)
+    step45 = chain(step4, buildjob(MakeCmd{VcOptim}(), cfgfile)[1])
+    step456 = chain(step45[end], buildjob(FitEos{VcOptim}(), cfgfile))
     step16 = chain(step123[end], step456[1])
     return step16
 end
@@ -196,19 +116,13 @@ function _alert(pressures)
     end
 end
 
-function standardize end
-
-function customize end
-
-function parseoutput end
-
 function expand_settings end
 
 function check_software_settings end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
-vscaling()::NTuple{2,<:AbstractFloat} = (0.5, 1.5)
+vscaling() = (0.5, 1.5)
 
 function expandeos(settings)
     type = lowercase(settings["type"])
@@ -236,12 +150,15 @@ function expandeos(settings)
 end
 
 function check_settings(settings)
-    for key in ("templates", "pressures", "trial_eos", "workdir")
-        @assert haskey(settings, key)
+    for key in ("templates", "pressures", "workdir", "pressures")
+        @assert haskey(settings, key) "`\"$key\"` was not found in settings!"
     end
-    @assert haskey(settings, "pressures") || haskey(settings, "volumes")
+    if !haskey(settings["pressures"], "unit")
+        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+    end
+    @assert haskey(settings, "trial_eos") || haskey(settings, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
     if !isdir(expanduser(settings["workdir"]))
-        @warn "`workdir` is not reachable, be careful!"
+        @warn "`workdir` \"$(settings["workdir"])\" is not reachable, be careful!"
     end
     for path in settings["templates"]
         if !isfile(path)
@@ -250,7 +167,7 @@ function check_settings(settings)
     end
     _alert(settings["pressures"]["values"])
     for key in ("type", "parameters")
-        @assert haskey(settings["trial_eos"], key)
+        @assert haskey(settings["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
 end
 
