@@ -1,15 +1,14 @@
-struct MakeInput{T} <: Action{T}
-    calc::T
-end
-function (x::MakeInput)(file, template::Input, args...)
-    input = customize(standardize(template, x.calc), args...)
+struct MakeInput{T} <: Action{T} end
+function (x::MakeInput{T})(file, template::Input, args...) where {T}
+    modify = customize(args...) ∘ standardize(T())
+    input = modify(template)
     writeinput(file, input)
     return input
 end
-function (x::MakeInput)(cfgfile; kwargs...)
+function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
     settings = load_settings(cfgfile)
-    infiles = first.(iofiles(x.calc, cfgfile))
-    eos = PressureEOS(x.calc isa Scf ? settings.trial_eos : FitEos(Scf())(cfgfile))
+    infiles = first.(iofiles(T(), cfgfile))
+    eos = PressureEOS(T <: Scf ? settings.trial_eos : FitEos{Scf}()(cfgfile))
     return broadcast(
         x,
         infiles,
