@@ -127,9 +127,17 @@ function checkconfig(config)
     for key in ("pressures", "qe", "templates", "workdir")
         @assert haskey(config, key) "`\"$key\"` was not found in settings!"
     end
-    if !haskey(config["pressures"], "unit")
-        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
+    let subconfig = config["pressures"]
+        if !haskey(subconfig, "unit")
+            @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+        end
+        _alert(subconfig["values"])
+        if config["templates"] isa Vector
+            if length(subconfig["values"]) != length(config["templates"])
+                throw(DimensionMismatch("templates and pressures have different length!"))
+            end
+        end
     end
     let workdir = expanduser(config["workdir"])
         if !isdir(workdir)
@@ -141,7 +149,6 @@ function checkconfig(config)
             @warn "template \"$path\" is not reachable, be careful!"
         end
     end
-    _alert(config["pressures"]["values"])
     if haskey(config, "trial_eos")
         @assert !haskey(config, "volumes") "key \"trial_eos\" and \"volumes\" are mutually exclusive!"
         for key in ("type", "parameters")
