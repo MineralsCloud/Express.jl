@@ -131,9 +131,6 @@ function checkconfig(config)
     end
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
     let subconfig = config["pressures"]
-        if !haskey(subconfig, "unit")
-            @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
-        end
         _alert(subconfig["values"])
         if config["templates"] isa Vector
             if length(subconfig["values"]) != length(config["templates"])
@@ -159,9 +156,6 @@ function checkconfig(config)
     end
     if haskey(config, "volumes")
         subconfig = config["volumes"]
-        if !haskey(subconfig, "unit")
-            @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
-        end
         if subconfig["values"] isa Vector
             if length(subconfig["values"]) != length(config["pressures"]["values"])
                 throw(DimensionMismatch("volumes and pressures have different length!"))
