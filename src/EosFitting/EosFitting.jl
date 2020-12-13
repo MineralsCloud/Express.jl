@@ -144,6 +144,7 @@ function checkconfig(config)
         @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
+    return
 end
 
 function materialize end
