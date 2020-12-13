@@ -87,15 +87,6 @@ function buildworkflow(cfgfile)
     return step16
 end
 
-function _alert(pressures)
-    if length(pressures) <= 5
-        @info "pressures <= 5 may give unreliable results, consider more if possible!"
-    end
-    if minimum(pressures) >= zero(eltype(pressures))
-        @warn "for better fitting, we need at least 1 negative pressure!"
-    end
-end
-
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 function materialize_eos(config)
@@ -121,6 +112,15 @@ function materialize_eos(config)
     end
     values = (v * uparse(u; unit_context = UNIT_CONTEXT) for (v, u) in config["parameters"])
     return ctor(values...)
+end
+
+function _alert(pressures)
+    if length(pressures) <= 5
+        @info "pressures <= 5 may give unreliable results, consider more if possible!"
+    end
+    if minimum(pressures) >= zero(eltype(pressures))
+        @warn "for better fitting, we need at least 1 negative pressure!"
+    end
 end
 
 function checkconfig(config)
