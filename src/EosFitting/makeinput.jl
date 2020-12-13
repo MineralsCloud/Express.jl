@@ -16,7 +16,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
         x,
         infiles,
         settings.templates,
-        settings.pressures_or_volumes,
+        settings.pressures,
         fill(eos, length(infiles));
         kwargs...,
     )
