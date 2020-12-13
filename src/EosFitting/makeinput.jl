@@ -22,7 +22,6 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
     )
 end
 
-buildjob(::MakeInput{T}, cfgfile) where {T} =
-    InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
+buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
 
 function adjust end
