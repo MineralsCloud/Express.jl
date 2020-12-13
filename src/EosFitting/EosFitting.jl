@@ -124,11 +124,12 @@ function _alert(pressures)
 end
 
 function checkconfig(config)
-    for key in ("templates", "pressures", "workdir", "pressures")
+    for key in ("pressures", "qe", "templates", "workdir")
         @assert haskey(config, key) "`\"$key\"` was not found in settings!"
     end
     if !haskey(config["pressures"], "unit")
         @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+    checkconfig(currentsoftware(), config["qe"])  # To be implemented
     end
     if !isdir(expanduser(config["workdir"]))
         @warn "`workdir` \"$(config["workdir"])\" is not reachable, be careful!"
@@ -142,7 +143,6 @@ function checkconfig(config)
     for key in ("type", "parameters")
         @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
-    checkconfig(currentsoftware(), config["qe"])  # To be implemented
     return
 end
 
