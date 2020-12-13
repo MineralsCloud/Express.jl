@@ -9,7 +9,7 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     infiles = first.(iofiles(T(), cfgfile))
     eos = PressureEOS(T <: Scf ? settings.trial_eos : FitEos{Scf}()(cfgfile))
     return broadcast(

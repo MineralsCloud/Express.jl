@@ -26,7 +26,7 @@ using ..Express:
     MakeCmd,
     distprocs,
     makescript,
-    load_settings
+    loadconfig
 using ..EosFitting: VcOptim
 
 import AbInitioSoftwareBase.Inputs: set_cell
@@ -48,7 +48,7 @@ export Dfpt,
     standardize,
     standardize,
     customize,
-    load_settings
+    loadconfig
 
 struct Dfpt <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end
@@ -97,7 +97,7 @@ function (x::MakeInput{<:Union{Scf,LatticeDynamics}})(
     return objects
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     previnputs = map(settings.dirs) do dir
         file = joinpath(dir, shortname(prevcalc(T)) * ".in")
@@ -108,7 +108,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
     return x(files, settings.templates[order(T)], previnputs; kwargs...)
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     templates = settings.templates[1]
     templates = if length(templates) == 1
@@ -125,7 +125,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
     return x(files, templates; kwargs...)
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,VDos}}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     ifcinputs = map(settings.dirs) do dir
         file = joinpath(dir, shortname(RealSpaceForceConstants()) * ".in")
@@ -145,7 +145,7 @@ end
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
     return Express.buildjob(

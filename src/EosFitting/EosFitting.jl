@@ -37,7 +37,7 @@ using ..Express:
     calculation,
     distprocs,
     makescript,
-    load_settings
+    loadconfig
 
 export SelfConsistentField,
     Scf,
@@ -51,7 +51,7 @@ export SelfConsistentField,
     FitEos,
     GetData,
     SaveEos,
-    load_settings,
+    loadconfig,
     iofiles,
     calculation,
     makescript,
@@ -72,7 +72,7 @@ include("fiteos.jl")
 include("saveeos.jl")
 
 function iofiles(T::ScfOrOptim, cfgfile)
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     return map(settings.dirs) do dir
         prefix = joinpath(dir, shortname(T))
         prefix * ".in" => prefix * ".out"
@@ -83,7 +83,7 @@ buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     io = iofiles(T(), cfgfile)
     infiles, outfiles = first.(io), last.(io)
     return Express.buildjob(
