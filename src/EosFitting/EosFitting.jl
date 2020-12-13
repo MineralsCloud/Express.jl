@@ -168,14 +168,14 @@ end
 
 function checkconfig(config)
     for key in ("pressures", "qe", "templates", "workdir")
-        @assert haskey(config, key) "`\"$key\"` was not found in settings!"
+        @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
-    let subconfig = config["pressures"]
-        _alert(subconfig["values"])
-        if config["templates"] isa Vector
-            if length(subconfig["values"]) != length(config["templates"])
-                throw(DimensionMismatch("templates and pressures have different length!"))
+    let subconfig = config["pressures"], values = subconfig["values"]
+        _alert(values)
+        if length(config["templates"]) != 1
+            if length(values) != length(config["templates"])
+                throw(DimensionMismatch("templates and pressures have different lengths!"))
             end
         end
     end
@@ -184,14 +184,7 @@ function checkconfig(config)
             @warn "`\"workdir\"` \"$workdir\" is not reachable, be careful!"
         end
     end
-    if config["templates"] isa Vector
-        for path in config["templates"]
-            if !isfile(path)
-                @warn "template \"$path\" is not reachable, be careful!"
-            end
-        end
-    else
-        path = config["templates"]
+    for path in config["templates"]
         if !isfile(path)
             @warn "template \"$path\" is not reachable, be careful!"
         end
@@ -204,9 +197,9 @@ function checkconfig(config)
     end
     if haskey(config, "volumes")
         subconfig = config["volumes"]
-        if subconfig["values"] isa Vector
+        if length(subconfig["values"]) != 1
             if length(subconfig["values"]) != length(config["pressures"]["values"])
-                throw(DimensionMismatch("volumes and pressures have different length!"))
+                throw(DimensionMismatch("volumes and pressures have different lengths!"))
             end
         end
     end
