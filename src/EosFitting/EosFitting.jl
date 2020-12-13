@@ -22,6 +22,7 @@ using ..Express:
     FixedIonSelfConsistentField,
     MakeCmd,
     calculation,
+    currentsoftware,
     makescript,
     loadconfig
 
