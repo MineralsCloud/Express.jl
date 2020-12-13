@@ -46,7 +46,9 @@ export SelfConsistentField,
     makescript,
     buildjob
 
-println("Load the `EosFitting` module of the corresponding software before running some functions!")
+function __init__()
+    @warn "load the `EosFitting` module of the corresponding software before running some functions!"
+end
 
 const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
