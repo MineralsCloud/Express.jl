@@ -44,6 +44,8 @@ export SelfConsistentField,
     makescript,
     buildjob
 
+const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
+
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
@@ -117,10 +119,7 @@ function materialize_eos(config)
     else
         error("unsupported eos type `\"$type\"`!")
     end
-    values = map(config["parameters"]) do (v, u)
-        v * uparse(u; unit_context = [Unitful, UnitfulAtomic])
-    end
-    return constructor(values...)
+    values = (v * uparse(u; unit_context = UNIT_CONTEXT) for (v, u) in config["parameters"])
 end
 
 function checkconfig(config)
