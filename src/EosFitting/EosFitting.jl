@@ -112,7 +112,10 @@ function materialize_eos(config)
     else
         error("unsupported eos type `\"$type\"`!")
     end
-    values = (v * uparse(u; unit_context = UNIT_CONTEXT) for (v, u) in config["parameters"])
+    values = (
+        v * uparse(string(u); unit_context = UNIT_CONTEXT) for
+        (v, u) in config["parameters"]
+    )
     return ctor(values...)
 end
 
