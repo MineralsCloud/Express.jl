@@ -118,26 +118,28 @@ end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
-function expandeos(settings)
-    type = lowercase(settings["type"])
-    constructor = if type in ("m", "murnaghan")
+function materialize_eos(config)
+    selection = lowercase(config["type"])
+    constructor = if selection in ("m", "murnaghan")
         Murnaghan
-    elseif type in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
+    elseif selection in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
         BirchMurnaghan2nd
-    elseif type in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
+    elseif selection in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
         BirchMurnaghan3rd
-    elseif type in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
+    elseif selection in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
         BirchMurnaghan4th
-    elseif type in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
+    elseif selection in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
         PoirierTarantola2nd
-    elseif type in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
+    elseif selection in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
         PoirierTarantola3rd
-    elseif type in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
+    elseif selection in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
         PoirierTarantola4th
-    elseif type in ("v", "vinet")
+    elseif selection in ("v", "vinet")
         Vinet
+    else
+        error("unsupported eos type `\"$type\"`!")
     end
-    values = map(settings["parameters"]) do (v, u)
+    values = map(config["parameters"]) do (v, u)
         v * uparse(u; unit_context = [Unitful, UnitfulAtomic])
     end
     return constructor(values...)
