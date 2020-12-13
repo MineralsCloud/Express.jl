@@ -140,8 +140,12 @@ function checkconfig(config)
         end
     end
     _alert(config["pressures"]["values"])
-    for key in ("type", "parameters")
-        @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
+    if haskey(config, "trial_eos")
+        @assert !haskey(config, "volumes") "key \"trial_eos\" and \"volumes\" are mutually exclusive!"
+        for key in ("type", "parameters")
+            @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
+        end
+    end
     end
     return
 end
