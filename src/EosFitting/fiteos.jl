@@ -22,3 +22,5 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     SaveEos{T}(saveto, eos)
     return eos
 end
+
+buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))

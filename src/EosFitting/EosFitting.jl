@@ -9,7 +9,7 @@ using EquationsOfStateOfSolids.Collections:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using SimpleWorkflow: InternalAtomicJob, chain
+using SimpleWorkflow: chain
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
@@ -59,9 +59,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
-buildjob(::MakeInput{T}, cfgfile) where {T} =
-    InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = loadconfig(cfgfile)
     io = iofiles(T(), cfgfile)
@@ -155,12 +152,14 @@ module DefaultActions
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writeinput
 using EquationsOfStateOfSolids.Collections:
-    EquationOfStateOfSolids, EnergyEOS, PressureEOS, getparam
+    EquationOfStateOfSolids, EnergyEOS, PressureEOS, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Serialization: serialize, deserialize
+using SimpleWorkflow: InternalAtomicJob
 
 using ...Express: Action, loadconfig
 using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
+import ...EosFitting: buildjob
 
 include("makeinput.jl")
 include("getdata.jl")
