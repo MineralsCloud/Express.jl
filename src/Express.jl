@@ -84,7 +84,7 @@ function loadconfig(cfgfile)
     settings = load(cfgfile)
     mod = whichmodule(settings["workflow"])
     getproperty(mod, :checkconfig)(settings)  # Errors will be thrown if exist
-    return getproperty(mod, :expand_settings)(settings)
+    return getproperty(mod, :materialize)(settings)
 end
 
 function currentsoftware end
