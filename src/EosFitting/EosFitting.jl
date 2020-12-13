@@ -165,7 +165,7 @@ function checkconfig(config)
     end
 end
 
-function expand_settings end
+function materialize end
 
 function check_software_settings end
 
