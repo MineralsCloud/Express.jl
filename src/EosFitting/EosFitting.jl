@@ -130,7 +130,6 @@ function checkconfig(config)
     if !haskey(config["pressures"], "unit")
         @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
     end
-    @assert haskey(config, "trial_eos") || haskey(config, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
     if !isdir(expanduser(config["workdir"]))
         @warn "`workdir` \"$(config["workdir"])\" is not reachable, be careful!"
     end
