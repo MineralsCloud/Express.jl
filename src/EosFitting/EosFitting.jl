@@ -131,8 +131,10 @@ function checkconfig(config)
         @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
     end
-    if !isdir(expanduser(config["workdir"]))
-        @warn "`workdir` \"$(config["workdir"])\" is not reachable, be careful!"
+    let workdir = expanduser(config["workdir"])
+        if !isdir(workdir)
+            @warn "`\"workdir\"` \"$workdir\" is not reachable, be careful!"
+        end
     end
     for path in config["templates"]
         if !isfile(path)
