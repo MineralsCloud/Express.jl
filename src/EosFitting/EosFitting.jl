@@ -99,27 +99,28 @@ end
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 function materialize_eos(config)
-    selection = lowercase(config["type"])
-    constructor = if selection in ("m", "murnaghan")
+    name = lowercase(config["name"])
+    ctor = if name in ("m", "murnaghan")
         Murnaghan
-    elseif selection in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
+    elseif name in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
         BirchMurnaghan2nd
-    elseif selection in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
+    elseif name in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
         BirchMurnaghan3rd
-    elseif selection in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
+    elseif name in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
         BirchMurnaghan4th
-    elseif selection in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
+    elseif name in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
         PoirierTarantola2nd
-    elseif selection in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
+    elseif name in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
         PoirierTarantola3rd
-    elseif selection in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
+    elseif name in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
         PoirierTarantola4th
-    elseif selection in ("v", "vinet")
+    elseif name in ("v", "vinet")
         Vinet
     else
         error("unsupported eos type `\"$type\"`!")
     end
     values = (v * uparse(u; unit_context = UNIT_CONTEXT) for (v, u) in config["parameters"])
+    return ctor(values...)
 end
 
 function checkconfig(config)
