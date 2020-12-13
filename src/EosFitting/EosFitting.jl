@@ -58,24 +58,24 @@ const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 function iofiles(T::ScfOrOptim, cfgfile)
-    settings = loadconfig(cfgfile)
-    return map(settings.dirs) do dir
+    config = loadconfig(cfgfile)
+    return map(config.dirs) do dir
         prefix = joinpath(dir, shortname(T))
         prefix * ".in" => prefix * ".out"
     end
 end
 
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    settings = loadconfig(cfgfile)
+    config = loadconfig(cfgfile)
     io = iofiles(T(), cfgfile)
     infiles, outfiles = first.(io), last.(io)
     return Express.buildjob(
         x,
         outfiles,
         infiles,
-        settings.manager.np,
-        settings.bin;
-        use_shell = settings.use_shell,
+        config.manager.np,
+        config.bin;
+        use_shell = config.use_shell,
     )
 end
 
