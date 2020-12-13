@@ -184,7 +184,14 @@ function checkconfig(config)
             @warn "`\"workdir\"` \"$workdir\" is not reachable, be careful!"
         end
     end
-    for path in config["templates"]
+    if config["templates"] isa Vector
+        for path in config["templates"]
+            if !isfile(path)
+                @warn "template \"$path\" is not reachable, be careful!"
+            end
+        end
+    else
+        path = config["templates"]
         if !isfile(path)
             @warn "template \"$path\" is not reachable, be careful!"
         end
