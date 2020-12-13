@@ -9,14 +9,14 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
-    settings = loadconfig(cfgfile)
+    config = loadconfig(cfgfile)
     infiles = first.(iofiles(T(), cfgfile))
-    eos = PressureEOS(T <: Scf ? settings.trial_eos : FitEos{Scf}()(cfgfile))
+    eos = PressureEOS(T <: Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
     return broadcast(
         x,
         infiles,
-        settings.templates,
-        settings.pressures,
+        config.templates,
+        config.pressures,
         fill(eos, length(infiles));
         kwargs...,
     )

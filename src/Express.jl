@@ -74,17 +74,17 @@ function buildjob(x::MakeCmd, outputs, inputs, np, exe; kwargs...)
     return parallel(jobs...)
 end
 
-function buildworkflow(cfgfile)
-    settings = load(cfgfile)
-    mod = whichmodule(settings["workflow"])
-    return getproperty(mod, :buildworkflow)(cfgfile)
+function buildworkflow(file)
+    config = load(file)
+    mod = whichmodule(config["workflow"])
+    return mod.buildworkflow(file)
 end
 
-function loadconfig(cfgfile)
-    settings = load(cfgfile)
-    mod = whichmodule(settings["workflow"])
-    getproperty(mod, :checkconfig)(settings)  # Errors will be thrown if exist
-    return getproperty(mod, :materialize)(settings)
+function loadconfig(file)
+    config = load(file)
+    mod = whichmodule(config["workflow"])
+    mod.checkconfig(config)  # Errors will be thrown if exist
+    return mod.materialize(config)
 end
 
 function currentsoftware end
