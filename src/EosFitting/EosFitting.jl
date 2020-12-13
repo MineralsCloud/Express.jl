@@ -44,6 +44,8 @@ export SelfConsistentField,
     makescript,
     buildjob
 
+println("Load the `EosFitting` module of the corresponding software before running some functions!")
+
 const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
 struct StructuralOptimization <: Optimization end
