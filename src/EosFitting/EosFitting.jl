@@ -116,10 +116,6 @@ function _alert(pressures)
     end
 end
 
-function expand_settings end
-
-function check_software_settings end
-
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 function expandeos(settings)
@@ -168,5 +164,9 @@ function check_settings(settings)
         @assert haskey(settings["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
 end
+
+function expand_settings end
+
+function check_software_settings end
 
 end
