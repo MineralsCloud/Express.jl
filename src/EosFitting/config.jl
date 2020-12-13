@@ -36,10 +36,10 @@ function materialize_press(config)
         end;
         unit_context = UNIT_CONTEXT,
     )
-    return map(Base.Fix1(*, unit), config["values"])
+    return map(Base.Fix2(*, unit), config["values"])
 end
 
-function materialize_vol(config, templates)
+function materialize_vol(config, templates)  # Arg `templates` have the same length as `pressures` already.
     if haskey(config, "volumes")
         subconfig = config["volumes"]
         unit = uparse(
@@ -51,9 +51,13 @@ function materialize_vol(config, templates)
             end;
             unit_context = UNIT_CONTEXT,
         )
-        return map(Base.Fix1(*, unit), subconfig["values"])
+        if length(subconfig["values"]) == 1
+            return fill(only(subconfig["values"]) * unit, length(templates))
+        else
+            return map(Base.Fix2(*, unit), subconfig["values"])
+        end
     else
-        return map(cellvolume, templates) * u"bohr^3"
+        return map(cellvolume, templates) * u"bohr^3"  # FIXME: Are units all `bohr^3` for different software?
     end
 end
 

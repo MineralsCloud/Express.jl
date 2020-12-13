@@ -1,5 +1,6 @@
 module EosFitting
 
+using Compat: only
 using Crystallography: cellvolume
 using EquationsOfStateOfSolids.Collections:
     Murnaghan,
