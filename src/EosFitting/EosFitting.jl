@@ -143,25 +143,25 @@ function expandeos(settings)
     return constructor(values...)
 end
 
-function check_settings(settings)
+function checkconfig(config)
     for key in ("templates", "pressures", "workdir", "pressures")
-        @assert haskey(settings, key) "`\"$key\"` was not found in settings!"
+        @assert haskey(config, key) "`\"$key\"` was not found in settings!"
     end
-    if !haskey(settings["pressures"], "unit")
+    if !haskey(config["pressures"], "unit")
         @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
     end
-    @assert haskey(settings, "trial_eos") || haskey(settings, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
-    if !isdir(expanduser(settings["workdir"]))
-        @warn "`workdir` \"$(settings["workdir"])\" is not reachable, be careful!"
+    @assert haskey(config, "trial_eos") || haskey(config, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
+    if !isdir(expanduser(config["workdir"]))
+        @warn "`workdir` \"$(config["workdir"])\" is not reachable, be careful!"
     end
-    for path in settings["templates"]
+    for path in config["templates"]
         if !isfile(path)
             @warn "template \"$path\" is not reachable, be careful!"
         end
     end
-    _alert(settings["pressures"]["values"])
+    _alert(config["pressures"]["values"])
     for key in ("type", "parameters")
-        @assert haskey(settings["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
+        @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
 end
 

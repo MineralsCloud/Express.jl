@@ -208,7 +208,7 @@ function inputtype end
 
 function parsecell end
 
-function check_settings(settings)
+function checkconfig(settings)
     map(("templates", "pressures", "workdir")) do key
         @assert haskey(settings, key)
     end
