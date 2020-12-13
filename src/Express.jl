@@ -87,6 +87,8 @@ function loadconfig(cfgfile)
     return getproperty(mod, :expand_settings)(settings)
 end
 
+function currentsoftware end
+
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting/EosFitting.jl")
