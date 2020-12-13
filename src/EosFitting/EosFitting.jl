@@ -44,6 +44,8 @@ export SelfConsistentField,
     makescript,
     buildjob
 
+println("Load the `EosFitting` module of the corresponding software before running some functions!")
+
 const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
 struct StructuralOptimization <: Optimization end
@@ -87,15 +89,6 @@ function buildworkflow(cfgfile)
     return step16
 end
 
-function _alert(pressures)
-    if length(pressures) <= 5
-        @info "pressures <= 5 may give unreliable results, consider more if possible!"
-    end
-    if minimum(pressures) >= zero(eltype(pressures))
-        @warn "for better fitting, we need at least 1 negative pressure!"
-    end
-end
-
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 function materialize_eos(config)
@@ -123,27 +116,52 @@ function materialize_eos(config)
     return ctor(values...)
 end
 
+function _alert(pressures)
+    if length(pressures) <= 5
+        @info "pressures <= 5 may give unreliable results, consider more if possible!"
+    end
+    if minimum(pressures) >= zero(eltype(pressures))
+        @warn "for better fitting, we need at least 1 negative pressure!"
+    end
+end
+
 function checkconfig(config)
-    for key in ("templates", "pressures", "workdir", "pressures")
+    for key in ("pressures", "qe", "templates", "workdir")
         @assert haskey(config, key) "`\"$key\"` was not found in settings!"
     end
-    if !haskey(config["pressures"], "unit")
-        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+    checkconfig(currentsoftware(), config["qe"])  # To be implemented
+    let subconfig = config["pressures"]
+        _alert(subconfig["values"])
+        if config["templates"] isa Vector
+            if length(subconfig["values"]) != length(config["templates"])
+                throw(DimensionMismatch("templates and pressures have different length!"))
+            end
+        end
     end
-    @assert haskey(config, "trial_eos") || haskey(config, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
-    if !isdir(expanduser(config["workdir"]))
-        @warn "`workdir` \"$(config["workdir"])\" is not reachable, be careful!"
+    let workdir = expanduser(config["workdir"])
+        if !isdir(workdir)
+            @warn "`\"workdir\"` \"$workdir\" is not reachable, be careful!"
+        end
     end
     for path in config["templates"]
         if !isfile(path)
             @warn "template \"$path\" is not reachable, be careful!"
         end
     end
-    _alert(config["pressures"]["values"])
-    for key in ("type", "parameters")
-        @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
+    if haskey(config, "trial_eos")
+        @assert !haskey(config, "volumes") "key \"trial_eos\" and \"volumes\" are mutually exclusive!"
+        for key in ("name", "parameters")
+            @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
+        end
     end
-    checkconfig(currentsoftware(), config["qe"])  # To be implemented
+    if haskey(config, "volumes")
+        subconfig = config["volumes"]
+        if subconfig["values"] isa Vector
+            if length(subconfig["values"]) != length(config["pressures"]["values"])
+                throw(DimensionMismatch("volumes and pressures have different length!"))
+            end
+        end
+    end
     return
 end
 
