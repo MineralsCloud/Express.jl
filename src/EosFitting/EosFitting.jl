@@ -1,5 +1,6 @@
 module EosFitting
 
+using Crystallography: cellvolume
 using EquationsOfStateOfSolids.Collections:
     Murnaghan,
     BirchMurnaghan2nd,
@@ -10,7 +11,7 @@ using EquationsOfStateOfSolids.Collections:
     PoirierTarantola4th,
     Vinet
 using SimpleWorkflow: chain
-using Unitful: uparse
+using Unitful: uparse, ustrip, @u_str
 import Unitful
 import UnitfulAtomic
 
@@ -117,6 +118,43 @@ function materialize_eos(config)
         (v, u) in config["parameters"]
     )
     return ctor(values...)
+end
+
+function materialize_press(config)
+    unit = uparse(
+        if haskey(config, "unit")
+            config["unit"]
+        else
+            @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+            u"GPa"
+        end;
+        unit_context = UNIT_CONTEXT,
+    )
+    return map(Base.Fix1(*, unit), config["values"])
+end
+
+function materialize_vol(config, templates)
+    if haskey(config, "volumes")
+        subconfig = config["volumes"]
+        unit = uparse(
+            if haskey(subconfig, "unit")
+                subconfig["unit"]
+            else
+                @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
+                u"bohr^3"
+            end;
+            unit_context = UNIT_CONTEXT,
+        )
+        return map(Base.Fix1(*, unit), subconfig["values"])
+    else
+        return map(cellvolume, templates) * u"bohr^3"
+    end
+end
+
+function materialize_dirs(config, pressures)
+    return map(pressures) do pressure
+        abspath(joinpath(expanduser(config), "p" * string(ustrip(pressure))))
+    end
 end
 
 function _alert(pressures)
