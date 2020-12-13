@@ -37,7 +37,7 @@ using ..Express:
     calculation,
     distprocs,
     makescript,
-    load_settings
+    loadconfig
 
 export SelfConsistentField,
     Scf,
@@ -51,7 +51,7 @@ export SelfConsistentField,
     FitEos,
     GetData,
     SaveEos,
-    load_settings,
+    loadconfig,
     iofiles,
     calculation,
     makescript,
@@ -72,7 +72,7 @@ include("fiteos.jl")
 include("saveeos.jl")
 
 function iofiles(T::ScfOrOptim, cfgfile)
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     return map(settings.dirs) do dir
         prefix = joinpath(dir, shortname(T))
         prefix * ".in" => prefix * ".out"
@@ -83,7 +83,7 @@ buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     io = iofiles(T(), cfgfile)
     infiles, outfiles = first.(io), last.(io)
     return Express.buildjob(
@@ -116,59 +116,58 @@ function _alert(pressures)
     end
 end
 
-function expand_settings end
-
-function check_software_settings end
-
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
-vscaling() = (0.5, 1.5)
-
-function expandeos(settings)
-    type = lowercase(settings["type"])
-    constructor = if type in ("m", "murnaghan")
+function materialize_eos(config)
+    selection = lowercase(config["type"])
+    constructor = if selection in ("m", "murnaghan")
         Murnaghan
-    elseif type in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
+    elseif selection in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
         BirchMurnaghan2nd
-    elseif type in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
+    elseif selection in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
         BirchMurnaghan3rd
-    elseif type in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
+    elseif selection in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
         BirchMurnaghan4th
-    elseif type in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
+    elseif selection in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
         PoirierTarantola2nd
-    elseif type in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
+    elseif selection in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
         PoirierTarantola3rd
-    elseif type in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
+    elseif selection in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
         PoirierTarantola4th
-    elseif type in ("v", "vinet")
+    elseif selection in ("v", "vinet")
         Vinet
+    else
+        error("unsupported eos type `\"$type\"`!")
     end
-    values = map(settings["parameters"]) do (v, u)
+    values = map(config["parameters"]) do (v, u)
         v * uparse(u; unit_context = [Unitful, UnitfulAtomic])
     end
     return constructor(values...)
 end
 
-function check_settings(settings)
+function checkconfig(config)
     for key in ("templates", "pressures", "workdir", "pressures")
-        @assert haskey(settings, key) "`\"$key\"` was not found in settings!"
+        @assert haskey(config, key) "`\"$key\"` was not found in settings!"
     end
-    if !haskey(settings["pressures"], "unit")
+    if !haskey(config["pressures"], "unit")
         @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
     end
-    @assert haskey(settings, "trial_eos") || haskey(settings, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
-    if !isdir(expanduser(settings["workdir"]))
-        @warn "`workdir` \"$(settings["workdir"])\" is not reachable, be careful!"
+    @assert haskey(config, "trial_eos") || haskey(config, "volumes") "either `\"trial_eos\"` or `\"volumes\"` is required in settings!"
+    if !isdir(expanduser(config["workdir"]))
+        @warn "`workdir` \"$(config["workdir"])\" is not reachable, be careful!"
     end
-    for path in settings["templates"]
+    for path in config["templates"]
         if !isfile(path)
             @warn "template \"$path\" is not reachable, be careful!"
         end
     end
-    _alert(settings["pressures"]["values"])
+    _alert(config["pressures"]["values"])
     for key in ("type", "parameters")
-        @assert haskey(settings["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
+        @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
     end
+    checkconfig(currentsoftware(), config["qe"])  # To be implemented
 end
+
+function materialize end
 
 end

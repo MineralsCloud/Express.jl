@@ -13,7 +13,7 @@ function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
     return x(data, trial_eos)
 end
 function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
-    settings = load_settings(cfgfile)
+    settings = loadconfig(cfgfile)
     outfiles = last.(iofiles(T(), cfgfile))
     rawsettings = load(cfgfile)
     saveto = joinpath(rawsettings["workdir"], shortname(T) * "_eos.jls")

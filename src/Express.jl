@@ -80,12 +80,14 @@ function buildworkflow(cfgfile)
     return getproperty(mod, :buildworkflow)(cfgfile)
 end
 
-function load_settings(cfgfile)
+function loadconfig(cfgfile)
     settings = load(cfgfile)
     mod = whichmodule(settings["workflow"])
-    getproperty(mod, :check_settings)(settings)  # Errors will be thrown if exist
+    getproperty(mod, :checkconfig)(settings)  # Errors will be thrown if exist
     return getproperty(mod, :expand_settings)(settings)
 end
+
+function currentsoftware end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
