@@ -155,6 +155,16 @@ function checkconfig(config)
             @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
         end
     end
+    if haskey(config, "volumes")
+        subconfig = config["volumes"]
+        if !haskey(subconfig, "unit")
+            @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
+        end
+        if subconfig["values"] isa Vector
+            if length(subconfig["values"]) != length(config["pressures"]["values"])
+                throw(DimensionMismatch("volumes and pressures have different length!"))
+            end
+        end
     end
     return
 end
