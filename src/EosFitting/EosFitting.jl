@@ -1,14 +1,6 @@
 module EosFitting
 
-using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.CLI: Mpiexec
-using AbInitioSoftwareBase.Inputs: Input, writeinput
-using Compat: isnothing
 using EquationsOfStateOfSolids.Collections:
-    EquationOfStateOfSolids,
-    EnergyEOS,
-    PressureEOS,
-    Parameters,
     Murnaghan,
     BirchMurnaghan2nd,
     BirchMurnaghan3rd,
@@ -16,26 +8,20 @@ using EquationsOfStateOfSolids.Collections:
     PoirierTarantola2nd,
     PoirierTarantola3rd,
     PoirierTarantola4th,
-    Vinet,
-    getparam
-using EquationsOfStateOfSolids.Fitting: eosfit
-using Serialization: serialize, deserialize
-using SimpleWorkflow: InternalAtomicJob, chain
+    Vinet
+using SimpleWorkflow: chain
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
 import ..Express
 using ..Express:
-    Calculation,
     Optimization,
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
-    Action,
     MakeCmd,
     calculation,
-    distprocs,
     makescript,
     loadconfig
 
@@ -55,7 +41,6 @@ export SelfConsistentField,
     iofiles,
     calculation,
     makescript,
-    writeinput,
     buildjob
 
 struct StructuralOptimization <: Optimization end
@@ -66,11 +51,6 @@ const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
-include("makeinput.jl")
-include("getdata.jl")
-include("fiteos.jl")
-include("saveeos.jl")
-
 function iofiles(T::ScfOrOptim, cfgfile)
     settings = loadconfig(cfgfile)
     return map(settings.dirs) do dir
@@ -79,9 +59,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-buildjob(x::FitEos, args...) = InternalAtomicJob(() -> x(args...))
-buildjob(::MakeInput{T}, cfgfile) where {T} =
-    InternalAtomicJob(() -> MakeInput{T}()(cfgfile))
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = loadconfig(cfgfile)
     io = iofiles(T(), cfgfile)
@@ -169,5 +146,28 @@ function checkconfig(config)
 end
 
 function materialize end
+
+module DefaultActions
+
+using AbInitioSoftwareBase: save, load, extension
+using AbInitioSoftwareBase.Inputs: Input, writeinput
+using EquationsOfStateOfSolids.Collections:
+    EquationOfStateOfSolids, EnergyEOS, PressureEOS, Parameters, getparam
+using EquationsOfStateOfSolids.Fitting: eosfit
+using Serialization: serialize, deserialize
+using SimpleWorkflow: InternalAtomicJob
+
+using ...Express: Action, loadconfig
+using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
+import ...EosFitting: buildjob
+
+include("makeinput.jl")
+include("getdata.jl")
+include("fiteos.jl")
+include("saveeos.jl")
+
+end
+
+using .DefaultActions: MakeInput, GetData, FitEos, SaveEos
 
 end
