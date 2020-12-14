@@ -107,6 +107,7 @@ using EquationsOfStateOfSolids.Collections:
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob
+using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig
 using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
