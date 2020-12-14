@@ -94,6 +94,8 @@ end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
+vscale() = (0.5, 1.5)
+
 include("config.jl")
 
 module DefaultActions
