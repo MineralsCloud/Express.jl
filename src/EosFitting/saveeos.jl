@@ -1,12 +1,12 @@
 struct SaveEos{T} <: Action{T} end
-function (::SaveEos{T})(path, eos::Parameters) where {T<:ScfOrOptim}
-    ext = lowercase(extension(path))
+function (::SaveEos{T})(file, eos::Parameters) where {T<:ScfOrOptim}
+    ext = lowercase(extension(file))
     if ext == "jls"
-        open(path, "w") do io
+        open(file, "w") do io
             serialize(io, eos)
         end
     elseif ext in ("json", "yaml", "yml", "toml")
-        save(path, eos)
+        save(file, eos)
     else
         error("unsupported file extension `$ext`!")
     end
