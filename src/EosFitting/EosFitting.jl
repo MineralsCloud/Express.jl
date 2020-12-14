@@ -85,9 +85,18 @@ function buildworkflow(cfgfile)
     step1 = buildjob(MakeInput{Scf}(), cfgfile)
     step12 = chain(step1, buildjob(MakeCmd{Scf}(), cfgfile)[1])
     step123 = chain(step12[end], buildjob(FitEos{Scf}(), cfgfile))
+    step3p =
+        buildjob(GetData{Scf}(), shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile)))
+    step123 = chain(step123[end], step3p)
     step4 = buildjob(MakeInput{VcOptim}(), cfgfile)
     step45 = chain(step4, buildjob(MakeCmd{VcOptim}(), cfgfile)[1])
     step456 = chain(step45[end], buildjob(FitEos{VcOptim}(), cfgfile))
+    step6p = buildjob(
+        GetData{VcOptim}(),
+        shortname(VcOptim) * ".json",
+        last.(iofiles(VcOptim(), cfgfile)),
+    )
+    step456 = chain(step456[end], step6p)
     step16 = chain(step123[end], step456[1])
     return step16
 end
