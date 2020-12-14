@@ -52,7 +52,7 @@ function materialize_vol(config, templates)  # Arg `templates` have the same len
             unit_context = UNIT_CONTEXT,
         )
         if length(subconfig["values"]) == 1
-            return fill(only(subconfig["values"]) * unit, length(templates))
+            return repeat(subconfig["values"] * unit, length(templates))
         else
             return map(Base.Fix2(*, unit), subconfig["values"])
         end
