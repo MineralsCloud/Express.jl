@@ -16,7 +16,9 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     config = loadconfig(cfgfile)
     outfiles = last.(iofiles(T(), cfgfile))
     saveto = joinpath(config.workdir, shortname(T) * "_eos.jls")
-    trial_eos = T <: Scf ? config.trial_eos : deserialize(shortname(Scf) * "_eos.jls")
+    trial_eos =
+        T <: Scf ? config.trial_eos :
+        deserialize(joinpath(config.workdir, shortname(Scf) * "_eos.jls"))
     eos = x(outfiles, EnergyEOS(trial_eos))
     SaveEos{T}()(saveto, eos)
     return eos
