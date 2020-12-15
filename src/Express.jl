@@ -5,6 +5,10 @@ using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
 using Mustache: render
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
+import Unitful
+import UnitfulAtomic
+
+const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end

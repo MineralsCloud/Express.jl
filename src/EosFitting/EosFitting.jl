@@ -12,11 +12,10 @@ using EquationsOfStateOfSolids.Collections:
     Vinet
 using SimpleWorkflow: chain
 using Unitful: uparse, ustrip, @u_str
-import Unitful
-import UnitfulAtomic
 
 import ..Express
 using ..Express:
+    UNIT_CONTEXT,
     Optimization,
     SelfConsistentField,
     Scf,
@@ -44,8 +43,6 @@ export SelfConsistentField,
     calculation,
     makescript,
     buildjob
-
-const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
