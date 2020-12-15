@@ -1,12 +1,11 @@
 function materialize_press_vol(config)
-    unit = uparse(
+    unit = _uparse(
         if haskey(config, "unit")
             config["unit"]
         else
             @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
             u"GPa"
-        end;
-        unit_context = UNIT_CONTEXT,
+        end
     )
     return map(Base.Fix2(*, unit), config["values"])
 end

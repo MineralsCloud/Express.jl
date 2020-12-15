@@ -19,38 +19,29 @@ function materialize_eos(config)
     else
         error("unsupported eos type `\"$type\"`!")
     end
-    values = (
-        v * uparse(string(u); unit_context = UNIT_CONTEXT) for
-        (v, u) in config["parameters"]
-    )
+    values = (v * _uparse(string(u)) for (v, u) in config["parameters"])
     return ctor(values...)
 end
 
 function materialize_press(config)
-    unit = uparse(
-        if haskey(config, "unit")
-            config["unit"]
-        else
-            @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
-            "GPa"
-        end;
-        unit_context = UNIT_CONTEXT,
-    )
+    unit = _uparse(if haskey(config, "unit")
+        config["unit"]
+    else
+        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+        "GPa"
+    end)
     return map(Base.Fix2(*, unit), config["values"])
 end
 
 function materialize_vol(config, templates)  # Arg `templates` have the same length as `pressures` already.
     if haskey(config, "volumes")
         subconfig = config["volumes"]
-        unit = uparse(
-            if haskey(subconfig, "unit")
-                subconfig["unit"]
-            else
-                @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
-                "bohr^3"
-            end;
-            unit_context = UNIT_CONTEXT,
-        )
+        unit = _uparse(if haskey(subconfig, "unit")
+            subconfig["unit"]
+        else
+            @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
+            "bohr^3"
+        end)
         if length(subconfig["values"]) == 1
             return repeat(subconfig["values"] * unit, length(templates))
         else

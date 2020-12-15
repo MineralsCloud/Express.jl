@@ -14,11 +14,10 @@ module Phonon
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using SimpleWorkflow: chain
-using Unitful: uparse, ustrip, @u_str
+using Unitful: ustrip, @u_str
 
 import ..Express
 using ..Express:
-    UNIT_CONTEXT,
     Calculation,
     LatticeDynamics,
     SelfConsistentField,
@@ -29,7 +28,8 @@ using ..Express:
     distprocs,
     currentsoftware,
     makescript,
-    loadconfig
+    loadconfig,
+    _uparse
 using ..EosFitting: VcOptim
 
 export Dfpt,

@@ -11,12 +11,11 @@ using EquationsOfStateOfSolids.Collections:
     PoirierTarantola4th,
     Vinet
 using SimpleWorkflow: chain
-using Unitful: uparse, ustrip, @u_str
+using Unitful: ustrip, @u_str
 using UnitfulAtomic: bohr
 
 import ..Express
 using ..Express:
-    UNIT_CONTEXT,
     Optimization,
     SelfConsistentField,
     Scf,
@@ -25,7 +24,8 @@ using ..Express:
     calculation,
     currentsoftware,
     makescript,
-    loadconfig
+    loadconfig,
+    _uparse
 
 export SelfConsistentField,
     Scf,
