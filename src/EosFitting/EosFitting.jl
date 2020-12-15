@@ -11,9 +11,8 @@ using EquationsOfStateOfSolids.Collections:
     PoirierTarantola4th,
     Vinet
 using SimpleWorkflow: chain
-using Unitful: uparse, ustrip, @u_str
-import Unitful
-import UnitfulAtomic
+using Unitful: ustrip, @u_str
+using UnitfulAtomic: bohr
 
 import ..Express
 using ..Express:
@@ -25,7 +24,8 @@ using ..Express:
     calculation,
     currentsoftware,
     makescript,
-    loadconfig
+    loadconfig,
+    _uparse
 
 export SelfConsistentField,
     Scf,
@@ -44,8 +44,6 @@ export SelfConsistentField,
     calculation,
     makescript,
     buildjob
-
-const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end

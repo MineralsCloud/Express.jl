@@ -5,6 +5,11 @@ using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
 using Mustache: render
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
+using Unitful: uparse
+import Unitful
+import UnitfulAtomic
+
+_uparse(string) = uparse(string; unit_context = [Unitful, UnitfulAtomic])
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
@@ -92,6 +97,6 @@ function currentsoftware end
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting/EosFitting.jl")
-# include("Phonon.jl")
+include("Phonon/Phonon.jl")
 
 end
