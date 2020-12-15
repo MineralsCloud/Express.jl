@@ -32,7 +32,7 @@ function materialize_press(config)
             config["unit"]
         else
             @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
-            u"GPa"
+            "GPa"
         end;
         unit_context = UNIT_CONTEXT,
     )
@@ -47,7 +47,7 @@ function materialize_vol(config, templates)  # Arg `templates` have the same len
                 subconfig["unit"]
             else
                 @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
-                u"bohr^3"
+                "bohr^3"
             end;
             unit_context = UNIT_CONTEXT,
         )
@@ -57,7 +57,7 @@ function materialize_vol(config, templates)  # Arg `templates` have the same len
             return map(Base.Fix2(*, unit), subconfig["values"])
         end
     else
-        return map(cellvolume, templates) * u"bohr^3"  # FIXME: Are units all `bohr^3` for different software?
+        return map(cellvolume, templates) * bohr^3  # FIXME: Are units all `bohr^3` for different software?
     end
 end
 

@@ -12,6 +12,7 @@ using EquationsOfStateOfSolids.Collections:
     Vinet
 using SimpleWorkflow: chain
 using Unitful: uparse, ustrip, @u_str
+using UnitfulAtomic: bohr
 
 import ..Express
 using ..Express:
