@@ -34,7 +34,6 @@ function checkconfig(config)
     else
         error("\"pressures\" or \"volumes\", there must be one!")
     end
-    subconfig = config[key]
     return
 end
 
