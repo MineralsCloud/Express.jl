@@ -12,8 +12,8 @@ julia>
 module Phonon
 
 using AbInitioSoftwareBase: load
-using AbInitioSoftwareBase.Inputs: Input, writeinput
-using SimpleWorkflow: InternalAtomicJob, chain
+using AbInitioSoftwareBase.Inputs: Input
+using SimpleWorkflow: chain
 
 import ..Express
 using ..Express:
@@ -29,8 +29,6 @@ using ..Express:
     loadconfig
 using ..EosFitting: VcOptim
 
-import AbInitioSoftwareBase.Inputs: set_cell
-
 export Dfpt,
     Dfpt,
     SelfConsistentField,
@@ -44,10 +42,6 @@ export Dfpt,
     ZoneCentrePhonons,
     MakeInput,
     makescript,
-    writeinput,
-    standardize,
-    standardize,
-    customize,
     loadconfig
 
 struct Dfpt <: LatticeDynamics end
@@ -166,5 +160,7 @@ using ..Phonon:
 include("makeinput.jl")
 
 end
+
+using .DefaultActions: MakeInput
 
 end
