@@ -92,6 +92,6 @@ function currentsoftware end
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("EosFitting/EosFitting.jl")
-# include("Phonon.jl")
+include("Phonon/Phonon.jl")
 
 end
