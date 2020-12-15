@@ -14,6 +14,9 @@ module Phonon
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using SimpleWorkflow: chain
+using Unitful: uparse, ustrip, @u_str
+import Unitful
+import UnitfulAtomic
 
 import ..Express
 using ..Express:
@@ -25,6 +28,7 @@ using ..Express:
     Action,
     MakeCmd,
     distprocs,
+    currentsoftware,
     makescript,
     loadconfig
 using ..EosFitting: VcOptim
@@ -43,6 +47,8 @@ export Dfpt,
     MakeInput,
     makescript,
     loadconfig
+
+const UNIT_CONTEXT = [Unitful, UnitfulAtomic]
 
 struct Dfpt <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end

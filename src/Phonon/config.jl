@@ -1,3 +1,16 @@
+function materialize_press_vol(config)
+    unit = uparse(
+        if haskey(config, "unit")
+            config["unit"]
+        else
+            @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
+            u"GPa"
+        end;
+        unit_context = UNIT_CONTEXT,
+    )
+    return map(Base.Fix2(*, unit), config["values"])
+end
+
 function checkconfig(config)
     map(("templates", "qe", "workdir")) do key
         @assert haskey(config, key)
@@ -25,3 +38,5 @@ function checkconfig(config)
     subconfig = config[key]
     return
 end
+
+function materialize end
