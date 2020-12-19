@@ -106,7 +106,7 @@ module DefaultActions
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writeinput
 using EquationsOfStateOfSolids.Collections:
-    EquationOfStateOfSolids, EnergyEOS, PressureEOS, Parameters, getparam
+    EquationOfStateOfSolids, EnergyEos, PressureEos, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob

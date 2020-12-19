@@ -1,11 +1,11 @@
 struct FitEos{T} <: Action{T} end
 function (x::FitEos{T})(
     data::AbstractVector{<:Pair},
-    trial_eos::EnergyEOS,
+    trial_eos::EnergyEos,
 ) where {T<:ScfOrOptim}
     return eosfit(trial_eos, first.(data), last.(data))
 end
-function (x::FitEos{T})(outputs, trial_eos::EnergyEOS) where {T<:ScfOrOptim}
+function (x::FitEos{T})(outputs, trial_eos::EnergyEos) where {T<:ScfOrOptim}
     data = GetData{T}()(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
@@ -19,7 +19,7 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     trial_eos =
         T <: Scf ? config.trial_eos :
         deserialize(joinpath(config.workdir, shortname(Scf) * "_eos.jls"))
-    eos = x(outfiles, EnergyEOS(trial_eos))
+    eos = x(outfiles, EnergyEos(trial_eos))
     SaveEos{T}()(saveto, eos)
     return eos
 end
