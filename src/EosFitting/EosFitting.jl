@@ -25,7 +25,7 @@ using ..Express:
     currentsoftware,
     makescript,
     loadconfig,
-    _uparse
+    myuparse
 
 export SelfConsistentField,
     Scf,

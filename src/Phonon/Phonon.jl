@@ -29,7 +29,7 @@ using ..Express:
     currentsoftware,
     makescript,
     loadconfig,
-    _uparse
+    myuparse
 using ..EosFitting: VcOptim
 
 export Dfpt,

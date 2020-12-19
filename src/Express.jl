@@ -9,7 +9,7 @@ using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
-_uparse(string) = uparse(string; unit_context = [Unitful, UnitfulAtomic])
+myuparse(string) = uparse(string; unit_context = [Unitful, UnitfulAtomic])
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
