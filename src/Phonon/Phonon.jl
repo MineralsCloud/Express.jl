@@ -55,18 +55,6 @@ struct ZoneCenterPhonons <: LatticeDynamics end
 const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
-function set_cell(template::Input, output)
-    cell = open(output, "r") do io
-        str = read(io, String)
-        parsecell(str)
-    end
-    if any(x === nothing for x in cell)
-        error("set cell failed!")
-    else
-        return set_cell(template, cell...)
-    end
-end
-
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     settings = loadconfig(cfgfile)
     inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
