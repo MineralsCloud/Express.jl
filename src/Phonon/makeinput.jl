@@ -45,7 +45,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
             error("set cell failed!")
         end
     end
-    return broadcast(x, files, templates, cells; kwargs...)
+    return broadcast(x, files, templates, first.(cells), last.(cells); kwargs...)
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,VDos}}
     settings = loadconfig(cfgfile)
