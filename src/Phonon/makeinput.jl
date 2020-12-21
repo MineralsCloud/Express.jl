@@ -1,10 +1,10 @@
 struct MakeInput{T} <: Action{T} end
-function (::MakeInput{T})(template::S, args...)::S where {T,S<:Input}
+function (::MakeInput{T})(template::S, args...)::S where {T,S<:inputtype(T)}
     return adjust(template, T(), args...)
 end
 function (x::MakeInput{T})(
     file,
-    template::Input,
+    template::inputtype(T),
     args...;
     kwargs...,
 ) where {T<:Union{Scf,LatticeDynamics}}
@@ -55,13 +55,13 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
     ifcinputs = map(settings.dirs) do dir
         file = joinpath(dir, shortname(RealSpaceForceConstants()) * ".in")
         open(file, "r") do io
-            parse(inputtype(RealSpaceForceConstants()), read(file, String))
+            parse(inputtype(RealSpaceForceConstants), read(file, String))
         end
     end
     dfptinputs = map(settings.dirs) do dir
         file = joinpath(dir, shortname(Dfpt()) * ".in")
         open(file, "r") do io
-            parse(inputtype(Dfpt()), read(file, String))
+            parse(inputtype(Dfpt), read(file, String))
         end
     end
     return broadcast(
