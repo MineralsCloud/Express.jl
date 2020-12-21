@@ -1,10 +1,13 @@
 struct MakeInput{T} <: Action{T} end
-function (::MakeInput{T})(template::S, args...)::S where {T,S<:inputtype(T)}
+function (::MakeInput{T})(
+    template::S,
+    args...,
+)::S where {T<:Union{Scf,LatticeDynamics},S<:Input}
     return adjust(template, T(), args...)
 end
 function (x::MakeInput{T})(
-    file,
-    template::inputtype(T),
+    file::Union{AbstractString},
+    template::Input,
     args...;
     kwargs...,
 ) where {T<:Union{Scf,LatticeDynamics}}
@@ -78,7 +81,7 @@ function adjust end
 
 function parsecell end
 
-inputtype(::Type{<:Calculation}) = Any
+function inputtype end
 
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))
