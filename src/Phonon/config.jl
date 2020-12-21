@@ -9,15 +9,10 @@ function materialize_press_vol(config)
 end
 
 function checkconfig(config)
-    map(("templates", "qe", "workdir")) do key
+    map(("templates", "qe")) do key
         @assert haskey(config, key)
     end
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
-    let workdir = expanduser(config["workdir"])
-        if !isdir(workdir)
-            @warn "`\"workdir\"` \"$workdir\" is not reachable, be careful!"
-        end
-    end
     for paths in config["templates"]
         for path in paths
             if !isfile(path)

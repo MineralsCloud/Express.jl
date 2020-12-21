@@ -19,9 +19,6 @@ In the examples below, I will use `YAML` syntax for configuration files.
   - `manager` means the process manager to be used. By now, only set `local`.
   - `n` is the total number of processes available. If running on a node with 24
     processors, set it to `24`. If multiple nodes are being used, just add them up.
-- `workdir` is the working directory. When running, the directory will be changed to there.
-  That is, if you are using relative paths for `template`, `bin`, etc., the root directory
-  will be `dir`.
 - `templates` is a vector of the template files for scf and vc-relax calculations. If it has
   only one value, all the pressures share the same template. If it has more than one value,
   the number of files must be equal to the number of pressures. That is, each pressure has
@@ -50,7 +47,6 @@ qe:
   bin: pw.x
   manager: local
   n: 32
-workdir: examples/Ge
 save: examples/Ge/Ge.eos
 templates:
   - examples/Ge/template.in
