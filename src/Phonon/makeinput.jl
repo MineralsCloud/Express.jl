@@ -43,6 +43,8 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
         end
         if any(x === nothing for x in cell)
             error("set cell failed!")
+        else
+            cell
         end
     end
     return broadcast(x, files, templates, first.(cells), last.(cells); kwargs...)
