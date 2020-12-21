@@ -68,7 +68,7 @@ function _alert(pressures)
 end
 
 function checkconfig(config)
-    for key in ("pressures", "qe", "templates", "workdir")
+    for key in ("pressures", "qe", "templates")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
     checkconfig(currentsoftware(), config["qe"])  # To be implemented
@@ -78,11 +78,6 @@ function checkconfig(config)
             if length(values) != length(config["templates"])
                 throw(DimensionMismatch("templates and pressures have different lengths!"))
             end
-        end
-    end
-    let workdir = expanduser(config["workdir"])
-        if !isdir(workdir)
-            @warn "`\"workdir\"` \"$workdir\" is not reachable, be careful!"
         end
     end
     for path in config["templates"]
