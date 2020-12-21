@@ -78,7 +78,7 @@ function adjust end
 
 function parsecell end
 
-function inputtype end
+inputtype(::Type{<:Calculation}) = Any
 
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))
