@@ -1,27 +1,17 @@
 struct MakeInput{T} <: Action{T} end
+function (::MakeInput{T})(template::S, args...)::S where {T,S<:Input}
+    return adjust(template, T(), args...)
+end
 function (x::MakeInput{T})(
     file,
     template::Input,
     args...;
     kwargs...,
 ) where {T<:Union{Scf,LatticeDynamics}}
-    object = customize(standardize(template, T()), args...; kwargs...)
-    writeinput(file, object)
-    return object
-end
-function (x::MakeInput{<:Union{Scf,LatticeDynamics}})(
-    files,
-    templates,
-    restargs...;
-    kwargs...,
-)
-    if templates isa Input
-        templates = fill(templates, size(files))
-    end
-    objects = map(files, templates, zip(restargs...)) do file, template, args
-        x(file, template, args...; kwargs...)
-    end
-    return objects
+    input = x(template, args...)
+    mkpath(dirname(file))  # In case its parent directory is not created
+    writeinput(file, input)
+    return input
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
     settings = loadconfig(cfgfile)
@@ -32,7 +22,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
             parse(inputtype(prevcalc(T)), read(file, String))
         end
     end
-    return x(files, settings.templates[order(T)], previnputs; kwargs...)
+    return broadcast(x, files, settings.templates[order(T)], previnputs; kwargs...)
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
     settings = loadconfig(cfgfile)
@@ -45,11 +35,19 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
     else
         templates
     end
-    templates = map(settings.dirs, templates) do dir, template
+    cells = map(settings.dirs, templates) do dir, template
         file = joinpath(dir, shortname(VcOptim()) * ".out")
-        set_cell(template, file)
+        cell = open(file, "r") do io
+            str = read(io, String)
+            parsecell(str)
+        end
+        if any(x === nothing for x in cell)
+            error("set cell failed!")
+        else
+            cell
+        end
     end
-    return x(files, templates; kwargs...)
+    return broadcast(x, files, templates, first.(cells), last.(cells); kwargs...)
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,VDos}}
     settings = loadconfig(cfgfile)
@@ -66,12 +64,21 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
             parse(inputtype(Dfpt()), read(file, String))
         end
     end
-    return x(files, settings.templates[order(T)], ifcinputs, dfptinputs; kwargs...)
+    return broadcast(
+        x,
+        files,
+        settings.templates[order(T)],
+        ifcinputs,
+        dfptinputs;
+        kwargs...,
+    )
 end
 
-function standardize end
+function adjust end
 
-function customize end
+function parsecell end
+
+function inputtype end
 
 buildjob(::MakeInput{T}, cfgfile) where {T} =
     InternalAtomicJob(() -> MakeInput(T())(cfgfile))

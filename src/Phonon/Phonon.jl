@@ -105,16 +105,6 @@ prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
 
 shortname(x::Calculation) = shortname(typeof(x))
 
-function parseoutput end
-
-function expand_settings end
-
-function check_software_settings end
-
-function inputtype end
-
-function parsecell end
-
 include("config.jl")
 
 module DefaultActions
@@ -131,7 +121,6 @@ using ..Phonon:
     VDos,
     shortname,
     prevcalc,
-    inputtype,
     order
 
 include("makeinput.jl")
