@@ -68,10 +68,11 @@ function _alert(pressures)
 end
 
 function checkconfig(config)
-    for key in ("pressures", "qe", "templates")
+    for key in ("np", "pressures", "bin", "templates")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
-    checkconfig(currentsoftware(), config["qe"])  # To be implemented
+    @assert config["np"] isa Integer
+    checkconfig(currentsoftware(), config["bin"])  # To be implemented
     let subconfig = config["pressures"], values = subconfig["values"]
         _alert(values)
         if length(config["templates"]) != 1
