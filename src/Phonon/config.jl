@@ -9,10 +9,11 @@ function materialize_press_vol(config)
 end
 
 function checkconfig(config)
-    map(("templates", "qe")) do key
-        @assert haskey(config, key)
+    for key in ("np", "bin", "templates")
+        @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
-    checkconfig(currentsoftware(), config["qe"])  # To be implemented
+    @assert config["np"] isa Integer
+    checkconfig(currentsoftware(), config["bin"])  # To be implemented
     for paths in config["templates"]
         for path in paths
             if !isfile(path)
