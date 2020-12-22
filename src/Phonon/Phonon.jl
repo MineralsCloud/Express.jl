@@ -70,22 +70,22 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
 end
 
 function buildworkflow(cfgfile)
-    step1 = buildjob(MakeInput(Scf()), cfgfile)
-    step2 = chain(step1, buildjob(MakeCmd(Scf()), cfgfile)[1])
-    step3 = chain(step2[end], buildjob(MakeInput(Dfpt()), cfgfile))
-    step4 = chain(step3[end], buildjob(MakeCmd(Dfpt()), cfgfile)[1])
-    step5 = chain(step4[end], buildjob(MakeInput(RealSpaceForceConstants()), cfgfile))
-    step6 = chain(step5[end], buildjob(MakeCmd(RealSpaceForceConstants()), cfgfile)[1])
+    step1 = buildjob(MakeInput{Scf}(), cfgfile)
+    step2 = chain(step1, buildjob(MakeCmd{Scf}(), cfgfile)[1])
+    step3 = chain(step2[end], buildjob(MakeInput{Dfpt}(), cfgfile))
+    step4 = chain(step3[end], buildjob(MakeCmd{Dfpt}(), cfgfile)[1])
+    step5 = chain(step4[end], buildjob(MakeInput{RealSpaceForceConstants}(), cfgfile))
+    step6 = chain(step5[end], buildjob(MakeCmd{RealSpaceForceConstants}(), cfgfile)[1])
     settings = load(cfgfile)
     x = if settings["workflow"] == "phonon dispersion"
-        PhononDispersion()
+        PhononDispersion
     elseif settings["workflow"] == "vdos"
-        VDos()
+        VDos
     else
         error("unsupported option!")
     end
-    step7 = chain(step6[end], buildjob(MakeInput(x), cfgfile))
-    step8 = chain(step7[end], buildjob(MakeCmd(x), cfgfile)[1])
+    step7 = chain(step6[end], buildjob(MakeInput{x}(), cfgfile))
+    step8 = chain(step7[end], buildjob(MakeCmd{x}(), cfgfile)[1])
     return step8
 end
 
@@ -115,13 +115,7 @@ using SimpleWorkflow: InternalAtomicJob
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig
 using ...EosFitting: VcOptim
 using ..Phonon:
-    Dfpt,
-    RealSpaceForceConstants,
-    PhononDispersion,
-    VDos,
-    shortname,
-    prevcalc,
-    order
+    Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 
 include("makeinput.jl")
 
