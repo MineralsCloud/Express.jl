@@ -117,6 +117,8 @@ using ...EosFitting: VcOptim
 using ..Phonon:
     Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 
+import ..Phonon: buildjob
+
 include("makeinput.jl")
 
 end

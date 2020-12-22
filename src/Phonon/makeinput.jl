@@ -83,5 +83,4 @@ function parsecell end
 
 function inputtype end
 
-buildjob(::MakeInput{T}, cfgfile) where {T} =
-    InternalAtomicJob(() -> MakeInput(T())(cfgfile))
+buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
