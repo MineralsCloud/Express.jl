@@ -12,7 +12,7 @@ function checkconfig(config)
     for key in ("np", "bin", "templates")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
-    @assert config["np"] isa Integer
+    @assert config["np"] isa Integer && config["np"] >= 1
     checkconfig(currentsoftware(), config["bin"])  # To be implemented
     for paths in config["templates"]
         for path in paths
