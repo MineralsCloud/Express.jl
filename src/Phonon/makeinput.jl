@@ -50,7 +50,13 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
             cell
         end
     end
-    return broadcast(x, files, templates, first.(cells), last.(cells); kwargs...)
+    phinputs = map(settings.dirs) do dir
+        file = joinpath(dir, shortname(nextcalc(T)) * ".in")
+        open(file, "r") do io
+            parse(inputtype(nextcalc(T)), read(file, String))
+        end
+    end
+    return broadcast(x, files, templates, first.(cells), last.(cells), phinputs; kwargs...)
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,VDos}}
     settings = loadconfig(cfgfile)
@@ -78,6 +84,8 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
 end
 
 function adjust end
+
+function nextcalc end
 
 function parsecell end
 
