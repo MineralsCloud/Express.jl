@@ -118,7 +118,14 @@ using SimpleWorkflow: InternalAtomicJob
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig
 using ...EosFitting: VcOptim
 using ..Phonon:
-    Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
+    Dfpt,
+    RealSpaceForceConstants,
+    PhononDispersion,
+    VDos,
+    shortname,
+    prevcalc,
+    nextcalc,
+    order
 
 import ..Phonon: buildjob
 
