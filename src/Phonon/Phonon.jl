@@ -103,6 +103,9 @@ prevcalc(::Type{RealSpaceForceConstants}) = Dfpt()
 prevcalc(::Type{PhononDispersion}) = RealSpaceForceConstants()
 prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
 
+nextcalc(x) = nextcalc(typeof(x))
+nextcalc(::Type{Scf}) = Dfpt()
+
 shortname(x::Calculation) = shortname(typeof(x))
 
 include("config.jl")

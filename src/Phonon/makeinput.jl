@@ -85,8 +85,6 @@ end
 
 function adjust end
 
-function nextcalc end
-
 function parsecell end
 
 function inputtype end
