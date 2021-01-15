@@ -50,6 +50,8 @@ function whichmodule(name)
         EosFitting
     elseif name in ("phonon dispersion", "vdos")
         Phonon
+    elseif name in ("qha single", "qha multi")
+        Qha
     else
         error("workflow `$name` is not recognized!")
     end
@@ -99,5 +101,6 @@ function currentsoftware end
 # include("BandStructure.jl")
 include("EosFitting/EosFitting.jl")
 include("Phonon/Phonon.jl")
+include("Qha/Qha.jl")
 
 end
