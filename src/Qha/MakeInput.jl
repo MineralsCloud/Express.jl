@@ -4,7 +4,9 @@ function (x::MakeInput{QuasiHarmonicApprox})(inp_file_list, inp_static, inp_q_po
 end
 function (x::MakeInput{QuasiHarmonicApprox})(cfgfile)
     input, file, inp_file_list, static, q_points = loadconfig(cfgfile)
-    x(inp_file_list, static, q_points)
+    cd(dirname(input)) do
+        x(inp_file_list, static, q_points)
+    end
 end
 
 buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
