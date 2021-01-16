@@ -116,10 +116,10 @@ using ...Express: Action, loadconfig
 using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
 import ...EosFitting: buildjob
 
-include("makeinput.jl")
-include("getdata.jl")
-include("fiteos.jl")
-include("saveeos.jl")
+include("MakeInput.jl")
+include("GetData.jl")
+include("FitEos.jl")
+include("SaveEos.jl")
 
 end
 

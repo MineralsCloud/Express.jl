@@ -119,7 +119,7 @@ using ..Phonon:
 
 import ..Phonon: buildjob
 
-include("makeinput.jl")
+include("MakeInput.jl")
 
 end
 
