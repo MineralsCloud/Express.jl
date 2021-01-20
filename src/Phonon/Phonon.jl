@@ -66,6 +66,8 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
         settings.manager.np,
         settings.bin[order(T)];
         use_shell = settings.use_shell,
+        script_template = config.script_template,
+        shell_args = config.shell_args,
     )
 end
 
