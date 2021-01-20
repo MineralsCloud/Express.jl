@@ -3,7 +3,7 @@ module Express
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
-using Mustache: render
+using Mustache: render_from_file, render, @mt_str
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 using Unitful: uparse
 import Unitful
@@ -31,15 +31,17 @@ function distprocs(nprocs, njobs)
     if !iszero(remainder)
         @warn "The processes are not fully balanced! Consider the number of subjobs!"
     end
-    return quotient
+    return quotient,
+    Tuple(range(quotient * i; stop = quotient * (i + 1) - 1) for i in 0:(njobs-1))
 end
 
+function makescript_from_file(file, view)
+    str = render_from_file(file, view)
+    return Script(str, view["script_template"])
+end
 function makescript(template, view)
-    map((:press, :nprocs, :in, :out, :script)) do key
-        @assert haskey(view, key)
-    end
     str = render(template, view)
-    return Script(str, view[:script])
+    return Script(str, view["script_template"])
 end
 makescript(template, args::Pair...) = makescript(template, Dict(args))
 makescript(template; kwargs...) = makescript(template, Dict(kwargs))
@@ -59,20 +61,51 @@ end
 
 struct MakeCmd{T} <: Action{T} end
 MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
-function (::MakeCmd)(output, input, np, exe; use_shell = false, kwargs...)
-    return scriptify(
-        Mpiexec(np; kwargs...),
-        exe;
-        stdin = input,
-        stdout = output,
-        use_shell = use_shell,
-    )
+function (::MakeCmd)(
+    output,
+    input,
+    np,
+    exe;
+    use_shell = false,
+    script_template = nothing,
+    shell_args = Dict(),
+    procs = (),
+    kwargs...,
+)
+    if isnothing(script_template)
+        return scriptify(
+            Mpiexec(np, []),
+            exe;
+            stdin = input,
+            stdout = output,
+            use_shell = use_shell,
+        )
+    else
+        view = merge(
+            Dict(
+                "output" => output,
+                "input" => input,
+                "np" => np,
+                "exe" => exe,
+                "script_template" => script_template,
+                "procs" => procs,
+            ),
+            shell_args,
+        )
+        return makescript_from_file(script_template, view)
+    end
 end
-function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
+function (x::MakeCmd)(
+    outputs::AbstractArray,
+    inputs::AbstractArray,
+    np,
+    exe;
+    kwargs...,
+)
     # `map` guarantees they are of the same size, no need to check.
-    n = distprocs(np, length(inputs))
-    return map(outputs, inputs) do output, input
-        x(output, input, n, exe; kwargs...)
+    n, proc_sets = distprocs(np, length(inputs))
+    return map(outputs, inputs, proc_sets) do output, input, procs
+        x(output, input, n, exe; procs = procs, kwargs...)
     end
 end
 

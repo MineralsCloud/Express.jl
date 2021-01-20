@@ -14,6 +14,9 @@ function checkconfig(config)
     end
     @assert config["np"] isa Integer && config["np"] >= 1
     checkconfig(currentsoftware(), config["bin"])  # To be implemented
+    if haskey(config, "use_shell") && config["use_shell"]
+        @assert config["shell_args"] isa AbstractDict
+    end
     for paths in config["templates"]
         for path in paths
             if !isfile(path)
