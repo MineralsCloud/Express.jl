@@ -23,7 +23,7 @@ end
 
 module DefaultActions
 
-using AbInitioSoftwareBase.Inputs: Input, writeinput
+using AbInitioSoftwareBase.Inputs: Input, writetxt
 using PyQHA: converter, runcode, plot
 using SimpleWorkflow: InternalAtomicJob
 

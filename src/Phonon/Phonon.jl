@@ -109,7 +109,7 @@ include("config.jl")
 
 module DefaultActions
 
-using AbInitioSoftwareBase.Inputs: Input, writeinput
+using AbInitioSoftwareBase.Inputs: Input, writetxt
 using SimpleWorkflow: InternalAtomicJob
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig

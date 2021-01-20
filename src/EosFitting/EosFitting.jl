@@ -104,7 +104,7 @@ include("config.jl")
 module DefaultActions
 
 using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.Inputs: Input, writeinput
+using AbInitioSoftwareBase.Inputs: Input, writetxt
 using EquationsOfStateOfSolids.Collections:
     EquationOfStateOfSolids, EnergyEos, PressureEos, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit

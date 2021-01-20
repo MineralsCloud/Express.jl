@@ -5,7 +5,7 @@ end
 function (x::MakeInput)(file, template::Input, args...)
     input = x(template, args...)
     mkpath(dirname(file))  # In case its parent directory is not created
-    writeinput(file, input)
+    writetxt(file, input)
     return input
 end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
