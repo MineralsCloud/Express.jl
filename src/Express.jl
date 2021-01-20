@@ -69,6 +69,7 @@ function (::MakeCmd)(
     use_shell = false,
     script_template = nothing,
     shell_args = Dict(),
+    procs = (),
     kwargs...,
 )
     if isnothing(script_template)
@@ -87,17 +88,24 @@ function (::MakeCmd)(
                 "np" => np,
                 "exe" => exe,
                 "script_template" => script_template,
+                "procs" => procs,
             ),
             shell_args,
         )
         return makescript_from_file(script_template, view)
     end
 end
-function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
+function (x::MakeCmd)(
+    outputs::AbstractArray,
+    inputs::AbstractArray,
+    np,
+    exe;
+    kwargs...,
+)
     # `map` guarantees they are of the same size, no need to check.
-    n = distprocs(np, length(inputs))
-    return map(outputs, inputs) do output, input
-        x(output, input, n, exe; kwargs...)
+    n, proc_sets = distprocs(np, length(inputs))
+    return map(outputs, inputs, proc_sets) do output, input, procs
+        x(output, input, n, exe; procs = procs, kwargs...)
     end
 end
 
