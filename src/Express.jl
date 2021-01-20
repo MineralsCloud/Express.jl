@@ -3,7 +3,7 @@ module Express
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
-using Mustache: render
+using Mustache: render_from_file, render, @mt_str
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 using Unitful: uparse
 import Unitful
@@ -34,12 +34,13 @@ function distprocs(nprocs, njobs)
     return quotient
 end
 
+function makescript_from_file(file, view)
+    str = render_from_file(file, view)
+    return Script(str, view["script_template"])
+end
 function makescript(template, view)
-    map((:press, :nprocs, :in, :out, :script)) do key
-        @assert haskey(view, key)
-    end
     str = render(template, view)
-    return Script(str, view[:script])
+    return Script(str, view["script_template"])
 end
 makescript(template, args::Pair...) = makescript(template, Dict(args))
 makescript(template; kwargs...) = makescript(template, Dict(kwargs))
