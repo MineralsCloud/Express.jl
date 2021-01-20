@@ -60,14 +60,36 @@ end
 
 struct MakeCmd{T} <: Action{T} end
 MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
-function (::MakeCmd)(output, input, np, exe; use_shell = false, kwargs...)
-    return scriptify(
-        Mpiexec(np; kwargs...),
-        exe;
-        stdin = input,
-        stdout = output,
-        use_shell = use_shell,
-    )
+function (::MakeCmd)(
+    output,
+    input,
+    np,
+    exe;
+    use_shell = false,
+    script_template = nothing,
+    kwargs...,
+)
+    if isnothing(script_template)
+        return scriptify(
+            Mpiexec(np, []),
+            exe;
+            stdin = input,
+            stdout = output,
+            use_shell = use_shell,
+        )
+    else
+        str = read(script_template, String)
+        makescript_from_file(
+            script_template,
+            Dict(
+                "output" => output,
+                "input" => input,
+                "np" => np,
+                "exe" => exe,
+                "script_template" => script_template,
+            ),
+        )
+    end
 end
 function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
     # `map` guarantees they are of the same size, no need to check.
