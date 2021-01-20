@@ -67,6 +67,7 @@ function (::MakeCmd)(
     exe;
     use_shell = false,
     script_template = nothing,
+    shell_args = Dict(),
     kwargs...,
 )
     if isnothing(script_template)
@@ -78,9 +79,7 @@ function (::MakeCmd)(
             use_shell = use_shell,
         )
     else
-        str = read(script_template, String)
-        makescript_from_file(
-            script_template,
+        view = merge(
             Dict(
                 "output" => output,
                 "input" => input,
@@ -88,7 +87,9 @@ function (::MakeCmd)(
                 "exe" => exe,
                 "script_template" => script_template,
             ),
+            shell_args,
         )
+        return makescript_from_file(script_template, view)
     end
 end
 function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
