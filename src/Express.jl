@@ -31,7 +31,8 @@ function distprocs(nprocs, njobs)
     if !iszero(remainder)
         @warn "The processes are not fully balanced! Consider the number of subjobs!"
     end
-    return quotient
+    return quotient,
+    Tuple(range(quotient * i; stop = quotient * (i + 1) - 1) for i in 0:(njobs-1))
 end
 
 function makescript_from_file(file, view)
