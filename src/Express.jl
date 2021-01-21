@@ -74,7 +74,7 @@ function (::MakeCmd)(
 )
     if isnothing(script_template)
         return scriptify(
-            Mpiexec(np, []),
+            Mpiexec(np, Pair[]),
             exe;
             stdin = input,
             stdout = output,
@@ -95,13 +95,7 @@ function (::MakeCmd)(
         return makescript_from_file(script_template, view)
     end
 end
-function (x::MakeCmd)(
-    outputs::AbstractArray,
-    inputs::AbstractArray,
-    np,
-    exe;
-    kwargs...,
-)
+function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
     # `map` guarantees they are of the same size, no need to check.
     n, proc_sets = distprocs(np, length(inputs))
     return map(outputs, inputs, proc_sets) do output, input, procs
