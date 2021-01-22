@@ -81,10 +81,10 @@ function (::MakeCmd)(
     else
         view = merge(
             Dict(
-                "output" => output,
-                "input" => input,
+                "output" => abspath(output),
+                "input" => abspath(input),
                 "np" => np,
-                "exe" => exe,
+                "exe" => exe.bin,
                 "script_template" => script_template,
                 "procs" => procs,
             ),
