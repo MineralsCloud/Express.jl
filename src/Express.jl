@@ -90,6 +90,7 @@ function (::MakeCmd)(
             ),
             shell_args,
         )
+        mkpath(dirname(input))
         saveto, _ = mktemp(dirname(input); cleanup = false)
         return makescript_from_file(saveto, script_template, view)
     end
