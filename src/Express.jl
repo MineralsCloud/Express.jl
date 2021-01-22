@@ -35,16 +35,14 @@ function distprocs(nprocs, njobs)
     Tuple(range(quotient * i; stop = quotient * (i + 1) - 1) for i in 0:(njobs-1))
 end
 
-function makescript_from_file(file, view)
+function makescript_from_file(to, file, view)
     str = render_from_file(file, view)
-    return Script(str, view["script_template"])
+    return Script(str, to)
 end
-function makescript(template, view)
+function makescript(to, template, view)
     str = render(template, view)
-    return Script(str, view["script_template"])
+    return Script(str, to)
 end
-makescript(template, args::Pair...) = makescript(template, Dict(args))
-makescript(template; kwargs...) = makescript(template, Dict(kwargs))
 
 function whichmodule(name)
     name = lowercase(name)
@@ -92,7 +90,8 @@ function (::MakeCmd)(
             ),
             shell_args,
         )
-        return makescript_from_file(script_template, view)
+        saveto, _ = mktemp(dirname(input); cleanup = false)
+        return makescript_from_file(saveto, script_template, view)
     end
 end
 function (x::MakeCmd)(outputs::AbstractArray, inputs::AbstractArray, np, exe; kwargs...)
