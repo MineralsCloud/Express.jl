@@ -56,16 +56,16 @@ const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
 function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    settings = loadconfig(cfgfile)
-    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
-    out = map(dir -> joinpath(dir, shortname(T) * ".out"), settings.dirs)
+    config = loadconfig(cfgfile)
+    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
+    out = map(dir -> joinpath(dir, shortname(T) * ".out"), config.dirs)
     return Express.buildjob(
         x,
         out,
         inp,
-        settings.manager.np,
-        settings.bin[order(T)];
-        use_shell = settings.use_shell,
+        config.manager.np,
+        config.bin[order(T)];
+        use_shell = config.use_shell,
         script_template = config.script_template,
         shell_args = config.shell_args,
     )
