@@ -11,7 +11,7 @@ end
 function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
     config = loadconfig(cfgfile)
     infiles = first.(iofiles(T(), cfgfile))
-    eos = PressureEos(T <: Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
+    eos = PressureEquation(T <: Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
     return broadcast(
         x,
         infiles,

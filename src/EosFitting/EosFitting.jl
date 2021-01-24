@@ -1,7 +1,7 @@
 module EosFitting
 
 using Crystallography: cellvolume
-using EquationsOfStateOfSolids.Collections:
+using EquationsOfStateOfSolids:
     Murnaghan,
     BirchMurnaghan2nd,
     BirchMurnaghan3rd,
@@ -107,8 +107,8 @@ module DefaultActions
 
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
-using EquationsOfStateOfSolids.Collections:
-    EquationOfStateOfSolids, EnergyEos, PressureEos, Parameters, getparam
+using EquationsOfStateOfSolids:
+    EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob
