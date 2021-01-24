@@ -168,12 +168,12 @@ uuid = "97e2ac4a-e175-5f49-beb1-4d6866a6cdc3"
 version = "0.2.2"
 
 [[EquationsOfStateOfSolids]]
-deps = ["AutoHashEquals", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "dec2712f061d49d817b2108a83222f634a7c8712"
-repo-rev = "0.1.0"
+deps = ["AutoHashEquals", "Compat", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
+git-tree-sha1 = "256b0a1585bb2891760238730481f91d48b1bd27"
+repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/EquationsOfStateOfSolids.jl.git"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
-version = "0.1.0"
+version = "0.1.1"
 
 [[ExprTools]]
 git-tree-sha1 = "10407a39b87f29d47ebaca8edbc75d7c302ff93e"
