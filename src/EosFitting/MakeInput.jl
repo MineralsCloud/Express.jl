@@ -1,7 +1,4 @@
 struct MakeInput{T} <: Action{T} end
-function (::MakeInput{T})(template::S, args...)::S where {T,S<:Input}
-    return adjust(template, T(), args...)
-end
 function (x::MakeInput)(file, template::Input, args...)
     input = x(template, args...)
     dir = dirname(file)
@@ -27,5 +24,3 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
 end
 
 buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
-
-function adjust end
