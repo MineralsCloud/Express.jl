@@ -4,7 +4,11 @@ function (::MakeInput{T})(template::S, args...)::S where {T,S<:Input}
 end
 function (x::MakeInput)(file, template::Input, args...)
     input = x(template, args...)
-    mkpath(dirname(file))  # In case its parent directory is not created
+    dir = dirname(file)
+    if !isdir(dir)
+        @warn "directory `$dir` not found! I will create it for you."
+        mkpath(dir)
+    end
     writetxt(file, input)
     return input
 end
