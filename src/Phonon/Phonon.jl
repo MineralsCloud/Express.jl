@@ -30,7 +30,7 @@ using ..Express:
     makescript,
     loadconfig,
     myuparse
-using ..EosFitting: VcOptim
+using ..EosFitting: VCOptim
 
 export Dfpt,
     Dfpt,
@@ -99,7 +99,7 @@ order(::Type{PhononDispersion}) = 4
 order(::Type{PhononDensityOfStates}) = 4
 
 prevcalc(x) = prevcalc(typeof(x))
-prevcalc(::Type{Scf}) = VcOptim()
+prevcalc(::Type{Scf}) = VCOptim()
 prevcalc(::Type{Dfpt}) = Scf()
 prevcalc(::Type{RealSpaceForceConstants}) = Dfpt()
 prevcalc(::Type{PhononDispersion}) = RealSpaceForceConstants()
@@ -115,7 +115,7 @@ using AbInitioSoftwareBase.Inputs: Input, writetxt
 using SimpleWorkflow: InternalAtomicJob
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig
-using ...EosFitting: VcOptim
+using ...EosFitting: VCOptim
 using ..Phonon:
     Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 

@@ -34,7 +34,7 @@ export SelfConsistentField,
     FixedCellOptimization,
     VariableCellOptimization,
     Optim,
-    VcOptim,
+    VCOptim,
     MakeInput,
     FitEos,
     GetData,
@@ -49,7 +49,7 @@ struct FixedCellOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
 const Optim = FixedCellOptimization
-const VcOptim = VariableCellOptimization
+const VCOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 function iofiles(T::ScfOrOptim, cfgfile)
@@ -83,13 +83,13 @@ function buildworkflow(cfgfile)
     step3p =
         buildjob(GetData{Scf}(), shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile)))
     step123 = chain(step123[end], step3p)
-    step4 = buildjob(MakeInput{VcOptim}(), cfgfile)
-    step45 = chain(step4, buildjob(MakeCmd{VcOptim}(), cfgfile)[1])
-    step456 = chain(step45[end], buildjob(FitEos{VcOptim}(), cfgfile))
+    step4 = buildjob(MakeInput{VCOptim}(), cfgfile)
+    step45 = chain(step4, buildjob(MakeCmd{VCOptim}(), cfgfile)[1])
+    step456 = chain(step45[end], buildjob(FitEos{VCOptim}(), cfgfile))
     step6p = buildjob(
-        GetData{VcOptim}(),
-        shortname(VcOptim) * ".json",
-        last.(iofiles(VcOptim(), cfgfile)),
+        GetData{VCOptim}(),
+        shortname(VCOptim) * ".json",
+        last.(iofiles(VCOptim(), cfgfile)),
     )
     step456 = chain(step456[end], step6p)
     step16 = chain(step123[end], step456[1])

@@ -39,7 +39,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
         templates
     end
     cells = map(settings.dirs, templates) do dir, template
-        file = joinpath(dir, shortname(VcOptim()) * ".out")
+        file = joinpath(dir, shortname(VCOptim()) * ".out")
         cell = open(file, "r") do io
             str = read(io, String)
             parsecell(str)
