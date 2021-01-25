@@ -15,6 +15,7 @@ abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
 struct SelfConsistentField <: ElectronicStructure end
 abstract type Optimization <: Calculation end
+abstract type MolecularDynamics <: Calculation end
 abstract type LatticeDynamics <: Calculation end
 # Aliases
 const Calc = Calculation
