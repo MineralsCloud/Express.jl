@@ -33,7 +33,6 @@ export SelfConsistentField,
     FixedCellOptimization,
     FixedCellOptimization,
     VariableCellOptimization,
-    Optim,
     VCOptim,
     MakeInput,
     FitEos,
@@ -48,7 +47,6 @@ export SelfConsistentField,
 struct FixedCellOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
-const Optim = FixedCellOptimization
 const VCOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
