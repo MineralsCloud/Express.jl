@@ -30,10 +30,10 @@ using ..Express:
 export SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
-    StructuralOptimization,
+    FixedCellOptimization,
     FixedCellOptimization,
     VariableCellOptimization,
-    StOptim,
+    Optim,
     VcOptim,
     MakeInput,
     FitEos,
@@ -45,11 +45,10 @@ export SelfConsistentField,
     makescript,
     buildjob
 
-struct StructuralOptimization <: Optimization end
+struct FixedCellOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
-const FixedCellOptimization = StructuralOptimization
-const StOptim = StructuralOptimization
+const Optim = FixedCellOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
