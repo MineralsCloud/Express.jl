@@ -10,7 +10,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using SimpleWorkflow: chain
+using SimpleWorkflow: chain, run!
 using Unitful: ustrip, @u_str
 using UnitfulAtomic: bohr
 
@@ -43,6 +43,7 @@ export SelfConsistentField,
     iofiles,
     calculation,
     makescript,
+    run!,
     buildjob
 
 struct StructuralOptimization <: Optimization end

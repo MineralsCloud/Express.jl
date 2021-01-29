@@ -13,7 +13,7 @@ module Phonon
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
-using SimpleWorkflow: chain
+using SimpleWorkflow: chain, run!
 using Unitful: ustrip, @u_str
 
 import ..Express
@@ -45,6 +45,7 @@ export Dfpt,
     ZoneCentrePhonons,
     MakeInput,
     makescript,
+    run!,
     loadconfig
 
 struct Dfpt <: LatticeDynamics end
