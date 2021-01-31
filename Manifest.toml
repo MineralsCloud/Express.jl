@@ -39,9 +39,9 @@ version = "0.2.0"
 
 [[BangBang]]
 deps = ["Compat", "ConstructionBase", "Future", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables", "ZygoteRules"]
-git-tree-sha1 = "f42321255afc37da855b6cd9f2a1fc36c017ceee"
+git-tree-sha1 = "d53b1eaefd48e233545d21f5b764c8ee54df4a09"
 uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
-version = "0.3.29"
+version = "0.3.30"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -405,9 +405,9 @@ uuid = "87e2bd06-a317-5318-96d9-3ecbac512eee"
 version = "2.0.1"
 
 [[OrderedCollections]]
-git-tree-sha1 = "cf59cfed2e2c12e8a2ff0a4f1e9b2cd8650da6db"
+git-tree-sha1 = "d45739abcfc03b51f6a42712894a593f74c80a23"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.3.2"
+version = "1.3.3"
 
 [[PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
@@ -532,12 +532,12 @@ uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 version = "0.9.3"
 
 [[SimpleWorkflow]]
-deps = ["BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs"]
-git-tree-sha1 = "8c1a5d8e4a244de4d8842cbcf16675e3a7bbfdee"
-repo-rev = "0.1.0"
+deps = ["AbInitioSoftwareBase", "BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs"]
+git-tree-sha1 = "2037b5807ebe62794e2997358a43a68b6bff5a65"
+repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/SimpleWorkflow.jl.git"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
-version = "0.1.0"
+version = "0.1.2"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
