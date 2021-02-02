@@ -108,7 +108,7 @@ prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
 
 shortname(x::Calculation) = shortname(typeof(x))
 
-include("config.jl")
+include("Config.jl")
 
 module DefaultActions
 

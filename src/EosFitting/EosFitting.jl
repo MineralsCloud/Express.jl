@@ -100,7 +100,7 @@ end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
-include("config.jl")
+include("Config.jl")
 
 module DefaultActions
 

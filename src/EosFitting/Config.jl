@@ -1,3 +1,5 @@
+module Config
+
 function materialize_eos(config)
     name = lowercase(config["name"])
     ctor = if name in ("m", "murnaghan")
@@ -117,3 +119,5 @@ function checkconfig(config)
 end
 
 function materialize end
+
+end
