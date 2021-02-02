@@ -1,5 +1,27 @@
 module Config
 
+using Configurations: @option
+
+@option "pressures" struct Pressures
+    values::AbstractVector
+    unit::String = "GPa"
+end
+
+@option "volumes" struct Volumes
+    values::AbstractVector
+    unit::String = "bohr^3"
+end
+
+@option "trial_eos" struct TrialEos
+    name::String
+    parameters::AbstractVector
+end
+
+@option "fit" struct EosFittingConfig
+    fixed::Union{Pressures,Volumes}
+    trial_eos::Union{TrialEos,Nothing}
+end
+
 function materialize_eos(config)
     name = lowercase(config["name"])
     ctor = if name in ("m", "murnaghan")
