@@ -100,8 +100,6 @@ end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
-vscale() = (eps(), 1.5)
-
 include("config.jl")
 
 module DefaultActions
