@@ -83,7 +83,7 @@ function checkconfig(config)
     end
     @assert config["np"] isa Integer && config["np"] >= 1
     checkconfig(currentsoftware(), config["bin"])  # To be implemented
-    if haskey(config, "use_shell") && haskey(config, "shell_args")&& config["use_shell"]
+    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
         @assert config["shell_args"] isa AbstractDict
     end
     let subconfig = config["pressures"], values = subconfig["values"]
