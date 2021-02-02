@@ -23,7 +23,7 @@ function materialize_eos(config)
     eos = if parameters isa AbstractVector
         ctor(map(myuparse, parameters))
     elseif parameters isa AbstractDict
-        ctor(myuparse(parameters[string(f)]) for f in fieldnames(ctor))
+        ctor((myuparse(parameters[string(f)]) for f in fieldnames(ctor))...)
     else
         error("unknown container of parameters!")
     end
