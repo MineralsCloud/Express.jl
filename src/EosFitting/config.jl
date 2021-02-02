@@ -17,10 +17,20 @@ function materialize_eos(config)
     elseif name in ("v", "vinet")
         Vinet
     else
-        error("unsupported eos type `\"$type\"`!")
+        error("unsupported eos name `\"$name\"`!")
     end
-    values = (v * myuparse(string(u)) for (v, u) in config["parameters"])
-    return ctor(values...)
+    parameters = config["parameters"]
+    eos = if parameters isa AbstractVector
+        ctor(map(myuparse, parameters))
+    elseif parameters isa AbstractDict
+        ctor(myuparse(parameters[string(f)]) for f in fieldnames(ctor))
+    else
+        error("unknown container of parameters!")
+    end
+    if !(eltype(eos) <: AbstractQuantity)
+        @warn "the equation of state's elements seem not to have units! Be careful!"
+    end
+    return eos
 end
 
 function materialize_press(config)

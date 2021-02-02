@@ -11,7 +11,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet
 using SimpleWorkflow: chain, run!
-using Unitful: ustrip, @u_str
+using Unitful: AbstractQuantity, ustrip, @u_str
 using UnitfulAtomic: bohr
 
 import ..Express
