@@ -9,7 +9,8 @@ using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
-myuparse(string) = uparse(string; unit_context = [Unitful, UnitfulAtomic])
+myuparse(str::AbstractString) = uparse(str; unit_context = [Unitful, UnitfulAtomic])
+myuparse(num::Number) = num  # FIXME: this might be error-prone!
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
