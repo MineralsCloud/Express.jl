@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[AbInitioSoftwareBase]]
-deps = ["IsURL", "JSON", "Pkg", "YAML"]
-git-tree-sha1 = "46085f53c6cccae418f3e4a217a0f3878219b860"
+deps = ["IsURL", "JSON", "Pkg", "Preferences", "YAML"]
+git-tree-sha1 = "32d8bc5f56355fc20f05405547bb9eb1f04efab3"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -92,6 +92,12 @@ git-tree-sha1 = "c0647249d785f1d5139c0cc96db8f6b32f7ec416"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 version = "1.5.0"
 
+[[Configurations]]
+deps = ["Crayons", "ExprTools", "MatchCore", "OrderedCollections", "TOML"]
+git-tree-sha1 = "84a19ac7a48245419990792df182025fc9216419"
+uuid = "5218b696-f38b-4ac9-8b61-a12ec717816d"
+version = "0.9.4"
+
 [[ConstructionBase]]
 git-tree-sha1 = "a2a6a5fea4d6f730ec4c18a76d27ec10e8ec1c50"
 uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
@@ -103,6 +109,11 @@ git-tree-sha1 = "6d1c23e740a586955645500bbec662476204a52c"
 uuid = "150eb455-5306-5404-9cee-2592286d6298"
 version = "0.6.1"
 
+[[Crayons]]
+git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.0.4"
+
 [[Crystallography]]
 deps = ["CoordinateTransformations", "LibSymspg", "LinearAlgebra", "StaticArrays", "Unitful"]
 git-tree-sha1 = "e561a9a6ded242324ba27ef76aeee815a266088f"
@@ -112,9 +123,9 @@ uuid = "3bff3928-7a76-11e9-2089-d112443085a5"
 version = "0.1.1"
 
 [[DataAPI]]
-git-tree-sha1 = "25ccd31003243d2ce83e474cf11663dddf48035f"
+git-tree-sha1 = "6d64b28d291cb94a0d84e6e41081fb081e7f717f"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.4.1"
+version = "1.5.0"
 
 [[DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -162,8 +173,8 @@ deps = ["ArgTools", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[EquationsOfStateOfSolids]]
-deps = ["AutoHashEquals", "Compat", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "ad4efb25c80ade8d60cb28af44260b347b4dd270"
+deps = ["AutoHashEquals", "Compat", "Configurations", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
+git-tree-sha1 = "4103204062488d4e39b6c186b91df0f1c108fe38"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/EquationsOfStateOfSolids.jl.git"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
@@ -332,6 +343,11 @@ version = "0.5.6"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
+[[MatchCore]]
+git-tree-sha1 = "c4b9f2f81cb7dbe22540df3a084de380f3cef6c4"
+uuid = "5dd3f0b1-72a9-48ad-ae6e-79f673da005f"
+version = "0.1.0"
+
 [[MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "Random", "Sockets"]
 git-tree-sha1 = "1c38e51c3d08ef2278062ebceade0e46cefc96fe"
@@ -436,6 +452,12 @@ git-tree-sha1 = "1c6c5b0c3713738d6b987903c529d80622c37e07"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 version = "1.2.0"
 
+[[Preferences]]
+deps = ["TOML"]
+git-tree-sha1 = "ea79e4c9077208cd3bc5d29631a26bc0cff78902"
+uuid = "21216c6a-2e73-6563-6e65-726566657250"
+version = "1.2.1"
+
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -505,9 +527,9 @@ version = "0.2.2+1"
 
 [[Roots]]
 deps = ["Printf"]
-git-tree-sha1 = "8f743e4f4368d1d753f3806bf635899dad6b4847"
+git-tree-sha1 = "369e25546984dff5df351bc056fccc30de615080"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.0.7"
+version = "1.0.8"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -662,9 +684,9 @@ version = "1.2.0"
 
 [[XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "be0db24f70aae7e2b89f2f3092e93b8606d659a6"
+git-tree-sha1 = "afd2b541e8fd425cd3b7aa55932a257035ab4a70"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.9.10+3"
+version = "2.9.11+0"
 
 [[YAML]]
 deps = ["Base64", "Dates", "Printf"]
