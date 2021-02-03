@@ -24,9 +24,9 @@ end
     trial_eos::Union{TrialEos,Nothing}
 end
 
-function materialize_eos(config)
-    name = lowercase(config["name"])
-    ctor = if name in ("m", "murnaghan")
+function materialize_eos(config::TrialEos)
+    name = config.name
+    T = if name in ("m", "murnaghan")
         Murnaghan
     elseif name in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
         BirchMurnaghan2nd
@@ -45,19 +45,16 @@ function materialize_eos(config)
     else
         error("unsupported eos name `\"$name\"`!")
     end
-    parameters = config["parameters"]
-    eos = if parameters isa AbstractVector
-        ctor(map(myuparse, parameters))
-    elseif parameters isa AbstractDict
-        ctor((myuparse(parameters[string(f)]) for f in fieldnames(ctor))...)
-    else
-        error("unknown container of parameters!")
-    end
+    eos = _materialize_eos(T, config.parameters)
     if !(eltype(eos) <: AbstractQuantity)
         @warn "the equation of state's elements seem not to have units! Be careful!"
     end
     return eos
 end
+materialize_eos(config::AbstractDict) = materialize_eos(from_dict(TrialEos, config))
+_materialize_eos(T, parameters::AbstractVector) = T(map(myuparse, parameters))
+_materialize_eos(T, parameters::AbstractDict) =
+    T((myuparse(parameters[string(f)]) for f in fieldnames(T))...)
 
 function materialize_press(config::Pressures)
     unit = myuparse(config.unit)
