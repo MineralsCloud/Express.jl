@@ -21,6 +21,7 @@ export materialize_eos
 @option struct Templates
     paths::AbstractVector
     function Templates(paths)
+        @assert length(paths) >= 1
         for path in paths
             if !isfile(path)
                 @warn "template \"$path\" is not reachable, be careful!"
