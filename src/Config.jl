@@ -4,14 +4,14 @@ using Configurations: @option
 using Mustache: render_from_file
 using SimpleWorkflow: Script
 
-export ShellTemplate, makescript
+export ScriptTemplate, makescript
 
-@option "shell_template" struct ShellTemplate
+@option "script_template" struct ScriptTemplate
     file::String
     view::Dict
 end
 
-function makescript(path, template::ShellTemplate)
+function makescript(path, template::ScriptTemplate)
     str = render_from_file(template.file, template.view)
     if !isfile(path)
         if !isdir(dirname(path))
