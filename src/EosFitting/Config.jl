@@ -7,6 +7,15 @@ export materialize_eos
 @option "pressures" struct Pressures
     values::AbstractVector
     unit::String = "GPa"
+    function Pressures(values, unit)
+        if length(values) <= 5
+            @info "pressures <= 5 may give unreliable results, consider more if possible!"
+        end
+        if minimum(values) >= zero(eltype(values))
+            @warn "for better fitting, we need at least 1 negative pressure!"
+        end
+        return new(values, unit)
+    end
 end
 
 @option "volumes" struct Volumes
@@ -84,15 +93,6 @@ end
 function materialize_dirs(config, pressures)
     return map(pressures) do pressure
         abspath(joinpath(expanduser(config), "p" * string(ustrip(pressure))))
-    end
-end
-
-function _alert(pressures)
-    if length(pressures) <= 5
-        @info "pressures <= 5 may give unreliable results, consider more if possible!"
-    end
-    if minimum(pressures) >= zero(eltype(pressures))
-        @warn "for better fitting, we need at least 1 negative pressure!"
     end
 end
 
