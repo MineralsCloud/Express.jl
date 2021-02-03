@@ -1,6 +1,20 @@
 module Config
 
 using Configurations: from_dict, @option
+using Crystallography: cellvolume
+using EquationsOfStateOfSolids:
+    Murnaghan,
+    BirchMurnaghan2nd,
+    BirchMurnaghan3rd,
+    BirchMurnaghan4th,
+    PoirierTarantola2nd,
+    PoirierTarantola3rd,
+    PoirierTarantola4th,
+    Vinet
+using Unitful: AbstractQuantity, ustrip, @u_str
+using UnitfulAtomic
+
+using ...Express: myuparse
 
 export materialize_eos
 
@@ -111,7 +125,7 @@ function materialize_vol(config, templates)  # Arg `templates` have the same len
             return map(Base.Fix2(*, unit), subconfig["values"])
         end
     else
-        return map(cellvolume, templates) * bohr^3  # FIXME: Are units all `bohr^3` for different software?
+        return map(cellvolume, templates) * u"bohr^3"  # FIXME: Are units all `bohr^3` for different software?
     end
 end
 
