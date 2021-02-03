@@ -12,8 +12,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using Unitful: AbstractQuantity, ustrip, @u_str
-using UnitfulAtomic
+using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
 

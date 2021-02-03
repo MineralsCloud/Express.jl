@@ -1,18 +1,6 @@
 module EosFitting
 
-using Crystallography: cellvolume
-using EquationsOfStateOfSolids:
-    Murnaghan,
-    BirchMurnaghan2nd,
-    BirchMurnaghan3rd,
-    BirchMurnaghan4th,
-    PoirierTarantola2nd,
-    PoirierTarantola3rd,
-    PoirierTarantola4th,
-    Vinet
 using SimpleWorkflow: chain, run!
-using Unitful: AbstractQuantity, ustrip, @u_str
-using UnitfulAtomic: bohr
 
 import ..Express
 using ..Express:
@@ -24,8 +12,7 @@ using ..Express:
     calculation,
     currentsoftware,
     makescript,
-    loadconfig,
-    myuparse
+    loadconfig
 
 export SelfConsistentField,
     Scf,
