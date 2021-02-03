@@ -13,6 +13,10 @@ end
 
 function makescript(path, template::ShellTemplate)
     str = render_from_file(template.file, template.view)
+    mkpath(dirname(path))
+    open(path, "w") do io
+        write(io, str)
+    end
     return Script(str, path)
 end
 
