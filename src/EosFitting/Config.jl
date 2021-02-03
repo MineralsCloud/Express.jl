@@ -1,5 +1,6 @@
 module Config
 
+using Compat: isnothing
 using Configurations: from_dict, @option
 using Crystallography: cellvolume
 using EquationsOfStateOfSolids:
@@ -111,24 +112,20 @@ function materialize_press(config::Pressures)
 end
 materialize_press(config::AbstractDict) = materialize_press(from_dict(Pressures, config))
 
-function materialize_vol(config, templates)  # Arg `templates` have the same length as `pressures` already.
-    if haskey(config, "volumes")
-        subconfig = config["volumes"]
-        unit = myuparse(if haskey(subconfig, "unit")
-            subconfig["unit"]
-        else
-            @info "no unit provided for `\"volumes\"`! \"bohr^3\" is assumed!"
-            "bohr^3"
-        end)
-        if length(subconfig["values"]) == 1
-            return repeat(subconfig["values"] * unit, length(templates))
-        else
-            return map(Base.Fix2(*, unit), subconfig["values"])
-        end
+function materialize_vol(config::Volumes)
+    unit = myuparse(config.unit)
+    return config.values .* config.unit
+end
+function materialize_vol(config::EosFittingConfig)
+    if isnothing(config.fixed)  # If no volume or pressure is provided, use templates cell volumes
+        return materialize_vol(Volumes(map(cellvolume, config.templates)))
+    elseif config.fixed isa Pressures
+        error("wrong method called! Use `materialize_press` instead!")
     else
-        return map(cellvolume, templates) * u"bohr^3"  # FIXME: Are units all `bohr^3` for different software?
+        return materialize_vol(config.fixed)
     end
 end
+materialize_vol(config::AbstractDict) = materialize_vol(from_dict(EosFittingConfig, config))
 
 function materialize_dirs(config, pressures)
     return map(pressures) do pressure
