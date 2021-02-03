@@ -27,7 +27,7 @@ export materialize_eos
                 @warn "template \"$path\" is not reachable, be careful!"
             end
         end
-        return Templates(paths)
+        return new(paths)
     end
 end
 
