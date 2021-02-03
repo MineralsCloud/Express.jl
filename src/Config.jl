@@ -17,7 +17,7 @@ function makescript(path, template::ShellTemplate)
     open(path, "w") do io
         write(io, str)
     end
-    return Script(str, path)
+    return Script(path)
 end
 
 end
