@@ -144,20 +144,6 @@ function checkconfig(config)
     if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
         @assert config["shell_args"] isa AbstractDict
     end
-    if haskey(config, "trial_eos")
-        @assert !haskey(config, "volumes") "key \"trial_eos\" and \"volumes\" are mutually exclusive!"
-        for key in ("name", "parameters")
-            @assert haskey(config["trial_eos"], key) "the trial eos needs `\"$key\"` specified!"
-        end
-    end
-    if haskey(config, "volumes")
-        subconfig = config["volumes"]
-        if length(subconfig["values"]) != 1
-            if length(subconfig["values"]) != length(config["pressures"]["values"])
-                throw(DimensionMismatch("volumes and pressures have different lengths!"))
-            end
-        end
-    end
     return
 end
 
