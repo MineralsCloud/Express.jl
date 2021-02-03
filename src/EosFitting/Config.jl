@@ -136,7 +136,6 @@ function checkconfig(config)
     for key in ("np", "pressures", "bin", "templates")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
-    @assert config["np"] isa Integer && config["np"] >= 1
     checkconfig(currentsoftware(), config["bin"])  # To be implemented
     if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
         @assert config["shell_args"] isa AbstractDict
