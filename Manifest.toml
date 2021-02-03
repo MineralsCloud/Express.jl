@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[AbInitioSoftwareBase]]
-deps = ["IsURL", "JSON", "Pkg", "Preferences", "YAML"]
-git-tree-sha1 = "32d8bc5f56355fc20f05405547bb9eb1f04efab3"
+deps = ["Configurations", "IsURL", "JSON", "Pkg", "YAML"]
+git-tree-sha1 = "ec5b28cc1165986c1e36716b312bd4b8ca159342"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -452,12 +452,6 @@ git-tree-sha1 = "1c6c5b0c3713738d6b987903c529d80622c37e07"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 version = "1.2.0"
 
-[[Preferences]]
-deps = ["TOML"]
-git-tree-sha1 = "ea79e4c9077208cd3bc5d29631a26bc0cff78902"
-uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.2.1"
-
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -555,11 +549,11 @@ version = "0.9.3"
 
 [[SimpleWorkflow]]
 deps = ["AbInitioSoftwareBase", "BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs"]
-git-tree-sha1 = "2037b5807ebe62794e2997358a43a68b6bff5a65"
+git-tree-sha1 = "217499166f4751da13fd2b45efc43838a80b2d30"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/SimpleWorkflow.jl.git"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
-version = "0.1.2"
+version = "0.2.0"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
