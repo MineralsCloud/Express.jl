@@ -12,6 +12,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
+using EquationsOfStateOfSolids.Inverse: NumericalInversionOptions
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
@@ -57,19 +58,22 @@ end
 
 @option "fit" struct EosFittingConfig
     templates::Templates
-    fixed::Union{Pressures,Volumes,Nothing}
-    trial_eos::Union{TrialEos,Nothing}
-    function EosFittingConfig(templates, fixed, trial_eos)
+    fixed::Union{Pressures,Volumes,Nothing} = nothing
+    trial_eos::Union{TrialEos,Nothing} = nothing
+    num_inv::NumericalInversionOptions = NumericalInversionOptions()
+    function EosFittingConfig(templates, fixed, trial_eos, num_inv)
         if length(templates.paths) != 1  # Always >= 1
-            if length(templates.paths) != length(fixed.values)
-                throw(
-                    DimensionMismatch(
-                        "templates and pressures or volumes have different lengths!",
-                    ),
-                )
+            if !isnothing(fixed)
+                if length(templates.paths) != length(fixed.values)
+                    throw(
+                        DimensionMismatch(
+                            "templates and pressures or volumes have different lengths!",
+                        ),
+                    )
+                end
             end
         end
-        return new(templates, fixed, trial_eos)
+        return new(templates, fixed, trial_eos, num_inv)
     end
 end
 
