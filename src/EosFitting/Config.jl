@@ -1,6 +1,8 @@
 module Config
 
-using Configurations: @option
+using Configurations: from_dict, @option
+
+export materialize_eos
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -57,15 +59,11 @@ function materialize_eos(config)
     return eos
 end
 
-function materialize_press(config)
-    unit = myuparse(if haskey(config, "unit")
-        config["unit"]
-    else
-        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
-        "GPa"
-    end)
-    return map(Base.Fix2(*, unit), config["values"])
+function materialize_press(config::Pressures)
+    unit = myuparse(config.unit)
+    return config.values .* unit
 end
+materialize_press(config::AbstractDict) = materialize_press(from_dict(Pressures, config))
 
 function materialize_vol(config, templates)  # Arg `templates` have the same length as `pressures` already.
     if haskey(config, "volumes")
