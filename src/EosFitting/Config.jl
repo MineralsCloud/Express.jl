@@ -4,6 +4,18 @@ using Configurations: from_dict, @option
 
 export materialize_eos
 
+@option struct Templates
+    paths::AbstractVector
+    function Templates(paths)
+        for path in paths
+            if !isfile(path)
+                @warn "template \"$path\" is not reachable, be careful!"
+            end
+        end
+        return Templates(paths)
+    end
+end
+
 @option "pressures" struct Pressures
     values::AbstractVector
     unit::String = "GPa"
@@ -111,11 +123,6 @@ function checkconfig(config)
             if length(values) != length(config["templates"])
                 throw(DimensionMismatch("templates and pressures have different lengths!"))
             end
-        end
-    end
-    for path in config["templates"]
-        if !isfile(path)
-            @warn "template \"$path\" is not reachable, be careful!"
         end
     end
     if haskey(config, "trial_eos")
