@@ -136,16 +136,7 @@ function materialize_dirs(config, pressures)
     end
 end
 
-function checkconfig(config)
-    for key in ("np", "pressures", "bin", "templates")
-        @assert haskey(config, key) "`\"$key\"` was not found in config!"
-    end
-    checkconfig(currentsoftware(), config["bin"])  # To be implemented
-    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
-        @assert config["shell_args"] isa AbstractDict
-    end
-    return
-end
+function checkconfig(config) end
 
 function materialize end
 
