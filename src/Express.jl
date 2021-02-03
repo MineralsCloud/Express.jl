@@ -3,7 +3,6 @@ module Express
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
-using Mustache: render_from_file, render, @mt_str
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 using Unitful: uparse
 import Unitful
@@ -35,15 +34,6 @@ function distprocs(nprocs, njobs)
     end
     return quotient,
     Tuple(range(quotient * i; stop = quotient * (i + 1) - 1) for i in 0:(njobs-1))
-end
-
-function makescript_from_file(to, file, view)
-    str = render_from_file(file, view)
-    return Script(str, to)
-end
-function makescript(to, template, view)
-    str = render(template, view)
-    return Script(str, to)
 end
 
 function whichmodule(name)
@@ -128,6 +118,8 @@ function currentsoftware end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
+include("Config.jl")
+using .Config
 include("EosFitting/EosFitting.jl")
 include("Phonon/Phonon.jl")
 include("Qha/Qha.jl")
