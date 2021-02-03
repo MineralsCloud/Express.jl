@@ -36,10 +36,10 @@ end
     unit::String = "GPa"
     function Pressures(values, unit)
         if length(values) <= 5
-            @info "pressures <= 5 may give unreliable results, consider more if possible!"
+            @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
         if minimum(values) >= zero(eltype(values))
-            @warn "for better fitting, we need at least 1 negative pressure!"
+            @warn "for better fitting result, provide at least 1 negative pressure!"
         end
         return new(values, unit)
     end
