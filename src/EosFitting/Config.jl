@@ -41,8 +41,21 @@ end
 end
 
 @option "fit" struct EosFittingConfig
+    templates::Templates
     fixed::Union{Pressures,Volumes}
     trial_eos::Union{TrialEos,Nothing}
+    function EosFittingConfig(templates, fixed, trial_eos)
+        if length(templates.paths) != 1
+            if length(templates.paths) != length(fixed.values)
+                throw(
+                    DimensionMismatch(
+                        "templates and pressures or volumes have different lengths!",
+                    ),
+                )
+            end
+        end
+        return new(templates, fixed, trial_eos)
+    end
 end
 
 function materialize_eos(config::TrialEos)
@@ -116,14 +129,6 @@ function checkconfig(config)
     checkconfig(currentsoftware(), config["bin"])  # To be implemented
     if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
         @assert config["shell_args"] isa AbstractDict
-    end
-    let subconfig = config["pressures"], values = subconfig["values"]
-        _alert(values)
-        if length(config["templates"]) != 1
-            if length(values) != length(config["templates"])
-                throw(DimensionMismatch("templates and pressures have different lengths!"))
-            end
-        end
     end
     if haskey(config, "trial_eos")
         @assert !haskey(config, "volumes") "key \"trial_eos\" and \"volumes\" are mutually exclusive!"
