@@ -78,22 +78,22 @@ end
 end
 
 function materialize_eos(config::TrialEos)
-    name = config.name
-    T = if name in ("m", "murnaghan")
+    name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
+    T = if name == "m" || occursin("murnaghan", name)
         Murnaghan
-    elseif name in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
+    elseif name == "bm2" || occursin("birchmurnaghan2", name)
         BirchMurnaghan2nd
-    elseif name in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
+    elseif name == "bm3" || occursin("birchmurnaghan3", name)
         BirchMurnaghan3rd
-    elseif name in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
+    elseif name == "bm4" || occursin("birchmurnaghan4", name)
         BirchMurnaghan4th
-    elseif name in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
+    elseif name == "pt2" || occursin("poiriertarantola2", name)
         PoirierTarantola2nd
-    elseif name in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
+    elseif name == "pt3" || occursin("poiriertarantola3", name)
         PoirierTarantola3rd
-    elseif name in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
+    elseif name == "pt4" || occursin("poiriertarantola4", name)
         PoirierTarantola4th
-    elseif name in ("v", "vinet")
+    elseif name == "v" || occursin("vinet", name)
         Vinet
     else
         error("unsupported eos name `\"$name\"`!")
