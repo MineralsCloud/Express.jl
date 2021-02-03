@@ -57,10 +57,10 @@ end
 
 @option "fit" struct EosFittingConfig
     templates::Templates
-    fixed::Union{Pressures,Volumes}
+    fixed::Union{Pressures,Volumes,Nothing}
     trial_eos::Union{TrialEos,Nothing}
     function EosFittingConfig(templates, fixed, trial_eos)
-        if length(templates.paths) != 1
+        if length(templates.paths) != 1  # Always >= 1
             if length(templates.paths) != length(fixed.values)
                 throw(
                     DimensionMismatch(
