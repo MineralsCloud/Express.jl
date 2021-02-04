@@ -2,7 +2,6 @@ module Express
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
-using AbInitioSoftwareBase.CLI: Mpiexec, scriptify
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 using Unitful: uparse
 import Unitful
