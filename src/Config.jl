@@ -2,13 +2,19 @@ module Config
 
 using Configurations: @option
 using Mustache: render_from_file
-using SimpleWorkflow: Script
+using SimpleWorkflow: Script, ExternalAtomicJob, parallel
+
+using ..Express: Action, Calculation
 
 export ScriptTemplate, makescript
 
-@option "script_template" struct ScriptTemplate
+@option "template" struct ScriptTemplate
     file::String
     view::Dict
+end
+
+@option "script" struct ScriptConfig
+    template::ScriptTemplate
 end
 
 function makescript(path, template::ScriptTemplate)
@@ -24,6 +30,23 @@ function makescript(path, template::ScriptTemplate)
         write(io, str)
     end
     return Script(path)
+end
+
+function distprocs(nprocs, njobs)
+    quotient, remainder = divrem(nprocs, njobs)
+    if !iszero(remainder)
+        @warn "The processes are not fully balanced! Consider the number of subjobs!"
+    end
+    return quotient
+end
+
+struct MakeCmd{T} <: Action{T} end
+MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
+(::MakeCmd)(input; kwargs...) = makecmd(input; kwargs...)
+
+function buildjob(x::MakeCmd, inputs, args...; kwargs...)
+    jobs = map(ExternalAtomicJob, x(inputs, 1; kwargs...))
+    return parallel(jobs...)
 end
 
 end
