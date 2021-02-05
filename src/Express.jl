@@ -24,6 +24,12 @@ const FixedIonSelfConsistentField = SelfConsistentField
 
 abstract type Action{T<:Calculation} end
 
+macro action(type)
+    quote
+        struct $type{T} <: Action{T} end
+    end |> esc
+end
+
 calculation(::Action{T}) where {T} = T()
 
 function whichmodule(name)
