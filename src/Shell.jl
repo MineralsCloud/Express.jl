@@ -41,7 +41,6 @@ function distprocs(nprocs, njobs)
 end
 
 struct MakeCmd{T} <: Action{T} end
-(::MakeCmd)(input; kwargs...) = makecmd(input; kwargs...)
 
 function buildjob(x::MakeCmd, inputs, args...; kwargs...)
     jobs = map(ExternalAtomicJob, x(inputs, 1; kwargs...))
