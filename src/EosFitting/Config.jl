@@ -70,7 +70,14 @@ end
     outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
-    function EosFittingConfig(templates, fixed, trial_eos, outdirs, num_inv, cli::T) where {T}
+    function EosFittingConfig{T}(
+        templates,
+        fixed,
+        trial_eos,
+        outdirs,
+        num_inv,
+        cli::T,
+    ) where {T}
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
@@ -82,7 +89,7 @@ end
                 end
             end
         end
-        return new{T}(templates, fixed, trial_eos, outdirs, num_inv, cli)
+        return new(templates, fixed, trial_eos, outdirs, num_inv, cli)
     end
 end
 
