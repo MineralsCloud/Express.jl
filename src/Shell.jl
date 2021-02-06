@@ -1,4 +1,4 @@
-module Config
+module Shell
 
 using Configurations: @option
 using Mustache: render_from_file
@@ -41,7 +41,6 @@ function distprocs(nprocs, njobs)
 end
 
 struct MakeCmd{T} <: Action{T} end
-MakeCmd(::T) where {T<:Calculation} = MakeCmd{T}()
 (::MakeCmd)(input; kwargs...) = makecmd(input; kwargs...)
 
 function buildjob(x::MakeCmd, inputs, args...; kwargs...)

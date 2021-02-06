@@ -63,8 +63,8 @@ function currentsoftware end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
-include("Config.jl")
-using .Config
+include("Shell.jl")
+using .Shell
 include("EosFitting/EosFitting.jl")
 include("Phonon/Phonon.jl")
 include("Qha/Qha.jl")
