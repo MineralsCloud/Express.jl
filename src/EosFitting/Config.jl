@@ -116,11 +116,7 @@ function materialize_eos(config::TrialEos)
     else
         error("unsupported eos name `\"$name\"`!")
     end
-    eos = _materialize_eos(T, config.parameters)
-    if !(eltype(eos) <: AbstractQuantity)
-        @warn "the equation of state's elements seem not to have units! Be careful!"
-    end
-    return eos
+    return _materialize_eos(T, config.parameters)
 end
 _materialize_eos(T, parameters::AbstractVector) = T(map(myuparse, parameters))
 _materialize_eos(T, parameters::AbstractDict) =

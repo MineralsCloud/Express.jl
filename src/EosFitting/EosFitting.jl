@@ -49,16 +49,7 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    config = loadconfig(cfgfile)
-    io = iofiles(T(), cfgfile)
-    infiles, outfiles = first.(io), last.(io)
-    jobs = map(
-        ExternalAtomicJob,
-        x(infiles; outputs = outfiles, mpi = config.mpi, options = config.options),
-    )
-    return parallel(jobs...)
-end
+function buildjob end
 
 function buildworkflow(cfgfile)
     step1 = buildjob(MakeInput{Scf}(), cfgfile)
