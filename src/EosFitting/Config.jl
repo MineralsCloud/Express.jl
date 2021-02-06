@@ -2,7 +2,7 @@ module Config
 
 using AbInitioSoftwareBase.Cli: CliConfig
 using Compat: isnothing
-using Configurations: from_dict, @option
+using Configurations: @option
 using Crystallography: cellvolume
 using EquationsOfStateOfSolids:
     Murnaghan,
@@ -122,7 +122,6 @@ function materialize_eos(config::TrialEos)
     end
     return eos
 end
-materialize_eos(config::AbstractDict) = materialize_eos(from_dict(TrialEos, config))
 _materialize_eos(T, parameters::AbstractVector) = T(map(myuparse, parameters))
 _materialize_eos(T, parameters::AbstractDict) =
     T((myuparse(parameters[string(f)]) for f in fieldnames(T))...)
@@ -131,7 +130,6 @@ function materialize_press(config::Pressures)
     unit = myuparse(config.unit)
     return config.values .* unit
 end
-materialize_press(config::AbstractDict) = materialize_press(from_dict(Pressures, config))
 
 function materialize_vol(config::Volumes)
     unit = myuparse(config.unit)
@@ -146,7 +144,6 @@ function materialize_vol(config::EosFittingConfig)
         return materialize_vol(config.fixed)
     end
 end
-materialize_vol(config::AbstractDict) = materialize_vol(from_dict(EosFittingConfig, config))
 
 function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
@@ -154,7 +151,6 @@ function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
     end
 end
 materialize_dir(config::EosFittingConfig) = materialize_dir(config.outdirs, config.fixed)
-materialize_dir(config::AbstractDict) = materialize_dir(from_dict(EosFittingConfig, config))
 
 function materialize end
 

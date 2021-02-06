@@ -1,6 +1,6 @@
 module EosFitting
 
-using SimpleWorkflow: chain, run!
+using SimpleWorkflow: ExternalAtomicJob, chain, parallel, run!
 
 import ..Express
 using ..Express:
@@ -53,16 +53,11 @@ function buildjob(x::MakeCmd{T}, cfgfile) where {T}
     config = loadconfig(cfgfile)
     io = iofiles(T(), cfgfile)
     infiles, outfiles = first.(io), last.(io)
-    return Express.buildjob(
-        x,
-        outfiles,
-        infiles,
-        config.manager.np,
-        config.bin;
-        use_shell = config.use_shell,
-        script_template = config.script_template,
-        shell_args = config.shell_args,
+    jobs = map(
+        ExternalAtomicJob,
+        x(infiles; outputs = outfiles, mpi = config.mpi, options = config.options),
     )
+    return parallel(jobs...)
 end
 
 function buildworkflow(cfgfile)
