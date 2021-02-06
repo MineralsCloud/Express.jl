@@ -69,7 +69,7 @@ end
     trial_eos::Union{TrialEos,Nothing} = nothing
     outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
-    cli::CliConfig
+    cli::cliconfig()
     function EosFittingConfig(templates, fixed, trial_eos, outdirs, num_inv, cli)
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
@@ -85,6 +85,8 @@ end
         return new(templates, fixed, trial_eos, outdirs, num_inv, cli)
     end
 end
+
+function cliconfig end
 
 function materialize_eos(config::TrialEos)
     name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
