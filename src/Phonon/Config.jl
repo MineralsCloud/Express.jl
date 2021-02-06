@@ -1,41 +1,61 @@
 module Config
 
-using Unitful: ustrip, @u_str
+using Configurations: @option
 
-using ..Express: myuparse, currentsoftware
+using ...Express: myuparse
 
-function materialize_press_vol(config)
-    unit = myuparse(if haskey(config, "unit")
-        config["unit"]
-    else
-        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
-        u"GPa"
-    end)
-    return map(Base.Fix2(*, unit), config["values"])
+@option struct Templates
+    paths::AbstractVector
+    function Templates(paths)
+        @assert length(paths) >= 1
+        for path in paths
+            if !isfile(path)
+                @warn "template \"$path\" is not reachable, be careful!"
+            end
+        end
+        return Templates(paths)
+    end
+end
+
+@option "pressures" struct Pressures
+    values::AbstractVector
+    unit::String = "GPa"
+end
+
+@option "volumes" struct Volumes
+    values::AbstractVector
+    unit::String = "bohr^3"
+end
+
+@option "fit" struct PhononConfig
+    templates::Templates
+    fixed::Union{Pressures,Volumes}
+    function PhononConfig(templates, fixed, trial_eos)
+        if length(templates.paths) != 1  # Always >= 1
+            if length(templates.paths) != length(fixed.values)
+                throw(
+                    DimensionMismatch(
+                        "templates and pressures or volumes have different lengths!",
+                    ),
+                )
+            end
+        end
+        return new(templates, fixed)
+    end
+end
+
+function materialize_press_vol(config::Union{Pressures,Volumes})
+    unit = myuparse(config.unit)
+    return config.values .* unit
 end
 
 function checkconfig(config)
     for key in ("np", "bin", "templates")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
-    @assert config["np"] isa Integer && config["np"] >= 1
     checkconfig(currentsoftware(), config["bin"])  # To be implemented
     if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
         @assert config["shell_args"] isa AbstractDict
-    end
-    for paths in config["templates"]
-        for path in paths
-            if !isfile(path)
-                @warn "template \"$path\" is not reachable, be careful!"
-            end
-        end
-    end
-    if haskey(config, "pressures")
-        key = "pressures"
-    elseif haskey(config, "volumes")
-        key = "volumes"
-    else
-        error("\"pressures\" or \"volumes\", there must be one!")
     end
     return
 end
