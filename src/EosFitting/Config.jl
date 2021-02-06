@@ -1,5 +1,6 @@
 module Config
 
+using AbInitioSoftwareBase.Cli: CliConfig
 using Compat: isnothing
 using Configurations: from_dict, @option
 using Crystallography: cellvolume
@@ -68,7 +69,8 @@ end
     trial_eos::Union{TrialEos,Nothing} = nothing
     outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
-    function EosFittingConfig(templates, fixed, trial_eos, outdirs, num_inv)
+    cli::CliConfig
+    function EosFittingConfig(templates, fixed, trial_eos, outdirs, num_inv, cli)
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
@@ -80,7 +82,7 @@ end
                 end
             end
         end
-        return new(templates, fixed, trial_eos, outdirs, num_inv)
+        return new(templates, fixed, trial_eos, outdirs, num_inv, cli)
     end
 end
 
