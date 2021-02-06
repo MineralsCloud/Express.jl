@@ -63,6 +63,8 @@ end
     group_by_step::Bool = false
 end
 
+function cliconfig end
+
 @option "fit" struct EosFittingConfig
     templates::Templates
     fixed::Union{Pressures,Volumes,Nothing} = nothing
@@ -85,8 +87,6 @@ end
         return new(templates, fixed, trial_eos, outdirs, num_inv, cli)
     end
 end
-
-function cliconfig end
 
 function materialize_eos(config::TrialEos)
     name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
