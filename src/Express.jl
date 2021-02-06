@@ -54,8 +54,8 @@ end
 function loadconfig(file)
     config = load(file)
     push!(config, "workdir" => abspath(dirname(file)))  # Add `workdir` key since we now deprecate it
-    mod = whichmodule(config["workflow"])
-    return mod.materialize(config)
+    mod = whichmodule(pop!(config, "workflow"))
+    return mod.Config.materialize(config)
 end
 
 function currentsoftware end
