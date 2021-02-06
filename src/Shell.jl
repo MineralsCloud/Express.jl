@@ -42,9 +42,4 @@ end
 
 struct MakeCmd{T} <: Action{T} end
 
-function buildjob(x::MakeCmd, inputs, args...; kwargs...)
-    jobs = map(ExternalAtomicJob, x(inputs, 1; kwargs...))
-    return parallel(jobs...)
-end
-
 end
