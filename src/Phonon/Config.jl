@@ -4,16 +4,25 @@ using Configurations: @option
 
 using ...Express: myuparse
 
-@option struct Templates
-    paths::AbstractVector
-    function Templates(paths)
-        @assert length(paths) >= 1
-        for path in paths
-            if !isfile(path)
-                @warn "template \"$path\" is not reachable, be careful!"
-            end
+@option "template" struct DfptTemplate
+    scf::String
+    dfpt::String
+    q2r::String
+    disp::String
+    function DfptTemplate(scf, dfpt, q2r, disp)
+        if !isfile(scf)
+            @warn "file \"$scf\" is not reachable, be careful!"
         end
-        return Templates(paths)
+        if !isfile(dfpt)
+            @warn "file \"$dfpt\" is not reachable, be careful!"
+        end
+        if !isfile(q2r)
+            @warn "file \"$q2r\" is not reachable, be careful!"
+        end
+        if !isfile(disp)
+            @warn "file \"$disp\" is not reachable, be careful!"
+        end
+        return new(scf, dfpt, q2r, disp)
     end
 end
 
@@ -28,17 +37,16 @@ end
 end
 
 @option "fit" struct PhononConfig
-    templates::Templates
+    templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
-    function PhononConfig(templates, fixed, trial_eos)
-        if length(templates.paths) != 1  # Always >= 1
-            if length(templates.paths) != length(fixed.values)
-                throw(
-                    DimensionMismatch(
-                        "templates and pressures or volumes have different lengths!",
-                    ),
-                )
-            end
+    function PhononConfig(templates, fixed)
+        @assert length(templates) >= 1
+        if length(templates) != length(fixed.values)
+            throw(
+                DimensionMismatch(
+                    "templates and pressures or volumes have different lengths!",
+                ),
+            )
         end
         return new(templates, fixed)
     end
@@ -49,16 +57,7 @@ function materialize_press_vol(config::Union{Pressures,Volumes})
     return config.values .* unit
 end
 
-function checkconfig(config)
-    for key in ("np", "bin", "templates")
-        @assert haskey(config, key) "`\"$key\"` was not found in config!"
-    end
-    checkconfig(currentsoftware(), config["bin"])  # To be implemented
-    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
-        @assert config["shell_args"] isa AbstractDict
-    end
-    return
-end
+function checkconfig(config) end
 
 function materialize end
 
