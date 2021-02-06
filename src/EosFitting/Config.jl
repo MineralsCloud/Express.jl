@@ -67,6 +67,7 @@ end
     templates::Templates
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     trial_eos::Union{TrialEos,Nothing} = nothing
+    workdir::String = ""
     outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
@@ -74,6 +75,7 @@ end
         templates,
         fixed,
         trial_eos,
+        workdir,
         outdirs,
         num_inv,
         cli::T,
@@ -89,7 +91,7 @@ end
                 end
             end
         end
-        return new(templates, fixed, trial_eos, outdirs, num_inv, cli)
+        return new(templates, fixed, trial_eos, workdir, outdirs, num_inv, cli)
     end
 end
 
