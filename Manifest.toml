@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[AbInitioSoftwareBase]]
-deps = ["IsURL", "JSON", "Pkg", "YAML"]
-git-tree-sha1 = "7d62c4f99805f15f157490a995e33cf8014231da"
+deps = ["Configurations", "IsURL", "JSON", "Pkg", "YAML"]
+git-tree-sha1 = "7ae139ee9c89fe6e6ec81b28c8692c9e55499293"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -174,7 +174,7 @@ uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[EquationsOfStateOfSolids]]
 deps = ["AutoHashEquals", "Compat", "Configurations", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "0a84577f6b39f24a861dc5db45d69a1b9b5c2cf1"
+git-tree-sha1 = "9a86e10417fc1834b1eca5a1f519b0aa49d0a127"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/EquationsOfStateOfSolids.jl.git"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
@@ -549,7 +549,7 @@ version = "0.9.3"
 
 [[SimpleWorkflow]]
 deps = ["AbInitioSoftwareBase", "BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs"]
-git-tree-sha1 = "217499166f4751da13fd2b45efc43838a80b2d30"
+git-tree-sha1 = "47f01e0e82606459c8208f453054beeaacfb0af5"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/SimpleWorkflow.jl.git"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
