@@ -1,5 +1,6 @@
 module Config
 
+using AbInitioSoftwareBase.Cli: CliConfig
 using Compat: isnothing
 using Configurations: from_dict, @option
 using Crystallography: cellvolume
@@ -12,8 +13,8 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using Unitful: AbstractQuantity, ustrip, @u_str
-using UnitfulAtomic
+using EquationsOfStateOfSolids.Inverse: NumericalInversionOptions
+using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
 
@@ -28,7 +29,7 @@ export materialize_eos
                 @warn "template \"$path\" is not reachable, be careful!"
             end
         end
-        return Templates(paths)
+        return new(paths)
     end
 end
 
@@ -37,10 +38,10 @@ end
     unit::String = "GPa"
     function Pressures(values, unit)
         if length(values) <= 5
-            @info "pressures <= 5 may give unreliable results, consider more if possible!"
+            @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
         if minimum(values) >= zero(eltype(values))
-            @warn "for better fitting, we need at least 1 negative pressure!"
+            @warn "for better fitting result, provide at least 1 negative pressure!"
         end
         return new(values, unit)
     end
@@ -56,41 +57,61 @@ end
     parameters::AbstractVector
 end
 
-@option "fit" struct EosFittingConfig
+@option "outdirs" struct OutDirs
+    root::String = pwd()
+    prefix::String = "p="
+    group_by_step::Bool = false
+end
+
+@option "fit" struct EosFittingConfig{T<:CliConfig}
     templates::Templates
-    fixed::Union{Pressures,Volumes,Nothing}
-    trial_eos::Union{TrialEos,Nothing}
-    function EosFittingConfig(templates, fixed, trial_eos)
+    fixed::Union{Pressures,Volumes,Nothing} = nothing
+    trial_eos::Union{TrialEos,Nothing} = nothing
+    workdir::String = ""
+    outdirs::OutDirs = OutDirs()
+    num_inv::NumericalInversionOptions = NumericalInversionOptions()
+    cli::T
+    function EosFittingConfig{T}(
+        templates,
+        fixed,
+        trial_eos,
+        workdir,
+        outdirs,
+        num_inv,
+        cli::T,
+    ) where {T}
         if length(templates.paths) != 1  # Always >= 1
-            if length(templates.paths) != length(fixed.values)
-                throw(
-                    DimensionMismatch(
-                        "templates and pressures or volumes have different lengths!",
-                    ),
-                )
+            if !isnothing(fixed)
+                if length(templates.paths) != length(fixed.values)
+                    throw(
+                        DimensionMismatch(
+                            "templates and pressures or volumes have different lengths!",
+                        ),
+                    )
+                end
             end
         end
-        return new(templates, fixed, trial_eos)
+        return new(templates, fixed, trial_eos, workdir, outdirs, num_inv, cli)
     end
 end
 
 function materialize_eos(config::TrialEos)
-    name = config.name
-    T = if name in ("m", "murnaghan")
+    name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
+    T = if name == "m" || occursin("murnaghan", name)
         Murnaghan
-    elseif name in ("bm2", "birchmurnaghan2nd", "birch-murnaghan-2")
+    elseif name == "bm2" || occursin("birchmurnaghan2", name)
         BirchMurnaghan2nd
-    elseif name in ("bm3", "birchmurnaghan3rd", "birch-murnaghan-3")
+    elseif name == "bm3" || occursin("birchmurnaghan3", name)
         BirchMurnaghan3rd
-    elseif name in ("bm4", "birchmurnaghan4th", "birch-murnaghan-4")
+    elseif name == "bm4" || occursin("birchmurnaghan4", name)
         BirchMurnaghan4th
-    elseif name in ("pt2", "poiriertarantola2nd", "poirier-tarantola-2")
+    elseif name == "pt2" || occursin("poiriertarantola2", name)
         PoirierTarantola2nd
-    elseif name in ("pt3", "poiriertarantola3rd", "poirier-tarantola-3")
+    elseif name == "pt3" || occursin("poiriertarantola3", name)
         PoirierTarantola3rd
-    elseif name in ("pt4", "poiriertarantola4th", "poirier-tarantola-4")
+    elseif name == "pt4" || occursin("poiriertarantola4", name)
         PoirierTarantola4th
-    elseif name in ("v", "vinet")
+    elseif name == "v" || occursin("vinet", name)
         Vinet
     else
         error("unsupported eos name `\"$name\"`!")
@@ -127,23 +148,13 @@ function materialize_vol(config::EosFittingConfig)
 end
 materialize_vol(config::AbstractDict) = materialize_vol(from_dict(EosFittingConfig, config))
 
-function materialize_dirs(config, pressures)
-    return map(pressures) do pressure
-        abspath(joinpath(expanduser(config), "p" * string(ustrip(pressure))))
+function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
+    return map(fixed.values) do value
+        abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-
-function checkconfig(config)
-    for key in ("np", "pressures", "bin", "templates")
-        @assert haskey(config, key) "`\"$key\"` was not found in config!"
-    end
-    @assert config["np"] isa Integer && config["np"] >= 1
-    checkconfig(currentsoftware(), config["bin"])  # To be implemented
-    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
-        @assert config["shell_args"] isa AbstractDict
-    end
-    return
-end
+materialize_dir(config::EosFittingConfig) = materialize_dir(config.outdirs, config.fixed)
+materialize_dir(config::AbstractDict) = materialize_dir(from_dict(EosFittingConfig, config))
 
 function materialize end
 

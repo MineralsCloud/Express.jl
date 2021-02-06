@@ -1,39 +1,60 @@
 module Config
 
-function materialize_press_vol(config)
-    unit = myuparse(if haskey(config, "unit")
-        config["unit"]
-    else
-        @info "no unit provided for `\"pressures\"`! \"GPa\" is assumed!"
-        u"GPa"
-    end)
-    return map(Base.Fix2(*, unit), config["values"])
+using Configurations: @option
+
+using ...Express: myuparse
+
+@option "template" struct DfptTemplate
+    scf::String
+    dfpt::String
+    q2r::String
+    disp::String
+    function DfptTemplate(scf, dfpt, q2r, disp)
+        if !isfile(scf)
+            @warn "file \"$scf\" is not reachable, be careful!"
+        end
+        if !isfile(dfpt)
+            @warn "file \"$dfpt\" is not reachable, be careful!"
+        end
+        if !isfile(q2r)
+            @warn "file \"$q2r\" is not reachable, be careful!"
+        end
+        if !isfile(disp)
+            @warn "file \"$disp\" is not reachable, be careful!"
+        end
+        return new(scf, dfpt, q2r, disp)
+    end
 end
 
-function checkconfig(config)
-    for key in ("np", "bin", "templates")
-        @assert haskey(config, key) "`\"$key\"` was not found in config!"
-    end
-    @assert config["np"] isa Integer && config["np"] >= 1
-    checkconfig(currentsoftware(), config["bin"])  # To be implemented
-    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
-        @assert config["shell_args"] isa AbstractDict
-    end
-    for paths in config["templates"]
-        for path in paths
-            if !isfile(path)
-                @warn "template \"$path\" is not reachable, be careful!"
-            end
+@option "pressures" struct Pressures
+    values::AbstractVector
+    unit::String = "GPa"
+end
+
+@option "volumes" struct Volumes
+    values::AbstractVector
+    unit::String = "bohr^3"
+end
+
+@option "fit" struct PhononConfig
+    templates::AbstractVector{DfptTemplate}
+    fixed::Union{Pressures,Volumes}
+    function PhononConfig(templates, fixed)
+        @assert length(templates) >= 1
+        if length(templates) != length(fixed.values)
+            throw(
+                DimensionMismatch(
+                    "templates and pressures or volumes have different lengths!",
+                ),
+            )
         end
+        return new(templates, fixed)
     end
-    if haskey(config, "pressures")
-        key = "pressures"
-    elseif haskey(config, "volumes")
-        key = "volumes"
-    else
-        error("\"pressures\" or \"volumes\", there must be one!")
-    end
-    return
+end
+
+function materialize_press_vol(config::Union{Pressures,Volumes})
+    unit = myuparse(config.unit)
+    return config.values .* unit
 end
 
 function materialize end

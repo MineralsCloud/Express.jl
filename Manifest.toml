@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[AbInitioSoftwareBase]]
-deps = ["IsURL", "JSON", "Pkg", "Preferences", "YAML"]
-git-tree-sha1 = "32d8bc5f56355fc20f05405547bb9eb1f04efab3"
+deps = ["Configurations", "IsURL", "JSON", "Pkg", "YAML"]
+git-tree-sha1 = "7ae139ee9c89fe6e6ec81b28c8692c9e55499293"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
 uuid = "df5135bc-470e-46c6-b451-292e27ca5b84"
@@ -10,9 +10,9 @@ version = "0.2.0"
 
 [[Adapt]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "4146c39f29be88c3f0cef732f86e5ab640d2e22d"
+git-tree-sha1 = "ffcfa2d345aaee0ef3d8346a073d5dd03c983ebe"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "3.1.1"
+version = "3.2.0"
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -25,9 +25,9 @@ version = "0.1.0"
 
 [[ArrayInterface]]
 deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "ef91c543a3a8094eba9b1f7171258b9ecae87dfa"
+git-tree-sha1 = "b9c3166c0124f44135419a394f42912c14dcbd80"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "3.0.0"
+version = "3.0.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -174,7 +174,7 @@ uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[EquationsOfStateOfSolids]]
 deps = ["AutoHashEquals", "Compat", "Configurations", "ConstructionBase", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "4103204062488d4e39b6c186b91df0f1c108fe38"
+git-tree-sha1 = "9a86e10417fc1834b1eca5a1f519b0aa49d0a127"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/EquationsOfStateOfSolids.jl.git"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
@@ -211,9 +211,9 @@ version = "0.8.4"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "NaNMath", "Random", "SpecialFunctions", "StaticArrays"]
-git-tree-sha1 = "c26b56e9b9f0687f7ca887f6b6ded03d269e0e35"
+git-tree-sha1 = "d48a40c0f54f29a5c8748cfb3225719accc72b77"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "0.10.15"
+version = "0.10.16"
 
 [[Future]]
 deps = ["Random"]
@@ -452,12 +452,6 @@ git-tree-sha1 = "1c6c5b0c3713738d6b987903c529d80622c37e07"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 version = "1.2.0"
 
-[[Preferences]]
-deps = ["TOML"]
-git-tree-sha1 = "ea79e4c9077208cd3bc5d29631a26bc0cff78902"
-uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.2.1"
-
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -555,11 +549,11 @@ version = "0.9.3"
 
 [[SimpleWorkflow]]
 deps = ["AbInitioSoftwareBase", "BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs"]
-git-tree-sha1 = "2037b5807ebe62794e2997358a43a68b6bff5a65"
+git-tree-sha1 = "47f01e0e82606459c8208f453054beeaacfb0af5"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/SimpleWorkflow.jl.git"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
-version = "0.1.2"
+version = "0.2.0"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"

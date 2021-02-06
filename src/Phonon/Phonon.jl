@@ -24,13 +24,12 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     Action,
-    MakeCmd,
-    distprocs,
     currentsoftware,
     makescript,
     loadconfig,
     myuparse
 using ..EosFitting: VcOptim
+using ..Shell: MakeCmd, distprocs
 
 export Dfpt,
     Dfpt,
