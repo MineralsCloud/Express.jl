@@ -8,11 +8,11 @@ using ..Express:
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
-    MakeCmd,
     calculation,
     currentsoftware,
     makescript,
     loadconfig
+using ..Shell: MakeCmd
 
 export SelfConsistentField,
     Scf,

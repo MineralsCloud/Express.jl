@@ -1,5 +1,9 @@
 module Config
 
+using Unitful: ustrip, @u_str
+
+using ..Express: myuparse, currentsoftware
+
 function materialize_press_vol(config)
     unit = myuparse(if haskey(config, "unit")
         config["unit"]
