@@ -63,16 +63,14 @@ end
     group_by_step::Bool = false
 end
 
-function cliconfig end
-
-@option "fit" struct EosFittingConfig
+@option "fit" struct EosFittingConfig{T<:CliConfig}
     templates::Templates
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     trial_eos::Union{TrialEos,Nothing} = nothing
     outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
-    cli::cliconfig()
-    function EosFittingConfig(templates, fixed, trial_eos, outdirs, num_inv, cli)
+    cli::T
+    function EosFittingConfig(templates, fixed, trial_eos, outdirs, num_inv, cli::T) where {T}
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
@@ -84,7 +82,7 @@ function cliconfig end
                 end
             end
         end
-        return new(templates, fixed, trial_eos, outdirs, num_inv, cli)
+        return new{T}(templates, fixed, trial_eos, outdirs, num_inv, cli)
     end
 end
 
