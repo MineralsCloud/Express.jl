@@ -57,8 +57,6 @@ function materialize_press_vol(config::Union{Pressures,Volumes})
     return config.values .* unit
 end
 
-function checkconfig(config) end
-
 function materialize end
 
 end

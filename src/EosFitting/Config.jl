@@ -147,8 +147,6 @@ end
 materialize_dir(config::EosFittingConfig) = materialize_dir(config.outdirs, config.fixed)
 materialize_dir(config::AbstractDict) = materialize_dir(from_dict(EosFittingConfig, config))
 
-function checkconfig(config) end
-
 function materialize end
 
 end

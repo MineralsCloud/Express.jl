@@ -55,7 +55,6 @@ function loadconfig(file)
     config = load(file)
     push!(config, "workdir" => abspath(dirname(file)))  # Add `workdir` key since we now deprecate it
     mod = whichmodule(config["workflow"])
-    mod.checkconfig(config)  # Errors will be thrown if exist
     return mod.materialize(config)
 end
 
