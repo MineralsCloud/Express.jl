@@ -65,16 +65,16 @@ end
 
 @option "fit" struct EosFittingConfig{T<:CliConfig}
     templates::Templates
+    trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    trial_eos::Union{TrialEos,Nothing} = nothing
     workdir::String = ""
     outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
     function EosFittingConfig{T}(
         templates,
-        fixed,
         trial_eos,
+        fixed,
         workdir,
         outdirs,
         num_inv,
@@ -91,7 +91,7 @@ end
                 end
             end
         end
-        return new(templates, fixed, trial_eos, workdir, outdirs, num_inv, cli)
+        return new(templates, trial_eos, fixed, workdir, outdirs, num_inv, cli)
     end
 end
 
