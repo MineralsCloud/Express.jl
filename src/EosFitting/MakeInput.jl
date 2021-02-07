@@ -20,5 +20,3 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T}
 end
 
 buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
-
-function adjust end
