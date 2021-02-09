@@ -47,8 +47,9 @@ end
 @option "fit" struct PhononConfig{T<:CliConfig}
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
+    workdir::String = ""
     cli::T
-    function PhononConfig{T}(templates, fixed, cli::T) where {T}
+    function PhononConfig{T}(templates, fixed, workdir, cli::T) where {T}
         @assert length(templates) >= 1
         if length(templates) != length(fixed.values)
             throw(
@@ -57,7 +58,7 @@ end
                 ),
             )
         end
-        return new(templates, fixed, cli)
+        return new(templates, fixed, workdir, cli)
     end
 end
 
