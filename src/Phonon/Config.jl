@@ -1,6 +1,8 @@
 module Config
 
+using AbInitioSoftwareBase.Cli: CliConfig
 using Configurations: @option
+using Unitful: ustrip
 
 using ...Express: myuparse
 
@@ -36,19 +38,30 @@ end
     unit::String = "bohr^3"
 end
 
-@option "fit" struct PhononConfig
+@option "outdirs" struct OutDirs
+    root::String = pwd()
+    prefix::String = "p="
+    group_by_step::Bool = false
+end
+
+@option "fit" struct PhononConfig{T<:CliConfig}
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
-    function PhononConfig(templates, fixed)
+    workdir::String = ""
+    outdirs::OutDirs = OutDirs()
+    cli::T
+    function PhononConfig{T}(templates, fixed, workdir, outdirs, cli::T) where {T}
         @assert length(templates) >= 1
-        if length(templates) != length(fixed.values)
-            throw(
-                DimensionMismatch(
-                    "templates and pressures or volumes have different lengths!",
-                ),
-            )
+        if length(templates) != 1
+            if length(templates) != length(fixed.values)
+                throw(
+                    DimensionMismatch(
+                        "templates and pressures or volumes have different lengths!",
+                    ),
+                )
+            end
         end
-        return new(templates, fixed)
+        return new(templates, fixed, workdir, outdirs, cli)
     end
 end
 
@@ -56,6 +69,13 @@ function materialize_press_vol(config::Union{Pressures,Volumes})
     unit = myuparse(config.unit)
     return config.values .* unit
 end
+
+function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
+    return map(fixed.values) do value
+        abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
+    end
+end
+materialize_dir(config::PhononConfig) = materialize_dir(config.outdirs, config.fixed)
 
 function materialize end
 
