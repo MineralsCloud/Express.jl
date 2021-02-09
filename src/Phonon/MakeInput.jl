@@ -2,15 +2,14 @@ struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
     file::Union{AbstractString},
     template::Input,
-    args...;
-    kwargs...,
+    args...,
 ) where {T<:Union{Scf,LatticeDynamics}}
     input = x(template, args...)
     mkpath(dirname(file))  # In case its parent directory is not created
     writetxt(file, input)
     return input
 end
-function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
+function (x::MakeInput{T})(cfgfile) where {T<:LatticeDynamics}
     settings = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     previnputs = map(settings.dirs) do dir
@@ -19,9 +18,9 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:LatticeDynamics}
             parse(inputtype(prevcalc(T)), read(file, String))
         end
     end
-    return broadcast(x, files, settings.templates[order(T)], previnputs; kwargs...)
+    return broadcast(x, files, settings.templates[order(T)], previnputs)
 end
-function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
+function (x::MakeInput{T})(cfgfile) where {T<:Scf}
     settings = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     templates = settings.templates[1]
@@ -44,9 +43,9 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Scf}
             cell
         end
     end
-    return broadcast(x, files, templates, first.(cells), last.(cells); kwargs...)
+    return broadcast(x, files, templates, first.(cells), last.(cells))
 end
-function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,VDos}}
+function (x::MakeInput{T})(cfgfile) where {T<:Union{PhononDispersion,VDos}}
     settings = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
     ifcinputs = map(settings.dirs) do dir
@@ -61,14 +60,7 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
             parse(inputtype(Dfpt), read(file, String))
         end
     end
-    return broadcast(
-        x,
-        files,
-        settings.templates[order(T)],
-        ifcinputs,
-        dfptinputs;
-        kwargs...,
-    )
+    return broadcast(x, files, settings.templates[order(T)], ifcinputs, dfptinputs)
 end
 
 function parsecell end
