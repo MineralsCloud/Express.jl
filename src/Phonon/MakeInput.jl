@@ -1,10 +1,4 @@
 struct MakeInput{T} <: Action{T} end
-function (::MakeInput{T})(
-    template::S,
-    args...,
-)::S where {T<:Union{Scf,LatticeDynamics},S<:Input}
-    return adjust(template, T(), args...)
-end
 function (x::MakeInput{T})(
     file::Union{AbstractString},
     template::Input,
@@ -76,8 +70,6 @@ function (x::MakeInput{T})(cfgfile; kwargs...) where {T<:Union{PhononDispersion,
         kwargs...,
     )
 end
-
-function adjust end
 
 function parsecell end
 
