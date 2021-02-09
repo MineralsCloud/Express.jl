@@ -68,7 +68,7 @@ end
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     workdir::String = ""
-    outdirs::OutDirs = OutDirs()
+    outdirs::OutDirs = OutDirs(; root = workdir)
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
     function EosFittingConfig{T}(
