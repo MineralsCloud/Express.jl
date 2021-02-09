@@ -1,5 +1,6 @@
 module Config
 
+using AbInitioSoftwareBase.Cli: CliConfig
 using Configurations: @option
 
 using ...Express: myuparse
@@ -36,10 +37,11 @@ end
     unit::String = "bohr^3"
 end
 
-@option "fit" struct PhononConfig
+@option "fit" struct PhononConfig{T<:CliConfig}
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
-    function PhononConfig(templates, fixed)
+    cli::T
+    function PhononConfig(templates, fixed, cli)
         @assert length(templates) >= 1
         if length(templates) != length(fixed.values)
             throw(
@@ -48,7 +50,7 @@ end
                 ),
             )
         end
-        return new(templates, fixed)
+        return new(templates, fixed, cli)
     end
 end
 
