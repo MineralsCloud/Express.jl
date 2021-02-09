@@ -48,7 +48,7 @@ end
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
     cli::T
-    function PhononConfig(templates, fixed, cli)
+    function PhononConfig{T}(templates, fixed, cli::T) where {T}
         @assert length(templates) >= 1
         if length(templates) != length(fixed.values)
             throw(
