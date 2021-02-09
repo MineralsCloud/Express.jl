@@ -51,12 +51,14 @@ end
     cli::T
     function PhononConfig{T}(templates, fixed, workdir, cli::T) where {T}
         @assert length(templates) >= 1
-        if length(templates) != length(fixed.values)
-            throw(
-                DimensionMismatch(
-                    "templates and pressures or volumes have different lengths!",
-                ),
-            )
+        if length(templates) != 1
+            if length(templates) != length(fixed.values)
+                throw(
+                    DimensionMismatch(
+                        "templates and pressures or volumes have different lengths!",
+                    ),
+                )
+            end
         end
         return new(templates, fixed, workdir, cli)
     end
