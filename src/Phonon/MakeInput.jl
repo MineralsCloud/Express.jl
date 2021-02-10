@@ -10,28 +10,28 @@ function (x::MakeInput{T})(
     return input
 end
 function (x::MakeInput{T})(cfgfile) where {T<:LatticeDynamics}
-    settings = loadconfig(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
-    previnputs = map(settings.dirs) do dir
+    config = loadconfig(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
+    previnputs = map(config.dirs) do dir
         file = joinpath(dir, shortname(prevcalc(T)) * ".in")
         open(file, "r") do io
             parse(inputtype(prevcalc(T)), read(file, String))
         end
     end
-    return broadcast(x, files, settings.templates[order(T)], previnputs)
+    return broadcast(x, files, config.templates[order(T)], previnputs)
 end
 function (x::MakeInput{T})(cfgfile) where {T<:Scf}
-    settings = loadconfig(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
-    templates = settings.templates[1]
+    config = loadconfig(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
+    templates = config.templates[1]
     templates = if length(templates) == 1
-        fill(templates[1], length(settings.pressures))
-    elseif length(templates) != length(settings.pressures)
+        fill(templates[1], length(config.pressures))
+    elseif length(templates) != length(config.pressures)
         throw(DimensionMismatch("!!!"))
     else
         templates
     end
-    cells = map(settings.dirs, templates) do dir, template
+    cells = map(config.dirs, templates) do dir, template
         file = joinpath(dir, shortname(VcOptim()) * ".out")
         cell = open(file, "r") do io
             str = read(io, String)
@@ -46,21 +46,21 @@ function (x::MakeInput{T})(cfgfile) where {T<:Scf}
     return broadcast(x, files, templates, first.(cells), last.(cells))
 end
 function (x::MakeInput{T})(cfgfile) where {T<:Union{PhononDispersion,VDos}}
-    settings = loadconfig(cfgfile)
-    files = map(dir -> joinpath(dir, shortname(T) * ".in"), settings.dirs)
-    ifcinputs = map(settings.dirs) do dir
+    config = loadconfig(cfgfile)
+    files = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
+    ifcinputs = map(config.dirs) do dir
         file = joinpath(dir, shortname(RealSpaceForceConstants()) * ".in")
         open(file, "r") do io
             parse(inputtype(RealSpaceForceConstants), read(file, String))
         end
     end
-    dfptinputs = map(settings.dirs) do dir
+    dfptinputs = map(config.dirs) do dir
         file = joinpath(dir, shortname(Dfpt()) * ".in")
         open(file, "r") do io
             parse(inputtype(Dfpt), read(file, String))
         end
     end
-    return broadcast(x, files, settings.templates[order(T)], ifcinputs, dfptinputs)
+    return broadcast(x, files, config.templates[order(T)], ifcinputs, dfptinputs)
 end
 
 function parsecell end
