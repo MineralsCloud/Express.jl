@@ -6,7 +6,7 @@ using Unitful: ustrip
 
 using ...Express: myuparse
 
-@option "template" struct DfptTemplate
+@option struct DfptTemplate
     scf::String
     dfpt::String
     q2r::String
@@ -38,13 +38,13 @@ end
     unit::String = "bohr^3"
 end
 
-@option "outdirs" struct OutDirs
+@option struct Directories
     root::String = pwd()
     prefix::String = "p="
     group_by_step::Bool = false
 end
 
-@option "fit" struct PhononConfig{T<:CliConfig}
+@option struct PhononConfig{T<:CliConfig}
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
     dirs::Directories = Directories()

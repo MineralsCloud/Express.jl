@@ -52,7 +52,7 @@ end
     unit::String = "bohr^3"
 end
 
-@option "trial_eos" struct TrialEos
+@option struct TrialEos
     name::String
     parameters::AbstractVector
 end
@@ -63,7 +63,7 @@ end
     group_by_step::Bool = false
 end
 
-@option "fit" struct EosFittingConfig{T<:CliConfig}
+@option struct EosFittingConfig{T<:CliConfig}
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
