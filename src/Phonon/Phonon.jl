@@ -55,21 +55,7 @@ struct ZoneCenterPhonons <: LatticeDynamics end
 const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
-function buildjob(x::MakeCmd{T}, cfgfile) where {T}
-    config = loadconfig(cfgfile)
-    inp = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
-    out = map(dir -> joinpath(dir, shortname(T) * ".out"), config.dirs)
-    return Express.buildjob(
-        x,
-        out,
-        inp,
-        config.manager.np,
-        config.bin[order(T)];
-        use_shell = config.use_shell,
-        script_template = config.script_template,
-        shell_args = config.shell_args,
-    )
-end
+function buildjob end
 
 function buildworkflow(cfgfile)
     step1 = buildjob(MakeInput{Scf}(), cfgfile)
