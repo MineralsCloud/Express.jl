@@ -47,9 +47,9 @@ end
 @option "fit" struct PhononConfig{T<:CliConfig}
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
-    outdirs::OutDirs = OutDirs()
+    dirs::Directories = Directories()
     cli::T
-    function PhononConfig{T}(templates, fixed, outdirs, cli::T) where {T}
+    function PhononConfig{T}(templates, fixed, dirs, cli::T) where {T}
         @assert length(templates) >= 1
         if length(templates) != 1
             if length(templates) != length(fixed.values)
@@ -60,7 +60,7 @@ end
                 )
             end
         end
-        return new(templates, fixed, outdirs, cli)
+        return new(templates, fixed, dirs, cli)
     end
 end
 
@@ -69,12 +69,12 @@ function materialize_press_vol(config::Union{Pressures,Volumes})
     return config.values .* unit
 end
 
-function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
+function materialize_dir(config::Directories, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
         abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-materialize_dir(config::PhononConfig) = materialize_dir(config.outdirs, config.fixed)
+materialize_dir(config::PhononConfig) = materialize_dir(config.dirs, config.fixed)
 
 function materialize end
 

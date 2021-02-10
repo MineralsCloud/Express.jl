@@ -57,7 +57,7 @@ end
     parameters::AbstractVector
 end
 
-@option "outdirs" struct OutDirs
+@option struct Directories
     root::String = pwd()
     prefix::String = "p="
     group_by_step::Bool = false
@@ -67,14 +67,14 @@ end
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    outdirs::OutDirs = OutDirs()
+    dirs::Directories = Directories()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
     function EosFittingConfig{T}(
         templates,
         trial_eos,
         fixed,
-        outdirs,
+        dirs,
         num_inv,
         cli::T,
     ) where {T}
@@ -89,7 +89,7 @@ end
                 end
             end
         end
-        return new(templates, trial_eos, fixed, outdirs, num_inv, cli)
+        return new(templates, trial_eos, fixed, dirs, num_inv, cli)
     end
 end
 
@@ -139,12 +139,12 @@ function materialize_vol(config::EosFittingConfig)
     end
 end
 
-function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
+function materialize_dir(config::Directories, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
         abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-materialize_dir(config::EosFittingConfig) = materialize_dir(config.outdirs, config.fixed)
+materialize_dir(config::EosFittingConfig) = materialize_dir(config.dirs, config.fixed)
 
 function materialize end
 
