@@ -24,13 +24,6 @@ function (x::MakeInput{T})(cfgfile) where {T<:Scf}
     config = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
     templates = config.templates[1]
-    templates = if length(templates) == 1
-        fill(templates[1], length(config.pressures))
-    elseif length(templates) != length(config.pressures)
-        throw(DimensionMismatch("!!!"))
-    else
-        templates
-    end
     cells = map(config.dirs, templates) do dir, template
         file = joinpath(dir, shortname(VcOptim()) * ".out")
         cell = open(file, "r") do io
