@@ -18,13 +18,17 @@ function (x::MakeInput{T})(cfgfile) where {T<:LatticeDynamics}
             parse(inputtype(prevcalc(T)), read(file, String))
         end
     end
-    return broadcast(x, files, config.templates[order(T)], previnputs)
+    return broadcast(
+        x,
+        files,
+        map(o -> getfield(o, order(T)), config.templates),
+        previnputs,
+    )
 end
 function (x::MakeInput{T})(cfgfile) where {T<:Scf}
     config = loadconfig(cfgfile)
     files = map(dir -> joinpath(dir, shortname(T) * ".in"), config.dirs)
-    templates = config.templates[1]
-    cells = map(config.dirs, templates) do dir, template
+    cells = map(config.dirs) do dir
         file = joinpath(dir, shortname(VcOptim()) * ".out")
         cell = open(file, "r") do io
             str = read(io, String)
@@ -36,7 +40,13 @@ function (x::MakeInput{T})(cfgfile) where {T<:Scf}
             cell
         end
     end
-    return broadcast(x, files, templates, first.(cells), last.(cells))
+    return broadcast(
+        x,
+        files,
+        map(o -> getfield(o, order(T)), config.templates),
+        first.(cells),
+        last.(cells),
+    )
 end
 function (x::MakeInput{T})(cfgfile) where {T<:Union{PhononDispersion,VDos}}
     config = loadconfig(cfgfile)
@@ -53,7 +63,13 @@ function (x::MakeInput{T})(cfgfile) where {T<:Union{PhononDispersion,VDos}}
             parse(inputtype(Dfpt), read(file, String))
         end
     end
-    return broadcast(x, files, config.templates[order(T)], ifcinputs, dfptinputs)
+    return broadcast(
+        x,
+        files,
+        map(o -> getfield(o, order(T)), config.templates),
+        ifcinputs,
+        dfptinputs,
+    )
 end
 
 function parsecell end
