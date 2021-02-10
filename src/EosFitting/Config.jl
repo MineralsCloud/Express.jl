@@ -67,15 +67,13 @@ end
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    workdir::String = ""
-    outdirs::OutDirs = OutDirs(; root = workdir)
+    outdirs::OutDirs = OutDirs()
     num_inv::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
     function EosFittingConfig{T}(
         templates,
         trial_eos,
         fixed,
-        workdir,
         outdirs,
         num_inv,
         cli::T,
@@ -91,7 +89,7 @@ end
                 end
             end
         end
-        return new(templates, trial_eos, fixed, workdir, outdirs, num_inv, cli)
+        return new(templates, trial_eos, fixed, outdirs, num_inv, cli)
     end
 end
 
