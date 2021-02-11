@@ -54,7 +54,7 @@ end
 
 @option struct TrialEos
     name::String
-    parameters::AbstractVector
+    parameters::Union{AbstractVector,AbstractDict}
 end
 
 @option struct Directories
