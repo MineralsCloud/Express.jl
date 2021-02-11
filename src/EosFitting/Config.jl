@@ -68,14 +68,14 @@ end
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     dirs::Directories = Directories()
-    num_inv::NumericalInversionOptions = NumericalInversionOptions()
+    inv_opt::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
     function EosFittingConfig{T}(
         templates,
         trial_eos,
         fixed,
         dirs,
-        num_inv,
+        inv_opt,
         cli::T,
     ) where {T}
         if length(templates.paths) != 1  # Always >= 1
@@ -89,7 +89,7 @@ end
                 end
             end
         end
-        return new(templates, trial_eos, fixed, dirs, num_inv, cli)
+        return new(templates, trial_eos, fixed, dirs, inv_opt, cli)
     end
 end
 
