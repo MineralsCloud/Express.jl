@@ -34,7 +34,7 @@ export materialize_eos
 end
 
 @option "pressures" struct Pressures
-    values::AbstractVector
+    values::AbstractVector{<:Real}
     unit::String = "GPa"
     function Pressures(values, unit)
         if length(values) <= 5
@@ -48,7 +48,7 @@ end
 end
 
 @option "volumes" struct Volumes
-    values::AbstractVector
+    values::AbstractVector{<:Real}
     unit::String = "bohr^3"
 end
 
