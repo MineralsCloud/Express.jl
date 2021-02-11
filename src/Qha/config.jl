@@ -16,7 +16,7 @@ function checkconfig(config)
         end
     end
     @assert config["t_min"] >= 0 && config["nt"] >= 0 && config["npress"] >= 0
-    if haskey(config, "use_shell") && haskey(config, "shell_args")&& config["use_shell"]
+    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
         @assert config["shell_args"] isa AbstractDict
     end
     return
