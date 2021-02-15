@@ -53,7 +53,7 @@ end
 
 function loadconfig(file)
     config = load(file)
-    config["outdirs"]["root"] = abspath(dirname(file))  # Add `workdir` key since we now deprecate it
+    config["dirs"]["root"] = abspath(dirname(file))  # Add `workdir` key since we now deprecate it
     mod = whichmodule(pop!(config, "workflow"))
     return mod.Config.materialize(config)
 end
