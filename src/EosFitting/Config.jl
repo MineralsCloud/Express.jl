@@ -34,7 +34,7 @@ export materialize_eos
 end
 
 @option "pressures" struct Pressures
-    values::AbstractVector
+    values::AbstractVector{<:Real}
     unit::String = "GPa"
     function Pressures(values, unit)
         if length(values) <= 5
@@ -48,36 +48,34 @@ end
 end
 
 @option "volumes" struct Volumes
-    values::AbstractVector
+    values::AbstractVector{<:Real}
     unit::String = "bohr^3"
 end
 
-@option "trial_eos" struct TrialEos
+@option struct TrialEos
     name::String
-    parameters::AbstractVector
+    parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option "outdirs" struct OutDirs
+@option struct Directories
     root::String = pwd()
     prefix::String = "p="
     group_by_step::Bool = false
 end
 
-@option "fit" struct EosFittingConfig{T<:CliConfig}
+@option struct EosFittingConfig{T<:CliConfig}
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    workdir::String = ""
-    outdirs::OutDirs = OutDirs(; root = workdir)
-    num_inv::NumericalInversionOptions = NumericalInversionOptions()
+    dirs::Directories = Directories()
+    inv_opt::NumericalInversionOptions = NumericalInversionOptions()
     cli::T
     function EosFittingConfig{T}(
         templates,
         trial_eos,
         fixed,
-        workdir,
-        outdirs,
-        num_inv,
+        dirs,
+        inv_opt,
         cli::T,
     ) where {T}
         if length(templates.paths) != 1  # Always >= 1
@@ -91,7 +89,7 @@ end
                 end
             end
         end
-        return new(templates, trial_eos, fixed, workdir, outdirs, num_inv, cli)
+        return new(templates, trial_eos, fixed, dirs, inv_opt, cli)
     end
 end
 
@@ -141,12 +139,12 @@ function materialize_vol(config::EosFittingConfig)
     end
 end
 
-function materialize_dir(config::OutDirs, fixed::Union{Pressures,Volumes})
+function materialize_dir(config::Directories, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
         abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-materialize_dir(config::EosFittingConfig) = materialize_dir(config.outdirs, config.fixed)
+materialize_dir(config::EosFittingConfig) = materialize_dir(config.dirs, config.fixed)
 
 function materialize end
 
