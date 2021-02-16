@@ -5,7 +5,7 @@ using Compat: isnothing
 using Configurations: @option
 using Crystallography: cellvolume
 using EquationsOfStateOfSolids:
-    Murnaghan,
+    Murnaghan1st,
     BirchMurnaghan2nd,
     BirchMurnaghan3rd,
     BirchMurnaghan4th,
@@ -96,7 +96,7 @@ end
 function materialize_eos(config::TrialEos)
     name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
     T = if name == "m" || occursin("murnaghan", name)
-        Murnaghan
+        Murnaghan1st
     elseif name == "bm2" || occursin("birchmurnaghan2", name)
         BirchMurnaghan2nd
     elseif name == "bm3" || occursin("birchmurnaghan3", name)
