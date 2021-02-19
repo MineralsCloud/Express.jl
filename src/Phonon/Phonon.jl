@@ -45,7 +45,9 @@ export Dfpt,
     MakeInput,
     makescript,
     run!,
-    loadconfig
+    loadconfig,
+    buildworkflow,
+    buildjob
 
 struct Dfpt <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end

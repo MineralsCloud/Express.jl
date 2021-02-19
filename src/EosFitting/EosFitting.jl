@@ -31,6 +31,7 @@ export SelfConsistentField,
     calculation,
     makescript,
     run!,
+    buildworkflow,
     buildjob
 
 struct StructuralOptimization <: Optimization end
