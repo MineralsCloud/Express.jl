@@ -12,7 +12,6 @@ using ..Express:
     currentsoftware,
     makescript,
     loadconfig
-using ..Shell: MakeCmd
 
 export SelfConsistentField,
     Scf,
@@ -26,6 +25,7 @@ export SelfConsistentField,
     FitEos,
     GetData,
     SaveEos,
+    MakeCmd,
     loadconfig,
     iofiles,
     calculation,
@@ -87,9 +87,11 @@ using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
 
-using ...Express: Action, loadconfig
+using ...Express: Action, loadconfig, @action
 using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
 import ...EosFitting: buildjob
+
+@action MakeCmd
 
 include("MakeInput.jl")
 include("GetData.jl")
@@ -98,6 +100,6 @@ include("SaveEos.jl")
 
 end
 
-using .DefaultActions: MakeInput, GetData, FitEos, SaveEos
+using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd
 
 end
