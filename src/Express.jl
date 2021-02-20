@@ -53,7 +53,13 @@ end
 
 function loadconfig(file)
     config = load(file)
-    config["dirs"]["root"] = abspath(dirname(file))  # Add `workdir` key since we now deprecate it
+    if haskey(config, "dirs")
+        if !haskey(config, "root")
+            config["dirs"]["root"] = abspath(dirname(file))
+        end
+    else
+        config["dirs"] = Dict("root" => abspath(dirname(file)))
+    end
     mod = whichmodule(pop!(config, "workflow"))
     return mod.Config.materialize(config)
 end
