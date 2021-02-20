@@ -119,9 +119,9 @@ function materialize_eos(config::TrialEos)
     end
     return _materialize_eos(T, config.parameters)
 end
-_materialize_eos(T, parameters::AbstractVector) = T(map(myuparse, parameters))
+_materialize_eos(T, parameters::AbstractVector) = T(map(myuparse, parameters)...)
 _materialize_eos(T, parameters::AbstractDict) =
-    T((myuparse(parameters[string(f)]) for f in fieldnames(T))...)
+    T((myuparse(parameters[string(f)]) for f in propertynames(T))...)
 
 function materialize_press(config::Pressures)
     unit = myuparse(config.unit)
@@ -147,7 +147,6 @@ function materialize_dir(config::Directories, fixed::Union{Pressures,Volumes})
         abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-materialize_dir(config::EosFittingConfig) = materialize_dir(config.dirs, config.fixed)
 
 function materialize end
 
