@@ -19,8 +19,6 @@ using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
 
-export materialize_eos
-
 @option struct Templates
     paths::AbstractVector
     function Templates(paths)
@@ -94,7 +92,7 @@ end
     end
 end
 
-function materialize_eos(config::TrialEos)
+function materialize(config::TrialEos)
     name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
     T = if name in ("m", "murnaghan")
         Murnaghan1st
@@ -117,37 +115,19 @@ function materialize_eos(config::TrialEos)
     else
         error("unsupported eos name `\"$name\"`!")
     end
-    return _materialize_eos(T, config.parameters)
+    return _materialize(T, config.parameters)
 end
-_materialize_eos(T, parameters::AbstractVector) = T(map(myuparse, parameters)...)
-_materialize_eos(T, parameters::AbstractDict) =
+_materialize(T, parameters::AbstractVector) = T(map(myuparse, parameters)...)
+_materialize(T, parameters::AbstractDict) =
     T((myuparse(parameters[string(f)]) for f in propertynames(T))...)
-
-function materialize_press(config::Pressures)
+function materialize(config::Union{Pressures,Volumes})
     unit = myuparse(config.unit)
     return config.values .* unit
 end
-
-function materialize_vol(config::Volumes)
-    unit = myuparse(config.unit)
-    return config.values .* config.unit
-end
-function materialize_vol(config::EosFittingConfig)
-    if isnothing(config.fixed)  # If no volume or pressure is provided, use templates cell volumes
-        return materialize_vol(Volumes(map(cellvolume, config.templates)))
-    elseif config.fixed isa Pressures
-        error("wrong method called! Use `materialize_press` instead!")
-    else
-        return materialize_vol(config.fixed)
-    end
-end
-
-function materialize_dir(config::Directories, fixed::Union{Pressures,Volumes})
+function materialize(config::Directories, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
         abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-
-function materialize end
 
 end
