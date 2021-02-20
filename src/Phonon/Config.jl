@@ -64,18 +64,14 @@ end
     end
 end
 
-function materialize_press_vol(config::Union{Pressures,Volumes})
+function materialize(config::Union{Pressures,Volumes})
     unit = myuparse(config.unit)
     return config.values .* unit
 end
-
-function materialize_dir(config::Directories, fixed::Union{Pressures,Volumes})
+function materialize(config::Directories, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
         abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
     end
 end
-materialize_dir(config::PhononConfig) = materialize_dir(config.dirs, config.fixed)
-
-function materialize end
 
 end
