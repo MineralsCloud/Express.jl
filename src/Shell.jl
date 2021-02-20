@@ -4,8 +4,6 @@ using Configurations: @option
 using Mustache: render_from_file
 using SimpleWorkflow: Script, ExternalAtomicJob, parallel
 
-using ..Express: Action, Calculation
-
 export ScriptTemplate, makescript
 
 @option "template" struct ScriptTemplate
@@ -39,7 +37,5 @@ function distprocs(nprocs, njobs)
     end
     return quotient
 end
-
-struct MakeCmd{T} <: Action{T} end
 
 end

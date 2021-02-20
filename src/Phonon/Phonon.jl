@@ -29,7 +29,7 @@ using ..Express:
     loadconfig,
     myuparse
 using ..EosFitting: VcOptim
-using ..Shell: MakeCmd, distprocs
+using ..Shell: distprocs
 
 export Dfpt,
     Dfpt,
@@ -102,17 +102,19 @@ module DefaultActions
 using AbInitioSoftwareBase.Inputs: Input, writetxt
 using SimpleWorkflow: InternalAtomicJob
 
-using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig
+using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig, @action
 using ...EosFitting: VcOptim
 using ..Phonon:
     Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 
 import ..Phonon: buildjob
 
+@action MakeCmd
+
 include("MakeInput.jl")
 
 end
 
-using .DefaultActions: MakeInput
+using .DefaultActions: MakeInput, MakeCmd
 
 end
