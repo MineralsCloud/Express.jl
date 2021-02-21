@@ -550,7 +550,7 @@ version = "0.9.3"
 
 [[SimpleWorkflow]]
 deps = ["AbInitioSoftwareBase", "BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs"]
-git-tree-sha1 = "47f01e0e82606459c8208f453054beeaacfb0af5"
+git-tree-sha1 = "62fe4fc8af7daffc57e1e224ea41586c5e60d7c9"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/SimpleWorkflow.jl.git"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
