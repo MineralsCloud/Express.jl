@@ -80,9 +80,11 @@ module DefaultActions
 
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
+using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
+using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
@@ -97,9 +99,10 @@ include("MakeInput.jl")
 include("GetData.jl")
 include("FitEos.jl")
 include("SaveEos.jl")
+include("LogMsg.jl")
 
 end
 
-using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd
+using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd, LogMsg
 
 end
