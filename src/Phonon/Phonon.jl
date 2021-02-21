@@ -13,7 +13,7 @@ module Phonon
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
-using SimpleWorkflow: chain, run!
+using SimpleWorkflow: run!, →
 using Unitful: ustrip, @u_str
 
 import ..Express
@@ -29,7 +29,7 @@ using ..Express:
     loadconfig,
     myuparse
 using ..EosFitting: VcOptim
-using ..Shell: distprocs
+using ..Shell: distprocs, @intjob
 
 export Dfpt,
     Dfpt,
@@ -61,19 +61,6 @@ const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 function buildjob end
 
 function buildworkflow(cfgfile)
-    step0 = buildjob(LogMsg{Scf}(), true)
-    step1 = buildjob(MakeInput{Scf}(), cfgfile)
-    step1 = chain(step0, step1)
-    step2 = chain(step1[end], buildjob(MakeCmd{Scf}(), cfgfile)[1])
-    step2 = chain(step2[end], buildjob(LogMsg{Scf}(), false))
-    step2 = chain(step2[end], buildjob(LogMsg{Dfpt}(), true))
-    step3 = chain(step2[end], buildjob(MakeInput{Dfpt}(), cfgfile))
-    step4 = chain(step3[end], buildjob(MakeCmd{Dfpt}(), cfgfile)[1])
-    step4 = chain(step4[end], buildjob(LogMsg{Dfpt}(), false))
-    step4 = chain(step4[end], buildjob(LogMsg{RealSpaceForceConstants}(), true))
-    step5 = chain(step4[end], buildjob(MakeInput{RealSpaceForceConstants}(), cfgfile))
-    step6 = chain(step5[end], buildjob(MakeCmd{RealSpaceForceConstants}(), cfgfile)[1])
-    step6 = chain(step6[end], buildjob(LogMsg{RealSpaceForceConstants}(), false))
     settings = load(cfgfile)
     x = if settings["workflow"] == "phonon dispersion"
         PhononDispersion
@@ -82,11 +69,23 @@ function buildworkflow(cfgfile)
     else
         error("unsupported option!")
     end
-    step7 = chain(step6[end], buildjob(LogMsg{x}(), true))
-    step7 = chain(step7[end], buildjob(MakeInput{x}(), cfgfile))
-    step8 = chain(step7[end], buildjob(MakeCmd{x}(), cfgfile)[1])
-    step8 = chain(step8[end], buildjob(LogMsg{x}(), false))
-    return step8
+    return begin
+        @intjob(LogMsg{Scf}()(true)) →
+        @intjob(MakeInput{Scf}()(cfgfile)) →
+        buildjob(MakeCmd{Scf}(), cfgfile) →
+        @intjob(LogMsg{Scf}()(false)) →
+        @intjob(LogMsg{Dfpt}()(true)) →
+        @intjob(MakeInput{Dfpt}()(cfgfile)) →
+        buildjob(MakeCmd{Dfpt}(), cfgfile)[1] →
+        @intjob(LogMsg{Dfpt}()(false)) →
+        @intjob(LogMsg{RealSpaceForceConstants}()(true)) →
+        @intjob(MakeInput{RealSpaceForceConstants}()(cfgfile)) →
+        buildjob(MakeCmd{RealSpaceForceConstants}(), cfgfile) →
+        @intjob(LogMsg{RealSpaceForceConstants}()(false)) →
+        @intjob(LogMsg{x}()(true)) →
+        @intjob(MakeInput{x}()(cfgfile)) →
+        buildjob(MakeCmd{x}(), cfgfile)[1] → @intjob(LogMsg{x}()(false))
+    end
 end
 
 order(x) = order(typeof(x))
