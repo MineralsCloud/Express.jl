@@ -1,6 +1,6 @@
 module EosFitting
 
-using SimpleWorkflow: ExternalAtomicJob, chain, parallel, run!
+using SimpleWorkflow: run!, →
 
 import ..Express
 using ..Express:
@@ -12,6 +12,7 @@ using ..Express:
     currentsoftware,
     makescript,
     loadconfig
+using ..Shell: @intjob
 
 export SelfConsistentField,
     Scf,
@@ -54,29 +55,24 @@ end
 function buildjob end
 
 function buildworkflow(cfgfile)
-    step0 = buildjob(LogMsg{Scf}(), true)
-    step1 = buildjob(MakeInput{Scf}(), cfgfile)
-    step1 = chain(step0, step1)
-    step12 = chain(step1[end], buildjob(MakeCmd{Scf}(), cfgfile)[1])
-    step123 = chain(step12[end], buildjob(FitEos{Scf}(), cfgfile))
-    step3p =
-        buildjob(GetData{Scf}(), shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile)))
-    step3p = chain(step3p, buildjob(LogMsg{Scf}(), false))
-    step123 = chain(step123[end], step3p[1])
-    step4m1 = buildjob(LogMsg{VcOptim}(), true)
-    step4 = buildjob(MakeInput{VcOptim}(), cfgfile)
-    step4 = chain(step4m1, step4)
-    step45 = chain(step4[end], buildjob(MakeCmd{VcOptim}(), cfgfile)[1])
-    step456 = chain(step45[end], buildjob(FitEos{VcOptim}(), cfgfile))
-    step6p = buildjob(
-        GetData{VcOptim}(),
-        shortname(VcOptim) * ".json",
-        last.(iofiles(VcOptim(), cfgfile)),
-    )
-    step6p = chain(step6p, buildjob(LogMsg{VcOptim}(), false))
-    step456 = chain(step456[end], step6p[1])
-    step16 = chain(step123[end], step456[1])
-    return step16
+    return begin
+        @intjob(LogMsg{Scf}()(true)) →
+        @intjob(MakeInput{Scf}()(cfgfile)) →
+        buildjob(MakeCmd{Scf}(), cfgfile) →
+        @intjob(FitEos{Scf}()(cfgfile)) →
+        @intjob(GetData{Scf}()(shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile)))) →
+        @intjob(LogMsg{Scf}()(false)) →
+        @intjob(LogMsg{VcOptim}()(true)) →
+        @intjob(MakeInput{VcOptim}()(cfgfile)) →
+        buildjob(MakeCmd{VcOptim}(), cfgfile) →
+        @intjob(FitEos{VcOptim}()(cfgfile)) →
+        @intjob(
+            GetData{VcOptim}()(
+                shortname(VcOptim) * ".json",
+                last.(iofiles(VcOptim(), cfgfile)),
+            )
+        ) → @intjob(LogMsg{VcOptim}()(false))
+    end
 end
 
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
