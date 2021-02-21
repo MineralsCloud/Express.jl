@@ -43,6 +43,7 @@ export Dfpt,
     ZoneCenterPhonons,
     ZoneCentrePhonons,
     MakeInput,
+    LogMsg,
     makescript,
     run!,
     loadconfig,
@@ -100,7 +101,9 @@ include("Config.jl")
 module DefaultActions
 
 using AbInitioSoftwareBase.Inputs: Input, writetxt
+using Dates: now, format
 using SimpleWorkflow: InternalAtomicJob
+using Logging: with_logger, current_logger
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig, @action
 using ...EosFitting: VcOptim
@@ -112,9 +115,10 @@ import ..Phonon: buildjob
 @action MakeCmd
 
 include("MakeInput.jl")
+include("LogMsg.jl")
 
 end
 
-using .DefaultActions: MakeInput, MakeCmd
+using .DefaultActions: MakeInput, MakeCmd, LogMsg
 
 end
