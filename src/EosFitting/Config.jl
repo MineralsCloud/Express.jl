@@ -90,6 +90,9 @@ end
                 end
             end
         end
+        if !isempty(recover)
+            recover = abspath(expanduser(recover))
+        end
         return new(templates, trial_eos, fixed, dirs, inv_opt, recover, cli)
     end
 end

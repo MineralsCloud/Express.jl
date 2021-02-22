@@ -61,6 +61,9 @@ end
                 )
             end
         end
+        if !isempty(recover)
+            recover = abspath(expanduser(recover))
+        end
         return new(templates, fixed, dirs, recover, cli)
     end
 end
