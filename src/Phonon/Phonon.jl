@@ -76,7 +76,7 @@ function buildworkflow(cfgfile)
         @intjob(LogMsg{Scf}()(false)) →
         @intjob(LogMsg{Dfpt}()(true)) →
         @intjob(MakeInput{Dfpt}()(cfgfile)) →
-        buildjob(MakeCmd{Dfpt}(), cfgfile)[1] →
+        buildjob(MakeCmd{Dfpt}(), cfgfile) →
         @intjob(LogMsg{Dfpt}()(false)) →
         @intjob(LogMsg{RealSpaceForceConstants}()(true)) →
         @intjob(MakeInput{RealSpaceForceConstants}()(cfgfile)) →
@@ -84,7 +84,7 @@ function buildworkflow(cfgfile)
         @intjob(LogMsg{RealSpaceForceConstants}()(false)) →
         @intjob(LogMsg{x}()(true)) →
         @intjob(MakeInput{x}()(cfgfile)) →
-        buildjob(MakeCmd{x}(), cfgfile)[1] → @intjob(LogMsg{x}()(false))
+        buildjob(MakeCmd{x}(), cfgfile) → @intjob(LogMsg{x}()(false))
     end
 end
 
