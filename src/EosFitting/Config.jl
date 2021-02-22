@@ -68,6 +68,7 @@ end
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     dirs::Directories = Directories()
     inv_opt::NumericalInversionOptions = NumericalInversionOptions()
+    recover::String = ""
     cli::T
     function EosFittingConfig{T}(
         templates,
@@ -75,6 +76,7 @@ end
         fixed,
         dirs,
         inv_opt,
+        recover,
         cli::T,
     ) where {T}
         if length(templates.paths) != 1  # Always >= 1
@@ -88,7 +90,7 @@ end
                 end
             end
         end
-        return new(templates, trial_eos, fixed, dirs, inv_opt, cli)
+        return new(templates, trial_eos, fixed, dirs, inv_opt, recover, cli)
     end
 end
 
