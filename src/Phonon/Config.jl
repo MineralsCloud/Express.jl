@@ -48,8 +48,9 @@ end
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
     dirs::Directories = Directories()
+    recover::String = ""
     cli::T
-    function PhononConfig{T}(templates, fixed, dirs, cli::T) where {T}
+    function PhononConfig{T}(templates, fixed, dirs, recover, cli::T) where {T}
         @assert length(templates) >= 1
         if length(templates) != 1
             if length(templates) != length(fixed.values)
@@ -60,7 +61,7 @@ end
                 )
             end
         end
-        return new(templates, fixed, dirs, cli)
+        return new(templates, fixed, dirs, recover, cli)
     end
 end
 
