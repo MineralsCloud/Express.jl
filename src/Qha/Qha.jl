@@ -9,7 +9,7 @@ export QuasiHarmonicApprox, MakeInput, CalculateThermodyn, Plot, buildworkflow
 
 struct QuasiHarmonicApprox <: Calculation end
 
-include("config.jl")
+include("Config.jl")
 
 function buildjob end
 
