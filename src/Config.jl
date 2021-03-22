@@ -2,7 +2,7 @@ module Config
 
 using Configurations: @option
 
-macro vecunit(type, unit, alias, criteria)
+macro vecunit(type, unit, alias = "", criteria = nothing)
     return quote
         @option $alias struct $type
             values
