@@ -36,6 +36,18 @@ end
     end
 end
 
+@option "temperatures" struct Temperatures
+    values::Union{AbstractVector{<:Real},String}
+    unit::String = "K"
+    function Temperatures(values, unit)
+        if !isa(values, AbstractVector)  # For `String` type
+            values = eval(Meta.parse(values))
+        end
+        typeassert(values, AbstractVector)  # Check if string is parsed correctly
+        return new(values, unit)
+    end
+end
+
 function checkconfig(config)
     for key in ("inp_file_list", "static", "q_points")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
