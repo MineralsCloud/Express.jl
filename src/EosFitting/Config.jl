@@ -33,13 +33,9 @@ using ...Express: myuparse
 end
 
 @option "pressures" struct Pressures
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "GPa"
-    function Pressures(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
+    values
+    unit::String
+    function Pressures(values::AbstractVector, unit = "GPa")
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
@@ -48,6 +44,10 @@ end
         end
         return new(values, unit)
     end
+end
+function Pressures(values::AbstractString, unit = "GPa")
+    values = eval(Meta.parse(values))
+    return Pressures(values, unit)
 end
 
 @option "volumes" struct Volumes
