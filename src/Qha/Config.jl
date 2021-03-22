@@ -98,15 +98,10 @@ function checkconfig(config)
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
     end
     list = load(config["inp_file_list"])["frequency_files"]
-    _alert(list)
     for path in vcat(list, config["static"], config["q_points"])
         if !isfile(path)
             throw(SystemError("opening file \"$path\"", 2))
         end
-    end
-    @assert config["t_min"] >= 0 && config["nt"] >= 0 && config["npress"] >= 0
-    if haskey(config, "use_shell") && haskey(config, "shell_args") && config["use_shell"]
-        @assert config["shell_args"] isa AbstractDict
     end
     return
 end
