@@ -3,7 +3,7 @@ module Config
 using AbInitioSoftwareBase: save, load
 using Configurations: @option
 
-using ...Config: @vecunit
+using ...Config: Directories, @vecunit
 
 @vecunit Pressures "GPa" "pressures" begin
     if length(values) <= 5
@@ -29,12 +29,6 @@ end
 @option struct Sampled
     temperatures::SampledTemperatures
     pressures::SampledPressures
-end
-
-@option struct Directories
-    root::String = pwd()
-    prefix::String = "p="
-    group_by_step::Bool = false
 end
 
 @option struct QhaConfig

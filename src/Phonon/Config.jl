@@ -5,7 +5,7 @@ using Configurations: @option
 using Unitful: ustrip
 
 using ...Express: myuparse
-using ...Config: @vecunit
+using ...Config: Directories, @vecunit
 
 @option struct DfptTemplate
     scf::String
@@ -32,12 +32,6 @@ end
 @vecunit Pressures "GPa" "pressures"
 
 @vecunit Volumes "bohr^3" "volumes"
-
-@option struct Directories
-    root::String = pwd()
-    prefix::String = "p="
-    group_by_step::Bool = false
-end
 
 @option struct PhononConfig{T<:CliConfig}
     templates::AbstractVector{DfptTemplate}
