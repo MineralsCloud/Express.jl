@@ -5,6 +5,7 @@ using Configurations: @option
 using Unitful: ustrip
 
 using ...Express: myuparse
+using ...Config: @vecunit
 
 @option struct DfptTemplate
     scf::String
@@ -28,29 +29,9 @@ using ...Express: myuparse
     end
 end
 
-@option "pressures" struct Pressures
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "GPa"
-    function Pressures(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        return new(values, unit)
-    end
-end
+@vecunit Pressures "GPa" "pressures"
 
-@option "volumes" struct Volumes
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "bohr^3"
-    function Volumes(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        return new(values, unit)
-    end
-end
+@vecunit Volumes "bohr^3" "volumes"
 
 @option struct Directories
     root::String = pwd()
