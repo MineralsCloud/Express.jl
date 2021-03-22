@@ -18,6 +18,7 @@ using EquationsOfStateOfSolids.Inverse: NumericalInversionOptions
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
+using ...Config: @vecunit
 
 @option struct Templates
     paths::AbstractVector
@@ -32,36 +33,18 @@ using ...Express: myuparse
     end
 end
 
-@option "pressures" struct Pressures
-    values
-    unit::String
-    function Pressures(values::AbstractVector, unit = "GPa")
-        if length(values) <= 5
-            @info "less than 6 pressures may not fit accurately, consider adding more!"
-        end
-        if minimum(values) >= zero(eltype(values))
-            @warn "for better fitting result, provide at least 1 negative pressure!"
-        end
-        return new(values, unit)
+@vecunit Pressures "GPa" "pressures" begin
+    if length(values) <= 5
+        @info "less than 6 pressures may not fit accurately, consider adding more!"
+    end
+    if minimum(values) >= zero(eltype(values))
+        @warn "for better fitting result, provide at least 1 negative pressure!"
     end
 end
-function Pressures(values::AbstractString, unit = "GPa")
-    values = eval(Meta.parse(values))
-    return Pressures(values, unit)
-end
 
-@option "volumes" struct Volumes
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "bohr^3"
-    function Volumes(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        if length(values) <= 5
-            @info "less than 6 volumes may not fit accurately, consider adding more!"
-        end
-        return new(values, unit)
+@vecunit Volumes "bohr^3" "volumes" begin
+    if length(values) <= 5
+        @info "less than 6 volumes may not fit accurately, consider adding more!"
     end
 end
 
