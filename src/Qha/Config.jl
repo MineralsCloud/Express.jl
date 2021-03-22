@@ -72,6 +72,10 @@ end
     end
 end
 
+@option struct Sampled
+    temperatures::SampledTemperatures
+    pressures::SampledPressures
+end
 function checkconfig(config)
     for key in ("inp_file_list", "static", "q_points")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
