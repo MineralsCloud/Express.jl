@@ -76,6 +76,23 @@ end
     temperatures::SampledTemperatures
     pressures::SampledPressures
 end
+
+@option struct Directories
+    root::String = pwd()
+    prefix::String = "p="
+    group_by_step::Bool = false
+end
+
+@option struct QhaConfig
+    input::String
+    temperatures::Temperatures
+    pressures::Pressures
+    sampled::Sampled
+    dirs::Directories = Directories()
+    static_only::Bool = false
+    order::UInt = 3
+end
+
 function checkconfig(config)
     for key in ("inp_file_list", "static", "q_points")
         @assert haskey(config, key) "`\"$key\"` was not found in config!"
