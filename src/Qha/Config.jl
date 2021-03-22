@@ -4,9 +4,13 @@ using AbInitioSoftwareBase: save, load
 using Configurations: @option
 
 @option "pressures" struct Pressures
-    values::AbstractVector{<:Real}
+    values::Union{AbstractVector{<:Real},String}
     unit::String = "GPa"
     function Pressures(values, unit)
+        if !isa(values, AbstractVector)  # For `String` type
+            values = eval(Meta.parse(values))
+        end
+        typeassert(values, AbstractVector)  # Check if string is parsed correctly
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
@@ -18,9 +22,13 @@ using Configurations: @option
 end
 
 @option "volumes" struct Volumes
-    values::AbstractVector{<:Real}
+    values::Union{AbstractVector{<:Real},String}
     unit::String = "bohr^3"
     function Volumes(values, unit)
+        if !isa(values, AbstractVector)  # For `String` type
+            values = eval(Meta.parse(values))
+        end
+        typeassert(values, AbstractVector)  # Check if string is parsed correctly
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
