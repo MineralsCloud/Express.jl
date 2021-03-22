@@ -29,13 +29,27 @@ using ...Express: myuparse
 end
 
 @option "pressures" struct Pressures
-    values::AbstractVector
+    values::Union{AbstractVector{<:Real},String}
     unit::String = "GPa"
+    function Pressures(values, unit)
+        if !isa(values, AbstractVector)  # For `String` type
+            values = eval(Meta.parse(values))
+        end
+        typeassert(values, AbstractVector)  # Check if string is parsed correctly
+        return new(values, unit)
+    end
 end
 
 @option "volumes" struct Volumes
-    values::AbstractVector
+    values::Union{AbstractVector{<:Real},String}
     unit::String = "bohr^3"
+    function Volumes(values, unit)
+        if !isa(values, AbstractVector)  # For `String` type
+            values = eval(Meta.parse(values))
+        end
+        typeassert(values, AbstractVector)  # Check if string is parsed correctly
+        return new(values, unit)
+    end
 end
 
 @option struct Directories
