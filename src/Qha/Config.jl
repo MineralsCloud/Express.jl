@@ -1,3 +1,30 @@
+module Config
+
+using AbInitioSoftwareBase: save, load
+using Configurations: @option
+
+@option "pressures" struct Pressures
+    values::AbstractVector{<:Real}
+    unit::String = "GPa"
+    function Pressures(values, unit)
+        if length(values) <= 5
+            @info "less than 6 pressures may not fit accurately, consider adding more!"
+        end
+        if minimum(values) >= zero(eltype(values))
+            @warn "for better fitting result, provide at least 1 negative pressure!"
+        end
+        return new(values, unit)
+    end
+end
+
+@option "volumes" struct Volumes
+    values::AbstractVector{<:Real}
+    unit::String = "bohr^3"
+    function Volumes(values, unit)
+        if length(values) <= 5
+            @info "less than 6 volumes may not fit accurately, consider adding more!"
+        end
+        return new(values, unit)
     end
 end
 
@@ -45,4 +72,6 @@ function materialize(config)
         static = config["static"],
         q_points = config["q_points"],
     )
+end
+
 end
