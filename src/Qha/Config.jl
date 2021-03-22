@@ -1,6 +1,3 @@
-function _alert(pressures)
-    if length(pressures) <= 5
-        @info "pressures <= 5 may give unreliable results, consider more if possible!"
     end
 end
 
