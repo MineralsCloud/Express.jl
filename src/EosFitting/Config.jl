@@ -49,6 +49,12 @@ end
 @option "volumes" struct Volumes
     values::AbstractVector{<:Real}
     unit::String = "bohr^3"
+    function Volumes(values, unit)
+        if length(values) <= 5
+            @info "less than 6 volumes may not fit accurately, consider adding more!"
+        end
+        return new(values, unit)
+    end
 end
 
 @option struct TrialEos
