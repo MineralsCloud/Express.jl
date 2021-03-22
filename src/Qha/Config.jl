@@ -3,74 +3,28 @@ module Config
 using AbInitioSoftwareBase: save, load
 using Configurations: @option
 
-@option "pressures" struct Pressures
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "GPa"
-    function Pressures(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        if length(values) <= 5
-            @info "less than 6 pressures may not fit accurately, consider adding more!"
-        end
-        if minimum(values) >= zero(eltype(values))
-            @warn "for better fitting result, provide at least 1 negative pressure!"
-        end
-        return new(values, unit)
+using ...Config: @vecunit
+
+@vecunit Pressures "GPa" "pressures" begin
+    if length(values) <= 5
+        @info "less than 6 pressures may not fit accurately, consider adding more!"
+    end
+    if minimum(values) >= zero(eltype(values))
+        @warn "for better fitting result, provide at least 1 negative pressure!"
     end
 end
 
-@option "volumes" struct Volumes
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "bohr^3"
-    function Volumes(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        if length(values) <= 5
-            @info "less than 6 volumes may not fit accurately, consider adding more!"
-        end
-        return new(values, unit)
+@vecunit Volumes "bohr^3" "volumes" begin
+    if length(values) <= 5
+        @info "less than 6 volumes may not fit accurately, consider adding more!"
     end
 end
 
-@option "temperatures" struct Temperatures
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "K"
-    function Temperatures(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        return new(values, unit)
-    end
-end
+@vecunit Temperatures "K" "temperatures"
 
-@option struct SampledTemperatures
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "K"
-    function SampledTemperatures(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        return new(values, unit)
-    end
-end
+@vecunit SampledTemperatures "K"
 
-@option struct SampledPressures
-    values::Union{AbstractVector{<:Real},String}
-    unit::String = "GPa"
-    function SampledPressures(values, unit)
-        if !isa(values, AbstractVector)  # For `String` type
-            values = eval(Meta.parse(values))
-        end
-        typeassert(values, AbstractVector)  # Check if string is parsed correctly
-        return new(values, unit)
-    end
-end
+@vecunit SampledPressures "GPa"
 
 @option struct Sampled
     temperatures::SampledTemperatures
