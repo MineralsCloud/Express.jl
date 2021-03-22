@@ -22,13 +22,9 @@ end
 
 @vecunit Temperatures "K" "temperatures"
 
-@vecunit SampledTemperatures "K"
-
-@vecunit SampledPressures "GPa"
-
 @option struct Sampled
-    temperatures::SampledTemperatures
-    pressures::SampledPressures
+    temperatures::Temperatures
+    pressures::Pressures
 end
 
 @option struct QhaConfig
