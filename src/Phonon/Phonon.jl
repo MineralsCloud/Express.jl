@@ -51,11 +51,12 @@ export Dfpt,
     buildworkflow,
     buildjob
 
-struct Dfpt <: LatticeDynamics end
+struct LinearResponse <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end
 struct PhononDispersion <: LatticeDynamics end
 struct PhononDensityOfStates <: LatticeDynamics end
 struct ZoneCenterPhonons <: LatticeDynamics end
+const Dfpt = LinearResponse
 const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
