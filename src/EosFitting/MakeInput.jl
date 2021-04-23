@@ -5,5 +5,3 @@ function (x::MakeInput)(file, template::Input, args...)
     writetxt(file, input)
     return input
 end
-
-buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
