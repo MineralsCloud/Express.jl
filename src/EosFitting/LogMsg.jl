@@ -5,5 +5,3 @@ function (x::LogMsg{T})(start = true) where {T}
         println("The calculation $T $startend at $(format(now(), "HH:MM:SS u dd, yyyy")).")
     end
 end
-
-buildjob(x::LogMsg, start) = InternalAtomicJob(() -> x(start))

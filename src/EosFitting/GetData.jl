@@ -23,6 +23,4 @@ function (x::GetData{T})(file, outputs) where {T}
     end
 end
 
-buildjob(x::GetData, args...) = InternalAtomicJob(() -> x(args...))
-
 function parseoutput end
