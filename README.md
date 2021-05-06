@@ -9,3 +9,7 @@
 [![Coverage](https://coveralls.io/repos/github/MineralsCloud/Express.jl/badge.svg?branch=master)](https://coveralls.io/github/MineralsCloud/Express.jl?branch=master)
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MineralsCloud.github.io/Express.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MineralsCloud.github.io/Express.jl/dev)
+
+The components of `express`:
+
+![components](https://raw.githubusercontent.com/singularitti/express-paper/main/images/components.png?token=AGAGOBMYXVAHHVG6RQPQNV3ATWJU2)
