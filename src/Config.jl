@@ -5,7 +5,7 @@ using Configurations: @option
 macro vecunit(type, unit, alias = "", criteria = nothing)
     return quote
         @option $alias struct $type
-            values
+            values::Any
             unit::String
             function ($type)(values::AbstractVector, unit = $unit)
                 $criteria
