@@ -50,11 +50,39 @@ end
     input::String
     temperatures::Temperatures
     pressures::Pressures
-    sampled::Sampled
     thermo::Thermo
     dirs::Directories = Directories()
+    calculation::String = "single"
     static_only::Bool = false
     order::UInt = 3
+    energy_unit::String = "ry"
+    function QhaConfig(
+        input,
+        temperatures,
+        pressures,
+        thermo,
+        dirs,
+        calculation,
+        static_only,
+        order,
+        energy_unit,
+    )
+        @assert lowercase(calculation) in
+                ("single", "same phonon dos", "different phonon dos")
+        @assert order in 3:5
+        @assert lowercase(energy_unit) in ("ry", "ev")
+        return new(
+            input,
+            temperatures,
+            pressures,
+            thermo,
+            dirs,
+            lowercase(calculation),
+            static_only,
+            order,
+            lowercase(energy_unit),
+        )
+    end
 end
 
 function checkconfig(config)
