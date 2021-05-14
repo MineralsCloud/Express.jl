@@ -31,11 +31,27 @@ end
     pressures::Pressures
 end
 
+@option struct Thermo
+    f::Bool = true
+    g::Bool = true
+    u::Bool = true
+    h::Bool = true
+    v::Bool = true
+    cₚ::Bool = true
+    cᵥ::Bool = true
+    α::Bool = true
+    βₜ::Bool = true
+    βₜ′::Bool = true
+    βₛ::Bool = true
+    γ::Bool = true
+end
+
 @option struct QhaConfig
     input::String
     temperatures::Temperatures
     pressures::Pressures
     sampled::Sampled
+    thermo::Thermo
     dirs::Directories = Directories()
     static_only::Bool = false
     order::UInt = 3
