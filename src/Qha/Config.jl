@@ -1,7 +1,8 @@
 module Config
 
 using AbInitioSoftwareBase: save, load
-using Configurations: @option
+using Configurations: from_dict, @option
+using Unitful: ustrip, @u_str
 
 using ...Config: Directories, @unit_vec_opt
 
@@ -24,11 +25,10 @@ end
     end
 end
 
-@unit_vec_opt Temperatures "K" "temperatures"
-
-@option struct Sampled
-    temperatures::Temperatures
-    pressures::Pressures
+@unit_vec_opt Temperatures "K" "temperatures" begin
+    function (values, unit)
+        @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
+    end
 end
 
 @option struct Thermo
