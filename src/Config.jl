@@ -8,20 +8,20 @@ using Configurations: @option
     group_by_step::Bool = false
 end
 
-macro vecunit(type, unit, alias = "", criteria = nothing)
+macro unit_vec_opt(type, unit, alias, criteria = (values, unit) -> nothing)
     return quote
         @option $alias struct $type
-            values::Any
+            values::AbstractVector
             unit::String
-            function ($type)(values::AbstractVector, unit = $unit)
-                $criteria
+            function $type(values, unit = $unit)
+                $criteria(values, unit)
                 return new(values, unit)
             end
         end
-        function ($type)(values::AbstractString, unit = $unit)
+        function $type(values::AbstractString, unit = $unit)
             values = eval(Meta.parse(values))
             typeassert(values, AbstractVector)
-            return ($type)(values, unit)
+            return $type(values, unit)
         end
     end |> esc
 end
