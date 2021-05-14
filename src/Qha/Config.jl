@@ -1,7 +1,8 @@
 module Config
 
 using AbInitioSoftwareBase: save, load
-using Configurations: @option
+using Configurations: from_dict, @option
+using Unitful: ustrip, @u_str
 
 using ...Config: Directories, @unit_vec_opt
 
@@ -24,21 +25,64 @@ end
     end
 end
 
-@unit_vec_opt Temperatures "K" "temperatures"
+@unit_vec_opt Temperatures "K" "temperatures" begin
+    function (values, unit)
+        @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
+    end
+end
 
-@option struct Sampled
-    temperatures::Temperatures
-    pressures::Pressures
+@option struct Thermo
+    F::Bool = true
+    G::Bool = true
+    U::Bool = true
+    H::Bool = true
+    V::Bool = true
+    Cp::Bool = true
+    Cv::Bool = true
+    alpha::Bool = true
+    Bt::Bool = true
+    Btp::Bool = true
+    Bs::Bool = true
+    gamma::Bool = true
 end
 
 @option struct QhaConfig
     input::String
     temperatures::Temperatures
     pressures::Pressures
-    sampled::Sampled
+    thermo::Thermo
     dirs::Directories = Directories()
+    calculation::String = "single"
     static_only::Bool = false
     order::UInt = 3
+    energy_unit::String = "ry"
+    function QhaConfig(
+        input,
+        temperatures,
+        pressures,
+        thermo,
+        dirs,
+        calculation,
+        static_only,
+        order,
+        energy_unit,
+    )
+        @assert lowercase(calculation) in
+                ("single", "same phonon dos", "different phonon dos")
+        @assert order in 3:5
+        @assert lowercase(energy_unit) in ("ry", "ev")
+        return new(
+            input,
+            temperatures,
+            pressures,
+            thermo,
+            dirs,
+            lowercase(calculation),
+            static_only,
+            order,
+            lowercase(energy_unit),
+        )
+    end
 end
 
 function checkconfig(config)
@@ -54,20 +98,25 @@ function checkconfig(config)
     return
 end
 
-function materialize(config)
+function materialize(config::AbstractDict)
+    config = from_dict(QhaConfig, config)
     dict = Dict{String,Any}(
-        "calculation" => "single",
-        "T_MIN" => config["t_min"],
-        "NT" => config["nt"],
-        "DT" => config["dt"],
-        "DT_SAMPLE" => config["dt_sample"],
-        "P_MIN" => config["p_min"],
-        "NTV" => config["npress"],
-        "DELTA_P" => config["delta_p"],
-        "DELTA_P_SAMPLE" => config["delta_p_sample"],
-        "input" => config["input"],
-        "thermodynamic_properties" => config["thermodynamic_properties"],
-        "energy_unit" => lowercase(config["energy_unit"]),
+        "calculation" => config.calculation,
+        "T_MIN" => ustrip(u"K", minimum(config.temperatures)),
+        "NT" => length(config.temperatures),
+        "DT" => ustrip(u"K", minimum(diff(config.temperatures))),
+        "DT_SAMPLE" => ustrip(u"K", minimum(diff(config.temperatures))),
+        "P_MIN" => ustrip(u"GPa", minimum(config.pressures)),
+        "NTV" => length(config.pressures),
+        "DELTA_P" => ustrip(u"GPa", minimum(diff(config.pressures))),
+        "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(config.pressures))),
+        "input" => config.input,
+        "thermodynamic_properties" => map(fieldnames(config.thermo)) do f
+            if getfield(config.thermo, f)
+                string(f)
+            end
+        end,
+        "energy_unit" => config.energy_unit,
         "high_verbosity" => true,
         "output_directory" => joinpath(config["workdir"], "results"),
     )

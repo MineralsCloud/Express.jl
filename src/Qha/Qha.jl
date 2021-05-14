@@ -28,7 +28,8 @@ using PyQHA: converter, runcode, plot
 using SimpleWorkflow: InternalAtomicJob
 
 using ...Express: Action, loadconfig
-using ..Qha: QuasiHarmonicApprox, materialize
+using ..Qha: QuasiHarmonicApprox
+using ..Config: materialize
 import ..Qha: buildjob
 
 include("MakeInput.jl")
