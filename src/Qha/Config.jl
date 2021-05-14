@@ -98,20 +98,25 @@ function checkconfig(config)
     return
 end
 
-function materialize(config)
+function materialize(config::AbstractDict)
+    config = from_dict(QhaConfig, config)
     dict = Dict{String,Any}(
-        "calculation" => "single",
-        "T_MIN" => config["t_min"],
-        "NT" => config["nt"],
-        "DT" => config["dt"],
-        "DT_SAMPLE" => config["dt_sample"],
-        "P_MIN" => config["p_min"],
-        "NTV" => config["npress"],
-        "DELTA_P" => config["delta_p"],
-        "DELTA_P_SAMPLE" => config["delta_p_sample"],
-        "input" => config["input"],
-        "thermodynamic_properties" => config["thermodynamic_properties"],
-        "energy_unit" => lowercase(config["energy_unit"]),
+        "calculation" => config.calculation,
+        "T_MIN" => ustrip(u"K", minimum(config.temperatures)),
+        "NT" => length(config.temperatures),
+        "DT" => ustrip(u"K", minimum(diff(config.temperatures))),
+        "DT_SAMPLE" => ustrip(u"K", minimum(diff(config.temperatures))),
+        "P_MIN" => ustrip(u"GPa", minimum(config.pressures)),
+        "NTV" => length(config.pressures),
+        "DELTA_P" => ustrip(u"GPa", minimum(diff(config.pressures))),
+        "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(config.pressures))),
+        "input" => config.input,
+        "thermodynamic_properties" => map(fieldnames(config.thermo)) do f
+            if getfield(config.thermo, f)
+                string(f)
+            end
+        end,
+        "energy_unit" => config.energy_unit,
         "high_verbosity" => true,
         "output_directory" => joinpath(config["workdir"], "results"),
     )
