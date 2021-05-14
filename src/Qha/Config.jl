@@ -32,18 +32,18 @@ end
 end
 
 @option struct Thermo
-    f::Bool = true
-    g::Bool = true
-    u::Bool = true
-    h::Bool = true
-    v::Bool = true
-    cₚ::Bool = true
-    cᵥ::Bool = true
-    α::Bool = true
-    βₜ::Bool = true
-    βₜ′::Bool = true
-    βₛ::Bool = true
-    γ::Bool = true
+    F::Bool = true
+    G::Bool = true
+    U::Bool = true
+    H::Bool = true
+    V::Bool = true
+    Cp::Bool = true
+    Cv::Bool = true
+    alpha::Bool = true
+    Bt::Bool = true
+    Btp::Bool = true
+    Bs::Bool = true
+    gamma::Bool = true
 end
 
 @option struct QhaConfig
