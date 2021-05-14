@@ -3,24 +3,28 @@ module Config
 using AbInitioSoftwareBase: save, load
 using Configurations: @option
 
-using ...Config: Directories, @vecunit
+using ...Config: Directories, @unit_vec_opt
 
-@vecunit Pressures "GPa" "pressures" begin
-    if length(values) <= 5
-        @info "less than 6 pressures may not fit accurately, consider adding more!"
-    end
-    if minimum(values) >= zero(eltype(values))
-        @warn "for better fitting result, provide at least 1 negative pressure!"
-    end
-end
-
-@vecunit Volumes "bohr^3" "volumes" begin
-    if length(values) <= 5
-        @info "less than 6 volumes may not fit accurately, consider adding more!"
+@unit_vec_opt Pressures "GPa" "pressures" begin
+    function (values, _)
+        if length(values) <= 5
+            @info "less than 6 pressures may not fit accurately, consider adding more!"
+        end
+        if minimum(values) >= zero(eltype(values))
+            @warn "for better fitting result, provide at least 1 negative pressure!"
+        end
     end
 end
 
-@vecunit Temperatures "K" "temperatures"
+@unit_vec_opt Volumes "bohr^3" "volumes" begin
+    function (values, _)
+        if length(values) <= 5
+            @info "less than 6 volumes may not fit accurately, consider adding more!"
+        end
+    end
+end
+
+@unit_vec_opt Temperatures "K" "temperatures"
 
 @option struct Sampled
     temperatures::Temperatures
