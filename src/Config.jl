@@ -18,11 +18,8 @@ macro unit_vec_opt(type, unit, alias, criteria = (values, unit) -> nothing)
                 return new(values, unit)
             end
         end
-        function $type(values::AbstractString, unit = $unit)
-            values = eval(Meta.parse(values))
-            typeassert(values, AbstractVector)
-            return $type(values, unit)
-        end
+        $type(values::AbstractString, unit = $unit) =
+            $type(eval(Meta.parse(values)), unit)
     end |> esc
 end
 
