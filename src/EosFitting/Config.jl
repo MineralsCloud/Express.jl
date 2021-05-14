@@ -18,7 +18,7 @@ using EquationsOfStateOfSolids.Inverse: NumericalInversionOptions
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
-using ...Config: @vecunit
+using ...Config: Directories, @vecunit
 
 @option struct Templates
     paths::AbstractVector
@@ -51,12 +51,6 @@ end
 @option struct TrialEos
     name::String
     parameters::Union{AbstractVector,AbstractDict}
-end
-
-@option struct Directories
-    root::String = pwd()
-    prefix::String = "p="
-    group_by_step::Bool = false
 end
 
 @option struct EosFittingConfig{T<:CliConfig}
