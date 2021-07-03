@@ -3,7 +3,7 @@ module Config
 using AbInitioSoftwareBase.Cli: CliConfig
 using Compat: isnothing
 using Configurations: @option
-using Crystallography: cellvolume
+using CrystallographyBase: cellvolume
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,

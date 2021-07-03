@@ -11,21 +11,7 @@ Then, similar to section "[Installation](@ref)", run
 ```julia
 julia> using Pkg; Pkg.update()
 
-julia> pkg"add git@github.com:MineralsCloud/AbInitioSoftwareBase.jl.git"
-
-julia> pkg"add git@github.com:MineralsCloud/Pseudopotentials.jl.git"
-
-julia> pkg"add git@github.com:MineralsCloud/Crystallography.jl.git"
-
-julia> pkg"add git@github.com:singularitti/PyFortran90Namelists.jl.git"
-
-julia> pkg"add git@github.com:MineralsCloud/QuantumESPRESSOBase.jl.git"
-
-julia> pkg"add git@github.com:MineralsCloud/QuantumESPRESSOParsers.jl.git"
-
-julia> pkg"add git@github.com:MineralsCloud/QuantumESPRESSO.jl.git"
-
-julia> pkg"dev git@github.com:MineralsCloud/Express.jl.git"
+julia> pkg"dev Express"
 ```
 
 Then the package will be cloned to your local machine at a path. On macOS, by default is

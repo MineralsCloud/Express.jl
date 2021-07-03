@@ -31,24 +31,29 @@ version = "0.2.0"
 
 [[BangBang]]
 deps = ["Compat", "ConstructionBase", "Future", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables", "ZygoteRules"]
-git-tree-sha1 = "d53b1eaefd48e233545d21f5b764c8ee54df4a09"
+git-tree-sha1 = "e239020994123f08905052b9603b4ca14f8c5807"
 uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
-version = "0.3.30"
+version = "0.3.31"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "d659e42240c2162300b321f05173cab5cc40a5ba"
+git-tree-sha1 = "ea05cadc30c15f9185b61ea418b9d47d53b55bc2"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "0.10.4"
+version = "0.10.8"
 
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "32a2b8af383f11cbb65803883837a149d10dfe8a"
+git-tree-sha1 = "024fe24d83e4a5bf5fc80501a314ce0d1aa35597"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.10.12"
+version = "0.11.0"
+
+[[Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
 
 [[CommonSolve]]
 git-tree-sha1 = "68a0743f578349ada8bc911a5cbd5a2ef6ed6d1f"
@@ -63,9 +68,9 @@ version = "0.3.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "e4e2b39db08f967cc1360951f01e8a75ec441cab"
+git-tree-sha1 = "dc7dedc2c2aa9faf59a55c622760a25cbefbe941"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.30.0"
+version = "3.31.0"
 
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -85,9 +90,9 @@ version = "0.15.4"
 
 [[ConstructionBase]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "1dc43957fb9a1574fa1b7a449e101bd1fd3a9fb7"
+git-tree-sha1 = "f74e9d5388b8620b4cee35d4c5a618dd4dc547f4"
 uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
-version = "1.2.1"
+version = "1.3.0"
 
 [[CoordinateTransformations]]
 deps = ["LinearAlgebra", "StaticArrays"]
@@ -106,19 +111,9 @@ git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
 uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 version = "4.0.4"
 
-[[Crystallography]]
-deps = ["CoordinateTransformations", "CrystallographyBase", "LinearAlgebra", "Spglib", "StaticArrays"]
-git-tree-sha1 = "7c7a3ce5c3067bec7fa1958b8d9cff4fc65fda9f"
-repo-rev = "master"
-repo-url = "https://github.com/MineralsCloud/Crystallography.jl.git"
-uuid = "3bff3928-7a76-11e9-2089-d112443085a5"
-version = "0.1.1"
-
 [[CrystallographyBase]]
-deps = ["Compat", "CoordinateTransformations", "Counters", "Functors", "LinearAlgebra", "Spglib", "StaticArrays"]
-git-tree-sha1 = "79b493b3217e098ad5ab0904c8b25b17e3c9e854"
-repo-rev = "master"
-repo-url = "https://github.com/MineralsCloud/CrystallographyBase.jl.git"
+deps = ["Combinatorics", "Compat", "CoordinateTransformations", "Counters", "Functors", "LinearAlgebra", "Spglib", "StaticArrays"]
+git-tree-sha1 = "27176c74d26d1254762ea0bbec481e797dc3df47"
 uuid = "93b1d1cd-a8ea-4aa5-adb1-b2407ea0ba8d"
 version = "0.1.0"
 
@@ -164,9 +159,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "013020ec9a5cdf1dd454eba3704dbffa69d3047e"
+git-tree-sha1 = "62e1ac52e9adf4234285cd88c94954924aa3f9ef"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.3"
+version = "0.25.5"
 
 [[DocStringExtensions]]
 deps = ["LibGit2"]
@@ -185,11 +180,9 @@ version = "4.0.0"
 
 [[EquationsOfStateOfSolids]]
 deps = ["AutoHashEquals", "Compat", "Configurations", "ConstructionBase", "EquationsOfState", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "0fcbb3fdc8c17b81aacf85e7a0b7c3aa0eb00a71"
-repo-rev = "master"
-repo-url = "https://github.com/MineralsCloud/EquationsOfStateOfSolids.jl.git"
+git-tree-sha1 = "a48803b902e1dca32e840928e4fa54c0799ea736"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
-version = "0.1.1"
+version = "0.1.0"
 
 [[ExprTools]]
 git-tree-sha1 = "10407a39b87f29d47ebaca8edbc75d7c302ff93e"
@@ -209,9 +202,9 @@ version = "1.1.0"
 
 [[FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
-git-tree-sha1 = "ca36405da56db2f4730b29cd2ad2bf5869baea3c"
+git-tree-sha1 = "256d8e6188f3f1ebfa1a5d17e072a0efafa8c5bf"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.9.1"
+version = "1.10.1"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
@@ -296,9 +289,9 @@ version = "1.0.0"
 
 [[JLD2]]
 deps = ["DataStructures", "FileIO", "MacroTools", "Mmap", "Pkg", "Printf", "Reexport", "TranscodingStreams", "UUIDs"]
-git-tree-sha1 = "3fd9b8beee02a27e3ad52e194c414ddc5f4c046b"
+git-tree-sha1 = "a605ca7aac73ccbba3208c49ca4d5eb78c8f4c74"
 uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-version = "0.4.9"
+version = "0.4.10"
 
 [[JLLWrappers]]
 deps = ["Preferences"]
@@ -343,9 +336,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "8d22e127ea9a0917bc98ebd3755c8bd31989381e"
+git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+0"
+version = "1.16.1+1"
 
 [[LightGraphs]]
 deps = ["ArnoldiMethod", "DataStructures", "Distributed", "Inflate", "LinearAlgebra", "Random", "SharedArrays", "SimpleTraits", "SparseArrays", "Statistics"]
@@ -424,9 +417,9 @@ version = "1.0.10"
 
 [[MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "ad9b2bce6021631e0e20706d361972343a03e642"
+git-tree-sha1 = "3927848ccebcc165952dc0d9ac9aa274a87bfe01"
 uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "0.2.19"
+version = "0.2.20"
 
 [[NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
@@ -588,7 +581,7 @@ version = "0.9.3"
 
 [[SimpleWorkflow]]
 deps = ["AbInitioSoftwareBase", "BangBang", "ColorTypes", "Dates", "Distributed", "LightGraphs", "MetaGraphs", "Serialization"]
-git-tree-sha1 = "b1e0bafcc0d42137a0b75ffa397c143500c52f0e"
+git-tree-sha1 = "d1ff03b622fc871a559067f637934fd238f3fa11"
 repo-rev = "master"
 repo-url = "git@github.com:MineralsCloud/SimpleWorkflow.jl.git"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
@@ -627,9 +620,9 @@ version = "0.2.5"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "42378d3bab8b4f57aa1ca443821b752850592668"
+git-tree-sha1 = "745914ebcd610da69f3cb6bf76cb7bb83dcb8c9a"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.2.2"
+version = "1.2.4"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -654,9 +647,9 @@ version = "0.9.8"
 
 [[StringEncodings]]
 deps = ["Libiconv_jll"]
-git-tree-sha1 = "c8834c5366bdf5796c7f90aa56ef2550da084b9c"
+git-tree-sha1 = "50ccd5ddb00d19392577902f0079267a72c5ab04"
 uuid = "69024149-9ee7-55f6-a4c4-859efe599b68"
-version = "0.3.4"
+version = "0.3.5"
 
 [[StructEquality]]
 deps = ["Compat"]
@@ -680,9 +673,9 @@ version = "1.0.1"
 
 [[Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "aa30f8bb63f9ff3f8303a06c604c8500a69aa791"
+git-tree-sha1 = "8ed4a3ea724dac32670b062be3ef1c1de6773ae8"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.4.3"
+version = "1.4.4"
 
 [[Tar]]
 deps = ["ArgTools", "SHA"]
