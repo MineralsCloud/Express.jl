@@ -2,10 +2,14 @@
 environment:
   matrix:
     - julia_version: 1.0
-    - julia_version: 1.3
+    - julia_version: 1.1
+    - julia_version: 1.6
     - julia_version: nightly
 platform:
   - x64
+  - x86
+cache:
+  - '%USERPROFILE%\.julia\artifacts'
 matrix:
   allow_failures:
     - julia_version: nightly
