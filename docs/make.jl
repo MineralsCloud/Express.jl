@@ -1,6 +1,8 @@
 using Express
 using Documenter
 
+DocMeta.setdocmeta!(Express, :DocTestSetup, :(using Express); recursive=true)
+
 makedocs(;
     modules = [Express],
     authors = "Qi Zhang <singularitti@outlook.com>",
@@ -24,4 +26,6 @@ makedocs(;
     ],
 )
 
-deploydocs(; repo = "github.com/MineralsCloud/Express.jl")
+deploydocs(;
+    repo="github.com/MineralsCloud/Express.jl",
+)
