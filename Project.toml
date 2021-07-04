@@ -23,6 +23,7 @@ UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 UrlDownload = "856ac37a-3032-4c1c-9122-f86d88358c8b"
 
 [compat]
+Configurations = "0.16"
 julia = "1"
 
 [extras]
