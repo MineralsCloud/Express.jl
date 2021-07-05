@@ -247,12 +247,6 @@ version = "0.21.1"
 deps = ["Artifacts", "Pkg"]
 uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
 
-[[LegibleLambdas]]
-deps = ["MacroTools"]
-git-tree-sha1 = "7946db4829eb8de47c399f92c19790f9cc0bbd07"
-uuid = "f1f30506-32fe-5131-bd72-7c197988f9e5"
-version = "0.3.0"
-
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
