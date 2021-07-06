@@ -22,7 +22,7 @@ makedocs(;
         ],
         "Examples" => ["hcp-GaN example" => "examples/GaN.md"],
         "Troubleshooting" => "troubleshooting.md",
-        "API by module" => ["`EosFitting` module" => "api/EosFitting.md"],
+        "API by module" => ["`EquationOfStateWorkflows` module" => "api/EquationOfStateWorkflows.md"],
     ],
 )
 

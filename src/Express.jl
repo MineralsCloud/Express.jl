@@ -35,7 +35,7 @@ calculation(::Action{T}) where {T} = T()
 function whichmodule(name)
     name = lowercase(name)
     return if name == "eos"
-        EosFitting
+        EquationOfStateWorkflows
     elseif name in ("phonon dispersion", "vdos")
         Phonon
     elseif name in ("qha single", "qha multi")
@@ -71,7 +71,7 @@ function currentsoftware end
 include("Config.jl")
 include("Shell.jl")
 using .Shell
-include("EosFitting/EosFitting.jl")
+include("EquationOfStateWorkflows/EquationOfStateWorkflows.jl")
 include("Phonon/Phonon.jl")
 include("Qha/Qha.jl")
 

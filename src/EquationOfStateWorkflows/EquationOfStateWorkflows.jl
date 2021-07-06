@@ -1,4 +1,4 @@
-module EosFitting
+module EquationOfStateWorkflows
 
 using Serialization: deserialize
 using SimpleWorkflow: Workflow, run!, →
@@ -101,8 +101,8 @@ using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig, @action
-using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
-import ...EosFitting: buildjob
+using ..EquationOfStateWorkflows: ScfOrOptim, Scf, iofiles, shortname
+import ...EquationOfStateWorkflows: buildjob
 
 @action MakeCmd
 

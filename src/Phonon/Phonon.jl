@@ -28,7 +28,7 @@ using ..Express:
     currentsoftware,
     loadconfig,
     myuparse
-using ..EosFitting: VcOptim
+using ..EquationOfStateWorkflows: VcOptim
 using ..Shell: distprocs, @intjob
 
 export Dfpt,
@@ -121,7 +121,7 @@ using SimpleWorkflow: InternalAtomicJob
 using Logging: with_logger, current_logger
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig, @action
-using ...EosFitting: VcOptim
+using ...EquationOfStateWorkflows: VcOptim
 using ..Phonon:
     Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 

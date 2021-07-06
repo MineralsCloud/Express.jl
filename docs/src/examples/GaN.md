@@ -12,7 +12,7 @@ usually `~/.julia/dev/`. Go to this `~/.julia/dev/Express`, start your VS Code o
 **exactly** there. Open a Julia REPL in your VS Code/Atom, run
 
 ```julia
-julia> using Express.EosFitting
+julia> using Express.EquationOfStateWorkflows
 
 julia> config = "<PATH-TO-EXPRESS>/examples/GaN/eos.yaml";
 
@@ -69,7 +69,7 @@ generated and job can be submitted. Then to scale your calculation, write the ab
 in a Julia script and submit it to a schedule manager. That is, write
 
 ```julia
-using Express.EosFitting
+using Express.EquationOfStateWorkflows
 
 config = "<PATH-TO-EXPRESS>/examples/GaN/eos.yaml"
 preprocess(SelfConsistentField(), config)  # Step 1
