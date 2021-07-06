@@ -37,7 +37,7 @@ function whichmodule(name)
     return if name == "eos"
         EquationOfStateWorkflows
     elseif name in ("phonon dispersion", "vdos")
-        Phonon
+        PhononWorkflows
     elseif name in ("qha single", "qha multi")
         Qha
     else
@@ -72,7 +72,7 @@ include("Config.jl")
 include("Shell.jl")
 using .Shell
 include("EquationOfStateWorkflows/EquationOfStateWorkflows.jl")
-include("Phonon/Phonon.jl")
+include("PhononWorkflows/PhononWorkflows.jl")
 include("Qha/Qha.jl")
 
 end

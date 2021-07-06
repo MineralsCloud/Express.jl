@@ -9,7 +9,7 @@
 julia>
 ```
 """
-module Phonon
+module PhononWorkflows
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
@@ -122,10 +122,10 @@ using Logging: with_logger, current_logger
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig, @action
 using ...EquationOfStateWorkflows: VcOptim
-using ..Phonon:
+using ..PhononWorkflows:
     Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 
-import ..Phonon: buildjob
+import ..PhononWorkflows: buildjob
 
 @action MakeCmd
 
