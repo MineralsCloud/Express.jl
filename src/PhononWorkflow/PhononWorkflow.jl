@@ -125,4 +125,6 @@ end
 
 using .DefaultActions: MakeInput, MakeCmd, LogMsg
 
+include("Recipes.jl")
+
 end

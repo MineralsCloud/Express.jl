@@ -119,4 +119,6 @@ end
 
 using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd, LogMsg
 
+include("Recipes.jl")
+
 end

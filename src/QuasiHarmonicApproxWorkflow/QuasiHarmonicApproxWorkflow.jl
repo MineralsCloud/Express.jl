@@ -40,4 +40,6 @@ end
 
 using .DefaultActions: MakeInput, CalculateThermodyn, Plot
 
+include("Recipes.jl")
+
 end
