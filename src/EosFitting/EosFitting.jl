@@ -11,7 +11,6 @@ using ..Express:
     FixedIonSelfConsistentField,
     calculation,
     currentsoftware,
-    makescript,
     loadconfig
 using ..Shell: @intjob
 
@@ -32,7 +31,6 @@ export SelfConsistentField,
     loadconfig,
     iofiles,
     calculation,
-    makescript,
     run!,
     buildworkflow,
     buildjob

@@ -1,34 +1,8 @@
 module Shell
 
-using Configurations: @option
-using Mustache: render_from_file
 using SimpleWorkflow: InternalAtomicJob, Script, parallel
 
-export ScriptTemplate, makescript, @intjob
-
-@option "template" struct ScriptTemplate
-    file::String
-    view::Dict
-end
-
-@option "script" struct ScriptConfig
-    template::ScriptTemplate
-end
-
-function makescript(path, template::ScriptTemplate)
-    str = render_from_file(template.file, template.view)
-    if !isfile(path)
-        if !isdir(dirname(path))
-            mkpath(dirname(path))
-        end
-    else
-        rm(path)
-    end
-    open(path, "w") do io
-        write(io, str)
-    end
-    return Script(path)
-end
+export @intjob
 
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)

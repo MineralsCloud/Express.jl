@@ -26,7 +26,6 @@ using ..Express:
     FixedIonSelfConsistentField,
     Action,
     currentsoftware,
-    makescript,
     loadconfig,
     myuparse
 using ..EosFitting: VcOptim
@@ -45,7 +44,6 @@ export Dfpt,
     ZoneCentrePhonons,
     MakeInput,
     LogMsg,
-    makescript,
     run!,
     loadconfig,
     buildworkflow,
