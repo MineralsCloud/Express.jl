@@ -57,7 +57,7 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option struct EquationOfStateWorkflowConfig{T<:CommandConfig}
+@option struct EquationOfStateConfig{T<:CommandConfig}
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
@@ -65,7 +65,7 @@ end
     inv_opt::NumericalInversionOptions = NumericalInversionOptions()
     recover::String = ""
     cli::T
-    function EquationOfStateWorkflowConfig{T}(
+    function EquationOfStateConfig{T}(
         templates,
         trial_eos,
         fixed,
