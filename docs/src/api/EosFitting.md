@@ -1,5 +1,5 @@
-## `Express.EosFitting` module
+## `Express.EquationOfStateWorkflow` module
 
 ```@autodocs
-Modules = [Express.EosFitting]
+Modules = [Express.EquationOfStateWorkflow]
 ```

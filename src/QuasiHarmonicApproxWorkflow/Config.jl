@@ -46,7 +46,7 @@ end
     gamma::Bool = true
 end
 
-@option struct QhaConfig
+@option struct QuasiHarmonicApproxConfig
     input::String
     temperatures::Temperatures
     pressures::Pressures
@@ -56,7 +56,7 @@ end
     static_only::Bool = false
     order::UInt = 3
     energy_unit::String = "ry"
-    function QhaConfig(
+    function QuasiHarmonicApproxConfig(
         input,
         temperatures,
         pressures,
@@ -99,7 +99,7 @@ function checkconfig(config)
 end
 
 function materialize(config::AbstractDict)
-    config = from_dict(QhaConfig, config)
+    config = from_dict(QuasiHarmonicApproxConfig, config)
     dict = Dict{String,Any}(
         "calculation" => config.calculation,
         "T_MIN" => ustrip(u"K", minimum(config.temperatures)),

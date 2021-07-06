@@ -1,4 +1,4 @@
-module EosFitting
+module EquationOfStateWorkflow
 
 using Serialization: deserialize
 using SimpleWorkflow: Workflow, run!, →
@@ -101,8 +101,8 @@ using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig, @action
-using ..EosFitting: ScfOrOptim, Scf, iofiles, shortname
-import ...EosFitting: buildjob
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
+import ...EquationOfStateWorkflow: buildjob
 
 @action MakeCmd
 
@@ -118,5 +118,7 @@ buildjob(x::Union{MakeInput,GetData,FitEos,LogMsg}, args...) =
 end
 
 using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd, LogMsg
+
+include("Recipes.jl")
 
 end

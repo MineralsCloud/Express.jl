@@ -35,11 +35,11 @@ calculation(::Action{T}) where {T} = T()
 function whichmodule(name)
     name = lowercase(name)
     return if name == "eos"
-        EosFitting
+        EquationOfStateWorkflow
     elseif name in ("phonon dispersion", "vdos")
-        Phonon
+        PhononWorkflow
     elseif name in ("qha single", "qha multi")
-        Qha
+        QuasiHarmonicApproxWorkflow
     else
         error("workflow `$name` is not recognized!")
     end
@@ -71,8 +71,8 @@ function currentsoftware end
 include("Config.jl")
 include("Shell.jl")
 using .Shell
-include("EosFitting/EosFitting.jl")
-include("Phonon/Phonon.jl")
-include("Qha/Qha.jl")
+include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
+include("PhononWorkflow/PhononWorkflow.jl")
+include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
 
 end

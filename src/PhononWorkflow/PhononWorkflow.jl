@@ -1,15 +1,4 @@
-"""
-# module Phonon
-
-
-
-# Examples
-
-```jldoctest
-julia>
-```
-"""
-module Phonon
+module PhononWorkflow
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
@@ -28,7 +17,7 @@ using ..Express:
     currentsoftware,
     loadconfig,
     myuparse
-using ..EosFitting: VcOptim
+using ..EquationOfStateWorkflow: VcOptim
 using ..Shell: distprocs, @intjob
 
 export Dfpt,
@@ -121,11 +110,11 @@ using SimpleWorkflow: InternalAtomicJob
 using Logging: with_logger, current_logger
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig, @action
-using ...EosFitting: VcOptim
-using ..Phonon:
+using ...EquationOfStateWorkflow: VcOptim
+using ..PhononWorkflow:
     Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
 
-import ..Phonon: buildjob
+import ..PhononWorkflow: buildjob
 
 @action MakeCmd
 
@@ -135,5 +124,7 @@ include("LogMsg.jl")
 end
 
 using .DefaultActions: MakeInput, MakeCmd, LogMsg
+
+include("Recipes.jl")
 
 end
