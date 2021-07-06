@@ -1,6 +1,6 @@
 module Config
 
-using AbInitioSoftwareBase.Cli: CliConfig
+using AbInitioSoftwareBase.Commands: CommandConfig
 using Compat: isnothing
 using Configurations: @option
 using CrystallographyBase: cellvolume
@@ -57,7 +57,7 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option struct EosFittingConfig{T<:CliConfig}
+@option struct EosFittingConfig{T<:CommandConfig}
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing

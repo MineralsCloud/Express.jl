@@ -11,7 +11,6 @@ using ..Express:
     FixedIonSelfConsistentField,
     calculation,
     currentsoftware,
-    makescript,
     loadconfig
 using ..Shell: @intjob
 
@@ -32,7 +31,6 @@ export SelfConsistentField,
     loadconfig,
     iofiles,
     calculation,
-    makescript,
     run!,
     buildworkflow,
     buildjob
@@ -97,7 +95,6 @@ using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using LegibleLambdas: @λ
 using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
 using SimpleWorkflow: InternalAtomicJob
@@ -116,7 +113,7 @@ include("SaveEos.jl")
 include("LogMsg.jl")
 
 buildjob(x::Union{MakeInput,GetData,FitEos,LogMsg}, args...) =
-    InternalAtomicJob(@λ(() -> x(args...)))
+    InternalAtomicJob(() -> x(args...))
 
 end
 

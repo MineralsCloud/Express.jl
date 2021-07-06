@@ -1,6 +1,6 @@
 module Config
 
-using AbInitioSoftwareBase.Cli: CliConfig
+using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: @option
 using Unitful: ustrip
 
@@ -33,7 +33,7 @@ end
 
 @unit_vec_opt Volumes "bohr^3" "volumes"
 
-@option struct PhononConfig{T<:CliConfig}
+@option struct PhononConfig{T<:CommandConfig}
     templates::AbstractVector{DfptTemplate}
     fixed::Union{Pressures,Volumes}
     dirs::Directories = Directories()
