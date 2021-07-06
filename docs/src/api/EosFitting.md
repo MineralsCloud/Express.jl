@@ -1,5 +1,5 @@
-## `Express.EquationOfStateWorkflows` module
+## `Express.EquationOfStateWorkflow` module
 
 ```@autodocs
-Modules = [Express.EquationOfStateWorkflows]
+Modules = [Express.EquationOfStateWorkflow]
 ```

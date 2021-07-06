@@ -1,4 +1,4 @@
-module EquationOfStateWorkflows
+module EquationOfStateWorkflow
 
 using Serialization: deserialize
 using SimpleWorkflow: Workflow, run!, →
@@ -101,8 +101,8 @@ using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig, @action
-using ..EquationOfStateWorkflows: ScfOrOptim, Scf, iofiles, shortname
-import ...EquationOfStateWorkflows: buildjob
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
+import ...EquationOfStateWorkflow: buildjob
 
 @action MakeCmd
 
