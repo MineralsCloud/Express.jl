@@ -1,14 +1,3 @@
-"""
-# module Phonon
-
-
-
-# Examples
-
-```jldoctest
-julia>
-```
-"""
 module PhononWorkflow
 
 using AbInitioSoftwareBase: load
