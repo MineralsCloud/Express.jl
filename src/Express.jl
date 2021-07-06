@@ -39,7 +39,7 @@ function whichmodule(name)
     elseif name in ("phonon dispersion", "vdos")
         PhononWorkflow
     elseif name in ("qha single", "qha multi")
-        QuasiHarmonicApproxWorkflows
+        QuasiHarmonicApproxWorkflow
     else
         error("workflow `$name` is not recognized!")
     end
@@ -73,6 +73,6 @@ include("Shell.jl")
 using .Shell
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
 include("PhononWorkflow/PhononWorkflow.jl")
-include("QuasiHarmonicApproxWorkflows/QuasiHarmonicApproxWorkflows.jl")
+include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
 
 end

@@ -1,4 +1,4 @@
-module QuasiHarmonicApproxWorkflows
+module QuasiHarmonicApproxWorkflow
 
 using AbInitioSoftwareBase: save, load
 using SimpleWorkflow: chain
@@ -28,9 +28,9 @@ using PyQHA: converter, runcode, plot
 using SimpleWorkflow: InternalAtomicJob
 
 using ...Express: Action, loadconfig
-using ..QuasiHarmonicApproxWorkflows: QuasiHarmonicApprox
+using ..QuasiHarmonicApproxWorkflow: QuasiHarmonicApprox
 using ..Config: materialize
-import ..QuasiHarmonicApproxWorkflows: buildjob
+import ..QuasiHarmonicApproxWorkflow: buildjob
 
 include("MakeInput.jl")
 include("Calculate.jl")
