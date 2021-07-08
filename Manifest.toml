@@ -28,19 +28,14 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "aec96e79e396dfa7f762c90e3cac8f15ddb43f03"
+git-tree-sha1 = "dcc25ff085cf548bc8befad5ce048391a7c07d40"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "0.10.10"
+version = "0.10.11"
 
 [[Combinatorics]]
 git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
 uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 version = "1.0.2"
-
-[[CommonSolve]]
-git-tree-sha1 = "68a0743f578349ada8bc911a5cbd5a2ef6ed6d1f"
-uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
-version = "0.2.0"
 
 [[CommonSubexpressions]]
 deps = ["MacroTools", "Test"]
@@ -65,10 +60,10 @@ uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 version = "1.5.2"
 
 [[Configurations]]
-deps = ["Crayons", "ExproniconLite", "OrderedCollections", "TOML"]
-git-tree-sha1 = "35a1e06647100e69a02facb7c57868faea609226"
+deps = ["ExproniconLite", "OrderedCollections", "TOML"]
+git-tree-sha1 = "41d153a50b001a7c534f19e263540cca1a4e7cf3"
 uuid = "5218b696-f38b-4ac9-8b61-a12ec717816d"
-version = "0.16.0"
+version = "0.16.4"
 
 [[ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -88,10 +83,11 @@ git-tree-sha1 = "6107c3c82c979db4c826b7abd0fa7175316683ba"
 uuid = "5a653867-b65e-5b16-a095-b1e26d522bbf"
 version = "0.3.3"
 
-[[Crayons]]
-git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.0.4"
+[[Crystallography]]
+deps = ["CoordinateTransformations", "CrystallographyBase", "LinearAlgebra", "StaticArrays"]
+git-tree-sha1 = "38bcde69d884fb400be947b31fbf1e644a709f0d"
+uuid = "3bff3928-7a76-11e9-2089-d112443085a5"
+version = "0.2.0"
 
 [[CrystallographyBase]]
 deps = ["Combinatorics", "Compat", "CoordinateTransformations", "Counters", "Functors", "LinearAlgebra", "Spglib", "StaticArrays"]
@@ -161,26 +157,20 @@ uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
 version = "4.0.0"
 
 [[EquationsOfStateOfSolids]]
-deps = ["AutoHashEquals", "Compat", "Configurations", "ConstructionBase", "EquationsOfState", "InteractiveUtils", "LsqFit", "PolynomialRoots", "Polynomials", "Roots", "Serialization", "UnPack", "Unitful"]
-git-tree-sha1 = "d076835ca11036de5afc721af16054c561a9f0ba"
+deps = ["AutoHashEquals", "ConstructionBase", "EquationsOfState", "LsqFit", "PolynomialRoots", "Polynomials", "UnPack", "Unitful"]
+git-tree-sha1 = "2dbd9241d130ed8361d3c39e3e2f7e5c6ab4642a"
 uuid = "1eaa2786-f833-4167-8397-974edad0881e"
-version = "0.1.1"
+version = "0.1.2"
 
 [[ExprTools]]
-git-tree-sha1 = "38fe9afc9bdf8708213ef9dcd5557da90ea6a2d5"
+git-tree-sha1 = "b7e3d17636b348f005f11040025ae8c6f645fe92"
 uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
-version = "0.1.5"
+version = "0.1.6"
 
 [[ExproniconLite]]
 git-tree-sha1 = "c97ce5069033ac15093dc44222e3ecb0d3af8966"
 uuid = "55351af7-c7e9-48d6-89ff-24e801d99491"
 version = "0.6.9"
-
-[[EzXML]]
-deps = ["Printf", "XML2_jll"]
-git-tree-sha1 = "0fa3b52a04a4e210aeb1626def9c90df3ae65268"
-uuid = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
-version = "1.1.0"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
@@ -205,6 +195,10 @@ deps = ["MacroTools"]
 git-tree-sha1 = "a7bb2af991c43dcf5c3455d276dd83976799634f"
 uuid = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
 version = "0.2.1"
+
+[[Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[IfElse]]
 git-tree-sha1 = "28e837ff3e7a6c3cdb252ce49fb412c8eb3caeef"
@@ -389,9 +383,9 @@ version = "1.0.0"
 
 [[Polynomials]]
 deps = ["Intervals", "LinearAlgebra", "MutableArithmetics", "RecipesBase"]
-git-tree-sha1 = "3685cb1e2ccbbb9973684774f956f5c6e4673bc9"
+git-tree-sha1 = "924935e4a24604784a79244cac529caa0e6b7aff"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
-version = "2.0.12"
+version = "2.0.13"
 
 [[Preferences]]
 deps = ["TOML"]
@@ -459,12 +453,6 @@ git-tree-sha1 = "68db32dff12bb6127bac73c209881191bf0efbb7"
 uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
 version = "0.3.0+0"
 
-[[Roots]]
-deps = ["CommonSolve", "Printf"]
-git-tree-sha1 = "4d64e7c43eca16edee87219b0b11f167f09c2d84"
-uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.0.9"
-
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
@@ -480,9 +468,9 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[SortingAlgorithms]]
 deps = ["DataStructures"]
-git-tree-sha1 = "2ec1962eba973f383239da22e75218565c390a96"
+git-tree-sha1 = "b3363d7460f7d098ca0912c69b082f75625d7508"
 uuid = "a2af1166-a08f-5f64-846c-94a0d3cef48c"
-version = "1.0.0"
+version = "1.0.1"
 
 [[SparseArrays]]
 deps = ["LinearAlgebra", "Random"]
@@ -574,10 +562,10 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[TimeZones]]
-deps = ["Dates", "EzXML", "LazyArtifacts", "Mocking", "Pkg", "Printf", "RecipesBase", "Serialization", "Unicode"]
-git-tree-sha1 = "960099aed321e05ac649c90d583d59c9309faee1"
+deps = ["Dates", "Future", "LazyArtifacts", "Mocking", "Pkg", "Printf", "RecipesBase", "Serialization", "Unicode"]
+git-tree-sha1 = "81753f400872e5074768c9a77d4c44e70d409ef0"
 uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
-version = "1.5.5"
+version = "1.5.6"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]
@@ -607,12 +595,6 @@ version = "1.0.0"
 git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
 uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
 version = "1.2.0"
-
-[[XML2_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "1acf5bdf07aa0907e0a37d3718bb88d4b687b74a"
-uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.9.12+0"
 
 [[YAML]]
 deps = ["Base64", "Dates", "Printf", "StringEncodings"]
