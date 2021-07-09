@@ -56,14 +56,14 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option struct EquationOfStateConfig{T<:CommandConfig}
+@option struct RuntimeConfig{T<:CommandConfig}
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     dirs::Directories = Directories()
     recover::String = ""
     cli::T
-    function EquationOfStateConfig{T}(
+    function RuntimeConfig{T}(
         templates,
         trial_eos,
         fixed,
