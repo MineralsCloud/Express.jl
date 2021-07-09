@@ -56,21 +56,14 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option struct RuntimeConfig{T<:CommandConfig}
+@option struct RuntimeConfig
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     dirs::Directories = Directories()
     recover::String = ""
-    cli::T
-    function RuntimeConfig{T}(
-        templates,
-        trial_eos,
-        fixed,
-        dirs,
-        recover,
-        cli::T,
-    ) where {T}
+    cli::CommandConfig
+    function RuntimeConfig(templates, trial_eos, fixed, dirs, recover, cli)
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
