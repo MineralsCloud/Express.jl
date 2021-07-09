@@ -14,7 +14,6 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using EquationsOfStateOfSolids.Inverse: NumericalInversionOptions
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
@@ -62,7 +61,6 @@ end
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     dirs::Directories = Directories()
-    inv_opt::NumericalInversionOptions = NumericalInversionOptions()
     recover::String = ""
     cli::T
     function EquationOfStateConfig{T}(
@@ -70,7 +68,6 @@ end
         trial_eos,
         fixed,
         dirs,
-        inv_opt,
         recover,
         cli::T,
     ) where {T}
@@ -88,7 +85,7 @@ end
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
-        return new(templates, trial_eos, fixed, dirs, inv_opt, recover, cli)
+        return new(templates, trial_eos, fixed, dirs, recover, cli)
     end
 end
 
