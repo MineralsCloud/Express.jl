@@ -17,7 +17,7 @@ function buildworkflow(cfgfile)
         return begin
             AtomicJob(() -> LogMsg{Scf}()(true)) →
             AtomicJob(() -> MakeInput{Scf}()(cfgfile)) →
-            AtomicJob(() -> MakeCmd{Scf}(), cfgfile) →
+            AtomicJob(() -> MakeCmd{Scf}()(cfgfile)) →
             AtomicJob(() -> FitEos{Scf}()(cfgfile)) →
             AtomicJob(
                 () -> GetData{Scf}()(
@@ -28,7 +28,7 @@ function buildworkflow(cfgfile)
             AtomicJob(() -> LogMsg{Scf}()(false)) →
             AtomicJob(() -> LogMsg{VcOptim}()(true)) →
             AtomicJob(() -> MakeInput{VcOptim}()(cfgfile)) →
-            AtomicJob(() -> MakeCmd{VcOptim}(), cfgfile) →
+            AtomicJob(() -> MakeCmd{VcOptim}()(cfgfile)) →
             AtomicJob(() -> FitEos{VcOptim}()(cfgfile)) →
             AtomicJob(
                 () -> GetData{VcOptim}()(
