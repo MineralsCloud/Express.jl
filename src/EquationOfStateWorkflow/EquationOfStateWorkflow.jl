@@ -9,7 +9,6 @@ using ..Express:
     calculation,
     currentsoftware,
     loadconfig
-using ..Shell: @intjob
 
 export SelfConsistentField,
     Scf,
