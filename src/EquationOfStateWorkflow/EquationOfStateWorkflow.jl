@@ -1,7 +1,5 @@
 module EquationOfStateWorkflow
 
-using Serialization: deserialize
-
 import ..Express
 using ..Express:
     Optimization,
