@@ -3,7 +3,7 @@ module Config
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Compat: isnothing
 using Configurations: @option
-using CrystallographyBase: cellvolume
+using Crystallography: cellvolume
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -14,7 +14,6 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using EquationsOfStateOfSolids.Inverse: NumericalInversionOptions
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
@@ -57,23 +56,14 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option struct EquationOfStateConfig{T<:CommandConfig}
+@option struct RuntimeConfig
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     dirs::Directories = Directories()
-    inv_opt::NumericalInversionOptions = NumericalInversionOptions()
     recover::String = ""
-    cli::T
-    function EquationOfStateConfig{T}(
-        templates,
-        trial_eos,
-        fixed,
-        dirs,
-        inv_opt,
-        recover,
-        cli::T,
-    ) where {T}
+    cli::CommandConfig
+    function RuntimeConfig(templates, trial_eos, fixed, dirs, recover, cli)
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
@@ -88,7 +78,7 @@ end
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
-        return new(templates, trial_eos, fixed, dirs, inv_opt, recover, cli)
+        return new(templates, trial_eos, fixed, dirs, recover, cli)
     end
 end
 
