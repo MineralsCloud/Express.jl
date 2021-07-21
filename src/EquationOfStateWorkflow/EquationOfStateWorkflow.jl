@@ -61,10 +61,10 @@ using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
 using Unitful: ustrip, unit
 
-using ...Express: Action, loadconfig, @action
+using ...Express: Action, loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
 
-@action MakeCmd
+struct MakeCmd{T} <: Action{T} end
 
 include("MakeInput.jl")
 include("GetData.jl")
