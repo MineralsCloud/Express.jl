@@ -50,8 +50,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-function buildjob end
-
 function buildworkflow(cfgfile)
     config = loadconfig(cfgfile)
     if isfile(config.recover)
@@ -109,9 +107,6 @@ include("GetData.jl")
 include("FitEos.jl")
 include("SaveEos.jl")
 include("LogMsg.jl")
-
-buildjob(x::Union{MakeInput,GetData,FitEos,LogMsg}, args...) =
-    InternalAtomicJob(() -> x(args...))
 
 end
 
