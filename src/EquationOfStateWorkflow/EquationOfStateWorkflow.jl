@@ -27,9 +27,7 @@ export SelfConsistentField,
     loadconfig,
     iofiles,
     calculation,
-    run!,
-    buildworkflow,
-    buildjob
+    buildworkflow
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
@@ -65,7 +63,6 @@ using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig, @action
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
-import ...EquationOfStateWorkflow: buildjob
 
 @action MakeCmd
 
