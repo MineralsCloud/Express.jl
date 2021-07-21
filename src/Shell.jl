@@ -1,6 +1,6 @@
 module Shell
 
-using SimpleWorkflow: InternalAtomicJob, Script, parallel
+using SimpleWorkflows: InternalAtomicJob, Script, parallel
 
 export @intjob
 

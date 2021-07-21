@@ -1,7 +1,6 @@
 module EquationOfStateWorkflow
 
 using Serialization: deserialize
-using SimpleWorkflow: Workflow, run!, →
 
 import ..Express
 using ..Express:
@@ -97,7 +96,6 @@ using EquationsOfStateOfSolids:
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
-using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig, @action

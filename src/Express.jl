@@ -2,7 +2,7 @@ module Express
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
-using SimpleWorkflow: Script, parallel
+using SimpleWorkflows: Script, parallel
 using Unitful: uparse
 import Unitful
 import UnitfulAtomic
