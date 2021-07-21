@@ -48,36 +48,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-function buildworkflow(cfgfile)
-    config = loadconfig(cfgfile)
-    if isfile(config.recover)
-        w = deserialize(config.recover)
-        typeassert(w, Workflow)
-        return w
-    else
-        return begin
-            @intjob(LogMsg{Scf}()(true)) →
-            @intjob(MakeInput{Scf}()(cfgfile)) →
-            buildjob(MakeCmd{Scf}(), cfgfile) →
-            @intjob(FitEos{Scf}()(cfgfile)) →
-            @intjob(
-                GetData{Scf}()(shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile)))
-            ) →
-            @intjob(LogMsg{Scf}()(false)) →
-            @intjob(LogMsg{VcOptim}()(true)) →
-            @intjob(MakeInput{VcOptim}()(cfgfile)) →
-            buildjob(MakeCmd{VcOptim}(), cfgfile) →
-            @intjob(FitEos{VcOptim}()(cfgfile)) →
-            @intjob(
-                GetData{VcOptim}()(
-                    shortname(VcOptim) * ".json",
-                    last.(iofiles(VcOptim(), cfgfile)),
-                )
-            ) → @intjob(LogMsg{VcOptim}()(false))
-        end
-    end
-end
-
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 include("Config.jl")
