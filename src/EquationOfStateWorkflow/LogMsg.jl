@@ -1,4 +1,4 @@
-@action LogMsg
+struct LogMsg{T} <: Action{T} end
 function (x::LogMsg{T})(start = true) where {T}
     startend = start ? "starts" : "ends"
     with_logger(current_logger()) do

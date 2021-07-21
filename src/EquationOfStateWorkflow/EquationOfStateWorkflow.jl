@@ -1,8 +1,5 @@
 module EquationOfStateWorkflow
 
-using Serialization: deserialize
-using SimpleWorkflow: Workflow, run!, →
-
 import ..Express
 using ..Express:
     Optimization,
@@ -12,7 +9,6 @@ using ..Express:
     calculation,
     currentsoftware,
     loadconfig
-using ..Shell: @intjob
 
 export SelfConsistentField,
     Scf,
@@ -31,9 +27,7 @@ export SelfConsistentField,
     loadconfig,
     iofiles,
     calculation,
-    run!,
-    buildworkflow,
-    buildjob
+    buildworkflow
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
@@ -51,38 +45,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-function buildjob end
-
-function buildworkflow(cfgfile)
-    config = loadconfig(cfgfile)
-    if isfile(config.recover)
-        w = deserialize(config.recover)
-        typeassert(w, Workflow)
-        return w
-    else
-        return begin
-            @intjob(LogMsg{Scf}()(true)) →
-            @intjob(MakeInput{Scf}()(cfgfile)) →
-            buildjob(MakeCmd{Scf}(), cfgfile) →
-            @intjob(FitEos{Scf}()(cfgfile)) →
-            @intjob(
-                GetData{Scf}()(shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile)))
-            ) →
-            @intjob(LogMsg{Scf}()(false)) →
-            @intjob(LogMsg{VcOptim}()(true)) →
-            @intjob(MakeInput{VcOptim}()(cfgfile)) →
-            buildjob(MakeCmd{VcOptim}(), cfgfile) →
-            @intjob(FitEos{VcOptim}()(cfgfile)) →
-            @intjob(
-                GetData{VcOptim}()(
-                    shortname(VcOptim) * ".json",
-                    last.(iofiles(VcOptim(), cfgfile)),
-                )
-            ) → @intjob(LogMsg{VcOptim}()(false))
-        end
-    end
-end
-
 shortname(calc::ScfOrOptim) = shortname(typeof(calc))
 
 include("Config.jl")
@@ -97,23 +59,18 @@ using EquationsOfStateOfSolids:
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
-using SimpleWorkflow: InternalAtomicJob
 using Unitful: ustrip, unit
 
-using ...Express: Action, loadconfig, @action
+using ...Express: Action, loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
-import ...EquationOfStateWorkflow: buildjob
 
-@action MakeCmd
+struct MakeCmd{T} <: Action{T} end
 
 include("MakeInput.jl")
 include("GetData.jl")
 include("FitEos.jl")
 include("SaveEos.jl")
 include("LogMsg.jl")
-
-buildjob(x::Union{MakeInput,GetData,FitEos,LogMsg}, args...) =
-    InternalAtomicJob(() -> x(args...))
 
 end
 
