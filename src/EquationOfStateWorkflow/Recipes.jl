@@ -7,6 +7,8 @@ using ...Express: loadconfig
 using ..DefaultActions: LogMsg, MakeInput, MakeCmd, GetData, FitEos
 using ..EquationOfStateWorkflow: Scf, VcOptim, iofiles, shortname
 
+export buildworkflow
+
 function buildworkflow(cfgfile)
     config = loadconfig(cfgfile)
     if isfile(config.recover)

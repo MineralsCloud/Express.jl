@@ -26,8 +26,7 @@ export SelfConsistentField,
     LogMsg,
     loadconfig,
     iofiles,
-    calculation,
-    buildworkflow
+    calculation
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
