@@ -14,29 +14,27 @@ function buildworkflow(cfgfile)
         typeassert(w, Workflow)
         return w
     else
-        return begin
-            AtomicJob(() -> LogMsg{Scf}()(true)) →
-            AtomicJob(() -> MakeInput{Scf}()(cfgfile)) →
-            AtomicJob(() -> MakeCmd{Scf}()(cfgfile)) →
-            AtomicJob(() -> FitEos{Scf}()(cfgfile)) →
-            AtomicJob(
-                () -> GetData{Scf}()(
-                    shortname(Scf) * ".json",
-                    last.(iofiles(Scf(), cfgfile)),
-                ),
-            ) →
-            AtomicJob(() -> LogMsg{Scf}()(false)) →
-            AtomicJob(() -> LogMsg{VcOptim}()(true)) →
-            AtomicJob(() -> MakeInput{VcOptim}()(cfgfile)) →
-            AtomicJob(() -> MakeCmd{VcOptim}()(cfgfile)) →
-            AtomicJob(() -> FitEos{VcOptim}()(cfgfile)) →
-            AtomicJob(
-                () -> GetData{VcOptim}()(
-                    shortname(VcOptim) * ".json",
-                    last.(iofiles(VcOptim(), cfgfile)),
-                ),
-            ) → AtomicJob(() -> LogMsg{VcOptim}()(false))
-        end
+        a = AtomicJob(() -> LogMsg{Scf}()(true))
+        b = AtomicJob(() -> MakeInput{Scf}()(cfgfile))
+        c = AtomicJob(() -> MakeCmd{Scf}()(cfgfile))
+        d = AtomicJob(() -> FitEos{Scf}()(cfgfile))
+        e = AtomicJob(
+            () -> GetData{Scf}()(shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile))),
+        )
+        f = AtomicJob(() -> LogMsg{Scf}()(false))
+        g = AtomicJob(() -> LogMsg{VcOptim}()(true))
+        h = AtomicJob(() -> MakeInput{VcOptim}()(cfgfile))
+        i = AtomicJob(() -> MakeCmd{VcOptim}()(cfgfile))
+        j = AtomicJob(() -> FitEos{VcOptim}()(cfgfile))
+        k = AtomicJob(
+            () -> GetData{VcOptim}()(
+                shortname(VcOptim) * ".json",
+                last.(iofiles(VcOptim(), cfgfile)),
+            ),
+        )
+        l = AtomicJob(() -> LogMsg{VcOptim}()(false))
+        a → b → c → d → e → f → g → h → i → j → k → l
+        return Workflow(a, b, c, d, e, f, g, h, i, j, k, l)
     end
 end
 
