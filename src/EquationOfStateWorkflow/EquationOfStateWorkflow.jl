@@ -44,8 +44,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-shortname(calc::ScfOrOptim) = shortname(typeof(calc))
-
 include("Config.jl")
 
 module DefaultActions
@@ -61,7 +59,7 @@ using Serialization: serialize, deserialize
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles
 
 struct MakeCmd{T} <: Action{T} end
 

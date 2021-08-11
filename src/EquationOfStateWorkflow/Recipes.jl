@@ -5,7 +5,7 @@ using SimpleWorkflows: AtomicJob, Workflow, run!, →
 
 using ...Express: loadconfig
 using ..DefaultActions: LogMsg, MakeInput, MakeCmd, GetData, FitEos
-using ..EquationOfStateWorkflow: Scf, VcOptim, iofiles, shortname
+using ..EquationOfStateWorkflow: Scf, VcOptim, iofiles
 
 export buildworkflow
 
