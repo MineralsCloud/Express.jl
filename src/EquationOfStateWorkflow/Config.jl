@@ -76,10 +76,10 @@ end
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    dirs::Directories = Directories()
+    filenames::FileNames = FileNames()
     recover::String = ""
     cli::CommandConfig
-    function RuntimeConfig(templates, trial_eos, fixed, dirs, recover, cli)
+    function RuntimeConfig(templates, trial_eos, fixed, filenames, recover, cli)
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
@@ -94,7 +94,7 @@ end
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
-        return new(templates, trial_eos, fixed, dirs, recover, cli)
+        return new(templates, trial_eos, fixed, filenames, recover, cli)
     end
 end
 
