@@ -3,7 +3,7 @@ module PhononWorkflow
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using Serialization: deserialize
-using SimpleWorkflow: Workflow, run!, →
+using SimpleWorkflows: Workflow, run!, →
 using Unitful: ustrip, @u_str
 
 import ..Express
@@ -18,7 +18,7 @@ using ..Express:
     loadconfig,
     myuparse
 using ..EquationOfStateWorkflow: VcOptim
-using ..Shell: distprocs, @intjob
+using ..Shell: distprocs
 
 export Dfpt,
     Dfpt,
