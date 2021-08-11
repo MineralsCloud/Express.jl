@@ -56,6 +56,22 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
+@option struct Prefixes
+    scf::String = "scf"
+    relax::String = "relax"
+end
+
+@option struct Extensions
+    input::String = ".in"
+    output::String = ".out"
+end
+
+@option struct FileNames
+    dirs::Directories = Directories()
+    prefixes::Prefixes = Prefixes()
+    extensions::Extensions = Extensions()
+end
+
 @option struct RuntimeConfig
     templates::Templates
     trial_eos::TrialEos
