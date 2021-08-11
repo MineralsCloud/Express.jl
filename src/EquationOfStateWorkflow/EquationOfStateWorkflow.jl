@@ -26,8 +26,7 @@ export SelfConsistentField,
     LogMsg,
     loadconfig,
     iofiles,
-    calculation,
-    buildworkflow
+    calculation
 
 struct StructuralOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
@@ -45,8 +44,6 @@ function iofiles(T::ScfOrOptim, cfgfile)
     end
 end
 
-shortname(calc::ScfOrOptim) = shortname(typeof(calc))
-
 include("Config.jl")
 
 module DefaultActions
@@ -62,7 +59,7 @@ using Serialization: serialize, deserialize
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles, shortname
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles
 
 struct MakeCmd{T} <: Action{T} end
 
