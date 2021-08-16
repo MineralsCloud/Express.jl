@@ -18,26 +18,34 @@ using Formatting: sprintf1
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
-using ...Config: Directories, @unit_vec_opt
+using ...Config: Directories
 
-@unit_vec_opt Pressures "GPa" "pressures" begin
-    function (values, _)
+@option "pressures" struct Pressures
+    values::AbstractVector
+    unit::String
+    function Pressures(values, unit = "GPa")
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
         if minimum(values) >= zero(eltype(values))
             @warn "for better fitting result, provide at least 1 negative pressure!"
         end
+        return new(values, unit)
     end
 end
+Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
-@unit_vec_opt Volumes "bohr^3" "volumes" begin
-    function (values, _)
+@option "volumes" struct Volumes
+    values::AbstractVector
+    unit::String
+    function Pressures(values, unit = "bohr^3")
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
+        return new(values, unit)
     end
 end
+Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
 @option struct TrialEquationOfState
     type::String
