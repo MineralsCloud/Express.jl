@@ -1,9 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Compat: isnothing
 using Configurations: @option
-using Crystallography: cellvolume
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -14,125 +12,112 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using Unitful: AbstractQuantity, ustrip
+using Formatting: sprintf1
 
-using ...Express: myuparse
-using ...Config: Directories, @unit_vec_opt
+using ...Express: myuparse, current_calculation
+using ...Config: Directories
 
-@option struct Templates
-    paths::AbstractVector
-    function Templates(paths)
-        @assert length(paths) >= 1
-        for path in paths
-            if !isfile(path)
-                @warn "template \"$path\" is not reachable, be careful!"
-            end
-        end
-        return new(paths)
-    end
-end
-
-@unit_vec_opt Pressures "GPa" "pressures" begin
-    function (values, _)
+@option "pressures" struct Pressures
+    values::AbstractVector
+    unit::String
+    function Pressures(values, unit = "GPa")
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
         if minimum(values) >= zero(eltype(values))
             @warn "for better fitting result, provide at least 1 negative pressure!"
         end
+        return new(values, unit)
     end
 end
+Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
-@unit_vec_opt Volumes "bohr^3" "volumes" begin
-    function (values, _)
+@option "volumes" struct Volumes
+    values::AbstractVector
+    unit::String
+    function Pressures(values, unit = "bohr^3")
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
+        return new(values, unit)
     end
 end
+Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
-@option struct TrialEos
-    name::String
-    parameters::Union{AbstractVector,AbstractDict}
+@option struct TrialEquationOfState
+    type::String
+    values::Union{AbstractVector,AbstractDict}
 end
 
-@option struct Prefixes
-    scf::String = "scf"
-    relax::String = "relax"
+@option struct NamingConvention
+    input::String = "%s.in"
+    output::String = "%s.out"
 end
 
-@option struct Extensions
-    input::String = ".in"
-    output::String = ".out"
-end
-
-@option struct FileNames
+@option struct GeneratedFiles
     dirs::Directories = Directories()
-    prefixes::Prefixes = Prefixes()
-    extensions::Extensions = Extensions()
+    naming_convention::NamingConvention = NamingConvention()
 end
 
 @option struct RuntimeConfig
-    templates::Templates
-    trial_eos::TrialEos
+    template::String
+    trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    filenames::FileNames = FileNames()
+    files::GeneratedFiles = GeneratedFiles()
     recover::String = ""
     cli::CommandConfig
-    function RuntimeConfig(templates, trial_eos, fixed, filenames, recover, cli)
-        if length(templates.paths) != 1  # Always >= 1
-            if !isnothing(fixed)
-                if length(templates.paths) != length(fixed.values)
-                    throw(
-                        DimensionMismatch(
-                            "templates and pressures or volumes have different lengths!",
-                        ),
-                    )
-                end
-            end
+    function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
+        if !isfile(template)
+            @warn "I cannot find template file `$template`!"
         end
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
-        return new(templates, trial_eos, fixed, filenames, recover, cli)
+        return new(template, trial_eos, fixed, files, recover, cli)
     end
 end
 
-function materialize(config::TrialEos)
-    name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
-    T = if name in ("m", "murnaghan")
+function materialize(trial_eos::TrialEquationOfState)
+    type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
+    T = if type in ("m", "murnaghan")
         Murnaghan1st
-    elseif name == "m2" || occursin("murnaghan2", name)
+    elseif type == "m2" || occursin("murnaghan2", type)
         Murnaghan2nd
-    elseif name == "bm2" || occursin("birchmurnaghan2", name)
+    elseif type == "bm2" || occursin("birchmurnaghan2", type)
         BirchMurnaghan2nd
-    elseif name == "bm3" || occursin("birchmurnaghan3", name)
+    elseif type == "bm3" || occursin("birchmurnaghan3", type)
         BirchMurnaghan3rd
-    elseif name == "bm4" || occursin("birchmurnaghan4", name)
+    elseif type == "bm4" || occursin("birchmurnaghan4", type)
         BirchMurnaghan4th
-    elseif name == "pt2" || occursin("poiriertarantola2", name)
+    elseif type == "pt2" || occursin("poiriertarantola2", type)
         PoirierTarantola2nd
-    elseif name == "pt3" || occursin("poiriertarantola3", name)
+    elseif type == "pt3" || occursin("poiriertarantola3", type)
         PoirierTarantola3rd
-    elseif name == "pt4" || occursin("poiriertarantola4", name)
+    elseif type == "pt4" || occursin("poiriertarantola4", type)
         PoirierTarantola4th
-    elseif name == "v" || occursin("vinet", name)
+    elseif type == "v" || occursin("vinet", type)
         Vinet
     else
-        error("unsupported eos name `\"$name\"`!")
+        error("unsupported eos name `\"$type\"`!")
     end
-    return _materialize(T, config.parameters)
+    if trial_eos.values isa AbstractVector
+        return T(map(myuparse, trial_eos.values)...)
+    elseif trial_eos.values isa AbstractDict
+        return T((myuparse(trial_eos.values[string(f)]) for f in propertynames(T))...)
+    else
+        @assert false "this is a bug!"
+    end
 end
-_materialize(T, parameters::AbstractVector) = T(map(myuparse, parameters)...)
-_materialize(T, parameters::AbstractDict) =
-    T((myuparse(parameters[string(f)]) for f in propertynames(T))...)
-function materialize(config::Union{Pressures,Volumes})
-    unit = myuparse(config.unit)
-    return config.values .* unit
+function materialize(fixed::Union{Pressures,Volumes})
+    unit = myuparse(fixed.unit)
+    return fixed.values .* unit
 end
-function materialize(config::Directories, fixed::Union{Pressures,Volumes})
-    return map(fixed.values) do value
-        abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
+function materialize(files::GeneratedFiles, fixed::Union{Pressures,Volumes})
+    dirs = map(fixed.values) do value
+        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.naming_convention, value)))
+    end
+    return map(dirs) do dir
+        joinpath(dir, sprintf1(files.naming_convention.input, current_calculation()))
     end
 end
 

@@ -63,7 +63,9 @@ function loadconfig(file)
     return mod.Config.materialize(config)
 end
 
-function currentsoftware end
+function current_software end
+
+function current_calculation end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")

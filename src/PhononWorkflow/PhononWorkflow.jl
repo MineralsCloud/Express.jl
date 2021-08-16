@@ -14,7 +14,7 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     Action,
-    currentsoftware,
+    current_software,
     loadconfig,
     myuparse
 using ..EquationOfStateWorkflow: VcOptim

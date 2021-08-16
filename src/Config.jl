@@ -4,8 +4,10 @@ using Configurations: @option
 
 @option struct Directories
     root::String = pwd()
-    prefix::String = "p="
+    naming_convention::String = "p=%.1f"
     group_by_step::Bool = false
+    Directories(root, naming_convention, group_by_step) =
+        abspath(expanduser(root), naming_convention, group_by_step)
 end
 
 macro unit_vec_opt(type, unit, alias, criteria = (values, unit) -> nothing)

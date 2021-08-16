@@ -7,7 +7,7 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     calculation,
-    currentsoftware,
+    current_software,
     loadconfig
 
 export SelfConsistentField,
