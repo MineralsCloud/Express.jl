@@ -25,7 +25,6 @@ export SelfConsistentField,
     MakeCmd,
     LogMsg,
     loadconfig,
-    iofiles,
     calculation
 
 struct StructuralOptimization <: Optimization end
@@ -35,14 +34,6 @@ const FixedCellOptimization = StructuralOptimization
 const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
-
-function iofiles(T::ScfOrOptim, cfgfile)
-    config = loadconfig(cfgfile)
-    return map(config.dirs) do dir
-        prefix = joinpath(dir, shortname(T))
-        prefix * ".in" => prefix * ".out"
-    end
-end
 
 include("Config.jl")
 
@@ -59,7 +50,7 @@ using Serialization: serialize, deserialize
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf
 
 struct MakeCmd{T} <: Action{T} end
 
