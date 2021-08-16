@@ -54,7 +54,7 @@ end
     output::String = "%s.out"
 end
 
-@option struct GeneratedFiles
+@option struct IOFiles
     dirs::Directories = Directories()
     naming_convention::NamingConvention = NamingConvention()
 end
@@ -63,7 +63,7 @@ end
     template::String
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    files::GeneratedFiles = GeneratedFiles()
+    files::IOFiles = IOFiles()
     recover::String = ""
     cli::CommandConfig
     function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
@@ -112,7 +112,7 @@ function materialize(fixed::Union{Pressures,Volumes})
     unit = myuparse(fixed.unit)
     return fixed.values .* unit
 end
-function materialize(files::GeneratedFiles, fixed::Union{Pressures,Volumes})
+function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
     dirs = map(fixed.values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.naming_convention, value)))
     end
