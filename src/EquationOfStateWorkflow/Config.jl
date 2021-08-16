@@ -14,6 +14,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
+using Formatting: sprintf1
 using Unitful: AbstractQuantity, ustrip
 
 using ...Express: myuparse
@@ -68,41 +69,44 @@ end
     end
 end
 
-function materialize(config::TrialEquationOfState)
-    name = filter(c -> isletter(c) || isdigit(c), lowercase(config.type))
-    T = if name in ("m", "murnaghan")
+function materialize(trial_eos::TrialEquationOfState)
+    type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
+    T = if type in ("m", "murnaghan")
         Murnaghan1st
-    elseif name == "m2" || occursin("murnaghan2", name)
+    elseif type == "m2" || occursin("murnaghan2", type)
         Murnaghan2nd
-    elseif name == "bm2" || occursin("birchmurnaghan2", name)
+    elseif type == "bm2" || occursin("birchmurnaghan2", type)
         BirchMurnaghan2nd
-    elseif name == "bm3" || occursin("birchmurnaghan3", name)
+    elseif type == "bm3" || occursin("birchmurnaghan3", type)
         BirchMurnaghan3rd
-    elseif name == "bm4" || occursin("birchmurnaghan4", name)
+    elseif type == "bm4" || occursin("birchmurnaghan4", type)
         BirchMurnaghan4th
-    elseif name == "pt2" || occursin("poiriertarantola2", name)
+    elseif type == "pt2" || occursin("poiriertarantola2", type)
         PoirierTarantola2nd
-    elseif name == "pt3" || occursin("poiriertarantola3", name)
+    elseif type == "pt3" || occursin("poiriertarantola3", type)
         PoirierTarantola3rd
-    elseif name == "pt4" || occursin("poiriertarantola4", name)
+    elseif type == "pt4" || occursin("poiriertarantola4", type)
         PoirierTarantola4th
-    elseif name == "v" || occursin("vinet", name)
+    elseif type == "v" || occursin("vinet", type)
         Vinet
     else
-        error("unsupported eos name `\"$name\"`!")
+        error("unsupported eos name `\"$type\"`!")
     end
-    return _materialize(T, config.values)
+    if trial_eos.values isa AbstractVector
+        return T(map(myuparse, trial_eos.values)...)
+    elseif trial_eos.values isa AbstractDict
+        return T((myuparse(trial_eos.values[string(f)]) for f in propertynames(T))...)
+    else
+        @assert false "this is a bug!"
+    end
 end
-_materialize(T, parameters::AbstractVector) = T(map(myuparse, parameters)...)
-_materialize(T, parameters::AbstractDict) =
-    T((myuparse(parameters[string(f)]) for f in propertynames(T))...)
-function materialize(config::Union{Pressures,Volumes})
-    unit = myuparse(config.unit)
-    return config.values .* unit
+function materialize(fixed::Union{Pressures,Volumes})
+    unit = myuparse(fixed.unit)
+    return fixed.values .* unit
 end
-function materialize(config::Directories, fixed::Union{Pressures,Volumes})
+function materialize(dirs::Directories, fixed::Union{Pressures,Volumes})
     return map(fixed.values) do value
-        abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
+        abspath(joinpath(dirs.root, sprintf1(dirs.naming_convention, ustrip(value))))
     end
 end
 
