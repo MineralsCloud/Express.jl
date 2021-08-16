@@ -66,7 +66,7 @@ end
     output::String = ".out"
 end
 
-@option struct FileNames
+@option struct GeneratedFiles
     dirs::Directories = Directories()
     prefixes::Prefixes = Prefixes()
     extensions::Extensions = Extensions()
@@ -76,10 +76,10 @@ end
     templates::Templates
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
-    filenames::FileNames = FileNames()
+    files::GeneratedFiles = GeneratedFiles()
     recover::String = ""
     cli::CommandConfig
-    function RuntimeConfig(templates, trial_eos, fixed, filenames, recover, cli)
+    function RuntimeConfig(templates, trial_eos, fixed, files, recover, cli)
         if length(templates.paths) != 1  # Always >= 1
             if !isnothing(fixed)
                 if length(templates.paths) != length(fixed.values)
@@ -94,7 +94,7 @@ end
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
-        return new(templates, trial_eos, fixed, filenames, recover, cli)
+        return new(templates, trial_eos, fixed, files, recover, cli)
     end
 end
 
