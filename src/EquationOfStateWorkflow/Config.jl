@@ -13,7 +13,6 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet
 using Formatting: sprintf1
-using Unitful: ustrip
 
 using ...Express: myuparse, current_calculation
 using ...Config: Directories
@@ -118,7 +117,7 @@ function materialize(files::GeneratedFiles, fixed::Union{Pressures,Volumes})
         abspath(
             joinpath(
                 files.dirs.root,
-                sprintf1(files.dirs.naming_convention, ustrip(value)),
+                sprintf1(files.dirs.naming_convention, value),
             ),
         )
     end
