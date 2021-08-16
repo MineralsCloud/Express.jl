@@ -114,21 +114,10 @@ function materialize(fixed::Union{Pressures,Volumes})
 end
 function materialize(files::GeneratedFiles, fixed::Union{Pressures,Volumes})
     dirs = map(fixed.values) do value
-        abspath(
-            joinpath(
-                files.dirs.root,
-                sprintf1(files.dirs.naming_convention, value),
-            ),
-        )
+        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.naming_convention, value)))
     end
     return map(dirs) do dir
-        joinpath(
-            dir,
-            sprintf1(
-                files.naming_convention.input,
-                lowercase(string(current_calculation())),
-            ),
-        )
+        joinpath(dir, sprintf1(files.naming_convention.input, current_calculation()))
     end
 end
 
