@@ -1,9 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Compat: isnothing
 using Configurations: @option
-using Crystallography: cellvolume
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -15,7 +13,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet
 using Formatting: sprintf1
-using Unitful: AbstractQuantity, ustrip
+using Unitful: ustrip
 
 using ...Express: myuparse
 using ...Config: Directories
