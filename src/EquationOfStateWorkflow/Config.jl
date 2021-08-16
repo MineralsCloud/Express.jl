@@ -38,7 +38,7 @@ end
     end
 end
 
-@option struct TrialEos
+@option struct TrialEquationOfState
     name::String
     parameters::Union{AbstractVector,AbstractDict}
 end
@@ -55,7 +55,7 @@ end
 
 @option struct RuntimeConfig
     template::String
-    trial_eos::TrialEos
+    trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     files::GeneratedFiles = GeneratedFiles()
     recover::String = ""
@@ -68,7 +68,7 @@ end
     end
 end
 
-function materialize(config::TrialEos)
+function materialize(config::TrialEquationOfState)
     name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
     T = if name in ("m", "murnaghan")
         Murnaghan1st
