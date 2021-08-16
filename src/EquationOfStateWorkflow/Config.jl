@@ -19,19 +19,6 @@ using Unitful: AbstractQuantity, ustrip
 using ...Express: myuparse
 using ...Config: Directories, @unit_vec_opt
 
-@option struct Templates
-    paths::AbstractVector
-    function Templates(paths)
-        @assert length(paths) >= 1
-        for path in paths
-            if !isfile(path)
-                @warn "template \"$path\" is not reachable, be careful!"
-            end
-        end
-        return new(paths)
-    end
-end
-
 @unit_vec_opt Pressures "GPa" "pressures" begin
     function (values, _)
         if length(values) <= 5
@@ -73,28 +60,17 @@ end
 end
 
 @option struct RuntimeConfig
-    templates::Templates
+    template::String
     trial_eos::TrialEos
     fixed::Union{Pressures,Volumes,Nothing} = nothing
     files::GeneratedFiles = GeneratedFiles()
     recover::String = ""
     cli::CommandConfig
-    function RuntimeConfig(templates, trial_eos, fixed, files, recover, cli)
-        if length(templates.paths) != 1  # Always >= 1
-            if !isnothing(fixed)
-                if length(templates.paths) != length(fixed.values)
-                    throw(
-                        DimensionMismatch(
-                            "templates and pressures or volumes have different lengths!",
-                        ),
-                    )
-                end
-            end
-        end
+    function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
-        return new(templates, trial_eos, fixed, files, recover, cli)
+        return new(template, trial_eos, fixed, files, recover, cli)
     end
 end
 
