@@ -70,6 +70,9 @@ end
     recover::String = ""
     cli::CommandConfig
     function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
+        if !isfile(template)
+            @warn "I cannot find template file `$template`!"
+        end
         if !isempty(recover)
             recover = abspath(expanduser(recover))
         end
