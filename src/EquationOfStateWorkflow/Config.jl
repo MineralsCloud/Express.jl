@@ -15,7 +15,7 @@ using EquationsOfStateOfSolids:
 using Formatting: sprintf1
 using Unitful: ustrip
 
-using ...Express: myuparse
+using ...Express: myuparse, current_calculation
 using ...Config: Directories
 
 @option "pressures" struct Pressures
@@ -113,9 +113,23 @@ function materialize(fixed::Union{Pressures,Volumes})
     unit = myuparse(fixed.unit)
     return fixed.values .* unit
 end
-function materialize(dirs::Directories, fixed::Union{Pressures,Volumes})
-    return map(fixed.values) do value
-        abspath(joinpath(dirs.root, sprintf1(dirs.naming_convention, ustrip(value))))
+function materialize(files::GeneratedFiles, fixed::Union{Pressures,Volumes})
+    dirs = map(fixed.values) do value
+        abspath(
+            joinpath(
+                files.dirs.root,
+                sprintf1(files.dirs.naming_convention, ustrip(value)),
+            ),
+        )
+    end
+    return map(dirs) do dir
+        joinpath(
+            dir,
+            sprintf1(
+                files.naming_convention.input,
+                lowercase(string(current_calculation())),
+            ),
+        )
     end
 end
 
