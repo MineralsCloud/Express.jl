@@ -49,14 +49,14 @@ Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(value
     values::Union{AbstractVector,AbstractDict}
 end
 
-@option struct NamingConvention
+@option struct NamingPattern
     input::String = "%s.in"
     output::String = "%s.out"
 end
 
 @option struct IOFiles
     dirs::Directories = Directories()
-    naming_convention::NamingConvention = NamingConvention()
+    pattern::NamingPattern = NamingPattern()
 end
 
 @option struct RuntimeConfig
@@ -114,11 +114,11 @@ function materialize(fixed::Union{Pressures,Volumes})
 end
 function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
     dirs = map(fixed.values) do value
-        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.naming_convention, value)))
+        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
         calc = current_calculation()
-        in, out = sprintf1(files.naming_convention.input, calc), sprintf1(files.naming_convention.output, calc)
+        in, out = sprintf1(files.pattern.input, calc), sprintf1(files.pattern.output, calc)
         joinpath(dir, in) => joinpath(dir, out)
     end
 end
