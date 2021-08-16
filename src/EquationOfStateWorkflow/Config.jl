@@ -39,8 +39,8 @@ end
 end
 
 @option struct TrialEquationOfState
-    name::String
-    parameters::Union{AbstractVector,AbstractDict}
+    type::String
+    values::Union{AbstractVector,AbstractDict}
 end
 
 @option struct NamingConvention
@@ -69,7 +69,7 @@ end
 end
 
 function materialize(config::TrialEquationOfState)
-    name = filter(c -> isletter(c) || isdigit(c), lowercase(config.name))
+    name = filter(c -> isletter(c) || isdigit(c), lowercase(config.type))
     T = if name in ("m", "murnaghan")
         Murnaghan1st
     elseif name == "m2" || occursin("murnaghan2", name)
@@ -91,7 +91,7 @@ function materialize(config::TrialEquationOfState)
     else
         error("unsupported eos name `\"$name\"`!")
     end
-    return _materialize(T, config.parameters)
+    return _materialize(T, config.values)
 end
 _materialize(T, parameters::AbstractVector) = T(map(myuparse, parameters)...)
 _materialize(T, parameters::AbstractDict) =
