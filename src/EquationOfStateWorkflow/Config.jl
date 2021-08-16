@@ -43,20 +43,14 @@ end
     parameters::Union{AbstractVector,AbstractDict}
 end
 
-@option struct Prefixes
-    scf::String = "scf"
-    relax::String = "relax"
-end
-
-@option struct Extensions
-    input::String = ".in"
-    output::String = ".out"
+@option struct NamingConvention
+    input::String = "%s.in"
+    output::String = "%s.out"
 end
 
 @option struct GeneratedFiles
     dirs::Directories = Directories()
-    prefixes::Prefixes = Prefixes()
-    extensions::Extensions = Extensions()
+    naming_convention::NamingConvention = NamingConvention()
 end
 
 @option struct RuntimeConfig
