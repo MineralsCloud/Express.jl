@@ -4,7 +4,7 @@ using Configurations: @option
 
 @option struct Directories
     root::String = pwd()
-    prefix::String = "p="
+    naming_convention::String = "p=%.1f"
     group_by_step::Bool = false
 end
 
