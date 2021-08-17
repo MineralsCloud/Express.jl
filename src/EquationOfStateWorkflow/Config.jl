@@ -62,7 +62,7 @@ end
 @option struct RuntimeConfig
     template::String
     trial_eos::TrialEquationOfState
-    fixed::Union{Pressures,Volumes,Nothing} = nothing
+    fixed::Union{Pressures,Volumes}
     files::IOFiles = IOFiles()
     recover::String = ""
     cli::CommandConfig
