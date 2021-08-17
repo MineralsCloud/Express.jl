@@ -5,6 +5,8 @@ using Configurations: @option
 
 using ..Express: whichmodule
 
+export loadconfig
+
 @option struct Directories
     root::String = pwd()
     naming_convention::String = "p=%.1f"

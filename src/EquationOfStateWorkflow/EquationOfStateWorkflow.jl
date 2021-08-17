@@ -7,8 +7,7 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     calculation,
-    current_software,
-    loadconfig
+    current_software
 
 export SelfConsistentField,
     Scf,
@@ -24,7 +23,6 @@ export SelfConsistentField,
     SaveEos,
     MakeCmd,
     LogMsg,
-    loadconfig,
     calculation
 
 struct StructuralOptimization <: Optimization end
