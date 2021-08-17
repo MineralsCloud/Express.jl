@@ -52,8 +52,6 @@ end
 
 function current_software end
 
-function current_calculation end
-
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("Config.jl")

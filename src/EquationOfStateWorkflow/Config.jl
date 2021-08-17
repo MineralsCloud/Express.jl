@@ -14,8 +14,9 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: myuparse, current_calculation
+using ...Express: myuparse
 using ...Config: Directories
+using ..EquationOfStateWorkflow: CURRENT_CALCULATION
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -117,7 +118,7 @@ function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
-        calc = current_calculation()
+        calc = CURRENT_CALCULATION
         in, out = sprintf1(files.pattern.input, calc), sprintf1(files.pattern.output, calc)
         joinpath(dir, in) => joinpath(dir, out)
     end

@@ -11,7 +11,7 @@ using Serialization: serialize, deserialize
 using Unitful: ustrip, unit
 
 using ...Express: Action, loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
 
 struct MakeCmd{T} <: Action{T} end
 
