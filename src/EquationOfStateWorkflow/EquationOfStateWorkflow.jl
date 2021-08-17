@@ -36,31 +36,7 @@ const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 include("Config.jl")
-
-module DefaultActions
-
-using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.Inputs: Input, writetxt
-using Dates: now, format
-using EquationsOfStateOfSolids:
-    EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
-using EquationsOfStateOfSolids.Fitting: eosfit
-using Logging: with_logger, current_logger
-using Serialization: serialize, deserialize
-using Unitful: ustrip, unit
-
-using ...Express: Action, loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf
-
-struct MakeCmd{T} <: Action{T} end
-
-include("MakeInput.jl")
-include("GetData.jl")
-include("FitEos.jl")
-include("SaveEos.jl")
-include("LogMsg.jl")
-
-end
+include("DefaultActions.jl")
 
 using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd, LogMsg
 
