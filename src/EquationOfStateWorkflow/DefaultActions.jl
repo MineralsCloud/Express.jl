@@ -10,7 +10,8 @@ using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
 using Unitful: ustrip, unit
 
-using ...Express: Action, loadconfig
+using ...Express: Action
+using ...Config: loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
 
 struct MakeCmd{T} <: Action{T} end
