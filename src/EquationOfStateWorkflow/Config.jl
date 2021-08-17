@@ -1,7 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Configurations: @option
+using Configurations: from_dict, @option
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -14,8 +14,9 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: myuparse, current_calculation
+using ...Express: myuparse
 using ...Config: Directories
+using ..EquationOfStateWorkflow: CURRENT_CALCULATION
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -49,21 +50,21 @@ Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(value
     values::Union{AbstractVector,AbstractDict}
 end
 
-@option struct NamingConvention
+@option struct NamingPattern
     input::String = "%s.in"
     output::String = "%s.out"
 end
 
-@option struct GeneratedFiles
+@option struct IOFiles
     dirs::Directories = Directories()
-    naming_convention::NamingConvention = NamingConvention()
+    pattern::NamingPattern = NamingPattern()
 end
 
 @option struct RuntimeConfig
     template::String
     trial_eos::TrialEquationOfState
-    fixed::Union{Pressures,Volumes,Nothing} = nothing
-    files::GeneratedFiles = GeneratedFiles()
+    fixed::Union{Pressures,Volumes}
+    files::IOFiles = IOFiles()
     recover::String = ""
     cli::CommandConfig
     function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
@@ -112,13 +113,26 @@ function materialize(fixed::Union{Pressures,Volumes})
     unit = myuparse(fixed.unit)
     return fixed.values .* unit
 end
-function materialize(files::GeneratedFiles, fixed::Union{Pressures,Volumes})
+function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
     dirs = map(fixed.values) do value
-        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.naming_convention, value)))
+        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
-        joinpath(dir, sprintf1(files.naming_convention.input, current_calculation()))
+        calc = CURRENT_CALCULATION
+        in, out = sprintf1(files.pattern.input, calc), sprintf1(files.pattern.output, calc)
+        joinpath(dir, in) => joinpath(dir, out)
     end
+end
+function materialize(config::AbstractDict)
+    config = from_dict(RuntimeConfig, config)
+    return (
+        template = materialize(config.template),
+        trial_eos = materialize(config.trial_eos),
+        fixed = materialize(config.fixed),
+        files = materialize(config.files, config.fixed),
+        recover = config.recover,
+        cli = config.cli,
+    )
 end
 
 end

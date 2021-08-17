@@ -7,8 +7,7 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     calculation,
-    current_software,
-    loadconfig
+    current_software
 
 export SelfConsistentField,
     Scf,
@@ -24,8 +23,6 @@ export SelfConsistentField,
     SaveEos,
     MakeCmd,
     LogMsg,
-    loadconfig,
-    iofiles,
     calculation
 
 struct StructuralOptimization <: Optimization end
@@ -36,40 +33,10 @@ const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
-function iofiles(T::ScfOrOptim, cfgfile)
-    config = loadconfig(cfgfile)
-    return map(config.dirs) do dir
-        prefix = joinpath(dir, shortname(T))
-        prefix * ".in" => prefix * ".out"
-    end
-end
+CURRENT_CALCULATION = nothing
 
 include("Config.jl")
-
-module DefaultActions
-
-using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.Inputs: Input, writetxt
-using Dates: now, format
-using EquationsOfStateOfSolids:
-    EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
-using EquationsOfStateOfSolids.Fitting: eosfit
-using Logging: with_logger, current_logger
-using Serialization: serialize, deserialize
-using Unitful: ustrip, unit
-
-using ...Express: Action, loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf, iofiles
-
-struct MakeCmd{T} <: Action{T} end
-
-include("MakeInput.jl")
-include("GetData.jl")
-include("FitEos.jl")
-include("SaveEos.jl")
-include("LogMsg.jl")
-
-end
+include("DefaultActions.jl")
 
 using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd, LogMsg
 

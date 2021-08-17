@@ -50,22 +50,7 @@ function buildworkflow(file)
     return mod.buildworkflow(file)
 end
 
-function loadconfig(file)
-    config = load(file)
-    if haskey(config, "dirs")
-        if !haskey(config, "root")
-            config["dirs"]["root"] = abspath(dirname(file))
-        end
-    else
-        config["dirs"] = Dict("root" => abspath(dirname(file)))
-    end
-    mod = whichmodule(pop!(config, "workflow"))
-    return mod.Config.materialize(config)
-end
-
 function current_software end
-
-function current_calculation end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
