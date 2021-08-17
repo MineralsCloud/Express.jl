@@ -1,7 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Configurations: @option
+using Configurations: from_dict, @option
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -121,6 +121,17 @@ function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
         in, out = sprintf1(files.pattern.input, calc), sprintf1(files.pattern.output, calc)
         joinpath(dir, in) => joinpath(dir, out)
     end
+end
+function materialize(config::AbstractDict)
+    config = from_dict(RuntimeConfig, config)
+    return (
+        template = materialize(config.template),
+        trial_eos = materialize(config.trial_eos),
+        fixed = materialize(config.fixed),
+        files = materialize(config.files, config.fixed),
+        recover = config.recover,
+        cli = config.cli,
+    )
 end
 
 end
