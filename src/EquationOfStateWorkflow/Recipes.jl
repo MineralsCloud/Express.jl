@@ -3,9 +3,9 @@ module Recipes
 using Serialization: deserialize
 using SimpleWorkflows: AtomicJob, Workflow, run!, →
 
-using ...Express: loadconfig
+using ...Config: loadconfig
 using ..DefaultActions: LogMsg, MakeInput, MakeCmd, GetData, FitEos
-using ..EquationOfStateWorkflow: Scf, VcOptim, iofiles
+using ..EquationOfStateWorkflow: Scf, VcOptim
 
 export buildworkflow
 
@@ -20,19 +20,14 @@ function buildworkflow(cfgfile)
         b = AtomicJob(() -> MakeInput{Scf}()(cfgfile))
         c = AtomicJob(() -> MakeCmd{Scf}()(cfgfile))
         d = AtomicJob(() -> FitEos{Scf}()(cfgfile))
-        e = AtomicJob(
-            () -> GetData{Scf}()(shortname(Scf) * ".json", last.(iofiles(Scf(), cfgfile))),
-        )
+        e = AtomicJob(() -> GetData{Scf}()(string(Scf) * ".json", last.(config.files)))
         f = AtomicJob(() -> LogMsg{Scf}()(false))
         g = AtomicJob(() -> LogMsg{VcOptim}()(true))
         h = AtomicJob(() -> MakeInput{VcOptim}()(cfgfile))
         i = AtomicJob(() -> MakeCmd{VcOptim}()(cfgfile))
         j = AtomicJob(() -> FitEos{VcOptim}()(cfgfile))
         k = AtomicJob(
-            () -> GetData{VcOptim}()(
-                shortname(VcOptim) * ".json",
-                last.(iofiles(VcOptim(), cfgfile)),
-            ),
+            () -> GetData{VcOptim}()(string(VcOptim) * ".json", last.(config.files)),
         )
         l = AtomicJob(() -> LogMsg{VcOptim}()(false))
         a → b → c → d → e → f → g → h → i → j → k → l
