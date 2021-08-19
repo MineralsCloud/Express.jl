@@ -14,7 +14,7 @@ using ...Express: Action
 using ...Config: loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
 
-struct MakeCmd{T} <: Action{T} end
+struct RunCmd{T} <: Action{T} end
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)

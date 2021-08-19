@@ -21,7 +21,7 @@ export SelfConsistentField,
     FitEos,
     GetData,
     SaveEos,
-    MakeCmd,
+    RunCmd,
     LogMsg,
     calculation
 
@@ -38,7 +38,7 @@ CURRENT_CALCULATION = nothing
 include("Config.jl")
 include("DefaultActions.jl")
 
-using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, MakeCmd, LogMsg
+using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, RunCmd, LogMsg
 
 include("Recipes.jl")
 
