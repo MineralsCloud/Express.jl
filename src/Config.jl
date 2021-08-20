@@ -9,10 +9,10 @@ export loadconfig
 
 @option struct Directories
     root::String = pwd()
-    naming_convention::String = "p=%.1f"
+    pattern::String = "p=%.1f"
     group_by_step::Bool = false
-    Directories(root, naming_convention, group_by_step) =
-        new(abspath(expanduser(root)), naming_convention, group_by_step)
+    Directories(root, pattern, group_by_step) =
+        new(abspath(expanduser(root)), pattern, group_by_step)
 end
 
 macro unit_vec_opt(type, unit, alias, criteria = (values, unit) -> nothing)
