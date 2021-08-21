@@ -1,7 +1,7 @@
 module Recipes
 
 using Serialization: deserialize
-using SimpleWorkflows: AtomicJob, Workflow, run!, →
+using SimpleWorkflows: AtomicJob, Workflow, run!, ▷
 
 using ...Config: loadconfig
 using ..DefaultActions: LogMsg, MakeInput, RunCmd, GetData, FitEos
@@ -30,7 +30,7 @@ function buildworkflow(cfgfile)
             () -> GetData{VcOptim}()(string(VcOptim) * ".json", last.(config.files)),
         )
         l = AtomicJob(() -> LogMsg{VcOptim}()(false))
-        a → b → c → d → e → f → g → h → i → j → k → l
+        a ▷ b ▷ c ▷ d ▷ e ▷ f ▷ g ▷ h ▷ i ▷ j ▷ k ▷ l
         return Workflow(a, b, c, d, e, f, g, h, i, j, k, l)
     end
 end

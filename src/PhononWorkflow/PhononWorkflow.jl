@@ -3,7 +3,7 @@ module PhononWorkflow
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using Serialization: deserialize
-using SimpleWorkflows: Workflow, run!, →
+using SimpleWorkflows: Workflow, run!, ▷
 using Unitful: ustrip, @u_str
 
 import ..Express
@@ -65,21 +65,21 @@ function buildworkflow(cfgfile)
             error("unsupported option!")
         end
         return begin
-            @intjob(LogMsg{Scf}()(true)) →
-            @intjob(MakeInput{Scf}()(cfgfile)) →
-            buildjob(MakeCmd{Scf}(), cfgfile) →
-            @intjob(LogMsg{Scf}()(false)) →
-            @intjob(LogMsg{Dfpt}()(true)) →
-            @intjob(MakeInput{Dfpt}()(cfgfile)) →
-            buildjob(MakeCmd{Dfpt}(), cfgfile) →
-            @intjob(LogMsg{Dfpt}()(false)) →
-            @intjob(LogMsg{RealSpaceForceConstants}()(true)) →
-            @intjob(MakeInput{RealSpaceForceConstants}()(cfgfile)) →
-            buildjob(MakeCmd{RealSpaceForceConstants}(), cfgfile) →
-            @intjob(LogMsg{RealSpaceForceConstants}()(false)) →
-            @intjob(LogMsg{x}()(true)) →
-            @intjob(MakeInput{x}()(cfgfile)) →
-            buildjob(MakeCmd{x}(), cfgfile) → @intjob(LogMsg{x}()(false))
+            @intjob(LogMsg{Scf}()(true)) ▷
+            @intjob(MakeInput{Scf}()(cfgfile)) ▷
+            buildjob(MakeCmd{Scf}(), cfgfile) ▷
+            @intjob(LogMsg{Scf}()(false)) ▷
+            @intjob(LogMsg{Dfpt}()(true)) ▷
+            @intjob(MakeInput{Dfpt}()(cfgfile)) ▷
+            buildjob(MakeCmd{Dfpt}(), cfgfile) ▷
+            @intjob(LogMsg{Dfpt}()(false)) ▷
+            @intjob(LogMsg{RealSpaceForceConstants}()(true)) ▷
+            @intjob(MakeInput{RealSpaceForceConstants}()(cfgfile)) ▷
+            buildjob(MakeCmd{RealSpaceForceConstants}(), cfgfile) ▷
+            @intjob(LogMsg{RealSpaceForceConstants}()(false)) ▷
+            @intjob(LogMsg{x}()(true)) ▷
+            @intjob(MakeInput{x}()(cfgfile)) ▷
+            buildjob(MakeCmd{x}(), cfgfile) ▷ @intjob(LogMsg{x}()(false))
         end
     end
 end
