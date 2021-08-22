@@ -136,7 +136,7 @@ end
 function (::ExpandConfig)(save::Save)
     return map((:raw, :eos, :status)) do f
         v = getfield(save, f)
-        isempty(v) ? v : abspath(expanduser(save))
+        isempty(v) ? abspath(mktemp(; cleanup = false)[1]) : abspath(expanduser(v))
     end
 end
 function (x::ExpandConfig)(config::AbstractDict)
