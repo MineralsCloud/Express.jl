@@ -98,7 +98,7 @@ function buildjob(x::GetData{T}, cfgfile) where {T}
                 "vunit" => string(unit(first(data).first)),
                 "eunit" => string(unit(first(data).second)),
             )
-            dict = isfile(config.save_raw) ? Dict() : load(config.save_raw)
+            dict = isfile(config.save_raw) ? load(config.save_raw) : Dict()
             dict[string(nameof(T))] = savedata
             save(config.save_raw, dict)
             return data
@@ -137,7 +137,8 @@ end
 
 struct SaveEos{T} <: Action{T} end
 function (::SaveEos{T})(file, eos::Parameters) where {T}
-    dict = isfile(file) ? Dict() : load(file)
+    @assert extension(file) == "jls"
+    dict = isfile(file) ? load(file) : Dict()
     dict[string(nameof(T))] = eos
     save(file, dict)
 end
