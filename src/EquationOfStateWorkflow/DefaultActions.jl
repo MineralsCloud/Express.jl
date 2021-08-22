@@ -118,17 +118,10 @@ function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
 end
 
 struct SaveEos{T} <: Action{T} end
-function (::SaveEos)(file, eos::Parameters)
-    ext = lowercase(extension(file))
-    if ext == "jls"
-        open(file, "w") do io
-            serialize(io, eos)
-        end
-    elseif ext in ("json", "yaml", "yml", "toml")
-        save(file, eos)
-    else
-        error("unsupported file extension `$ext`!")
-    end
+function (::SaveEos{T})(file, eos::Parameters) where {T}
+    dict = load(file)
+    dict[nameof(T)] = eos
+    save(file, dict)
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
