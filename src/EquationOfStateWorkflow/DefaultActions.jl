@@ -15,6 +15,7 @@ using ...Express: Action, calculation
 using ...Config: loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
 using ..Config: Volumes
+using ...Shell: distprocs
 
 struct RunCmd{T} <: Action{T} end
 
@@ -39,6 +40,14 @@ function buildjob(x::MakeInput, cfgfile)
         return map(inputs, config.fixed) do input, pressure
             AtomicJob(() -> x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S"))
         end
+    end
+end
+
+function buildjob(x::RunCmd, cfgfile)
+    config = loadconfig(cfgfile)
+    np = distprocs(config.cli.mpi.np, length(config.files))
+    return map(config.files) do (input, output)
+        AtomicJob(() -> x(input, output; np = np))
     end
 end
 
