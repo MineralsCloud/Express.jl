@@ -2,6 +2,7 @@ module DefaultActions
 
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
+using Compat: isnothing
 using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
