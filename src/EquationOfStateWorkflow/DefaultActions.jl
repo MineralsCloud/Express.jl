@@ -13,6 +13,7 @@ using Unitful: ustrip, unit
 using ...Express: Action
 using ...Config: loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
+using ..Config: Volumes
 
 struct RunCmd{T} <: Action{T} end
 
@@ -22,6 +23,20 @@ function (x::MakeInput)(file, template::Input, args...)
     mkpath(dirname(file))  # In case its parent directory is not created
     writetxt(file, input)
     return input
+end
+function (x::MakeInput{T})(cfgfile) where {T}
+    config = loadconfig(cfgfile)
+    inputs = first.(config.files)
+    eos = PressureEquation(T <: Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
+    if config.fixed isa Volumes
+        return map(inputs, config.fixed) do input, volume
+            x(input, config.template, volume, "Y-m-d_H:M:S")
+        end
+    else  # Pressure
+        return map(inputs, config.fixed) do input, pressure
+            x(input, config.template, eos, pressure, "Y-m-d_H:M:S")
+        end
+    end
 end
 
 struct GetData{T} <: Action{T} end
