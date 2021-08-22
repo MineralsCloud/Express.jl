@@ -13,9 +13,8 @@ using SimpleWorkflows: AtomicJob
 using Unitful: ustrip, unit
 
 using ...Express: Action, calculation
-using ...Config: loadconfig
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
-using ..Config: Volumes
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf
+using ..Config: Volumes, ExpandConfig
 using ...Shell: distprocs
 
 struct RunCmd{T} <: Action{T} end
@@ -28,8 +27,9 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
-function buildjob(x::MakeInput, cfgfile)
-    config = loadconfig(cfgfile)
+function buildjob(x::MakeInput{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
     inputs = first.(config.files)
     trial_eos = PressureEquation(
         calculation(x) isa Scf ? config.trial_eos :
@@ -46,8 +46,9 @@ function buildjob(x::MakeInput, cfgfile)
     end
 end
 
-function buildjob(x::RunCmd, cfgfile)
-    config = loadconfig(cfgfile)
+function buildjob(x::RunCmd{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files))
     return map(config.files) do (input, output)
         AtomicJob(() -> x(input, output; np = np))
@@ -93,7 +94,8 @@ function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim
 end
 
 function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
-    config = loadconfig(cfgfile)
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
     outputs = last.(config.files)
     saveto = joinpath(config.files.dirs.root, string(T) * "_eos.jls")
     trial_eos =
