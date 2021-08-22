@@ -61,6 +61,12 @@ end
     output::String = "%s.out"
 end
 
+@option struct Save
+    raw::String = "raw.json"
+    eos::String = "eos.json"
+    status::String = ""
+end
+
 @option struct IOFiles
     dirs::Directories = Directories()
     pattern::NamingPattern = NamingPattern()
@@ -71,16 +77,13 @@ end
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
     files::IOFiles = IOFiles()
-    recover::String = ""
+    save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
+    function RuntimeConfig(template, trial_eos, fixed, files, save, cli)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        if !isempty(recover)
-            recover = abspath(expanduser(recover))
-        end
-        return new(template, trial_eos, fixed, files, recover, cli)
+        return new(template, trial_eos, fixed, files, save, cli)
     end
 end
 
