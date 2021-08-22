@@ -13,7 +13,7 @@ using SimpleWorkflows: AtomicJob
 using Unitful: ustrip, unit
 
 using ...Express: Action, calculation
-using ..EquationOfStateWorkflow: ScfOrOptim, Scf
+using ..EquationOfStateWorkflow: ScfOrOptim, Scf, Optimization
 using ..Config: Volumes, ExpandConfig
 using ...Shell: distprocs
 
@@ -27,7 +27,26 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
-function buildjob(x::MakeInput{T}, cfgfile) where {T}
+function buildjob(x::MakeInput{Scf}, cfgfile)
+    dict = load(cfgfile)
+    config = ExpandConfig{Scf}()(dict)
+    inputs = first.(config.files)
+    if config.fixed isa Volumes
+        return map(inputs, config.fixed) do input, volume
+            AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
+        end
+    else  # Pressure
+        return map(inputs, config.fixed) do input, pressure
+            AtomicJob(
+                function ()
+                    trial_eos = PressureEquation(config.trial_eos)
+                    return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
+                end,
+            )
+        end
+    end
+end
+function buildjob(x::MakeInput{T}, cfgfile) where {T<:Optimization}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     inputs = first.(config.files)
@@ -40,9 +59,8 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T}
             AtomicJob(
                 function ()
                     trial_eos = PressureEquation(
-                        calculation(x) isa Scf ? config.trial_eos :
                         FitEos{Scf}()(
-                            last.(config.files),
+                            last.(ExpandConfig{Scf}()(dict).files),
                             EnergyEquation(config.trial_eos),
                         ),
                     )
