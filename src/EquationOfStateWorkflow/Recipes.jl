@@ -12,8 +12,8 @@ export buildworkflow
 
 function buildworkflow(cfgfile)
     dict = load(cfgfile)
-    if isfile(dict["recover"])
-        w = deserialize(dict["recover"])
+    if isfile(dict["save"]["status"])
+        w = deserialize(dict["save"]["status"])
         typeassert(w, Workflow)
         return w
     else
