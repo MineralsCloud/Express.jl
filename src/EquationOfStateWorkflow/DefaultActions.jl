@@ -78,6 +78,7 @@ function (x::GetData)(file, outputs)
     else
         error("unsupported file extension `$ext`!")
     end
+    return data
 end
 
 function buildjob(::GetData{T}, cfgfile) where {T}
