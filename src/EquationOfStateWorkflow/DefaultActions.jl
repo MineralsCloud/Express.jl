@@ -70,12 +70,8 @@ end
 function parseoutput end
 
 struct FitEos{T} <: Action{T} end
-function (x::FitEos{T})(
-    data::AbstractVector{<:Pair},
-    trial_eos::EnergyEquation,
-) where {T<:ScfOrOptim}
-    return eosfit(trial_eos, first.(data), last.(data))
-end
+(x::FitEos)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
+    eosfit(trial_eos, first.(data), last.(data))
 function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim}
     data = GetData{T}()(outputs)
     if length(data) <= 5
@@ -89,7 +85,7 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
     outfiles = last.(config.files)
     saveto = joinpath(config.workdir, string(T) * "_eos.jls")
     trial_eos =
-        T <: Scf ? config.trial_eos :
+        calculation(x) isa Scf ? config.trial_eos :
         deserialize(joinpath(config.workdir, string(Scf) * "_eos.jls"))
     eos = x(outfiles, EnergyEquation(trial_eos))
     SaveEos{T}()(saveto, eos)
@@ -97,7 +93,7 @@ function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
 end
 
 struct SaveEos{T} <: Action{T} end
-function (::SaveEos{T})(file, eos::Parameters) where {T<:ScfOrOptim}
+function (::SaveEos)(file, eos::Parameters)
     ext = lowercase(extension(file))
     if ext == "jls"
         open(file, "w") do io
@@ -112,10 +108,12 @@ end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
 struct LogMsg{T} <: Action{T} end
-function (x::LogMsg{T})(start = true) where {T}
-    startend = start ? "starts" : "ends"
+function (x::LogMsg)(; start = true)
+    act = start ? "starts" : "ends"
     with_logger(current_logger()) do
-        println("The calculation $T $startend at $(format(now(), "HH:MM:SS u dd, yyyy")).")
+        println(
+            "The calculation $(calculation(x)) $act at $(format(now(), "HH:MM:SS u dd, yyyy")).",
+        )
     end
 end
 
