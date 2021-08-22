@@ -4,7 +4,7 @@ using Serialization: deserialize
 using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
 
 using ...Config: loadconfig
-using ..DefaultActions: LogMsg, MakeInput, RunCmd, GetData, FitEos
+using ..DefaultActions: LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
 using ..EquationOfStateWorkflow: Scf, VcOptim
 
 export buildworkflow
@@ -17,15 +17,15 @@ function buildworkflow(cfgfile)
         return w
     else
         a = AtomicJob(() -> LogMsg{Scf}()(true))
-        b = map(x -> AtomicJob(() -> x), MakeInput{Scf}()(cfgfile))
-        c = map(x -> AtomicJob(() -> x), RunCmd{Scf}()(cfgfile))
-        d = AtomicJob(() -> FitEos{Scf}()(cfgfile))
+        b = buildjob(MakeInput{Scf}(), cfgfile)
+        c = buildjob(RunCmd{Scf}(), cfgfile)
+        d = buildjob(FitEos{Scf}(), cfgfile)
         e = AtomicJob(() -> GetData{Scf}()(string(Scf) * ".json", last.(config.files)))
         f = AtomicJob(() -> LogMsg{Scf}()(false))
         g = AtomicJob(() -> LogMsg{VcOptim}()(true))
-        h = map(x -> AtomicJob(() -> x), MakeInput{VcOptim}()(cfgfile))
-        i = map(x -> AtomicJob(() -> x), RunCmd{VcOptim}()(cfgfile))
-        j = AtomicJob(() -> FitEos{VcOptim}()(cfgfile))
+        h = buildjob(MakeInput{VcOptim}(), cfgfile)
+        i = buildjob(RunCmd{VcOptim}(), cfgfile)
+        j = buildjob(FitEos{Scf}(), cfgfile)
         k = AtomicJob(
             () -> GetData{VcOptim}()(string(VcOptim) * ".json", last.(config.files)),
         )
