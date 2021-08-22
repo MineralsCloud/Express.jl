@@ -15,7 +15,6 @@ using EquationsOfStateOfSolids:
 using Formatting: sprintf1
 
 using ...Express: Calculation, Action, myuparse
-using ...Config: Directories
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -47,6 +46,14 @@ Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(value
 @option struct TrialEquationOfState
     type::String
     values::Union{AbstractVector,AbstractDict}
+end
+
+@option struct Directories
+    root::String = pwd()
+    pattern::String = "p=%.1f"
+    group_by_step::Bool = false
+    Directories(root, pattern, group_by_step) =
+        new(abspath(expanduser(root)), pattern, group_by_step)
 end
 
 @option struct NamingPattern
