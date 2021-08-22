@@ -99,7 +99,7 @@ function buildjob(x::GetData{T}, cfgfile) where {T}
                 "eunit" => string(unit(first(data).second)),
             )
             dict = isfile(config.save_raw) ? Dict() : load(config.save_raw)
-            dict[nameof(T)] = savedata
+            dict[string(nameof(T))] = savedata
             save(config.save_raw, dict)
             return data
         end,
@@ -127,7 +127,7 @@ function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
             outputs = last.(config.files)
             trial_eos =
                 calculation(x) isa Scf ? config.trial_eos :
-                load(config.save_eos)[nameof(Scf)]
+                load(config.save_eos)[string(nameof(Scf))]
             eos = x(outputs, EnergyEquation(trial_eos))
             SaveEos{T}()(config.save_eos, eos)
             return eos
@@ -138,7 +138,7 @@ end
 struct SaveEos{T} <: Action{T} end
 function (::SaveEos{T})(file, eos::Parameters) where {T}
     dict = isfile(file) ? Dict() : load(file)
-    dict[nameof(T)] = eos
+    dict[string(nameof(T))] = eos
     save(file, dict)
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
