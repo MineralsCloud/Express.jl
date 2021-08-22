@@ -80,6 +80,12 @@ function (x::GetData)(file, outputs)
     end
 end
 
+function buildjob(::GetData{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
+    return AtomicJob(() -> GetData{T}()(string(T) * ".json", last.(config.files)))
+end
+
 function parseoutput end
 
 struct FitEos{T} <: Action{T} end
