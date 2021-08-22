@@ -79,7 +79,8 @@ function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim
     end
     return x(data, trial_eos)
 end
-function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
+
+function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
     CURRENT_CALCULATION = T
     config = loadconfig(cfgfile)
     outfiles = last.(config.files)
