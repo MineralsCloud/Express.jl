@@ -31,17 +31,24 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     inputs = first.(config.files)
-    trial_eos = PressureEquation(
-        calculation(x) isa Scf ? config.trial_eos :
-        FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos)),
-    )
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
             AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
         end
     else  # Pressure
         return map(inputs, config.fixed) do input, pressure
-            AtomicJob(() -> x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S"))
+            AtomicJob(
+                function ()
+                    trial_eos = PressureEquation(
+                        calculation(x) isa Scf ? config.trial_eos :
+                        FitEos{Scf}()(
+                            last.(config.files),
+                            EnergyEquation(config.trial_eos),
+                        ),
+                    )
+                    return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
+                end,
+            )
         end
     end
 end
@@ -101,16 +108,20 @@ function (x::FitEos)(outputs, trial_eos::EnergyEquation)
 end
 
 function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    outputs = last.(config.files)
-    saveto = joinpath(config.root, string(T) * "_eos.jls")
-    trial_eos =
-        calculation(x) isa Scf ? config.trial_eos :
-        deserialize(joinpath(config.root, string(Scf) * "_eos.jls"))
-    eos = x(outputs, EnergyEquation(trial_eos))
-    SaveEos{T}()(saveto, eos)
-    return eos
+    return AtomicJob(
+        function ()
+            dict = load(cfgfile)
+            config = ExpandConfig{T}()(dict)
+            outputs = last.(config.files)
+            saveto = joinpath(config.root, string(T) * "_eos.jls")
+            trial_eos =
+                calculation(x) isa Scf ? config.trial_eos :
+                deserialize(joinpath(config.root, string(Scf) * "_eos.jls"))
+            eos = x(outputs, EnergyEquation(trial_eos))
+            SaveEos{T}()(saveto, eos)
+            return eos
+        end,
+    )
 end
 
 struct SaveEos{T} <: Action{T} end
