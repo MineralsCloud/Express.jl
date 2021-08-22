@@ -30,8 +30,10 @@ end
 function buildjob(x::MakeInput, cfgfile)
     config = loadconfig(cfgfile)
     inputs = first.(config.files)
-    trial_eos =
-        PressureEquation(calculation(x) isa Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
+    trial_eos = PressureEquation(
+        calculation(x) isa Scf ? config.trial_eos :
+        FitEos{Scf}()(last.(config.files), config.trial_eos),
+    )
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
             AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
