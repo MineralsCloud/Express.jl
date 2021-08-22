@@ -128,7 +128,8 @@ function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) wh
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
-        in, out = sprintf1(files.pattern.input, T), sprintf1(files.pattern.output, T)
+        type = string(nameof(T))
+        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
         joinpath(dir, in) => joinpath(dir, out)
     end
 end
