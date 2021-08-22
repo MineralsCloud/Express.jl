@@ -132,15 +132,24 @@ function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) wh
         joinpath(dir, in) => joinpath(dir, out)
     end
 end
+function (::ExpandConfig)(save::Save)
+    return map((:raw, :eos, :status)) do f
+        v = getfield(save, f)
+        isempty(v) ? v : abspath(expanduser(save))
+    end
+end
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
+    save_raw, save_eos, save_status = x(config.save)
     return (
         template = x(config.template),
         trial_eos = x(config.trial_eos),
         fixed = x(config.fixed),
         root = config.files.dirs.root,
         files = x(config.files, config.fixed),
-        recover = config.recover,
+        save_raw = save_raw,
+        save_eos = save_eos,
+        save_status = save_status,
         cli = config.cli,
     )
 end
