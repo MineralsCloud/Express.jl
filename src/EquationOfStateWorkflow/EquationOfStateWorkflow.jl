@@ -33,8 +33,6 @@ const StOptim = StructuralOptimization
 const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
-CURRENT_CALCULATION = nothing
-
 include("Config.jl")
 include("DefaultActions.jl")
 

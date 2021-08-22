@@ -14,9 +14,7 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: myuparse
-using ...Config: Directories
-using ..EquationOfStateWorkflow: CURRENT_CALCULATION
+using ...Express: Calculation, Action, myuparse
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -50,6 +48,14 @@ Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(value
     values::Union{AbstractVector,AbstractDict}
 end
 
+@option struct Directories
+    root::String = pwd()
+    pattern::String = "p=%.1f"
+    group_by_step::Bool = false
+    Directories(root, pattern, group_by_step) =
+        new(abspath(expanduser(root)), pattern, group_by_step)
+end
+
 @option struct NamingPattern
     input::String = "%s.in"
     output::String = "%s.out"
@@ -78,7 +84,8 @@ end
     end
 end
 
-function materialize(trial_eos::TrialEquationOfState)
+struct ExpandConfig{T} <: Action{T} end
+function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
         Murnaghan1st
@@ -109,27 +116,26 @@ function materialize(trial_eos::TrialEquationOfState)
         @assert false "this is a bug!"
     end
 end
-function materialize(fixed::Union{Pressures,Volumes})
+function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
     unit = myuparse(fixed.unit)
     return fixed.values .* unit
 end
-function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
+function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}
     dirs = map(fixed.values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
-        calc = CURRENT_CALCULATION
-        in, out = sprintf1(files.pattern.input, calc), sprintf1(files.pattern.output, calc)
+        in, out = sprintf1(files.pattern.input, T), sprintf1(files.pattern.output, T)
         joinpath(dir, in) => joinpath(dir, out)
     end
 end
-function materialize(config::AbstractDict)
+function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     return (
-        template = materialize(config.template),
-        trial_eos = materialize(config.trial_eos),
-        fixed = materialize(config.fixed),
-        files = materialize(config.files, config.fixed),
+        template = x(config.template),
+        trial_eos = x(config.trial_eos),
+        fixed = x(config.fixed),
+        files = x(config.files, config.fixed),
         recover = config.recover,
         cli = config.cli,
     )
