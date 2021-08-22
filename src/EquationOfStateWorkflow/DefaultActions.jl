@@ -8,9 +8,10 @@ using EquationsOfStateOfSolids:
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
+using SimpleWorkflows: AtomicJob
 using Unitful: ustrip, unit
 
-using ...Express: Action
+using ...Express: Action, calculation
 using ...Config: loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
 using ..Config: Volumes
@@ -24,17 +25,19 @@ function (x::MakeInput)(file, template::Input, args...)
     writetxt(file, input)
     return input
 end
-function (x::MakeInput{T})(cfgfile) where {T}
+
+function buildjob(x::MakeInput, cfgfile)
     config = loadconfig(cfgfile)
     inputs = first.(config.files)
-    eos = PressureEquation(T <: Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
+    trial_eos =
+        PressureEquation(calculation(x) isa Scf ? config.trial_eos : FitEos{Scf}()(cfgfile))
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
-            x(input, config.template, volume, "Y-m-d_H:M:S")
+            AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
         end
     else  # Pressure
         return map(inputs, config.fixed) do input, pressure
-            x(input, config.template, eos, pressure, "Y-m-d_H:M:S")
+            AtomicJob(() -> x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S"))
         end
     end
 end
