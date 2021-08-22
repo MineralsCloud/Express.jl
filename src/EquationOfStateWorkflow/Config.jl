@@ -135,6 +135,7 @@ function (x::ExpandConfig)(config::AbstractDict)
         template = x(config.template),
         trial_eos = x(config.trial_eos),
         fixed = x(config.fixed),
+        root = config.files.dirs.root,
         files = x(config.files, config.fixed),
         recover = config.recover,
         cli = config.cli,
