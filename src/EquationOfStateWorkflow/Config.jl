@@ -61,6 +61,12 @@ end
     output::String = "%s.out"
 end
 
+@option struct Save
+    raw::String = "raw.json"
+    eos::String = "eos.json"
+    status::String = ""
+end
+
 @option struct IOFiles
     dirs::Directories = Directories()
     pattern::NamingPattern = NamingPattern()
@@ -71,16 +77,13 @@ end
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
     files::IOFiles = IOFiles()
-    recover::String = ""
+    save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(template, trial_eos, fixed, files, recover, cli)
+    function RuntimeConfig(template, trial_eos, fixed, files, save, cli)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        if !isempty(recover)
-            recover = abspath(expanduser(recover))
-        end
-        return new(template, trial_eos, fixed, files, recover, cli)
+        return new(template, trial_eos, fixed, files, save, cli)
     end
 end
 
@@ -125,19 +128,29 @@ function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) wh
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
-        in, out = sprintf1(files.pattern.input, T), sprintf1(files.pattern.output, T)
+        type = string(nameof(T))
+        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
         joinpath(dir, in) => joinpath(dir, out)
+    end
+end
+function (::ExpandConfig)(save::Save)
+    return map((:raw, :eos, :status)) do f
+        v = getfield(save, f)
+        isempty(v) ? v : abspath(expanduser(save))
     end
 end
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
+    save_raw, save_eos, save_status = x(config.save)
     return (
         template = x(config.template),
         trial_eos = x(config.trial_eos),
         fixed = x(config.fixed),
         root = config.files.dirs.root,
         files = x(config.files, config.fixed),
-        recover = config.recover,
+        save_raw = save_raw,
+        save_eos = save_eos,
+        save_status = save_status,
         cli = config.cli,
     )
 end
