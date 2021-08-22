@@ -43,11 +43,11 @@ function buildjob(x::MakeInput, cfgfile)
 end
 
 struct GetData{T} <: Action{T} end
-function (::GetData{T})(outputs) where {T<:ScfOrOptim}
-    raw = (parseoutput(T())(output) for output in outputs)  # `ntuple` cannot work with generators
+function (x::GetData)(outputs)
+    raw = (parseoutput(calculation(x))(output) for output in outputs)  # `ntuple` cannot work with generators
     return collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
 end
-function (x::GetData{T})(file, outputs) where {T}
+function (x::GetData)(file, outputs)
     data = x(outputs)
     dict = Dict(
         "volume" => (ustrip ∘ first).(data),
