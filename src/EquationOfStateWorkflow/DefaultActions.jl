@@ -31,17 +31,24 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     inputs = first.(config.files)
-    trial_eos = PressureEquation(
-        calculation(x) isa Scf ? config.trial_eos :
-        FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos)),
-    )
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
             AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
         end
     else  # Pressure
         return map(inputs, config.fixed) do input, pressure
-            AtomicJob(() -> x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S"))
+            AtomicJob(
+                function ()
+                    trial_eos = PressureEquation(
+                        calculation(x) isa Scf ? config.trial_eos :
+                        FitEos{Scf}()(
+                            last.(config.files),
+                            EnergyEquation(config.trial_eos),
+                        ),
+                    )
+                    return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
+                end,
+            )
         end
     end
 end
