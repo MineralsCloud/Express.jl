@@ -54,7 +54,6 @@ function current_software end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
-include("Config.jl")
 include("Shell.jl")
 using .Shell
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
