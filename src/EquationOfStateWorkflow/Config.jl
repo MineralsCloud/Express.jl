@@ -14,9 +14,8 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: myuparse
+using ...Express: Calculation, myuparse
 using ...Config: Directories
-using ..EquationOfStateWorkflow: CURRENT_CALCULATION
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -78,7 +77,8 @@ end
     end
 end
 
-function materialize(trial_eos::TrialEquationOfState)
+struct ExpandConfig{T<:Calculation} end
+function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
         Murnaghan1st
@@ -109,27 +109,26 @@ function materialize(trial_eos::TrialEquationOfState)
         @assert false "this is a bug!"
     end
 end
-function materialize(fixed::Union{Pressures,Volumes})
+function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
     unit = myuparse(fixed.unit)
     return fixed.values .* unit
 end
-function materialize(files::IOFiles, fixed::Union{Pressures,Volumes})
+function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}
     dirs = map(fixed.values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
-        calc = CURRENT_CALCULATION
-        in, out = sprintf1(files.pattern.input, calc), sprintf1(files.pattern.output, calc)
+        in, out = sprintf1(files.pattern.input, T), sprintf1(files.pattern.output, T)
         joinpath(dir, in) => joinpath(dir, out)
     end
 end
-function materialize(config::AbstractDict)
+function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     return (
-        template = materialize(config.template),
-        trial_eos = materialize(config.trial_eos),
-        fixed = materialize(config.fixed),
-        files = materialize(config.files, config.fixed),
+        template = x(config.template),
+        trial_eos = x(config.trial_eos),
+        fixed = x(config.fixed),
+        files = x(config.files, config.fixed),
         recover = config.recover,
         cli = config.cli,
     )
