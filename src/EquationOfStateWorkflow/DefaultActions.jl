@@ -33,7 +33,7 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T}
     inputs = first.(config.files)
     trial_eos = PressureEquation(
         calculation(x) isa Scf ? config.trial_eos :
-        FitEos{Scf}()(last.(config.files), config.trial_eos),
+        FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos)),
     )
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
