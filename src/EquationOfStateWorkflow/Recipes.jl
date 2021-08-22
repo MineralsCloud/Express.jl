@@ -39,7 +39,7 @@ function buildworkflow(cfgfile)
         end
         ⋺(i..., j)
         j ▷ l
-        return Workflow(a, b, c, d, f, g, h, i, j, l)
+        return Workflow(a, b..., c..., d, f, g, h..., i..., j, l)
     end
 end
 
