@@ -93,14 +93,13 @@ function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim
 end
 
 function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
-    CURRENT_CALCULATION = T
     config = loadconfig(cfgfile)
-    outfiles = last.(config.files)
-    saveto = joinpath(config.workdir, string(T) * "_eos.jls")
+    outputs = last.(config.files)
+    saveto = joinpath(config.files.dirs.root, string(T) * "_eos.jls")
     trial_eos =
         calculation(x) isa Scf ? config.trial_eos :
-        deserialize(joinpath(config.workdir, string(Scf) * "_eos.jls"))
-    eos = x(outfiles, EnergyEquation(trial_eos))
+        deserialize(joinpath(config.files.dirs.root, string(Scf) * "_eos.jls"))
+    eos = x(outputs, EnergyEquation(trial_eos))
     SaveEos{T}()(saveto, eos)
     return eos
 end
