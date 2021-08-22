@@ -14,7 +14,7 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: Calculation, myuparse
+using ...Express: Calculation, Action, myuparse
 using ...Config: Directories
 
 @option "pressures" struct Pressures
@@ -77,7 +77,7 @@ end
     end
 end
 
-struct ExpandConfig{T<:Calculation} end
+struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
