@@ -92,8 +92,8 @@ function parseoutput end
 struct FitEos{T} <: Action{T} end
 (x::FitEos)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
     eosfit(trial_eos, first.(data), last.(data))
-function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim}
-    data = GetData{T}()(outputs)
+function (x::FitEos)(outputs, trial_eos::EnergyEquation)
+    data = GetData{typeof(calculation(x))}()(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
