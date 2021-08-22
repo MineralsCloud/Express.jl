@@ -2,17 +2,21 @@ module DefaultActions
 
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
+using Compat: isnothing
 using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Logging: with_logger, current_logger
 using Serialization: serialize, deserialize
+using SimpleWorkflows: AtomicJob
 using Unitful: ustrip, unit
 
-using ...Express: Action
+using ...Express: Action, calculation
 using ...Config: loadconfig
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, CURRENT_CALCULATION
+using ..Config: Volumes
+using ...Shell: distprocs
 
 struct RunCmd{T} <: Action{T} end
 
@@ -24,12 +28,38 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
+function buildjob(x::MakeInput, cfgfile)
+    config = loadconfig(cfgfile)
+    inputs = first.(config.files)
+    trial_eos = PressureEquation(
+        calculation(x) isa Scf ? config.trial_eos :
+        FitEos{Scf}()(last.(config.files), config.trial_eos),
+    )
+    if config.fixed isa Volumes
+        return map(inputs, config.fixed) do input, volume
+            AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
+        end
+    else  # Pressure
+        return map(inputs, config.fixed) do input, pressure
+            AtomicJob(() -> x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S"))
+        end
+    end
+end
+
+function buildjob(x::RunCmd, cfgfile)
+    config = loadconfig(cfgfile)
+    np = distprocs(config.cli.mpi.np, length(config.files))
+    return map(config.files) do (input, output)
+        AtomicJob(() -> x(input, output; np = np))
+    end
+end
+
 struct GetData{T} <: Action{T} end
-function (::GetData{T})(outputs) where {T<:ScfOrOptim}
-    raw = (parseoutput(T())(output) for output in outputs)  # `ntuple` cannot work with generators
+function (x::GetData)(outputs)
+    raw = (parseoutput(calculation(x))(output) for output in outputs)  # `ntuple` cannot work with generators
     return collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
 end
-function (x::GetData{T})(file, outputs) where {T}
+function (x::GetData)(file, outputs)
     data = x(outputs)
     dict = Dict(
         "volume" => (ustrip ∘ first).(data),
@@ -52,12 +82,8 @@ end
 function parseoutput end
 
 struct FitEos{T} <: Action{T} end
-function (x::FitEos{T})(
-    data::AbstractVector{<:Pair},
-    trial_eos::EnergyEquation,
-) where {T<:ScfOrOptim}
-    return eosfit(trial_eos, first.(data), last.(data))
-end
+(x::FitEos)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
+    eosfit(trial_eos, first.(data), last.(data))
 function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim}
     data = GetData{T}()(outputs)
     if length(data) <= 5
@@ -65,21 +91,21 @@ function (x::FitEos{T})(outputs, trial_eos::EnergyEquation) where {T<:ScfOrOptim
     end
     return x(data, trial_eos)
 end
-function (x::FitEos{T})(cfgfile) where {T<:ScfOrOptim}
-    CURRENT_CALCULATION = T
+
+function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
     config = loadconfig(cfgfile)
-    outfiles = last.(config.files)
-    saveto = joinpath(config.workdir, string(T) * "_eos.jls")
+    outputs = last.(config.files)
+    saveto = joinpath(config.files.dirs.root, string(T) * "_eos.jls")
     trial_eos =
-        T <: Scf ? config.trial_eos :
-        deserialize(joinpath(config.workdir, string(Scf) * "_eos.jls"))
-    eos = x(outfiles, EnergyEquation(trial_eos))
+        calculation(x) isa Scf ? config.trial_eos :
+        deserialize(joinpath(config.files.dirs.root, string(Scf) * "_eos.jls"))
+    eos = x(outputs, EnergyEquation(trial_eos))
     SaveEos{T}()(saveto, eos)
     return eos
 end
 
 struct SaveEos{T} <: Action{T} end
-function (::SaveEos{T})(file, eos::Parameters) where {T<:ScfOrOptim}
+function (::SaveEos)(file, eos::Parameters)
     ext = lowercase(extension(file))
     if ext == "jls"
         open(file, "w") do io
@@ -94,10 +120,12 @@ end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
 struct LogMsg{T} <: Action{T} end
-function (x::LogMsg{T})(start = true) where {T}
-    startend = start ? "starts" : "ends"
+function (x::LogMsg)(; start = true)
+    act = start ? "starts" : "ends"
     with_logger(current_logger()) do
-        println("The calculation $T $startend at $(format(now(), "HH:MM:SS u dd, yyyy")).")
+        println(
+            "The calculation $(calculation(x)) $act at $(format(now(), "HH:MM:SS u dd, yyyy")).",
+        )
     end
 end
 
