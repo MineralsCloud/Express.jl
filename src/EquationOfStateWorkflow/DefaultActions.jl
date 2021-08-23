@@ -127,7 +127,7 @@ function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
             outputs = last.(config.files)
             trial_eos =
                 calculation(x) isa Scf ? config.trial_eos :
-                load(config.save_eos)[string(nameof(Scf))]
+                deserialize(config.save_eos)[string(nameof(Scf))]
             eos = x(outputs, EnergyEquation(trial_eos))
             SaveEos{T}()(config.save_eos, eos)
             return eos
