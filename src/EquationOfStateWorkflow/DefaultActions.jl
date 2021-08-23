@@ -138,9 +138,9 @@ end
 struct SaveEos{T} <: Action{T} end
 function (::SaveEos{T})(file, eos::Parameters) where {T}
     @assert extension(file) == "jls"
-    dict = isfile(file) ? load(file) : Dict()
+    dict = isfile(file) ? deserialize(file) : Dict()
     dict[string(nameof(T))] = eos
-    save(file, dict)
+    serialize(file, dict)
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
