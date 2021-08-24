@@ -17,16 +17,16 @@ function buildworkflow(cfgfile)
         typeassert(w, Workflow)
         return w
     else
-        a = AtomicJob(() -> LogMsg{Scf}()(true))
+        a = AtomicJob(() -> LogMsg{Scf}()(; start = true))
         b = buildjob(MakeInput{Scf}(), cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
         d = buildjob(FitEos{Scf}(), cfgfile)
-        f = AtomicJob(() -> LogMsg{Scf}()(false))
-        g = AtomicJob(() -> LogMsg{VcOptim}()(true))
+        f = AtomicJob(() -> LogMsg{Scf}()(; start = false))
+        g = AtomicJob(() -> LogMsg{VcOptim}()(; start = true))
         h = buildjob(MakeInput{VcOptim}(), cfgfile)
         i = buildjob(RunCmd{VcOptim}(), cfgfile)
         j = buildjob(FitEos{VcOptim}(), cfgfile)
-        l = AtomicJob(() -> LogMsg{VcOptim}()(false))
+        l = AtomicJob(() -> LogMsg{VcOptim}()(; start = false))
         (((((((a ⋲ b) ▷ c) ⋺ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j) ▷ l
         return Workflow(a, b..., c..., d, f, g, h..., i..., j, l)
     end
