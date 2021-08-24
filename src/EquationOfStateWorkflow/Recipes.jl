@@ -27,18 +27,7 @@ function buildworkflow(cfgfile)
         i = buildjob(RunCmd{VcOptim}(), cfgfile)
         j = buildjob(FitEos{VcOptim}(), cfgfile)
         l = AtomicJob(() -> LogMsg{VcOptim}()(false))
-        ⋲(a, b...)
-        for (x, y) in zip(b, c)
-            x ▷ y
-        end
-        ⋺(c..., d)
-        d ▷ f ▷ g
-        ⋲(g, h...)
-        for (x, y) in zip(h, i)
-            x ▷ y
-        end
-        ⋺(i..., j)
-        j ▷ l
+        (((((((a ⋲ b) ▷ c) ⋺ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j) ▷ l
         return Workflow(a, b..., c..., d, f, g, h..., i..., j, l)
     end
 end
