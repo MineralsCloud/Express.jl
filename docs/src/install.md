@@ -21,7 +21,7 @@ platform to explain the following steps:
    ```julia
    julia> using Pkg; Pkg.update()
 
-   julia> pkg"add git@github.com:MineralsCloud/Express.jl.git"
+   julia> pkg"add Express.jl.git"
    ```
 
    and wait for its finish.
