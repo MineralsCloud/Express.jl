@@ -2,7 +2,6 @@ module DefaultActions
 
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
-using Compat: isnothing
 using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
@@ -83,7 +82,7 @@ end
 struct GetData{T} <: Action{T} end
 function (x::GetData)(outputs)
     raw = (parseoutput(calculation(x))(output) for output in outputs)  # `ntuple` cannot work with generators
-    return collect(Iterators.filter(!isnothing, raw))  # A vector of pairs
+    return collect(Iterators.filter(x -> x !== nothing, raw))  # A vector of pairs
 end
 
 function buildjob(x::GetData{T}, cfgfile) where {T}
