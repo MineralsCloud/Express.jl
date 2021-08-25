@@ -1,7 +1,7 @@
 name = "Express"
 uuid = "b12df14e-adf7-11e9-0606-d5813a258349"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
-version = "0.1.0"
+version = "0.1.1-DEV"
 
 [deps]
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
