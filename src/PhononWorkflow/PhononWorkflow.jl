@@ -101,28 +101,7 @@ prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
 shortname(x::Calculation) = shortname(typeof(x))
 
 include("Config.jl")
-
-module DefaultActions
-
-using AbInitioSoftwareBase.Inputs: Input, writetxt
-using Dates: now, format
-using SimpleWorkflow: InternalAtomicJob
-using Logging: with_logger, current_logger
-
-using ...Express: Action, Calculation, LatticeDynamics, Scf, loadconfig, @action
-using ...EquationOfStateWorkflow: VcOptim
-using ..PhononWorkflow:
-    Dfpt, RealSpaceForceConstants, PhononDispersion, VDos, shortname, prevcalc, order
-
-import ..PhononWorkflow: buildjob
-
-@action MakeCmd
-
-include("MakeInput.jl")
-include("LogMsg.jl")
-
-end
-
+include("DefaultActions.jl")
 using .DefaultActions: MakeInput, MakeCmd, LogMsg
 
 include("Recipes.jl")
