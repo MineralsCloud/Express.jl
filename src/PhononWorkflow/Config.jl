@@ -2,10 +2,10 @@ module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: @option
+using Formatting: sprintf1
 using Unitful: ustrip
 
-using ...Express: myuparse
-using ...Config: Directories, @unit_vec_opt
+using ...Express: Action, myuparse
 
 @option struct Template
     scf::String
@@ -87,13 +87,27 @@ end
     end
 end
 
-function materialize(config::Union{Pressures,Volumes})
-    unit = myuparse(config.unit)
-    return config.values .* unit
+struct ExpandConfig{T} <: Action{T} end
+function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
+    unit = myuparse(fixed.unit)
+    return fixed.values .* unit
 end
-function materialize(config::Directories, fixed::Union{Pressures,Volumes})
-    return map(fixed.values) do value
-        abspath(joinpath(expanduser(config.root), config.prefix * string(ustrip(value))))
+function (::ExpandConfig)(save::Save)
+    return map((:raw, :status)) do f
+        v = getfield(save, f)
+        isempty(v) ? abspath(mktemp(; cleanup = false)[1]) : abspath(expanduser(v))
+    end
+end
+function (x::ExpandConfig)(files::IOFiles, fixed::Union{Pressures,Volumes})
+    dirs = map(fixed.values) do value
+        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
+    end
+    return map((:scf, :dfpt, :q2r, :disp)) do type
+        map(dirs) do dir
+            in, out =
+                sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
+            joinpath(dir, in) => joinpath(dir, out)
+        end
     end
 end
 
