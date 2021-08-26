@@ -1,32 +1,60 @@
 module Recipes
 
+using AbInitioSoftwareBase: load
+using Serialization: deserialize
+using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
+using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
+using ..DefaultActions: LogMsg, MakeInput, RunCmd, buildjob
+
 function buildworkflow(cfgfile)
-    config = loadconfig(cfgfile)
-    if isfile(config.recover)
-        w = deserialize(config.recover)
+    dict = load(cfgfile)
+    if isfile(dict["save"]["status"])
+        w = deserialize(dict["save"]["status"])
         typeassert(w, Workflow)
         return w
     else
-        settings = load(cfgfile)
-        x = if settings["workflow"] == "phonon dispersion"
+        x = if dict["workflow"] == "phonon dispersion"
             PhononDispersion
-        elseif settings["workflow"] == "vdos"
+        elseif dict["workflow"] == "vdos"
             VDos
         else
             error("unsupported option!")
         end
-        return begin
-            @intjob(LogMsg{Scf}()(true)) ▷ @intjob(MakeInput{Scf}()(cfgfile)) ▷
-            buildjob(MakeCmd{Scf}(), cfgfile) ▷ @intjob(LogMsg{Scf}()(false)) ▷
-            @intjob(LogMsg{Dfpt}()(true)) ▷ @intjob(MakeInput{Dfpt}()(cfgfile)) ▷
-            buildjob(MakeCmd{Dfpt}(), cfgfile) ▷ @intjob(LogMsg{Dfpt}()(false)) ▷
-            @intjob(LogMsg{RealSpaceForceConstants}()(true)) ▷
-            @intjob(MakeInput{RealSpaceForceConstants}()(cfgfile)) ▷
-            buildjob(MakeCmd{RealSpaceForceConstants}(), cfgfile) ▷
-            @intjob(LogMsg{RealSpaceForceConstants}()(false)) ▷ @intjob(LogMsg{x}()(true)) ▷
-            @intjob(MakeInput{x}()(cfgfile)) ▷ buildjob(MakeCmd{x}(), cfgfile) ▷
-            @intjob(LogMsg{x}()(false))
-        end
+        a = AtomicJob(() -> LogMsg{Scf}()(; start = true))
+        b = buildjob(MakeInput{Scf}(), cfgfile)
+        c = buildjob(RunCmd{Scf}(), cfgfile)
+        d = AtomicJob(() -> LogMsg{Scf}()(; start = false))
+        e = AtomicJob(() -> LogMsg{Dfpt}()(; start = true))
+        f = buildjob(MakeInput{Dfpt}(), cfgfile)
+        g = buildjob(RunCmd{Dfpt}(), cfgfile)
+        h = AtomicJob(() -> LogMsg{Dfpt}()(; start = false))
+        i = AtomicJob(() -> LogMsg{RealSpaceForceConstants}()(; start = true))
+        j = buildjob(MakeInput{RealSpaceForceConstants}(), cfgfile)
+        k = buildjob(RunCmd{RealSpaceForceConstants}(), cfgfile)
+        l = AtomicJob(() -> LogMsg{RealSpaceForceConstants}()(; start = false))
+        m = AtomicJob(() -> LogMsg{x}()(; start = true))
+        n = buildjob(MakeInput{x}(), cfgfile)
+        o = buildjob(RunCmd{x}(), cfgfile)
+        p = AtomicJob(() -> LogMsg{x}()(; start = false))
+        (((((((((a ⋲ b) ▷ c) ⋺ d) ▷ e ⋲ f) ▷ g) ⋺ h ▷ i) ⋲ j) ▷ k) ⋺ l ▷ m) ⋲ n ▷ o ⋺ p
+        return Workflow(
+            a,
+            b...,
+            c...,
+            d,
+            e,
+            f...,
+            g...,
+            h,
+            i,
+            j...,
+            k...,
+            l,
+            m,
+            n...,
+            o...,
+            p,
+        )
     end
 end
 
