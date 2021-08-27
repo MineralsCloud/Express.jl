@@ -1,7 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Configurations: @option
+using Configurations: from_dict, @option
 using Formatting: sprintf1
 using Unitful: ustrip
 
@@ -109,6 +109,19 @@ function (x::ExpandConfig)(files::IOFiles, fixed::Union{Pressures,Volumes})
             joinpath(dir, in) => joinpath(dir, out)
         end
     end
+end
+function (x::ExpandConfig)(config::AbstractDict)
+    config = from_dict(RuntimeConfig, config)
+    save_raw, save_status = x(config.save)
+    return (
+        template = x(config.templates),
+        fixed = x(config.fixed),
+        root = config.files.dirs.root,
+        files = x(config.files, config.fixed),
+        save_raw = save_raw,
+        save_status = save_status,
+        cli = config.cli,
+    )
 end
 
 end
