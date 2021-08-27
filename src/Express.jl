@@ -57,7 +57,7 @@ function current_software end
 include("Shell.jl")
 using .Shell
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
-# include("PhononWorkflow/PhononWorkflow.jl")
+include("PhononWorkflow/PhononWorkflow.jl")
 # include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
 
 end
