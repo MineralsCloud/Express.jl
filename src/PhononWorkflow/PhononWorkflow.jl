@@ -15,7 +15,6 @@ using ..Express:
     FixedIonSelfConsistentField,
     Action,
     current_software,
-    loadconfig,
     myuparse
 using ..EquationOfStateWorkflow: VcOptim
 using ..Shell: distprocs
@@ -34,7 +33,6 @@ export Dfpt,
     MakeInput,
     LogMsg,
     run!,
-    loadconfig,
     buildworkflow,
     buildjob
 
@@ -49,7 +47,7 @@ const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
 include("Config.jl")
 include("DefaultActions.jl")
-using .DefaultActions: MakeInput, MakeCmd, LogMsg
+using .DefaultActions: MakeInput, RunCmd, LogMsg
 
 include("Recipes.jl")
 
