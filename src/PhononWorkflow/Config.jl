@@ -80,8 +80,10 @@ end
     save::Save = Save()
     cli::CommandConfig
     function RuntimeConfig(template, fixed, files, save, cli)
-        if !isfile(template)
-            @warn "I cannot find template file `$template`!"
+        for i in 1:nfields(template)
+            if !isfile(getfield(template, i))
+                @warn "I cannot find template file `$template`!"
+            end
         end
         return new(template, fixed, files, save, cli)
     end
