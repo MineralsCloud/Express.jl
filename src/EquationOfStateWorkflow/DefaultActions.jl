@@ -16,8 +16,6 @@ using ..EquationOfStateWorkflow: ScfOrOptim, Scf, Optimization
 using ..Config: Volumes, ExpandConfig
 using ...Shell: distprocs
 
-struct RunCmd{T} <: Action{T} end
-
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
     input = x(template, args...)
@@ -69,6 +67,8 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T<:Optimization}
         end
     end
 end
+
+struct RunCmd{T} <: Action{T} end
 
 function buildjob(x::RunCmd{T}, cfgfile) where {T}
     dict = load(cfgfile)
