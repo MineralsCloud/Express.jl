@@ -25,6 +25,7 @@ end
 
 function buildjob(x::MakeInput{Dfpt}, cfgfile)
     dict = load(cfgfile)
+    pop!(dict, "workflow")
     config = ExpandConfig{Dfpt}()(dict)
     return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
         AtomicJob(() -> x(input, config.template[2], previnput))
@@ -32,6 +33,7 @@ function buildjob(x::MakeInput{Dfpt}, cfgfile)
 end
 function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
+    pop!(dict, "workflow")
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
     return map(config.files[3], config.files[2]) do (input, _), (previnput, _)
         AtomicJob(() -> x(input, config.template[3], previnput))
@@ -39,6 +41,7 @@ function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
 end
 function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
+    pop!(dict, "workflow")
     config = ExpandConfig{Scf}()(dict)
     cells = map(config.files) do (input, _)
         file = joinpath(dirname(input), string(VcOptim()) * ".out")
@@ -57,6 +60,7 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
 end
 function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
     dict = load(cfgfile)
+    pop!(dict, "workflow")
     config = ExpandConfig{T}()(dict)
     ifcinputs = map(config.files[3]) do (input, _)
         parse(inputtype(RealSpaceForceConstants), read(input, String))
@@ -77,6 +81,7 @@ struct RunCmd{T} <: Action{T} end
 
 function buildjob(x::RunCmd{T}, cfgfile) where {T}
     dict = load(cfgfile)
+    pop!(dict, "workflow")
     config = ExpandConfig{T}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files))
     return map(config.files) do (input, output)
