@@ -74,16 +74,16 @@ end
 end
 
 @option struct RuntimeConfig
-    templates::Template
+    template::Template
     fixed::Union{Pressures,Volumes}
     files::IOFiles = IOFiles()
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(templates, fixed, files, save, cli)
+    function RuntimeConfig(template, fixed, files, save, cli)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(templates, fixed, files, save, cli)
+        return new(template, fixed, files, save, cli)
     end
 end
 
@@ -114,7 +114,7 @@ function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     save_raw, save_status = x(config.save)
     return (
-        template = x(config.templates),
+        template = x(config.template),
         fixed = x(config.fixed),
         root = config.files.dirs.root,
         files = x(config.files, config.fixed),
