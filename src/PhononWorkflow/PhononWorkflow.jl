@@ -32,9 +32,7 @@ export Dfpt,
     ZoneCentrePhonons,
     MakeInput,
     LogMsg,
-    run!,
-    buildworkflow,
-    buildjob
+    run!
 
 struct LinearResponse <: LatticeDynamics end
 struct RealSpaceForceConstants <: LatticeDynamics end
