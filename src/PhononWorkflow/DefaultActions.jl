@@ -37,7 +37,7 @@ function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
         AtomicJob(() -> x(input, config.template[3], previnput))
     end
 end
-function buildjo(x::MakeInput{Scf}, cfgfile)
+function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     cells = map(config.files) do (input, _)
