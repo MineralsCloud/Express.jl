@@ -47,22 +47,6 @@ const Dfpt = LinearResponse
 const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
-order(x) = order(typeof(x))
-order(::Type{Scf}) = 1
-order(::Type{Dfpt}) = 2
-order(::Type{RealSpaceForceConstants}) = 3
-order(::Type{PhononDispersion}) = 4
-order(::Type{PhononDensityOfStates}) = 4
-
-prevcalc(x) = prevcalc(typeof(x))
-prevcalc(::Type{Scf}) = VcOptim()
-prevcalc(::Type{Dfpt}) = Scf()
-prevcalc(::Type{RealSpaceForceConstants}) = Dfpt()
-prevcalc(::Type{PhononDispersion}) = RealSpaceForceConstants()
-prevcalc(::Type{PhononDensityOfStates}) = RealSpaceForceConstants()
-
-shortname(x::Calculation) = shortname(typeof(x))
-
 include("Config.jl")
 include("DefaultActions.jl")
 using .DefaultActions: MakeInput, MakeCmd, LogMsg
