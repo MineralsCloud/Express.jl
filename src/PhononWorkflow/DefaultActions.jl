@@ -6,11 +6,10 @@ using Dates: now, format
 using Logging: with_logger, current_logger
 using SimpleWorkflows: AtomicJob
 using ...Express: Action, Calculation, LatticeDynamics, Scf, calculation
+using ...Shell: distprocs
 using ...EquationOfStateWorkflow: VcOptim
 using ..PhononWorkflow: Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using ..Config: ExpandConfig
-
-struct RunCmd{T} <: Action{T} end
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
@@ -73,6 +72,17 @@ end
 function parsecell end
 
 function inputtype end
+
+struct RunCmd{T} <: Action{T} end
+
+function buildjob(x::RunCmd{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
+    np = distprocs(config.cli.mpi.np, length(config.files))
+    return map(config.files) do (input, output)
+        AtomicJob(() -> x(input, output; np = np))
+    end
+end
 
 struct LogMsg{T} <: Action{T} end
 function (x::LogMsg)(; start = true)
