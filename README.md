@@ -13,5 +13,5 @@
 The components of `express`:
 
 <div align="center">
-  <img src="docs/src/assets/components.png" height="800"><br>
+  <img src="https://raw.githubusercontent.com/MineralsCloud/Express.jl/master/docs/src/assets/components.png" height="800"><br>
 </div>
