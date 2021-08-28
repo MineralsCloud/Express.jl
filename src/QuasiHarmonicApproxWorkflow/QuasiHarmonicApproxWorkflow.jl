@@ -1,8 +1,6 @@
 module QuasiHarmonicApproxWorkflow
 
 using AbInitioSoftwareBase: save, load
-using SimpleWorkflow: chain
-
 using ..Express: Calculation
 
 export QuasiHarmonicApprox, MakeInput, CalculateThermodyn, Plot, buildworkflow
@@ -21,23 +19,7 @@ function buildworkflow(cfgfile)
     )
 end
 
-module DefaultActions
-
-using AbInitioSoftwareBase.Inputs: Input, writetxt
-using PyQHA: converter, runcode, plot
-using SimpleWorkflow: InternalAtomicJob
-
-using ...Express: Action, loadconfig
-using ..QuasiHarmonicApproxWorkflow: QuasiHarmonicApprox
-using ..Config: materialize
-import ..QuasiHarmonicApproxWorkflow: buildjob
-
-include("MakeInput.jl")
-include("Calculate.jl")
-include("Plot.jl")
-
-end
-
+include("DefaultActions.jl")
 using .DefaultActions: MakeInput, CalculateThermodyn, Plot
 
 include("Recipes.jl")
