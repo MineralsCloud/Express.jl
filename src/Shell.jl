@@ -1,5 +1,7 @@
 module Shell
 
+export distprocs
+
 function distprocs(nprocs, njobs)
     quotient, remainder = divrem(nprocs, njobs)
     if !iszero(remainder)
