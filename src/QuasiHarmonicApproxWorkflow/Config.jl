@@ -65,7 +65,7 @@ end
         new(abspath(expanduser(root)), pattern, group_by_step)
 end
 
-@option struct QuasiHarmonicApproxConfig
+@option struct RuntimeConfig
     input::String
     temperatures::Temperatures
     pressures::Pressures
@@ -75,7 +75,7 @@ end
     static_only::Bool = false
     order::UInt = 3
     energy_unit::String = "ry"
-    function QuasiHarmonicApproxConfig(
+    function RuntimeConfig(
         input,
         temperatures,
         pressures,
@@ -118,7 +118,7 @@ function checkconfig(config)
 end
 
 function materialize(config::AbstractDict)
-    config = from_dict(QuasiHarmonicApproxConfig, config)
+    config = from_dict(RuntimeConfig, config)
     dict = Dict{String,Any}(
         "calculation" => config.calculation,
         "T_MIN" => ustrip(u"K", minimum(config.temperatures)),
