@@ -1,41 +1,42 @@
 module DefaultActions
 
-using AbInitioSoftwareBase.Inputs: Input, writetxt
+using AbInitioSoftwareBase: load
 using PyQHA: converter, runcode, plot
-using SimpleWorkflow: InternalAtomicJob
+using SimpleWorkflows: AtomicJob
 
-using ...Express: Action, loadconfig
+using ...Express: Action
 using ..QuasiHarmonicApproxWorkflow: QuasiHarmonicApprox
-using ..Config: materialize
-import ..QuasiHarmonicApproxWorkflow: buildjob
+using ..Config: ExpandConfig
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{QuasiHarmonicApprox})(inp_file_list, inp_static, inp_q_points)
     converter(inp_file_list, inp_static, inp_q_points)
 end
-function (x::MakeInput{QuasiHarmonicApprox})(cfgfile)
-    input, file, inp_file_list, static, q_points = loadconfig(cfgfile)
-    cd(dirname(input)) do
-        x(inp_file_list, static, q_points)
-    end
-end
 
-buildjob(x::MakeInput, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
+function buildjob(x::MakeInput{QuasiHarmonicApprox}, cfgfile)
+    dict = load(cfgfile)
+    config = ExpandConfig{QuasiHarmonicApprox}()(dict)
+    return AtomicJob(function ()
+        return cd(dirname(config.input)) do
+            x(config.inp_file_list, config.static, config.q_points)
+        end
+    end)
+end
 
 struct CalculateThermodyn{T} <: Action{T} end
-function (x::CalculateThermodyn{QuasiHarmonicApprox})(cfgfile)
-    config = loadconfig(cfgfile)
-    runcode(config[:config])
-end
 
-buildjob(x::CalculateThermodyn, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
+function buildjob(::CalculateThermodyn{QuasiHarmonicApprox}, cfgfile)
+    dict = load(cfgfile)
+    config = ExpandConfig{QuasiHarmonicApprox}()(dict)
+    return AtomicJob(() -> runcode(config[:config]))
+end
 
 struct Plot{T} <: Action{T} end
-function (x::Plot{QuasiHarmonicApprox})(cfgfile)
-    config = loadconfig(cfgfile)
-    plot(config[:config])
-end
 
-buildjob(x::Plot, cfgfile) = InternalAtomicJob(() -> x(cfgfile))
+function (::Plot{QuasiHarmonicApprox}, cfgfile)
+    dict = load(cfgfile)
+    config = ExpandConfig{QuasiHarmonicApprox}()(dict)
+    return AtomicJob(() -> plot(config[:config]))
+end
 
 end
