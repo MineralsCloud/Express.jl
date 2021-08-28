@@ -27,16 +27,38 @@ function buildjob(x::MakeInput{Dfpt}, cfgfile)
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{Dfpt}()(dict)
-    return map(config.files[2]) do (input, _)
-        AtomicJob(() -> x(input, config.template.dfpt, config.template.scf))
+    return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
+        AtomicJob(function ()
+            str = read(previnput, String)
+            prev = parse(inputtype(Scf), str)
+            return x(input, config.template.dfpt, prev)
+        end)
     end
 end
 function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
-    return map(config.files[3]) do (input, _)
-        AtomicJob(() -> x(input, config.template.q2r, config.template.dfpt))
+    return map(config.files[3], config.files[2]) do (input, _), (previnput, _)
+        AtomicJob(function ()
+            str = read(previnput, String)
+            prev = parse(inputtype(Dfpt), str)
+            return x(input, config.template.q2r, prev)
+        end)
+    end
+end
+function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
+    dict = load(cfgfile)
+    pop!(dict, "workflow")
+    config = ExpandConfig{T}()(dict)
+    return map(config.files[4], config.files[3], config.files[2]) do (input, _), (previnput, _), (pprevinput, _)
+        AtomicJob(function ()
+            str = read(previnput, String)
+            q2r = parse(inputtype(RealSpaceForceConstants), str)
+            str = read(pprevinput, String)
+            dfpt = parse(inputtype(Dfpt), str)
+            return x(input, config.template.disp, q2r, dfpt)
+        end)
     end
 end
 function buildjob(x::MakeInput{Scf}, cfgfile)
@@ -55,16 +77,6 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
             end
             return x(input, config.template.scf, first(cell), last(cell))
         end)
-    end
-end
-function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
-    dict = load(cfgfile)
-    pop!(dict, "workflow")
-    config = ExpandConfig{T}()(dict)
-    return map(config.files[4]) do (input, _)
-        AtomicJob(
-            () -> x(input, config.template.disp, config.template.q2r, config.template.dfpt),
-        )
     end
 end
 
