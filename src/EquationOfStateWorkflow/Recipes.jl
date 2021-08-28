@@ -8,7 +8,7 @@ using ..Config: ExpandConfig
 using ..DefaultActions: LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
 using ..EquationOfStateWorkflow: Scf, VcOptim
 
-export buildworkflow
+export buildworkflow, run!
 
 function buildworkflow(cfgfile)
     dict = load(cfgfile)

@@ -6,6 +6,8 @@ using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
 using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using ..DefaultActions: LogMsg, MakeInput, RunCmd, buildjob
 
+export buildworkflow, run!
+
 function buildworkflow(cfgfile)
     dict = load(cfgfile)
     if isfile(dict["save"]["status"])
