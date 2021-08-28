@@ -27,49 +27,44 @@ function buildjob(x::MakeInput{Dfpt}, cfgfile)
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{Dfpt}()(dict)
-    return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
-        AtomicJob(() -> x(input, config.template[2], previnput))
+    return map(config.files[2]) do (input, _)
+        AtomicJob(() -> x(input, config.template.dfpt, config.template.scf))
     end
 end
 function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
-    return map(config.files[3], config.files[2]) do (input, _), (previnput, _)
-        AtomicJob(() -> x(input, config.template[3], previnput))
+    return map(config.files[3]) do (input, _)
+        AtomicJob(() -> x(input, config.template.q2r, config.template.dfpt))
     end
 end
 function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{Scf}()(dict)
-    cells = map(config.files[1]) do (input, _)
-        file = joinpath(dirname(input), string(nameof(VcOptim)) * ".out")
-        str = read(file, String)
-        cell = parsecell(str)
-        if any(x === nothing for x in cell)
-            error("set cell failed!")
-        else
-            cell
-        end
-    end
-    return map(config.files[1], cells) do file, cell
-        input = first(file)
-        AtomicJob(() -> x(input, config.template[1], first(cell), last(cell)))
+    return map(config.files[1]) do (input, _)
+        AtomicJob(function ()
+            vcout = joinpath(dirname(input), string(nameof(VcOptim)) * ".out")
+            str = read(vcout, String)
+            cell = parsecell(str)
+            if any(x === nothing for x in cell)
+                error("set cell failed!")
+            else
+                cell
+            end
+            return x(input, config.template.scf, first(cell), last(cell))
+        end)
     end
 end
 function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{T}()(dict)
-    ifcinputs = map(config.files[3]) do (input, _)
-        parse(inputtype(RealSpaceForceConstants), read(input, String))
-    end
-    dfptinputs = map(config.files[2]) do (input, _)
-        parse(inputtype(Dfpt), read(input, String))
-    end
-    return map(config.files[4], ifcinputs, dfptinputs) do (input, _), ifcinput, dfptinput
-        AtomicJob(() -> x(input, config.template[2], ifcinput, dfptinput))
+    return map(config.files[4]) do (input, _)
+        AtomicJob(
+            () -> x(input, config.template.disp, config.template.q2r, config.template.dfpt),
+        )
     end
 end
 
