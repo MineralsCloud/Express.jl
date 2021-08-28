@@ -43,7 +43,7 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{Scf}()(dict)
-    cells = map(config.files) do (input, _)
+    cells = map(config.files[1]) do (input, _)
         file = joinpath(dirname(input), string(VcOptim()) * ".out")
         str = read(file, String)
         cell = parsecell(str)
@@ -79,12 +79,39 @@ function inputtype end
 
 struct RunCmd{T} <: Action{T} end
 
-function buildjob(x::RunCmd{T}, cfgfile) where {T}
+function buildjob(x::RunCmd{Scf}, cfgfile)
+    dict = load(cfgfile)
+    pop!(dict, "workflow")
+    config = ExpandConfig{Scf}()(dict)
+    np = distprocs(config.cli.mpi.np, length(config.files[1]))
+    return map(config.files[1]) do (input, output)
+        AtomicJob(() -> x(input, output; np = np))
+    end
+end
+function buildjob(x::RunCmd{Dfpt}, cfgfile)
+    dict = load(cfgfile)
+    pop!(dict, "workflow")
+    config = ExpandConfig{Dfpt}()(dict)
+    np = distprocs(config.cli.mpi.np, length(config.files[2]))
+    return map(config.files[2]) do (input, output)
+        AtomicJob(() -> x(input, output; np = np))
+    end
+end
+function buildjob(x::RunCmd{RealSpaceForceConstants}, cfgfile)
+    dict = load(cfgfile)
+    pop!(dict, "workflow")
+    config = ExpandConfig{RealSpaceForceConstants}()(dict)
+    np = distprocs(config.cli.mpi.np, length(config.files[3]))
+    return map(config.files[3]) do (input, output)
+        AtomicJob(() -> x(input, output; np = np))
+    end
+end
+function buildjob(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
     dict = load(cfgfile)
     pop!(dict, "workflow")
     config = ExpandConfig{T}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files))
-    return map(config.files) do (input, output)
+    np = distprocs(config.cli.mpi.np, length(config.files[4]))
+    return map(config.files[4]) do (input, output)
         AtomicJob(() -> x(input, output; np = np))
     end
 end
