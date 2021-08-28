@@ -57,6 +57,14 @@ Temperatures(values::AbstractString, unit = "K") =
     gamma::Bool = true
 end
 
+@option struct Directories
+    root::String = pwd()
+    pattern::String = "p=%.1f"
+    group_by_step::Bool = false
+    Directories(root, pattern, group_by_step) =
+        new(abspath(expanduser(root)), pattern, group_by_step)
+end
+
 @option struct QuasiHarmonicApproxConfig
     input::String
     temperatures::Temperatures
