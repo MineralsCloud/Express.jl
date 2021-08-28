@@ -4,8 +4,8 @@ using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using Formatting: sprintf1
 using Unitful: ustrip
-
 using ...Express: Action, myuparse
+using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics
 
 @option struct Template
     scf::String
@@ -104,7 +104,7 @@ function (x::ExpandConfig)(files::IOFiles, fixed::Union{Pressures,Volumes})
     dirs = map(fixed.values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
-    return map((:scf, :dfpt, :q2r, :disp)) do type
+    return map((Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics)) do type
         map(dirs) do dir
             in, out =
                 sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
