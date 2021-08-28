@@ -105,19 +105,6 @@ end
     end
 end
 
-function checkconfig(config)
-    for key in ("inp_file_list", "static", "q_points")
-        @assert haskey(config, key) "`\"$key\"` was not found in config!"
-    end
-    list = load(config["inp_file_list"])["frequency_files"]
-    for path in vcat(list, config["static"], config["q_points"])
-        if !isfile(path)
-            throw(SystemError("opening file \"$path\"", 2))
-        end
-    end
-    return
-end
-
 struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
