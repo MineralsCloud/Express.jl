@@ -3,6 +3,7 @@ module Config
 using AbInitioSoftwareBase: save, load
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
+using ...Express: Action
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -117,7 +118,8 @@ function checkconfig(config)
     return
 end
 
-function materialize(config::AbstractDict)
+struct ExpandConfig{T} <: Action{T} end
+function (::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     dict = Dict{String,Any}(
         "calculation" => config.calculation,
