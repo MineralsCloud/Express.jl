@@ -106,8 +106,8 @@ function (x::ExpandConfig)(files::IOFiles, fixed::Union{Pressures,Volumes})
     end
     return map((Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics)) do type
         map(dirs) do dir
-            in, out =
-                sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
+            in, out = sprintf1(files.pattern.input, string(nameof(type))),
+            sprintf1(files.pattern.output, string(nameof(type)))
             joinpath(dir, in) => joinpath(dir, out)
         end
     end
