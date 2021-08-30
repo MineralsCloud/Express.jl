@@ -1,6 +1,6 @@
 module Config
 
-using AbInitioSoftwareBase: save, load
+using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
 using ...Express: Action
@@ -126,12 +126,12 @@ function (::ExpandConfig)(config::AbstractDict)
         end,
         "energy_unit" => config.energy_unit,
         "high_verbosity" => true,
-        "output_directory" => joinpath(config["workdir"], "results"),
+        "output_directory" => joinpath(config.dirs.root, "results"),
     )
-    path = expanduser(joinpath(dirname(config["input"]), "settings.yaml"))
+    path = expanduser(joinpath(parentdir(dict["input"]), "settings.yaml"))
     save(path, dict)
     return (
-        input = expanduser(config["input"]),
+        input = abspath(expanduser(config["input"])),
         config = path,
         inp_file_list = config["inp_file_list"],
         static = config["static"],
