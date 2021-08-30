@@ -68,9 +68,12 @@ end
 
 @option struct RuntimeConfig
     input::String
+    inp_file_list::String
+    static::String
+    q_points::String
     temperatures::Temperatures
     pressures::Pressures
-    thermo::Thermo
+    thermo::Thermo = Thermo()
     dirs::Directories = Directories()
     calculation::String = "single"
     static_only::Bool = false
@@ -78,6 +81,9 @@ end
     energy_unit::String = "ry"
     function RuntimeConfig(
         input,
+        inp_file_list,
+        static,
+        q_points,
         temperatures,
         pressures,
         thermo,
@@ -93,6 +99,9 @@ end
         @assert lowercase(energy_unit) in ("ry", "ev")
         return new(
             input,
+            inp_file_list,
+            static,
+            q_points,
             temperatures,
             pressures,
             thermo,
