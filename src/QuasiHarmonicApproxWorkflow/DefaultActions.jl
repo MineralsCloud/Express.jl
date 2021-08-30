@@ -28,15 +28,15 @@ struct CalculateThermodyn{T} <: Action{T} end
 function buildjob(::CalculateThermodyn{QuasiHarmonicApprox}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{QuasiHarmonicApprox}()(dict)
-    return AtomicJob(() -> runcode(config[:config]))
+    return AtomicJob(() -> runcode(config.config))
 end
 
 struct Plot{T} <: Action{T} end
 
-function (::Plot{QuasiHarmonicApprox}, cfgfile)
+function buildjob(::Plot{QuasiHarmonicApprox}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{QuasiHarmonicApprox}()(dict)
-    return AtomicJob(() -> plot(config[:config]))
+    return AtomicJob(() -> plot(config.config))
 end
 
 end
