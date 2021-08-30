@@ -117,18 +117,20 @@ end
 struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
+    temperatures = config.temperatures.values .* myuparse(config.temperatures.unit)
+    pressures = config.pressures.values .* myuparse(config.pressures.unit)
     dict = Dict{String,Any}(
         "calculation" => config.calculation,
-        "T_MIN" => ustrip(u"K", minimum(config.temperatures)),
-        "NT" => length(config.temperatures),
-        "DT" => ustrip(u"K", minimum(diff(config.temperatures))),
-        "DT_SAMPLE" => ustrip(u"K", minimum(diff(config.temperatures))),
-        "P_MIN" => ustrip(u"GPa", minimum(config.pressures)),
-        "NTV" => length(config.pressures),
-        "DELTA_P" => ustrip(u"GPa", minimum(diff(config.pressures))),
-        "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(config.pressures))),
+        "T_MIN" => ustrip(u"K", minimum(temperatures)),
+        "NT" => length(temperatures),
+        "DT" => ustrip(u"K", minimum(diff(temperatures))),
+        "DT_SAMPLE" => ustrip(u"K", minimum(diff(temperatures))),
+        "P_MIN" => ustrip(u"GPa", minimum(pressures)),
+        "NTV" => length(pressures),
+        "DELTA_P" => ustrip(u"GPa", minimum(diff(pressures))),
+        "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(pressures))),
         "input" => config.input,
-        "thermodynamic_properties" => map(fieldnames(config.thermo)) do f
+        "thermodynamic_properties" => map(fieldnames(Thermo)) do f
             if getfield(config.thermo, f)
                 string(f)
             end
@@ -140,11 +142,11 @@ function (::ExpandConfig)(config::AbstractDict)
     path = expanduser(joinpath(parentdir(dict["input"]), "settings.yaml"))
     save(path, dict)
     return (
-        input = abspath(expanduser(config["input"])),
+        input = abspath(expanduser(dict["input"])),
         config = path,
-        inp_file_list = config["inp_file_list"],
-        static = config["static"],
-        q_points = config["q_points"],
+        inp_file_list = config.inp_file_list,
+        static = config.static,
+        q_points = config.q_points,
     )
 end
 
