@@ -3,7 +3,7 @@ module Config
 using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
-using ...Express: Action
+using ...Express: Action, myuparse
 
 @option "pressures" struct Pressures
     values::AbstractVector
@@ -36,7 +36,7 @@ Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(value
     values::AbstractVector
     unit::String
     function Temperatures(values, unit = "K")
-        @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
+        @assert minimum(values) * myuparse(unit) >= 0u"K" "the minimum temperature is less than 0K!"
         return new(values, unit)
     end
 end
