@@ -1,35 +1,47 @@
 module Config
 
-using AbInitioSoftwareBase: save, load
+using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
+using ...Express: Action, myuparse
 
-using ...Config: Directories, @unit_vec_opt
-
-@unit_vec_opt Pressures "GPa" "pressures" begin
-    function (values, _)
+@option "pressures" struct Pressures
+    values::AbstractVector
+    unit::String
+    function Pressures(values, unit = "GPa")
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
         if minimum(values) >= zero(eltype(values))
             @warn "for better fitting result, provide at least 1 negative pressure!"
         end
+        return new(values, unit)
     end
 end
+Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
-@unit_vec_opt Volumes "bohr^3" "volumes" begin
-    function (values, _)
+@option "volumes" struct Volumes
+    values::AbstractVector
+    unit::String
+    function Pressures(values, unit = "bohr^3")
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
+        return new(values, unit)
     end
 end
+Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
-@unit_vec_opt Temperatures "K" "temperatures" begin
-    function (values, unit)
-        @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
+@option "temperatures" struct Temperatures
+    values::AbstractVector
+    unit::String
+    function Temperatures(values, unit = "K")
+        @assert minimum(values) * myuparse(unit) >= 0u"K" "the minimum temperature is less than 0K!"
+        return new(values, unit)
     end
 end
+Temperatures(values::AbstractString, unit = "K") =
+    Temperatures(eval(Meta.parse(values)), unit)
 
 @option struct Thermo
     F::Bool = true
@@ -46,18 +58,32 @@ end
     gamma::Bool = true
 end
 
-@option struct QuasiHarmonicApproxConfig
+@option struct Directories
+    root::String = pwd()
+    pattern::String = "p=%.1f"
+    group_by_step::Bool = false
+    Directories(root, pattern, group_by_step) =
+        new(abspath(expanduser(root)), pattern, group_by_step)
+end
+
+@option struct RuntimeConfig
     input::String
+    inp_file_list::String
+    static::String
+    q_points::String
     temperatures::Temperatures
     pressures::Pressures
-    thermo::Thermo
+    thermo::Thermo = Thermo()
     dirs::Directories = Directories()
     calculation::String = "single"
     static_only::Bool = false
     order::UInt = 3
     energy_unit::String = "ry"
-    function QuasiHarmonicApproxConfig(
+    function RuntimeConfig(
         input,
+        inp_file_list,
+        static,
+        q_points,
         temperatures,
         pressures,
         thermo,
@@ -73,6 +99,9 @@ end
         @assert lowercase(energy_unit) in ("ry", "ev")
         return new(
             input,
+            inp_file_list,
+            static,
+            q_points,
             temperatures,
             pressures,
             thermo,
@@ -85,49 +114,39 @@ end
     end
 end
 
-function checkconfig(config)
-    for key in ("inp_file_list", "static", "q_points")
-        @assert haskey(config, key) "`\"$key\"` was not found in config!"
-    end
-    list = load(config["inp_file_list"])["frequency_files"]
-    for path in vcat(list, config["static"], config["q_points"])
-        if !isfile(path)
-            throw(SystemError("opening file \"$path\"", 2))
-        end
-    end
-    return
-end
-
-function materialize(config::AbstractDict)
-    config = from_dict(QuasiHarmonicApproxConfig, config)
+struct ExpandConfig{T} <: Action{T} end
+function (::ExpandConfig)(config::AbstractDict)
+    config = from_dict(RuntimeConfig, config)
+    temperatures = config.temperatures.values .* myuparse(config.temperatures.unit)
+    pressures = config.pressures.values .* myuparse(config.pressures.unit)
     dict = Dict{String,Any}(
         "calculation" => config.calculation,
-        "T_MIN" => ustrip(u"K", minimum(config.temperatures)),
-        "NT" => length(config.temperatures),
-        "DT" => ustrip(u"K", minimum(diff(config.temperatures))),
-        "DT_SAMPLE" => ustrip(u"K", minimum(diff(config.temperatures))),
-        "P_MIN" => ustrip(u"GPa", minimum(config.pressures)),
-        "NTV" => length(config.pressures),
-        "DELTA_P" => ustrip(u"GPa", minimum(diff(config.pressures))),
-        "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(config.pressures))),
+        "T_MIN" => ustrip(u"K", minimum(temperatures)),
+        "NT" => length(temperatures),
+        "DT" => ustrip(u"K", minimum(diff(temperatures))),
+        "DT_SAMPLE" => ustrip(u"K", minimum(diff(temperatures))),
+        "P_MIN" => ustrip(u"GPa", minimum(pressures)),
+        "NTV" => length(pressures),
+        "DELTA_P" => ustrip(u"GPa", minimum(diff(pressures))),
+        "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(pressures))),
         "input" => config.input,
-        "thermodynamic_properties" => map(fieldnames(config.thermo)) do f
+        "thermodynamic_properties" => map(fieldnames(Thermo)) do f
             if getfield(config.thermo, f)
                 string(f)
             end
         end,
         "energy_unit" => config.energy_unit,
         "high_verbosity" => true,
-        "output_directory" => joinpath(config["workdir"], "results"),
+        "output_directory" => joinpath(config.dirs.root, "results"),
     )
-    path = expanduser(joinpath(dirname(config["input"]), "settings.yaml"))
+    path = expanduser(joinpath(parentdir(dict["input"]), "settings.yaml"))
     save(path, dict)
     return (
-        input = expanduser(config["input"]),
+        input = abspath(expanduser(dict["input"])),
         config = path,
-        inp_file_list = config["inp_file_list"],
-        static = config["static"],
-        q_points = config["q_points"],
+        inp_file_list = config.inp_file_list,
+        static = config.static,
+        q_points = config.q_points,
     )
 end
 
