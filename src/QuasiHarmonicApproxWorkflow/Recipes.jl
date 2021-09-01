@@ -5,6 +5,8 @@ using ..QuasiHarmonicApproxWorkflow: QuasiHarmonicApprox
 using ..QuasiHarmonicApproxWorkflow.DefaultActions:
     MakeInput, CalculateThermodyn, Plot, buildjob
 
+export buildworkflow, run!
+
 function buildworkflow(cfgfile)
     a = buildjob(MakeInput{QuasiHarmonicApprox}(), cfgfile)
     b = buildjob(CalculateThermodyn{QuasiHarmonicApprox}(), cfgfile)
