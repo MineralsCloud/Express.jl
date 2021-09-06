@@ -34,7 +34,7 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
 @option "volumes" struct Volumes
     values::AbstractVector
     unit::String
-    function Pressures(values, unit = "bohr^3")
+    function Volumes(values, unit = "bohr^3")
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
