@@ -31,13 +31,7 @@ end
 
 @option "pressures" struct Pressures
     values::AbstractVector
-    unit::String
-    function Pressures(values, unit = "GPa")
-        if length(values) <= 5
-            @info "less than 6 pressures may not fit accurately, consider adding more!"
-        end
-        return new(values, unit)
-    end
+    unit::String = "GPa"
 end
 Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
