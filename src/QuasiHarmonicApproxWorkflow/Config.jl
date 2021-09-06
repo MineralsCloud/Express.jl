@@ -12,25 +12,10 @@ using ...Express: Action, myuparse
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
-        if minimum(values) >= zero(eltype(values))
-            @warn "for better fitting result, provide at least 1 negative pressure!"
-        end
         return new(values, unit)
     end
 end
 Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
-
-@option "volumes" struct Volumes
-    values::AbstractVector
-    unit::String
-    function Pressures(values, unit = "bohr^3")
-        if length(values) <= 5
-            @info "less than 6 volumes may not fit accurately, consider adding more!"
-        end
-        return new(values, unit)
-    end
-end
-Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
 @option "temperatures" struct Temperatures
     values::AbstractVector
@@ -115,10 +100,22 @@ end
 end
 
 struct ExpandConfig{T} <: Action{T} end
-function (::ExpandConfig)(config::AbstractDict)
+function (::ExpandConfig)(pressures::Pressures)
+    unit = myuparse(pressures.unit)
+    expanded = pressures.values .* unit
+    if minimum(expanded) >= zero(eltype(values))  # values may have eltype `Any`
+        @warn "for better fitting result, provide at least 1 negative pressure!"
+    end
+    return expanded
+end
+function (::ExpandConfig)(temperatures::Temperatures)
+    unit = myuparse(temperatures.unit)
+    return temperatures.values .* unit
+end
+function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
-    temperatures = config.temperatures.values .* myuparse(config.temperatures.unit)
-    pressures = config.pressures.values .* myuparse(config.pressures.unit)
+    temperatures = x(config.temperatures)
+    pressures = x(config.pressures)
     dict = Dict{String,Any}(
         "calculation" => config.calculation,
         "T_MIN" => ustrip(u"K", minimum(temperatures)),
