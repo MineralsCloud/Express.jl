@@ -20,18 +20,6 @@ using ...Express: Action, myuparse
 end
 Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
-@option "volumes" struct Volumes
-    values::AbstractVector
-    unit::String
-    function Volumes(values, unit = "bohr^3")
-        if length(values) <= 5
-            @info "less than 6 volumes may not fit accurately, consider adding more!"
-        end
-        return new(values, unit)
-    end
-end
-Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
-
 @option "temperatures" struct Temperatures
     values::AbstractVector
     unit::String
