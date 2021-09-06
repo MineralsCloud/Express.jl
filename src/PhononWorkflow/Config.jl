@@ -81,17 +81,9 @@ end
 end
 
 struct ExpandConfig{T} <: Action{T} end
-function (::ExpandConfig)(pressures::Pressures)
-    unit = myuparse(pressures.unit)
-    expanded = pressures.values .* unit
-    if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
-        @warn "for better fitting result, provide at least 1 negative pressure!"
-    end
-    return expanded
-end
-function (::ExpandConfig)(volumes::Volumes)
-    unit = myuparse(volumes.unit)
-    return volumes.values .* unit
+function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
+    unit = myuparse(fixed.unit)
+    return fixed.values .* unit
 end
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
