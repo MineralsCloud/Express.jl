@@ -37,7 +37,7 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
 
 @option "volumes" struct Volumes
     values::AbstractVector
-    unit::String
+    unit::String = "bohr^3"
 end
 Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
