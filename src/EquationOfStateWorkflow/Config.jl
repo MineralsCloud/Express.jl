@@ -119,7 +119,7 @@ end
 function (::ExpandConfig)(pressures::Pressures)
     unit = myuparse(pressures.unit)
     expanded = pressures.values .* unit
-    if minimum(expanded) >= zero(eltype(values))  # values may have eltype `Any`
+    if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
         @warn "for better fitting result, provide at least 1 negative pressure!"
     end
     return expanded
