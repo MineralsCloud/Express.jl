@@ -13,13 +13,11 @@ your VS Code or Atom at **exactly** there. Open a Julia REPL in your VS
 Code/Atom, run
 
 ```julia
-julia> using Express.EquationOfStateWorkflow
+julia> using Express.EquationOfStateWorkflow.Recipes
 
 julia> config = "<PATH-TO-EXPRESS>/examples/GaN/eos.yaml";
 
-julia> preprocess(SelfConsistentField(), config)  # Step 1
-
-julia> scfjobs = process(SelfConsistentField(), config)  # Step 2
+julia> buildworkflow(config)
 ```
 
 Then it will start running scf calculations on different pressures. You can type

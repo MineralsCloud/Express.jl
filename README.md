@@ -12,4 +12,6 @@
 
 The components of `express`:
 
-![components](https://raw.githubusercontent.com/singularitti/express-paper/main/images/components.png?token=AGAGOBMYXVAHHVG6RQPQNV3ATWJU2)
+<div align="center">
+  <img src="docs/src/assets/components.png" height="800"><br>
+</div>

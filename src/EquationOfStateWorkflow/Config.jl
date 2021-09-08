@@ -23,9 +23,6 @@ using ...Express: Calculation, Action, myuparse
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
-        if minimum(values) >= zero(eltype(values))
-            @warn "for better fitting result, provide at least 1 negative pressure!"
-        end
         return new(values, unit)
     end
 end
@@ -34,7 +31,7 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
 @option "volumes" struct Volumes
     values::AbstractVector
     unit::String
-    function Pressures(values, unit = "bohr^3")
+    function Volumes(values, unit = "bohr^3")
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
@@ -119,9 +116,17 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
         @assert false "this is a bug!"
     end
 end
-function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
-    unit = myuparse(fixed.unit)
-    return fixed.values .* unit
+function (::ExpandConfig)(pressures::Pressures)
+    unit = myuparse(pressures.unit)
+    expanded = pressures.values .* unit
+    if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
+        @warn "for better fitting result, provide at least 1 negative pressure!"
+    end
+    return expanded
+end
+function (::ExpandConfig)(volumes::Volumes)
+    unit = myuparse(volumes.unit)
+    return volumes.values .* unit
 end
 function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}
     dirs = map(fixed.values) do value

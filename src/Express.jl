@@ -23,12 +23,6 @@ const FixedIonSelfConsistentField = SelfConsistentField
 
 abstract type Action{T<:Calculation} end
 
-macro action(type)
-    quote
-        struct $type{T} <: Action{T} end
-    end |> esc
-end
-
 calculation(::Action{T}) where {T} = T()
 
 function whichmodule(name)
@@ -57,7 +51,7 @@ function current_software end
 include("Shell.jl")
 using .Shell
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
-# include("PhononWorkflow/PhononWorkflow.jl")
-# include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
+include("PhononWorkflow/PhononWorkflow.jl")
+include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
 
 end

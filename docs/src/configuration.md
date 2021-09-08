@@ -11,8 +11,6 @@ In the examples below, I will use `YAML` syntax for configuration files.
 
 ## Fitting equations of state
 
-- The first key `workflow` means which workflow you want to apply. For equation of state
-  fitting, write `eos`.
 - Next, specify how many computing cores you are using in total. If running on multiple nodes,
   write the summation of cores on these nodes. It will be better if `np` is an integer
   multiple of the number of pressures.

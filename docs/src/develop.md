@@ -32,7 +32,7 @@ julia> using Pkg; Pkg.instantiate()
 ## How to build docs
 
 Usually, the up-to-state doc is available in
-[here](https://MineralsCloud.github.io/AbInitioSoftwareBase.jl/dev), but there
+[here](https://MineralsCloud.github.io/Express.jl/dev), but there
 are cases where users need to build the doc themselves.
 
 After [instantiating](@ref) the project, go to `PKGROOT`, run (without the `$`
