@@ -1,7 +1,7 @@
 name = "Express"
 uuid = "b12df14e-adf7-11e9-0606-d5813a258349"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
-version = "0.4.0"
+version = "0.2.0"
 
 [deps]
 AbInitioSoftwareBase = "df5135bc-470e-46c6-b451-292e27ca5b84"
