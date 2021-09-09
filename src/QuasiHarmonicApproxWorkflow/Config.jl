@@ -17,7 +17,6 @@ import Configurations: convert_to_option
         return new(values, unit)
     end
 end
-Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
 @option "temperatures" struct Temperatures
     values::AbstractVector
@@ -27,8 +26,6 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
         return new(values, unit)
     end
 end
-Temperatures(values::AbstractString, unit = "K") =
-    Temperatures(eval(Meta.parse(values)), unit)
 
 @option struct Thermo
     F::Bool = true
