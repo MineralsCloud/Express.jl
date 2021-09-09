@@ -48,7 +48,7 @@ end
 abstract type UnitfulVector end
 
 function current_software end
-convert_to_option(::Type{UnitfulVector}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
+convert_to_option(::Type{<:UnitfulVector}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
