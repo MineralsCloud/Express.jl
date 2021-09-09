@@ -14,9 +14,9 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: Calculation, Action, myuparse
+using ...Express: Calculation, Action, UnitfulVector, myuparse
 
-@option "pressures" struct Pressures
+@option "pressures" struct Pressures <: UnitfulVector
     values::AbstractVector
     unit::String
     function Pressures(values, unit = "GPa")
@@ -26,9 +26,8 @@ using ...Express: Calculation, Action, myuparse
         return new(values, unit)
     end
 end
-Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
-@option "volumes" struct Volumes
+@option "volumes" struct Volumes <: UnitfulVector
     values::AbstractVector
     unit::String
     function Volumes(values, unit = "bohr^3")
@@ -38,7 +37,6 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
         return new(values, unit)
     end
 end
-Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
 @option struct TrialEquationOfState
     type::String

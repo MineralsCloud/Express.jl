@@ -6,6 +6,8 @@ using Unitful: uparse
 import Unitful
 import UnitfulAtomic
 
+import Configurations: convert_to_option
+
 myuparse(str::AbstractString) =
     uparse(filter(!isspace, str); unit_context = [Unitful, UnitfulAtomic])
 myuparse(num::Number) = num  # FIXME: this might be error-prone!
@@ -43,8 +45,10 @@ function buildworkflow(file)
     mod = whichmodule(config["workflow"])
     return mod.buildworkflow(file)
 end
+abstract type UnitfulVector end
 
 function current_software end
+convert_to_option(::Type{<:UnitfulVector}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")

@@ -3,9 +3,9 @@ module Config
 using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
-using ...Express: Action, myuparse
+using ...Express: Action, UnitfulVector, myuparse
 
-@option "pressures" struct Pressures
+@option struct Pressures <: UnitfulVector
     values::AbstractVector
     unit::String
     function Pressures(values, unit = "GPa")
@@ -15,9 +15,8 @@ using ...Express: Action, myuparse
         return new(values, unit)
     end
 end
-Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
-@option "temperatures" struct Temperatures
+@option struct Temperatures <: UnitfulVector
     values::AbstractVector
     unit::String
     function Temperatures(values, unit = "K")
@@ -25,8 +24,6 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
         return new(values, unit)
     end
 end
-Temperatures(values::AbstractString, unit = "K") =
-    Temperatures(eval(Meta.parse(values)), unit)
 
 @option struct Thermo
     F::Bool = true
