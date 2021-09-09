@@ -6,6 +6,8 @@ using Unitful: ustrip, @u_str
 using ...Express: Action, myuparse
 
 @option "pressures" struct Pressures
+import Configurations: convert_to_option
+
     values::AbstractVector
     unit::String
     function Pressures(values, unit = "GPa")
@@ -146,5 +148,8 @@ function (x::ExpandConfig)(config::AbstractDict)
         q_points = config.q_points,
     )
 end
+
+convert_to_option(::Type{Temperatures}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
+convert_to_option(::Type{Pressures}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
 
 end
