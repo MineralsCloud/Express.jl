@@ -5,9 +5,9 @@ using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
 using ...Express: Action, myuparse
 
-@option "pressures" struct Pressures
 import Configurations: convert_to_option
 
+@option struct Pressures
     values::AbstractVector
     unit::String
     function Pressures(values, unit = "GPa")
@@ -18,7 +18,7 @@ import Configurations: convert_to_option
     end
 end
 
-@option "temperatures" struct Temperatures
+@option struct Temperatures
     values::AbstractVector
     unit::String
     function Temperatures(values, unit = "K")
