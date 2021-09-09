@@ -26,7 +26,6 @@ using ...Express: Calculation, Action, myuparse
         return new(values, unit)
     end
 end
-Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(values)), unit)
 
 @option "volumes" struct Volumes
     values::AbstractVector
@@ -38,7 +37,6 @@ Pressures(values::AbstractString, unit = "GPa") = Pressures(eval(Meta.parse(valu
         return new(values, unit)
     end
 end
-Volumes(values::AbstractString, unit = "bohr^3") = Volumes(eval(Meta.parse(values)), unit)
 
 @option struct TrialEquationOfState
     type::String
