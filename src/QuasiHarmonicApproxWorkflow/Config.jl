@@ -124,11 +124,11 @@ function (x::ExpandConfig)(config::AbstractDict)
         "DELTA_P" => ustrip(u"GPa", minimum(diff(pressures))),
         "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(pressures))),
         "input" => config.input,
-        "thermodynamic_properties" => map(fieldnames(Thermo)) do f
+        "thermodynamic_properties" => collect(map(fieldnames(Thermo)) do f
             if getfield(config.thermo, f)
                 string(f)
             end
-        end,
+        end),
         "energy_unit" => config.energy_unit,
         "high_verbosity" => true,
         "output_directory" => joinpath(config.dirs.root, "results"),
