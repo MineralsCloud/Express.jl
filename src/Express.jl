@@ -27,27 +27,10 @@ abstract type Action{T<:Calculation} end
 
 calculation(::Action{T}) where {T} = T()
 
-function whichmodule(name)
-    name = lowercase(name)
-    return if name == "eos"
-        EquationOfStateWorkflow
-    elseif name in ("phonon dispersion", "vdos")
-        # PhononWorkflow
-    elseif name in ("qha single", "qha multi")
-        # QuasiHarmonicApproxWorkflow
-    else
-        error("workflow `$name` is not recognized!")
-    end
-end
+function current_software end
 
-function buildworkflow(file)
-    config = load(file)
-    mod = whichmodule(config["workflow"])
-    return mod.buildworkflow(file)
-end
 abstract type UnitfulVector end
 
-function current_software end
 convert_to_option(::Type{<:UnitfulVector}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
 
 # include("SelfConsistentField.jl")
