@@ -4,7 +4,7 @@ using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using Formatting: sprintf1
 using Unitful: ustrip
-using ...Express: Action, myuparse
+using ...Express: Action, UnitfulVector, myuparse
 using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics
 
 @option struct Template
@@ -29,12 +29,12 @@ using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics
     end
 end
 
-@option "pressures" struct Pressures
+@option "pressures" struct Pressures <: UnitfulVector
     values::AbstractVector
     unit::String = "GPa"
 end
 
-@option "volumes" struct Volumes
+@option "volumes" struct Volumes <: UnitfulVector
     values::AbstractVector
     unit::String = "bohr^3"
 end

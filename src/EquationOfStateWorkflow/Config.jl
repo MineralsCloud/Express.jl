@@ -14,9 +14,9 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: Calculation, Action, myuparse
+using ...Express: Calculation, Action, UnitfulVector, myuparse
 
-@option "pressures" struct Pressures
+@option "pressures" struct Pressures <: UnitfulVector
     values::AbstractVector
     unit::String
     function Pressures(values, unit = "GPa")
@@ -27,7 +27,7 @@ using ...Express: Calculation, Action, myuparse
     end
 end
 
-@option "volumes" struct Volumes
+@option "volumes" struct Volumes <: UnitfulVector
     values::AbstractVector
     unit::String
     function Volumes(values, unit = "bohr^3")

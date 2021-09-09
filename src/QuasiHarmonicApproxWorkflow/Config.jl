@@ -3,11 +3,9 @@ module Config
 using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
-using ...Express: Action, myuparse
+using ...Express: Action, UnitfulVector, myuparse
 
-import Configurations: convert_to_option
-
-@option struct Pressures
+@option struct Pressures <: UnitfulVector
     values::AbstractVector
     unit::String
     function Pressures(values, unit = "GPa")
@@ -18,7 +16,7 @@ import Configurations: convert_to_option
     end
 end
 
-@option struct Temperatures
+@option struct Temperatures <: UnitfulVector
     values::AbstractVector
     unit::String
     function Temperatures(values, unit = "K")
@@ -145,8 +143,5 @@ function (x::ExpandConfig)(config::AbstractDict)
         q_points = config.q_points,
     )
 end
-
-convert_to_option(::Type{Temperatures}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
-convert_to_option(::Type{Pressures}, ::Type{AbstractVector}, s) = eval(Meta.parse(s))
 
 end
