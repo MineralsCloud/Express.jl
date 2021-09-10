@@ -7,6 +7,7 @@
 [![Build Status](https://cloud.drone.io/api/badges/MineralsCloud/Express.jl/status.svg)](https://cloud.drone.io/MineralsCloud/Express.jl)
 [![Build Status](https://api.cirrus-ci.com/github/MineralsCloud/Express.jl.svg)](https://cirrus-ci.com/github/MineralsCloud/Express.jl)
 [![pipeline status](https://gitlab.com/singularitti/Express.jl/badges/master/pipeline.svg)](https://gitlab.com/singularitti/Express.jl/-/pipelines)
+[![coverage report](https://gitlab.com/singularitti/Express.jl/badges/master/coverage.svg)](https://gitlab.com/singularitti/Express.jl/-/jobs)
 [![Coverage](https://codecov.io/gh/MineralsCloud/Express.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/Express.jl)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
 
