@@ -48,7 +48,11 @@ end
 function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return map(config.files[4], config.files[3], config.files[2]) do (input, _), (previnput, _), (pprevinput, _)
+    return map(
+        config.files[4],
+        config.files[3],
+        config.files[2],
+    ) do (input, _), (previnput, _), (pprevinput, _)
         AtomicJob(function ()
             str = read(previnput, String)
             q2r = parse(inputtype(RealSpaceForceConstants), str)
