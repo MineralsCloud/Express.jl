@@ -15,9 +15,9 @@ function buildworkflow(cfgfile)
         typeassert(w, Workflow)
         return w
     else
-        x = if dict["workflow"] == "phonon dispersion"
+        x = if dict["recipe"] == "phonon dispersion"
             PhononDispersion
-        elseif dict["workflow"] == "vdos"
+        elseif dict["recipe"] == "vdos"
             VDos
         else
             error("unsupported option!")
