@@ -63,18 +63,20 @@ end
 end
 
 @option struct RuntimeConfig
+    recipe::String
     template::Template
     fixed::Union{Pressures,Volumes}
     files::IOFiles = IOFiles()
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(template, fixed, files, save, cli)
+    function RuntimeConfig(recipe, template, fixed, files, save, cli)
+        @assert recipe in ("phonon dispersion", "vdos")
         for i in 1:nfields(template)
             if !isfile(getfield(template, i))
                 @warn "I cannot find template file `$template`!"
             end
         end
-        return new(template, fixed, files, save, cli)
+        return new(recipe, template, fixed, files, save, cli)
     end
 end
 

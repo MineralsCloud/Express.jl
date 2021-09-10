@@ -49,6 +49,7 @@ end
 end
 
 @option struct RuntimeConfig
+    recipe::String = "single qha"
     input::String
     inp_file_list::String
     static::String
@@ -57,11 +58,11 @@ end
     pressures::Pressures
     thermo::Thermo = Thermo()
     dirs::Directories = Directories()
-    calculation::String = "single"
     static_only::Bool = false
     order::UInt = 3
     energy_unit::String = "ry"
     function RuntimeConfig(
+        recipe,
         input,
         inp_file_list,
         static,
@@ -70,16 +71,15 @@ end
         pressures,
         thermo,
         dirs,
-        calculation,
         static_only,
         order,
         energy_unit,
     )
-        @assert lowercase(calculation) in
-                ("single", "same phonon dos", "different phonon dos")
+        @assert recipe in ("single qha", "multi qha")
         @assert order in 3:5
         @assert lowercase(energy_unit) in ("ry", "ev")
         return new(
+            recipe,
             input,
             inp_file_list,
             static,
@@ -88,7 +88,6 @@ end
             pressures,
             thermo,
             dirs,
-            lowercase(calculation),
             static_only,
             order,
             lowercase(energy_unit),
@@ -113,8 +112,15 @@ function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     temperatures = x(config.temperatures)
     pressures = x(config.pressures)
+    if config.recipe == "single qha"
+        calculation = "single"
+    elseif config.recipe == "multi qha"
+        calculation = "different phonon dos"
+    else
+        @assert false "this should never happen!"
+    end
     dict = Dict{String,Any}(
-        "calculation" => config.calculation,
+        "calculation" => calculation,
         "T_MIN" => ustrip(u"K", minimum(temperatures)),
         "NT" => length(temperatures),
         "DT" => ustrip(u"K", minimum(diff(temperatures))),

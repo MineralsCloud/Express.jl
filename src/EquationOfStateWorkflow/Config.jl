@@ -68,17 +68,19 @@ end
 end
 
 @option struct RuntimeConfig
+    recipe::String
     template::String
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
     files::IOFiles = IOFiles()
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(template, trial_eos, fixed, files, save, cli)
+    function RuntimeConfig(recipe, template, trial_eos, fixed, files, save, cli)
+        @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(template, trial_eos, fixed, files, save, cli)
+        return new(recipe, template, trial_eos, fixed, files, save, cli)
     end
 end
 
