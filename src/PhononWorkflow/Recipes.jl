@@ -39,8 +39,10 @@ function buildworkflow(cfgfile)
         o = buildjob(RunCmd{x}(), cfgfile)
         p = AtomicJob(() -> LogMsg{x}()(; start = false))
         (
-            ((((((((((((a ⋲ b) ▷ c) ⋺ d) ▷ e) ⋲ f) ▷ g) ⋺ h) ▷ i) ⋲ j) ▷ k) ⋺ l ▷ m) ⋲ n) ▷
-            o
+            (
+                ((((((((((((a ⋲ b) ▷ c) ⋺ d) ▷ e) ⋲ f) ▷ g) ⋺ h) ▷ i) ⋲ j) ▷ k) ⋺ l) ▷ m) ⋲
+                n
+            ) ▷ o
         ) ⋺ p
         return Workflow(
             a,
