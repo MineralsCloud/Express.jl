@@ -111,7 +111,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     if trial_eos.values isa AbstractVector
         return T(map(myuparse, trial_eos.values)...)
     elseif trial_eos.values isa AbstractDict
-        return T((myuparse(trial_eos.values[string(f)]) for f in propertynames(T))...)
+        return T((myuparse(trial_eos.values[string(f)]) for f in fieldnames(T))...)
     else
         @assert false "this is a bug!"
     end
