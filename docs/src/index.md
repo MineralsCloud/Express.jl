@@ -99,7 +99,7 @@ Pages = [
     "troubleshooting.md",
     "api/EquationOfStateWorkflow.md",
 ]
-Depth = 1
+Depth = 3
 ```
 
 ### [Index](@id main-index)
