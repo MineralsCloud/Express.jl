@@ -14,13 +14,13 @@ If you have [Homebrew](https://brew.sh) installed, open
 `Terminal.app` and type
 
 ```shell
-brew install --cask julia  # on macOS
+$ brew install --cask julia  # on macOS
 ```
 
 or
 
 ```shell
-brew install julia  # on other operating systems
+$ brew install julia  # on other operating systems
 ```
 
 If you want to install multiple Julia versions in the same operating system,
@@ -30,14 +30,14 @@ First, [install `asdf`](https://asdf-vm.com/guide/getting-started.html#_3-instal
 Then, run
 
 ```shell
-asdf install julia 1.6.2   # or other versions of Julia
-asdf global julia 1.6.2
+$ asdf install julia 1.6.2   # or other versions of Julia
+$ asdf global julia 1.6.2
 ```
 
 to install Julia and
 [set `v1.6.2` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
 
-## Install `Express.jl`
+## Install `Express`
 
 Now I am using [macOS](https://en.wikipedia.org/wiki/MacOS) as a standard
 platform to explain the following steps:
@@ -64,7 +64,7 @@ platform to explain the following steps:
 4. While using, please keep this Julia session alive. Restarting might recompile
    the package and cost some time.
 
-If you want to install the latest in development (maybe buggy) version of `Express.jl`, type
+If you want to install the latest in development (maybe buggy) version of `Express`, type
 
 ```julia
 julia> using Pkg; Pkg.update()
@@ -74,7 +74,7 @@ julia> pkg"add Express#master"
 
 in the second step instead.
 
-## Uninstall and reinstall `Express.jl`
+## Uninstall and reinstall `Express`
 
 1. To uninstall, in a Julia session, run
 
@@ -83,4 +83,4 @@ in the second step instead.
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
-   reinstall `Express.jl`.
+   reinstall `Express`.
