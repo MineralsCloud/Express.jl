@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/src/assets/logo.png" height="400"><br>
+</div>
+
 # Express
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MineralsCloud.github.io/Express.jl/stable)
