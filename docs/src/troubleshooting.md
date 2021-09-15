@@ -1,5 +1,9 @@
 # Troubleshooting
 
+```@contents
+Pages = ["troubleshooting.md"]
+```
+
 This page collects some possible errors you may encounter and trick how to fix them.
 
 *If you have additional tips, please submit a PR with suggestions.*
@@ -9,13 +13,16 @@ This page collects some possible errors you may encounter and trick how to fix t
 ### Cannot find the Julia executable
 
 Make sure you have Julia installed in your environment. Please download the latest
-[stable Julia](https://julialang.org/downloads/) for your platform.
+[stable version](https://julialang.org/downloads/) for your platform.
 If you are using macOS, the recommended way is to use [Homebrew](https://brew.sh).
-If you do not want to install Homebrew or you are using other *nix that Julia supports,
+If you do not want to install Homebrew or you are using other platforms that Julia supports,
 download the corresponding binaries. And then create a symbolic link `/usr/local/bin/julia`
-to the Julia executable. If `/usr/local/bin/` is not in your `$PATH`, modify your
-`.bashrc` or `.zshrc` and export it to your `$PATH`.
-Some clusters, like `Habanero`, `Comet` already have Julia installed as a module, you may
+to the Julia executable. If `/usr/local/bin/` is not in your `$PATH`, export it to your `$PATH`.
+Some clusters, like
+[`Habanero`](https://confluence.columbia.edu/confluence/display/rcs/Habanero+HPC+Cluster+User+Documentation),
+[`Comet`](https://www.sdsc.edu/support/user_guides/comet.html),
+or [`Expanse`](https://www.sdsc.edu/services/hpc/expanse/index.html),
+already have Julia installed as a module, you may
 just `module load julia` to use it. If not, either install by yourself or contact your
 administrator.
 
@@ -25,11 +32,14 @@ See
 "[Loading settings](https://mineralscloud.github.io/AbInitioSoftwareBase.jl/dev/troubleshooting/#Loading-settings)"
 for detailed information.
 
-## Loading
+## Loading `Express`
 
 ### Why is Julia compiling/loading modules so slow? What can I do?
 
-If you just want Julia do a simple task and only once, you could start Julia REPL with
+First, we recommend you download the latest version of Julia. Usually, the newest version
+has the best performance.
+
+If you just want Julia to do a simple task and only once, you could start Julia REPL with
 
 ```shell
 $ julia --compile=min

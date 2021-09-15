@@ -18,7 +18,7 @@ makedocs(;
         "Manual" => [
             "Installation" => "install.md",
             "Development" => "develop.md",
-            # "Configuration files" => "configuration.md",
+            "Configuration files" => "configuration.md",
         ],
         # "Examples" => ["hcp-GaN example" => "examples/GaN.md"],
         "Troubleshooting" => "troubleshooting.md",

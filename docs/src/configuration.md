@@ -3,121 +3,256 @@
 `Express` can be run from a configuration file, with some preset rules.
 The following sections introduce how to write such configuration files.
 By now, only
-[`YAML`](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html),
-[`JSON`](https://restfulapi.net/json-syntax/), and
-[`TOML`](https://toml.io/en/) formats are supported. Please refer their official
+[YAML](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html),
+[JSON](https://restfulapi.net/json-syntax/), and
+[TOML](https://toml.io/en/) formats are supported. Please refer their official
 documentation for their syntax.
-In the examples below, I will use `YAML` syntax for configuration files.
+In the examples below, we will use YAML syntax for configuration files.
+But for readability purposes, we suggest users use the TOML syntax.
 
 ## Fitting equations of state
 
-- Next, specify how many computing cores you are using in total. If running on multiple nodes,
-  write the summation of cores on these nodes. It will be better if `np` is an integer
-  multiple of the number of pressures.
-- The next key `bin` is the software being used. If using Quantum ESPRESSO, write `qe`. The
-  values of `qe` is the path to the binaries that actually run the calculations. If they are
-  already in the `PATH` environment variable, write the names of the executables.
-- `templates` is a vector of the template files for scf and vc-relax calculations. If it has
-  only one value, all the pressures share the same template. If it has more than one value,
-  the number of files must be equal to the number of pressures. That is, each pressure has
-  its own template.
-- `pressures` are the pressures that on the compression curve, they are usually the desired
-  pressures for further calculations. The unit of them is by default `GPa`. It is usually
-  standard to have at least 6 pressures and at least 1 negative pressure.
-- `trial_eos` is the starting equation of state for setting volumes for corresponding
-  pressures.
-  - `name` is the name of that equation of state. Available options are `m` (Murnaghan EOS),
-    `bm2` - `bm4` (Birch--Murnaghan second to fourth order EOSs) and `v` (Vinet EOS).
-  - `parameters` are the parameters of that equation of state. With the first parameter be
-    zero-pressure volume (``V_0``), the second be zero-pressure bulk modulus (``B_0``), the
-    third be zero-pressure bulk modulus derivative (``B_0'``). Each value has an associate
-    unit. Allowed units for ``V_0`` are `angstrom^3`, `bohr^3`, `nm^3`, `pm^3`, etc. Allowed
-    values for ``B_0`` are `GPa`, `Pa`, `Mbar`, `kbar`, `eV/angstrom^3`, `eV/bohr^3`,
-    `eV/nm^3`, `Ry/angstrom^3`, `Ry/bohr^3`, `hartree/angstrom^3`, etc. ``B_0'`` is a
-    dimensionless number so its unit **must be** `1`.
-- `use_shell`: Whether create shell files to run external software to do computations.
-  Usually this is preferred when `express` is run non-interactively. If run in interactive
-  mode, you may want to set it to `false`.
+The configuration file for the EOS workflow has the following syntax:
+
+- `recipe`: A string that represents the type of the workflow. Allowed value is `eos`.
+- `template`: The path to a template input file for a specific software. It should be on the
+  same file system where `express` is deployed.
+- `trial_eos`: The trial EOS contains initial values for input files generation and EOS fitting.
+  - `type`: A string that represents the type of the EOS. Allowed values are `murnaghan`
+    (Murnaghan), `bm2` (Birch--Murnaghan second order), `bm3`, `bm4`, `vinet` (Vinet), `pt2`
+    (Poirier--Tarantola second order), `pt3`, and `pt4`.
+  - `values`: A vector of strings that specifies each value of the EOS.
+    The default order is ``V_0``, ``B_0``, ``B'_0``(, ``B''_0``, etc.). Units must be provided.
+- `fixed`:
+  - `pressures` or `volumes`: Whether to fix pressures of volumes.
+    - `values`: Specify the pressures or volumes. It can be a vector of numbers, or a string
+      with the syntax `start:step:stop` to form an arithmetic sequence where `start`,
+      `stop`, and `step` are numbers indicating the start, the end, and the common
+      difference of that sequence. See
+      ["Creating arrays using range objects"](https://en.wikibooks.org/wiki/Introducing_Julia/Arrays_and_tuples#Creating_arrays_using_range_objects)
+      for more information.
+    - `unit`: The units of pressure or volume. The pressure and volume default units are
+      `GPa` and `angstrom^3`. Allowed values for volumes are `nm^3`, `angstrom^3`, `bohr^3`,
+      etc. Allowed values for pressures are `Pa`, `GPa`, `TPa`, ..., `bar`, `kbar`, ...,
+      `atm`, and the combinations of `eV`, `Ry`, `hartree`, `J`, with any unit of volume.
+- `files`:
+  - `dirs`: It specifies the paths of output directories.
+    - `root`: The path of the root directory of output files.
+    - `pattern`: A string specifying the naming convention of the output directories. Its
+      default value is `p=`. For example, if `fixed.pressures.values` is a vector of
+      pressures `[10, 20, 30]` which represents the relaxations are done from ``10-30``GPa,
+      then the generated inputs and outputs will be stored in directories `p=10`, `p=20` and
+      `p=30`.
+- `save`:
+  - `status`: The path to a binary file that stores the status of the workflow.
+  - `eos`: The path to a binary file that stores the fitted equations of state.
+- `cli`:
+  - `mpi`: The configurations of the MPI software.
+  - `np`: An integer indicating the number of processors/cores/CPUs used.
+
+The code block below shows a typical configuration file for an EOS workflow in the YAML syntax:
 
 ```yaml
-workflow: eos
-np: 24
-bin:
-  qe:
-    - pw.x
-templates:
-  - examples/Ge/template.in
-pressures:
-  unit: GPa
-  values:
-    - -5
-    - -2
-    - 0
-    - 5
-    - 10
-    - 15
-    - 17
-    - 20
+recipe: eos
+cli:
+  mpi:
+    np: 16
+template: template.in
+save:
+  status: status.jls
+fixed:
+  pressures:
+    unit: GPa
+    values:
+      - -5
+      - -2
+      - 0
+      - 5
+      - 10
+      - 15
+      - 17
+      - 20
 trial_eos:
-  name: bm3
-  parameters:
-    - - 300.44
-      - bohr^3
-    - - 74.88
-      - GPa
-    - - 4.82
-      - 1
-    - - -612.43149513
-      - Ry
-use_shell: true
+  type: bm3
+  values:
+    - 300.44 bohr^3
+    - 74.88 GPa
+    - 4.82
+```
+
+The JSON and TOML equivalents of the above file are:
+
+```json
+{
+  "recipe": "eos",
+  "cli": {
+    "mpi": {
+      "np": 16
+    }
+  },
+  "template": "template.in",
+  "save": {
+    "status": "status.jls"
+  },
+  "fixed": {
+    "pressures": {
+      "unit": "GPa",
+      "values": [
+        -5,
+        -2,
+        0,
+        5,
+        10,
+        15,
+        17,
+        20
+      ]
+    }
+  },
+  "trial_eos": {
+    "type": "bm3",
+    "values": [
+      "300.44 bohr^3",
+      "74.88 GPa",
+      4.82
+    ]
+  }
+}
+```
+
+```toml
+recipe = 'eos'
+template = 'template.in'
+[fixed.pressures]
+unit = 'GPa'
+values = [-5, -2, 0, 5, 10, 15, 17, 20]
+
+[trial_eos]
+type = 'bm3'
+values = ['300.44 bohr^3', '74.88 GPa', 4.82]
+[cli.mpi]
+np = 16
+
+[save]
+status = 'status.jls'
 ```
 
 ## Phonon density of states or phonon dispersion relation
 
-- The first key `workflow` means which workflow you want to apply. For Phonon density of states,
-  write `vdos`. For phonon dispersion relation, write `phonon dispersion`.
-- Next, specify how many computing cores you are using in total. If running on multiple nodes,
-  write the summation of cores on these nodes. It will be better if `np` is an integer
-  multiple of the number of pressures.
-- The next key `bin` is the software being used. If using Quantum ESPRESSO, write `qe`. The
-  values of `qe` is the path to the binaries that actually run the calculations. If they are
-  already in the `PATH` environment variable, write the names of the executables. They
-  should be written sequentially, with each one corresponds to one calculation.
-- `templates` is a vector of the template files for the calculations. If it has
-  only one value, all the pressures share the same template. If it has more than one value,
-  the number of files must be equal to the number of pressures. That is, each pressure has
-  its own template. Note each calculation has a vector of template files.
-- `pressures` are the pressures that on the compression curve, they are usually the desired
-  pressures for further calculations. The unit of them is by default `GPa`. It is usually
-  standard to have at least 6 pressures and at least 1 negative pressure.
-- `use_shell`: Whether create shell files to run external software to do computations.
-  Usually this is preferred when `express` is run non-interactively. If run in interactive
-  mode, you may want to set it to `false`.
+The configuration file for the phonon workflow has the following syntax:
+
+- `recipe`: A string that represents the type of the workflow. Allowed values are
+  `phonon dispersion` (phonon dispersion along a q-path) and `vdos` (phonon density of states).
+- `template`:
+  - `scf`: The path to a template input file for an SCF calculation.
+  - `dfpt`: The path to a template input file for a DFPT calculation.
+  - `q2r`: The path to a template input file for a Fourier transform.
+  - `disp`: The path to a template input file for a phonon dispersion/phonon density of states calculation.
+- `fixed`:
+  - `pressures` or `volumes`: Whether to fix pressures of volumes.
+    - `values`: Specify the pressures or volumes. It can be a vector of numbers, or a string
+      with the syntax `start:step:stop` to form an arithmetic sequence where `start`,
+      `stop`, and `step` are numbers indicating the start, the end, and the common
+      difference of that sequence. See
+      ["Creating arrays using range objects"](https://en.wikibooks.org/wiki/Introducing_Julia/Arrays_and_tuples#Creating_arrays_using_range_objects)
+      for more information.
+    - `unit`: The units of pressure or volume. The pressure and volume default units are
+      `GPa` and `angstrom^3`. Allowed values for volumes are `nm^3`, `angstrom^3`, `bohr^3`,
+      etc. Allowed values for pressures are `Pa`, `GPa`, `TPa`, ..., `bar`, `kbar`, ...,
+      `atm`, and the combinations of `eV`, `Ry`, `hartree`, `J`, with any unit of volume.
+- `files`:
+  - `dirs`: It specifies the paths of output directories.
+    - `root`: The path of the root directory of output files.
+    - `pattern`: A string specifying the naming convention of the output directories. Its
+      default value is `p=`. For example, if `fixed.pressures.values` is a vector of
+      pressures `[10, 20, 30]` which represents the relaxations are done from ``10-30``GPa,
+      then the generated inputs and outputs will be stored in directories `p=10`, `p=20` and
+      `p=30`.
+- `save`:
+  - `status`: The path to a binary file that stores the status of the workflow.
+- `cli`:
+  - `mpi`: The configurations of the MPI software.
+  - `np`: An integer indicating the number of processors/cores/CPUs used.
+
+The code block below shows a typical configuration file for a phonon workflow in the YAML syntax:
 
 ```yaml
-workflow: vdos
-np: 24
-bin:
-  qe:
-    - pw.x
-    - ph.x
-    - q2r.x
-    - matdyn.x
-templates:
-  - - examples/Ge/template.in
-  - - examples/Ge/ph.in
-  - - examples/Ge/q2r.in
-  - - examples/Ge/disp.in
-pressures:
-  unit: GPa
-  values:
-    - -5
-    - -2
-    - 0
-    - 5
-    - 10
-    - 15
-    - 17
-    - 20
-use_shell: true
+recipe: vdos
+cli:
+  mpi:
+    np: 16
+template:
+  scf: template.in
+  dfpt: ph.in
+  q2r: q2r.in
+  disp: disp.in
+save:
+  status: status.jls
+fixed:
+  pressures:
+    unit: GPa
+    values:
+      - -5
+      - -2
+      - 0
+      - 5
+      - 10
+      - 15
+      - 17
+      - 20
+```
+
+The JSON and TOML equivalents of the above file are:
+
+```json
+{
+  "recipe": "vdos",
+  "cli": {
+    "mpi": {
+      "np": 16
+    }
+  },
+  "template": {
+    "scf": "template.in",
+    "dfpt": "ph.in",
+    "q2r": "q2r.in",
+    "disp": "disp.in"
+  },
+  "save": {
+    "status": "status.jls"
+  },
+  "fixed": {
+    "pressures": {
+      "unit": "GPa",
+      "values": [
+        -5,
+        -2,
+        0,
+        5,
+        10,
+        15,
+        17,
+        20
+      ]
+    }
+  }
+}
+```
+
+```toml
+recipe = 'vdos'
+[cli.mpi]
+np = 16
+
+[template]
+dfpt = 'ph.in'
+disp = 'disp.in'
+q2r = 'q2r.in'
+scf = 'template.in'
+[fixed.pressures]
+unit = 'GPa'
+values = [-5, -2, 0, 5, 10, 15, 17, 20]
+
+[save]
+status = 'status.jls'
 ```
