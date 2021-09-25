@@ -34,7 +34,7 @@ const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 include("Config.jl")
-include("DefaultActions.jl")
+include("actions.jl")
 include("Recipes.jl")
 
 end
