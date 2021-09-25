@@ -8,7 +8,7 @@ export QuasiHarmonicApprox, MakeInput, CalculateThermodyn, Plot
 struct QuasiHarmonicApprox <: Calculation end
 
 include("Config.jl")
-include("DefaultActions.jl")
+include("actions.jl")
 include("Recipes.jl")
 
 end
