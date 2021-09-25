@@ -1,12 +1,10 @@
-module DefaultActions
-
 using AbInitioSoftwareBase: load
 using PyQHA: converter, runcode, plot
 using SimpleWorkflows: AtomicJob
 
 using ...Express: Action
 using ..QuasiHarmonicApproxWorkflow: QuasiHarmonicApprox
-using ..Config: ExpandConfig
+using .Config: ExpandConfig
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{QuasiHarmonicApprox})(inp_file_list, inp_static, inp_q_points)
@@ -37,6 +35,4 @@ function buildjob(::Plot{QuasiHarmonicApprox}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{QuasiHarmonicApprox}()(dict)
     return AtomicJob(() -> plot(config.config))
-end
-
 end

@@ -5,8 +5,8 @@ using Serialization: deserialize
 using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
 
 using ..Config: ExpandConfig
-using ..DefaultActions: LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
-using ..EquationOfStateWorkflow: Scf, VcOptim
+using ..EquationOfStateWorkflow:
+    Scf, VcOptim, LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
 
 export buildworkflow, run!
 

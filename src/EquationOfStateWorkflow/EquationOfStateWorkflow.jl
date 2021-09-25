@@ -34,10 +34,7 @@ const VcOptim = VariableCellOptimization
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 include("Config.jl")
-include("DefaultActions.jl")
-
-using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, RunCmd, LogMsg
-
+include("actions.jl")
 include("Recipes.jl")
 
 end
