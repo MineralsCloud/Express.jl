@@ -45,8 +45,6 @@ const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
 include("Config.jl")
 include("DefaultActions.jl")
-using .DefaultActions: MakeInput, RunCmd, LogMsg
-
 include("Recipes.jl")
 
 end

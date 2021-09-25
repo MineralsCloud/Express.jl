@@ -3,8 +3,16 @@ module Recipes
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
 using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
-using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
-using ..DefaultActions: LogMsg, MakeInput, RunCmd, buildjob
+using ..PhononWorkflow:
+    Scf,
+    Dfpt,
+    RealSpaceForceConstants,
+    PhononDispersion,
+    VDos,
+    LogMsg,
+    MakeInput,
+    RunCmd,
+    buildjob
 
 export buildworkflow, run!
 

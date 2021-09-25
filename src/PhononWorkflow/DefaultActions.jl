@@ -1,15 +1,13 @@
-module DefaultActions
-
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, writetxt
 using Dates: now, format
 using Logging: with_logger, current_logger
 using SimpleWorkflows: AtomicJob
 using ...Express: Action, Calculation, LatticeDynamics, Scf, calculation
-using ...Shell: distprocs
-using ...EquationOfStateWorkflow: VcOptim
+using ..Shell: distprocs
+using ..EquationOfStateWorkflow: VcOptim
 using ..PhononWorkflow: Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
-using ..Config: ExpandConfig
+using .Config: ExpandConfig
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
@@ -127,6 +125,4 @@ function (x::LogMsg)(; start = true)
             "The calculation $(calculation(x)) $act at $(format(now(), "HH:MM:SS u dd, yyyy")).",
         )
     end
-end
-
 end
