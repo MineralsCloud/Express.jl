@@ -44,7 +44,7 @@ const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
 
 include("Config.jl")
-include("DefaultActions.jl")
+include("actions.jl")
 include("Recipes.jl")
 
 end
