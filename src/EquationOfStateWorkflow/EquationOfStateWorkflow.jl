@@ -35,9 +35,6 @@ const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
 include("Config.jl")
 include("DefaultActions.jl")
-
-using .DefaultActions: MakeInput, GetData, FitEos, SaveEos, RunCmd, LogMsg
-
 include("Recipes.jl")
 
 end

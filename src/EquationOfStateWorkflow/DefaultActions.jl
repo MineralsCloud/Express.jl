@@ -1,5 +1,3 @@
-module DefaultActions
-
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
 using Dates: now, format
@@ -13,8 +11,8 @@ using Unitful: ustrip, unit
 
 using ...Express: Action, calculation
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, Optimization
-using ..Config: Volumes, ExpandConfig
-using ...Shell: distprocs
+using ..Shell: distprocs
+using .Config: Volumes, ExpandConfig
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
@@ -151,6 +149,4 @@ function (x::LogMsg)(; start = true)
             "The calculation $(calculation(x)) $act at $(format(now(), "HH:MM:SS u dd, yyyy")).",
         )
     end
-end
-
 end
