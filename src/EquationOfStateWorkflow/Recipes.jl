@@ -36,4 +36,6 @@ function build(recipe::Recipe{:eos})
     end
 end
 
+Base.read(filename::AbstractString, ::Type{T}) where {T<:Recipe} = T(load(filename))
+
 end
