@@ -40,6 +40,10 @@ function _build(config::AbstractDict, ::Val{:eos})
     end
 end
 
-Base.read(filename::AbstractString, ::Type{T}) where {T<:Recipe} = T(load(filename))
+function Base.read(filename::AbstractString, ::Type{Recipe})
+    dict = load(filename)
+    type = pop!(dict, "recipe")
+    return Recipe(type, dict)
+end
 
 end
