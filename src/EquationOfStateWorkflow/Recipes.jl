@@ -10,6 +10,10 @@ using ..EquationOfStateWorkflow:
 
 export buildworkflow, run!
 
+struct Recipe{T}
+    config::Dict{String,Any}
+end
+
 function buildworkflow(cfgfile)
     dict = load(cfgfile)
     if isfile(dict["save"]["status"])
