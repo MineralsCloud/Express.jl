@@ -10,7 +10,8 @@ using ..EquationOfStateWorkflow:
 
 export build, run!
 
-struct Recipe{T}
+struct Recipe
+    type::String
     config::Dict{String,Any}
 end
 
