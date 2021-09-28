@@ -15,6 +15,18 @@
 [![Coverage](https://codecov.io/gh/MineralsCloud/Express.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/Express.jl)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
 
+Please cite this article as:
+```bibtex
+@misc{zhang2021textttexpress,
+      title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling}, 
+      author={Qi Zhang and Chaoxuan Gu and Jingyi Zhuang and Renata M. Wentzcovitch},
+      year={2021},
+      eprint={2109.11724},
+      archivePrefix={arXiv},
+      primaryClass={physics.comp-ph}
+}
+```
+
 `Express` is an extensible, high-throughput, high-level workflow framework that aims to
 automate *ab initio* calculations for the materials science community. `Express` is shipped
 with well-tested workflow templates, including structure optimization, equation of state
