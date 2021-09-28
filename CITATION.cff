@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Zhang
+    given-names: Qi
+    orcid: https://orcid.org/0000-0002-3153-1117
+  - family-names: Gu
+    given-names: Chaoxuan
+    orcid: https://orcid.org/0000-0002-2118-9805
+  - family-names: Zhuang
+    given-names: Jingyi
+    orcid: https://orcid.org/0000-0002-2987-3644
+  - family-names: Wentzcovitch
+    given-names: Renata
+    orcid: https://orcid.org/0000-0001-5663-9426
+title: "𝚎𝚡𝚙𝚛𝚎𝚜𝚜: extensible, high-level workflows for swifter ab initio materials modeling"
+version: 1.0.0
+date-released: 2021-09-24
