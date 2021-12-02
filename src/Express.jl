@@ -38,6 +38,7 @@ convert_to_option(::Type{<:UnitfulVector}, ::Type{AbstractVector}, str::Abstract
 # include("BandStructure.jl")
 include("Shell.jl")
 using .Shell
+include("ConvergenceTestWorkflow/ConvergenceTestWorkflow.jl")
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
 include("PhononWorkflow/PhononWorkflow.jl")
 include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
