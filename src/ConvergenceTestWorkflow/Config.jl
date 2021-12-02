@@ -23,6 +23,7 @@ end
 
 @option struct Directories
     root::String = pwd()
+    pattern::String = "e=%.1f"
 end
 
 @option struct FileNamePatterns
