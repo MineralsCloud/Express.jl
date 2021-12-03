@@ -52,14 +52,14 @@ end
     status::String = ""
 end
 
-@option struct NamingPattern
+@option struct FileNamePatterns
     input::String = "%s.in"
     output::String = "%s.out"
 end
 
 @option struct IOFiles
     dirs::Directories = Directories()
-    pattern::NamingPattern = NamingPattern()
+    pattern::FileNamePatterns = FileNamePatterns()
 end
 
 @option struct RuntimeConfig
