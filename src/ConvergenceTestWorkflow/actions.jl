@@ -69,7 +69,7 @@ function buildjob(x::TestConvergence{T}, cfgfile) where {T}
     config = ExpandConfig{T}()(dict)
     return AtomicJob(function ()
         data = GetData{T}()(last.(config.files))
-        return TestConvergence{T}()(data)
+        return x(data)
     end)
 end
 
