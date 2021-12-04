@@ -2,7 +2,7 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
-using SimpleWorkflows: AtomicJob, Workflow, run!
+using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
 
 using ..ConvergenceTestWorkflow: Scf, LogMsg, MakeInput, RunCmd, TestConvergence, buildjob
 
@@ -20,6 +20,7 @@ function buildworkflow(cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
         d = buildjob(TestConvergence{Scf}(), cfgfile)
         e = AtomicJob(() -> LogMsg{Scf}()(; start = false))
+        ((a ⋲ b) ▷ c) ⋺ d ▷ e
         return Workflow(a, b..., c..., d, e)
     end
 end
