@@ -64,7 +64,7 @@ end
 struct TestConvergence{T} <: Action{T} end
 (x::TestConvergence)(data) = isconvergent(data)
 
-function buildjob(x::TestConvergence, cfgfile) where {T}
+function buildjob(x::TestConvergence{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return AtomicJob(function ()
