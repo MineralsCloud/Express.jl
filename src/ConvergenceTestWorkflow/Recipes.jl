@@ -2,7 +2,7 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
-using SimpleWorkflows: AtomicJob, Workflow, run!, ->
+using SimpleWorkflows: AtomicJob, Workflow, run!
 
 using ..ConvergenceTestWorkflow: Scf, LogMsg, MakeInput, RunCmd, TestConvergence, buildjob
 
