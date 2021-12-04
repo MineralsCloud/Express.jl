@@ -20,7 +20,7 @@ function buildworkflow(cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
         d = buildjob(TestConvergence{Scf}(), cfgfile)
         e = AtomicJob(() -> LogMsg{Scf}()(; start = false))
-        ((a ⋲ b) ▷ c) ⋺ d ▷ e
+        (((a ⋲ b) ▷ c) ⋺ d) ▷ e
         return Workflow(a, b..., c..., d, e)
     end
 end
