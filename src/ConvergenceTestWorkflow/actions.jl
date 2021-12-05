@@ -72,7 +72,7 @@ function buildjob(x::TestConvergence{T}, cfgfile) where {T}
     return AtomicJob(
         function ()
             data = GetData{T}()(last.(config.files))
-            saved = Dict("x" => (ustrip ∘ first).(data), "y" => (ustrip ∘ last).(data))
+            saved = Dict("results" => (ustrip ∘ last).(data))
             save(config.save_raw, saved)
             return x(data)
         end,
