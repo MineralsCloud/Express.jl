@@ -67,7 +67,11 @@ function (::ExpandConfig)(energies::CutoffEnergies)
     unit = myuparse(energies.unit)
     return energies.values .* unit
 end
-(::ExpandConfig)(x::MonkhorstPackGrids) = x
+function (::ExpandConfig)(x::MonkhorstPackGrids)
+    return map(x.meshes, x.shifts) do mesh, shift
+        (mesh, shift)
+    end
+end
 function (::ExpandConfig{T})(files::IOFiles, energies::CutoffEnergies) where {T}
     dirs = map(energies.values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
