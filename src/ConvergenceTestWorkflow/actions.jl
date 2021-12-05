@@ -52,10 +52,8 @@ function buildjob(x::GetData{T}, cfgfile) where {T}
     return AtomicJob(
         function ()
             data = x(last.(config.files))
-            savedata = Dict("x" => (ustrip ∘ first).(data), "y" => (ustrip ∘ last).(data))
-            dict = isfile(config.save_raw) ? load(config.save_raw) : Dict()
-            dict[string(nameof(T))] = savedata
-            save(config.save_raw, dict)
+            saved = Dict("x" => (ustrip ∘ first).(data), "y" => (ustrip ∘ last).(data))
+            save(config.save_raw, saved)
             return data
         end,
     )
