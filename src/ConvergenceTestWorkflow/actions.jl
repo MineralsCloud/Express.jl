@@ -22,8 +22,14 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     inputs = first.(config.files)
-    return map(inputs, config.parameters) do input, energy
-        AtomicJob(() -> x(input, config.template, energy, "Y-m-d_H:M:S"))
+    if config.parameters isa AbstractVector{<:Tuple}
+        return map(inputs, config.parameters) do input, (mesh, shift)
+            AtomicJob(() -> x(input, config.template, mesh, shift, "Y-m-d_H:M:S"))
+        end
+    else
+        return map(inputs, config.parameters) do input, energy
+            AtomicJob(() -> x(input, config.template, energy, "Y-m-d_H:M:S"))
+        end
     end
 end
 
