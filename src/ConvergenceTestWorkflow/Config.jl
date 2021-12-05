@@ -68,11 +68,19 @@ function (::ExpandConfig)(energies::CutoffEnergies)
     return energies.values .* unit
 end
 (::ExpandConfig)(x::MonkhorstPackGrids) = x
-function (::ExpandConfig{T})(
-    files::IOFiles,
-    parameters::Union{CutoffEnergies,MonkhorstPackGrids},
-) where {T}
-    dirs = map(parameters.values) do value
+function (::ExpandConfig{T})(files::IOFiles, energies::CutoffEnergies) where {T}
+    dirs = map(energies.values) do value
+        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
+    end
+    return map(dirs) do dir
+        type = string(nameof(T))
+        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
+        joinpath(dir, in) => joinpath(dir, out)
+    end
+end
+function (::ExpandConfig{T})(files::IOFiles, grids::MonkhorstPackGrids) where {T}
+    values = zip(grids.meshes, grids.shifts)
+    dirs = map(values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
     end
     return map(dirs) do dir
