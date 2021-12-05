@@ -49,14 +49,12 @@ end
 function buildjob(x::GetData{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(
-        function ()
-            data = x(last.(config.files))
-            saved = Dict("x" => (ustrip ∘ first).(data), "y" => (ustrip ∘ last).(data))
-            save(config.save_raw, saved)
-            return data
-        end,
-    )
+    return AtomicJob(function ()
+        data = x(last.(config.files))
+        saved = Dict("results" => (ustrip ∘ last).(data))
+        save(config.save_raw, saved)
+        return data
+    end)
 end
 
 struct TestConvergence{T} <: Action{T} end
