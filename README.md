@@ -15,7 +15,7 @@
 [![Coverage](https://codecov.io/gh/MineralsCloud/Express.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/Express.jl)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
 
-Please cite this package as:
+Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite this package as:
 ```bibtex
 @misc{zhang2021textttexpress,
       title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling}, 
