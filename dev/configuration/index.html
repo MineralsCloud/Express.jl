@@ -1,55 +1,140 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Configuration files · Express.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://MineralsCloud.github.io/Express.jl/configuration/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">Express.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../install/">Installation</a></li><li><a class="tocitem" href="../develop/">Development</a></li></ul></li><li><a class="tocitem" href="../troubleshooting/">Troubleshooting</a></li><li><span class="tocitem">API by module</span><ul><li><a class="tocitem" href="../api/EquationOfStateWorkflow/"><code>EquationOfStateWorkflow</code> module</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Configuration files</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Configuration files</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/MineralsCloud/Express.jl/blob/master/docs/src/configuration.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Configuration-files"><a class="docs-heading-anchor" href="#Configuration-files">Configuration files</a><a id="Configuration-files-1"></a><a class="docs-heading-anchor-permalink" href="#Configuration-files" title="Permalink"></a></h1><p><code>Express</code> can be run from a configuration file, with some preset rules. The following sections introduce how to write such configuration files. By now, only <a href="https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html"><code>YAML</code></a>, <a href="https://restfulapi.net/json-syntax/"><code>JSON</code></a>, and <a href="https://toml.io/en/"><code>TOML</code></a> formats are supported. Please refer their official documentation for their syntax. In the examples below, I will use <code>YAML</code> syntax for configuration files.</p><h2 id="Fitting-equations-of-state"><a class="docs-heading-anchor" href="#Fitting-equations-of-state">Fitting equations of state</a><a id="Fitting-equations-of-state-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-equations-of-state" title="Permalink"></a></h2><ul><li>Next, specify how many computing cores you are using in total. If running on multiple nodes, write the summation of cores on these nodes. It will be better if <code>np</code> is an integer multiple of the number of pressures.</li><li>The next key <code>bin</code> is the software being used. If using Quantum ESPRESSO, write <code>qe</code>. The values of <code>qe</code> is the path to the binaries that actually run the calculations. If they are already in the <code>PATH</code> environment variable, write the names of the executables.</li><li><code>templates</code> is a vector of the template files for scf and vc-relax calculations. If it has only one value, all the pressures share the same template. If it has more than one value, the number of files must be equal to the number of pressures. That is, each pressure has its own template.</li><li><code>pressures</code> are the pressures that on the compression curve, they are usually the desired pressures for further calculations. The unit of them is by default <code>GPa</code>. It is usually standard to have at least 6 pressures and at least 1 negative pressure.</li><li><code>trial_eos</code> is the starting equation of state for setting volumes for corresponding pressures.<ul><li><code>name</code> is the name of that equation of state. Available options are <code>m</code> (Murnaghan EOS), <code>bm2</code> - <code>bm4</code> (Birch–Murnaghan second to fourth order EOSs) and <code>v</code> (Vinet EOS).</li><li><code>parameters</code> are the parameters of that equation of state. With the first parameter be zero-pressure volume (<span>$V_0$</span>), the second be zero-pressure bulk modulus (<span>$B_0$</span>), the third be zero-pressure bulk modulus derivative (<span>$B_0&#39;$</span>). Each value has an associate unit. Allowed units for <span>$V_0$</span> are <code>angstrom^3</code>, <code>bohr^3</code>, <code>nm^3</code>, <code>pm^3</code>, etc. Allowed values for <span>$B_0$</span> are <code>GPa</code>, <code>Pa</code>, <code>Mbar</code>, <code>kbar</code>, <code>eV/angstrom^3</code>, <code>eV/bohr^3</code>, <code>eV/nm^3</code>, <code>Ry/angstrom^3</code>, <code>Ry/bohr^3</code>, <code>hartree/angstrom^3</code>, etc. <span>$B_0&#39;$</span> is a dimensionless number so its unit <strong>must be</strong> <code>1</code>.</li></ul></li><li><code>use_shell</code>: Whether create shell files to run external software to do computations. Usually this is preferred when <code>express</code> is run non-interactively. If run in interactive mode, you may want to set it to <code>false</code>.</li></ul><pre><code class="language-yaml hljs">workflow: eos
-np: 24
-bin:
-  qe:
-    - pw.x
-templates:
-  - examples/Ge/template.in
-pressures:
-  unit: GPa
-  values:
-    - -5
-    - -2
-    - 0
-    - 5
-    - 10
-    - 15
-    - 17
-    - 20
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Configuration files · Express.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://MineralsCloud.github.io/Express.jl/configuration/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="Express.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">Express.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../install/">Installation</a></li><li><a class="tocitem" href="../develop/">Development</a></li><li class="is-active"><a class="tocitem" href>Configuration files</a><ul class="internal"><li><a class="tocitem" href="#Fitting-equations-of-state"><span>Fitting equations of state</span></a></li><li><a class="tocitem" href="#Phonon-density-of-states-or-phonon-dispersion-relation"><span>Phonon density of states or phonon dispersion relation</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../troubleshooting/">Troubleshooting</a></li><li><span class="tocitem">API by module</span><ul><li><a class="tocitem" href="../api/EquationOfStateWorkflow/"><code>EquationOfStateWorkflow</code> module</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Configuration files</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Configuration files</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/MineralsCloud/Express.jl/blob/master/docs/src/configuration.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Configuration-files"><a class="docs-heading-anchor" href="#Configuration-files">Configuration files</a><a id="Configuration-files-1"></a><a class="docs-heading-anchor-permalink" href="#Configuration-files" title="Permalink"></a></h1><p><code>Express</code> can be run from a configuration file, with some preset rules. The following sections introduce how to write such configuration files. By now, only <a href="https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html">YAML</a>, <a href="https://restfulapi.net/json-syntax/">JSON</a>, and <a href="https://toml.io/en/">TOML</a> formats are supported. Please refer their official documentation for their syntax. In the examples below, we will use YAML syntax for configuration files. But for readability purposes, we suggest users use the TOML syntax.</p><h2 id="Fitting-equations-of-state"><a class="docs-heading-anchor" href="#Fitting-equations-of-state">Fitting equations of state</a><a id="Fitting-equations-of-state-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-equations-of-state" title="Permalink"></a></h2><p>The configuration file for the EOS workflow has the following syntax:</p><ul><li><code>recipe</code>: A string that represents the type of the workflow. Allowed value is <code>eos</code>.</li><li><code>template</code>: The path to a template input file for a specific software. It should be on the same file system where <code>express</code> is deployed.</li><li><code>trial_eos</code>: The trial EOS contains initial values for input files generation and EOS fitting.<ul><li><code>type</code>: A string that represents the type of the EOS. Allowed values are <code>murnaghan</code> (Murnaghan), <code>bm2</code> (Birch–Murnaghan second order), <code>bm3</code>, <code>bm4</code>, <code>vinet</code> (Vinet), <code>pt2</code> (Poirier–Tarantola second order), <code>pt3</code>, and <code>pt4</code>.</li><li><code>values</code>: A vector of strings that specifies each value of the EOS. The default order is <span>$V_0$</span>, <span>$B_0$</span>, <span>$B&#39;_0$</span>(, <span>$B&#39;&#39;_0$</span>, etc.). Units must be provided.</li></ul></li><li><code>fixed</code>:<ul><li><code>pressures</code> or <code>volumes</code>: Whether to fix pressures of volumes.<ul><li><code>values</code>: Specify the pressures or volumes. It can be a vector of numbers, or a string with the syntax <code>start:step:stop</code> to form an arithmetic sequence where <code>start</code>, <code>stop</code>, and <code>step</code> are numbers indicating the start, the end, and the common difference of that sequence. See <a href="https://en.wikibooks.org/wiki/Introducing_Julia/Arrays_and_tuples#Creating_arrays_using_range_objects">&quot;Creating arrays using range objects&quot;</a> for more information.</li><li><code>unit</code>: The units of pressure or volume. The pressure and volume default units are <code>GPa</code> and <code>angstrom^3</code>. Allowed values for volumes are <code>nm^3</code>, <code>angstrom^3</code>, <code>bohr^3</code>, etc. Allowed values for pressures are <code>Pa</code>, <code>GPa</code>, <code>TPa</code>, ..., <code>bar</code>, <code>kbar</code>, ..., <code>atm</code>, and the combinations of <code>eV</code>, <code>Ry</code>, <code>hartree</code>, <code>J</code>, with any unit of volume.</li></ul></li></ul></li><li><code>files</code>:<ul><li><code>dirs</code>: It specifies the paths of output directories.<ul><li><code>root</code>: The path of the root directory of output files.</li><li><code>pattern</code>: A string specifying the naming convention of the output directories. Its default value is <code>p=</code>. For example, if <code>fixed.pressures.values</code> is a vector of pressures <code>[10, 20, 30]</code> which represents the relaxations are done from <span>$10-30$</span>GPa, then the generated inputs and outputs will be stored in directories <code>p=10</code>, <code>p=20</code> and <code>p=30</code>.</li></ul></li></ul></li><li><code>save</code>:<ul><li><code>status</code>: The path to a binary file that stores the status of the workflow.</li><li><code>eos</code>: The path to a binary file that stores the fitted equations of state.</li></ul></li><li><code>cli</code>:<ul><li><code>mpi</code>: The configurations of the MPI software.</li><li><code>np</code>: An integer indicating the number of processors/cores/CPUs used.</li></ul></li></ul><p>The code block below shows a typical configuration file for an EOS workflow in the YAML syntax:</p><pre><code class="language-yaml hljs">recipe: eos
+cli:
+  mpi:
+    np: 16
+template: template.in
+save:
+  status: status.jls
+fixed:
+  pressures:
+    unit: GPa
+    values:
+      - -5
+      - -2
+      - 0
+      - 5
+      - 10
+      - 15
+      - 17
+      - 20
 trial_eos:
-  name: bm3
-  parameters:
-    - - 300.44
-      - bohr^3
-    - - 74.88
-      - GPa
-    - - 4.82
-      - 1
-    - - -612.43149513
-      - Ry
-use_shell: true</code></pre><h2 id="Phonon-density-of-states-or-phonon-dispersion-relation"><a class="docs-heading-anchor" href="#Phonon-density-of-states-or-phonon-dispersion-relation">Phonon density of states or phonon dispersion relation</a><a id="Phonon-density-of-states-or-phonon-dispersion-relation-1"></a><a class="docs-heading-anchor-permalink" href="#Phonon-density-of-states-or-phonon-dispersion-relation" title="Permalink"></a></h2><ul><li>The first key <code>workflow</code> means which workflow you want to apply. For Phonon density of states, write <code>vdos</code>. For phonon dispersion relation, write <code>phonon dispersion</code>.</li><li>Next, specify how many computing cores you are using in total. If running on multiple nodes, write the summation of cores on these nodes. It will be better if <code>np</code> is an integer multiple of the number of pressures.</li><li>The next key <code>bin</code> is the software being used. If using Quantum ESPRESSO, write <code>qe</code>. The values of <code>qe</code> is the path to the binaries that actually run the calculations. If they are already in the <code>PATH</code> environment variable, write the names of the executables. They should be written sequentially, with each one corresponds to one calculation.</li><li><code>templates</code> is a vector of the template files for the calculations. If it has only one value, all the pressures share the same template. If it has more than one value, the number of files must be equal to the number of pressures. That is, each pressure has its own template. Note each calculation has a vector of template files.</li><li><code>pressures</code> are the pressures that on the compression curve, they are usually the desired pressures for further calculations. The unit of them is by default <code>GPa</code>. It is usually standard to have at least 6 pressures and at least 1 negative pressure.</li><li><code>use_shell</code>: Whether create shell files to run external software to do computations. Usually this is preferred when <code>express</code> is run non-interactively. If run in interactive mode, you may want to set it to <code>false</code>.</li></ul><pre><code class="language-yaml hljs">workflow: vdos
-np: 24
-bin:
-  qe:
-    - pw.x
-    - ph.x
-    - q2r.x
-    - matdyn.x
-templates:
-  - - examples/Ge/template.in
-  - - examples/Ge/ph.in
-  - - examples/Ge/q2r.in
-  - - examples/Ge/disp.in
-pressures:
-  unit: GPa
+  type: bm3
   values:
-    - -5
-    - -2
-    - 0
-    - 5
-    - 10
-    - 15
-    - 17
-    - 20
-use_shell: true</code></pre></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Sunday 29 August 2021 08:52">Sunday 29 August 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    - 300.44 bohr^3
+    - 74.88 GPa
+    - 4.82</code></pre><p>The JSON and TOML equivalents of the above file are:</p><pre><code class="language-json hljs">{
+  &quot;recipe&quot;: &quot;eos&quot;,
+  &quot;cli&quot;: {
+    &quot;mpi&quot;: {
+      &quot;np&quot;: 16
+    }
+  },
+  &quot;template&quot;: &quot;template.in&quot;,
+  &quot;save&quot;: {
+    &quot;status&quot;: &quot;status.jls&quot;
+  },
+  &quot;fixed&quot;: {
+    &quot;pressures&quot;: {
+      &quot;unit&quot;: &quot;GPa&quot;,
+      &quot;values&quot;: [
+        -5,
+        -2,
+        0,
+        5,
+        10,
+        15,
+        17,
+        20
+      ]
+    }
+  },
+  &quot;trial_eos&quot;: {
+    &quot;type&quot;: &quot;bm3&quot;,
+    &quot;values&quot;: [
+      &quot;300.44 bohr^3&quot;,
+      &quot;74.88 GPa&quot;,
+      4.82
+    ]
+  }
+}</code></pre><pre><code class="language-toml hljs">recipe = &#39;eos&#39;
+template = &#39;template.in&#39;
+[fixed.pressures]
+unit = &#39;GPa&#39;
+values = [-5, -2, 0, 5, 10, 15, 17, 20]
+
+[trial_eos]
+type = &#39;bm3&#39;
+values = [&#39;300.44 bohr^3&#39;, &#39;74.88 GPa&#39;, 4.82]
+[cli.mpi]
+np = 16
+
+[save]
+status = &#39;status.jls&#39;</code></pre><h2 id="Phonon-density-of-states-or-phonon-dispersion-relation"><a class="docs-heading-anchor" href="#Phonon-density-of-states-or-phonon-dispersion-relation">Phonon density of states or phonon dispersion relation</a><a id="Phonon-density-of-states-or-phonon-dispersion-relation-1"></a><a class="docs-heading-anchor-permalink" href="#Phonon-density-of-states-or-phonon-dispersion-relation" title="Permalink"></a></h2><p>The configuration file for the phonon workflow has the following syntax:</p><ul><li><code>recipe</code>: A string that represents the type of the workflow. Allowed values are <code>phonon dispersion</code> (phonon dispersion along a q-path) and <code>vdos</code> (phonon density of states).</li><li><code>template</code>:<ul><li><code>scf</code>: The path to a template input file for an SCF calculation.</li><li><code>dfpt</code>: The path to a template input file for a DFPT calculation.</li><li><code>q2r</code>: The path to a template input file for a Fourier transform.</li><li><code>disp</code>: The path to a template input file for a phonon dispersion/phonon density of states calculation.</li></ul></li><li><code>fixed</code>:<ul><li><code>pressures</code> or <code>volumes</code>: Whether to fix pressures of volumes.<ul><li><code>values</code>: Specify the pressures or volumes. It can be a vector of numbers, or a string with the syntax <code>start:step:stop</code> to form an arithmetic sequence where <code>start</code>, <code>stop</code>, and <code>step</code> are numbers indicating the start, the end, and the common difference of that sequence. See <a href="https://en.wikibooks.org/wiki/Introducing_Julia/Arrays_and_tuples#Creating_arrays_using_range_objects">&quot;Creating arrays using range objects&quot;</a> for more information.</li><li><code>unit</code>: The units of pressure or volume. The pressure and volume default units are <code>GPa</code> and <code>angstrom^3</code>. Allowed values for volumes are <code>nm^3</code>, <code>angstrom^3</code>, <code>bohr^3</code>, etc. Allowed values for pressures are <code>Pa</code>, <code>GPa</code>, <code>TPa</code>, ..., <code>bar</code>, <code>kbar</code>, ..., <code>atm</code>, and the combinations of <code>eV</code>, <code>Ry</code>, <code>hartree</code>, <code>J</code>, with any unit of volume.</li></ul></li></ul></li><li><code>files</code>:<ul><li><code>dirs</code>: It specifies the paths of output directories.<ul><li><code>root</code>: The path of the root directory of output files.</li><li><code>pattern</code>: A string specifying the naming convention of the output directories. Its default value is <code>p=</code>. For example, if <code>fixed.pressures.values</code> is a vector of pressures <code>[10, 20, 30]</code> which represents the relaxations are done from <span>$10-30$</span>GPa, then the generated inputs and outputs will be stored in directories <code>p=10</code>, <code>p=20</code> and <code>p=30</code>.</li></ul></li></ul></li><li><code>save</code>:<ul><li><code>status</code>: The path to a binary file that stores the status of the workflow.</li></ul></li><li><code>cli</code>:<ul><li><code>mpi</code>: The configurations of the MPI software.</li><li><code>np</code>: An integer indicating the number of processors/cores/CPUs used.</li></ul></li></ul><p>The code block below shows a typical configuration file for a phonon workflow in the YAML syntax:</p><pre><code class="language-yaml hljs">recipe: vdos
+cli:
+  mpi:
+    np: 16
+template:
+  scf: template.in
+  dfpt: ph.in
+  q2r: q2r.in
+  disp: disp.in
+save:
+  status: status.jls
+fixed:
+  pressures:
+    unit: GPa
+    values:
+      - -5
+      - -2
+      - 0
+      - 5
+      - 10
+      - 15
+      - 17
+      - 20</code></pre><p>The JSON and TOML equivalents of the above file are:</p><pre><code class="language-json hljs">{
+  &quot;recipe&quot;: &quot;vdos&quot;,
+  &quot;cli&quot;: {
+    &quot;mpi&quot;: {
+      &quot;np&quot;: 16
+    }
+  },
+  &quot;template&quot;: {
+    &quot;scf&quot;: &quot;template.in&quot;,
+    &quot;dfpt&quot;: &quot;ph.in&quot;,
+    &quot;q2r&quot;: &quot;q2r.in&quot;,
+    &quot;disp&quot;: &quot;disp.in&quot;
+  },
+  &quot;save&quot;: {
+    &quot;status&quot;: &quot;status.jls&quot;
+  },
+  &quot;fixed&quot;: {
+    &quot;pressures&quot;: {
+      &quot;unit&quot;: &quot;GPa&quot;,
+      &quot;values&quot;: [
+        -5,
+        -2,
+        0,
+        5,
+        10,
+        15,
+        17,
+        20
+      ]
+    }
+  }
+}</code></pre><pre><code class="language-toml hljs">recipe = &#39;vdos&#39;
+[cli.mpi]
+np = 16
+
+[template]
+dfpt = &#39;ph.in&#39;
+disp = &#39;disp.in&#39;
+q2r = &#39;q2r.in&#39;
+scf = &#39;template.in&#39;
+[fixed.pressures]
+unit = &#39;GPa&#39;
+values = [-5, -2, 0, 5, 10, 15, 17, 20]
+
+[save]
+status = &#39;status.jls&#39;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../develop/">« Development</a><a class="docs-footer-nextpage" href="../troubleshooting/">Troubleshooting »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Thursday 16 December 2021 04:40">Thursday 16 December 2021</span>. Using Julia version 1.7.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
