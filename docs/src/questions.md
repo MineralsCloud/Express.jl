@@ -50,28 +50,28 @@ when developing `express`. For example,
 [`Crystallography.jl`](https://github.com/MineralsCloud/Crystallography.jl),
 [`EquationsOfStateOfSolids.jl`](https://github.com/MineralsCloud/EquationsOfStateOfSolids.jl),
 [`QuantumESPRESSO.jl`](https://github.com/MineralsCloud/QuantumESPRESSO.jl), etc.,
-are distinct packages. They can work together to form the equation of state workflow, and
-they can also be used separately if users want to use specific features, e.g., managing
+are distinct packages. They can work together to form the equation of state workflow, or
+they can be used separately if users want to use specific features, e.g., managing
 pseudopotentials, calculating structural symmetry, fitting existing data.
 In that case, only related code will be installed, which saves disk space and time. However,
-most code in, for instance, [`aiida-core`](https://github.com/aiidateam/aiida-core), is
-dealing with servers, network, databases, web interfaces, YAML, etc, which makes it a
+most code in, for instance, [`aiida-core`](https://github.com/aiidateam/aiida-core),
+deals with servers, networks, databases, web interfaces, YAML, etc., making it a
 gigantic project that is hard to read, trace, and debug. And everything in `AiiDA` is bond
 to its workflow system. Its data structure may not be compatible with other people's code.
-It is difficult for users who are unfamiliar with their code structure to pick a subset of
+It is difficult for users unfamiliar with their code structure to pick a subset of
 features they need if they want to customize. In `express`, everything is very loosely
-coupled to each other, no workflow needs to be composed if you just want to do a simple
+coupled to each other, and no workflow needs to be composed if you just want to do a simple
 thing (In fact, each workflow in `express` is just a collection of predefined wrappers of
 functions that its dependencies have already provided. The core code of `Express.jl` is very
-small.). Users can cooperate with others' packages with little effort thanks to the
+small.). Users can cooperate with others' packages with little effort, thanks to the
 composability that Julia enables. For example, in `express`, our users never need to convert
 units. With the help of Julia's [`Unitful.jl`](https://github.com/PainterQubits/Unitful.jl)
 package, users can always throw literal units they obtained from experiments or papers
 directly to `express` and do not need to consider whether they are compatible or not. This
-is helpful when fitting equations of state, modifying crystal structures, etc. From
-developers' side, we seldom need to adapt for others' code. Theirs and ours just "magically"
+is helpful when fitting equations of state, modifying crystal structures, etc. From the
+developers' side, we seldom need to adapt to others' code. Theirs and ours just "magically"
 work together. You usually do not have such flexibility in other languages. Besides, even
-the core calculation part of `AiiDA` and `atomate`, they use
+the core calculation part of `AiiDA` and `atomate`,
 [`pymatgen`](https://pymatgen.org/), another phenomenal code in the materials science
 community. However, it is still an enormous code that integrates too many things together,
 which limits its extensibility.
