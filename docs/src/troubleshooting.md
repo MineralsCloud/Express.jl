@@ -52,9 +52,23 @@ set `ENV["PYTHON"]=""`, run `Pkg.build("PyCall")`, and re-launch Julia.
 
 ## Loading settings
 
-See
-"[Loading settings](https://mineralscloud.github.io/AbInitioSoftwareBase.jl/dev/troubleshooting/#Loading-settings)"
-for detailed information.
+### Error parsing `YAML` files
+
+If you encounter
+
+```
+ERROR: expected '<document start>' but found YAML.BlockMappingStartToken at nothing
+```
+
+or
+
+```
+ERROR: while scanning a simple key at line n, column 0: could not find expected ':' at line n+1, column 0
+```
+
+Check whether you have no space between the `YAML` key and its value like
+`key:1` or `key:some text`, etc. To correct, change to `key: 1`, `key: some text`, etc.
+Otherwise check other `YAML` syntax you may have broken.
 
 ## Loading `Express`
 
