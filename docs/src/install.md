@@ -30,12 +30,12 @@ First, [install `asdf`](https://asdf-vm.com/guide/getting-started.html#_3-instal
 Then, run
 
 ```shell
-$ asdf install julia 1.6.2   # or other versions of Julia
-$ asdf global julia 1.6.2
+$ asdf install julia 1.6.4   # or other versions of Julia
+$ asdf global julia 1.6.4
 ```
 
 to install Julia and
-[set `v1.6.2` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
+[set `v1.6.4` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
 
 ## Install `Express`
 
