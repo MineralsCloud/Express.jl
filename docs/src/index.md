@@ -42,14 +42,14 @@ The direct components of `express` are:
   crystal's primitive cell (or supercell) volume from lattice parameters, finds symmetry
   operations and generates high symmetry points in the Brillouin zone, etc.
 
-- [`PyQHA.jl`](https://github.com/MineralsCloud/PyQHA.jl) is a `Julia` wrapper of the
-  `Python` [`qha` package](https://github.com/MineralsCloud/qha), which can calculate
+- [`PyQHA.jl`](https://github.com/MineralsCloud/PyQHA.jl) is a Julia wrapper of the
+  Python [`qha` package](https://github.com/MineralsCloud/qha), which can calculate
   several thermodynamic properties of both single- and multi-configuration crystalline
   materials in the framework of quasi-harmonic approximation (QHA). The `qha` code is the
   foundation of the QHA workflow.
 
-- [`Geotherm.jl`](https://github.com/MineralsCloud/Geotherm.jl) is a `Julia` interpretation
-  of the `Fortran` code we used in
+- [`Geotherm.jl`](https://github.com/MineralsCloud/Geotherm.jl) is a Julia interpretation
+  of the Fortran code we used in
   [this paper](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2017GL073294), which
   calculates the isentropic temperature/pressure gradient (geotherm) using thermodynamic
   properties obtained with the QHA workflow.

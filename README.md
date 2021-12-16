@@ -18,7 +18,7 @@
 Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite this package as:
 ```bibtex
 @misc{zhang2021textttexpress,
-      title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling}, 
+      title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling},
       author={Qi Zhang and Chaoxuan Gu and Jingyi Zhuang and Renata M. Wentzcovitch},
       year={2021},
       eprint={2109.11724},
@@ -61,14 +61,14 @@ The components of `express`:
   crystal's primitive cell (or supercell) volume from lattice parameters, finds symmetry
   operations and generates high symmetry points in the Brillouin zone, etc.
 
-- [`PyQHA.jl`](https://github.com/MineralsCloud/PyQHA.jl) is a `Julia` wrapper of the
-  `Python` [`qha` package](https://github.com/MineralsCloud/qha), which can calculate
+- [`PyQHA.jl`](https://github.com/MineralsCloud/PyQHA.jl) is a Julia wrapper of the
+  Python [`qha` package](https://github.com/MineralsCloud/qha), which can calculate
   several thermodynamic properties of both single- and multi-configuration crystalline
   materials in the framework of quasi-harmonic approximation (QHA). The `qha` code is the
   foundation of the QHA workflow.
 
-- [`Geotherm.jl`](https://github.com/MineralsCloud/Geotherm.jl) is a `Julia` interpretation
-  of the `Fortran` code we used in
+- [`Geotherm.jl`](https://github.com/MineralsCloud/Geotherm.jl) is a Julia interpretation
+  of the Fortran code we used in
   [this paper](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2017GL073294), which
   calculates the isentropic temperature/pressure gradient (geotherm) using thermodynamic
   properties obtained with the QHA workflow.
