@@ -22,6 +22,7 @@ makedocs(;
         ],
         # "Examples" => ["hcp-GaN example" => "examples/GaN.md"],
         "Troubleshooting" => "troubleshooting.md",
+        "Other questions" => "questions.md",
         "API by module" => ["`EquationOfStateWorkflow` module" => "api/EquationOfStateWorkflow.md"],
     ],
 )
