@@ -34,7 +34,7 @@ Those projects are of very high quality and are de facto standards of the materi
 simulation community. They have much larger teams and longer history than us, so
 it is unrealistic to say we are better than them in every aspect in the first few releases
 of `express`. However, it does not mean we cannot have our features or advantages.
-Our code has higher extensibility, modularity, and readability.
+Our code has higher modularity, extensibility, and readability.
 
 As explained in [the paper](https://arxiv.org/abs/2109.11724), `express` is a highly
 modularized collection of packages. Each of them provides a succinct but complete
@@ -75,3 +75,20 @@ the core calculation part of `AiiDA` and `atomate`, they use
 [`pymatgen`](https://pymatgen.org/), another phenomenal code in the materials science
 community. However, it is still an enormous code that integrates too many things together,
 which limits its extensibility.
+
+Due to the modularity we mentioned above, the `express` project is separated into many
+packages. Each package has its own documentation and tests, and is released individually to
+avoid updating the whole codebase whenever there is a bug fix or a feature enhancement. They
+also have separated pull request pages for developers and skilled users to discuss and
+collaborate. Julia's semantic versioning system manages their compatibility, i.e.,
+compatible packages are downloaded automatically, and no human intervention is needed.
+
+In addition, some of the workflows we shipped in `express` is uniquely developed by us. See
+the introduction of the [`qha` package](https://doi.org/10.1016/j.cpc.2018.11.003), which
+can calculate quasiharmonic free energy for multi-configuration systems. We also have some
+workflows that will be integrated into `express` in the near future, including but not
+limited to, the `pgm` (phonon gas model) workflow that was used to calculate thermodynamic
+properties of
+[ε-Fe with thermal electronic excitation effects on vibrational spectra](https://doi.org/10.1103/PhysRevB.103.144102),
+and the [thermoelasticity workflow](https://doi.org/10.1016/j.cpc.2021.108067) based on the
+[Wu–Wentzcovitch semi-analytical method (SAM)](https://doi.org/10.1103/PhysRevB.83.184115).
