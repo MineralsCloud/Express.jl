@@ -26,6 +26,30 @@ already have Julia installed as a module, you may
 just `module load julia` to use it. If not, either install by yourself or contact your
 administrator.
 
+### Have trouble installing [`PyCall.jl`](https://github.com/JuliaPy/PyCall.jl)
+
+If you are seeing error message like this:
+
+```
+ERROR: LoadError: InitError: PyError (PyImport_ImportModule
+
+The Python package qha could not be imported by pyimport. Usually this means
+that you did not install qha in the Python version being used by PyCall.
+```
+
+One solution is to re-configure `PyCall` to use a different Python
+version on your system: set `ENV["PYTHON"]` to the path of the python
+executable you want to use, run `Pkg.build("PyCall")`, and re-launch Julia.
+Please see [this part](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version)
+for more detailed instructions.
+
+Another solution is to configure `PyCall` to use a Julia-specific Python
+distribution via the [`Conda.jl` package](https://github.com/JuliaPy/Conda.jl)
+(which installs a private Anaconda
+Python distribution), which has the advantage that packages can be installed
+and kept up-to-date via Julia.  As explained in the `PyCall` documentation, in Julia,
+set `ENV["PYTHON"]=""`, run `Pkg.build("PyCall")`, and re-launch Julia.
+
 ## Loading settings
 
 See
