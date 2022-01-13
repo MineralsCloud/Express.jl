@@ -24,6 +24,12 @@ function (x::DownloadPotentials)(template::Input, args...)
     end
 end
 
+function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
+    return AtomicJob(() -> x(config.template))
+end
+
 function getpseudodir end
 
 function getpotentials end
