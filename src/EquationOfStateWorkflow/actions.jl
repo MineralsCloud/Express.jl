@@ -16,11 +16,14 @@ using ..Shell: distprocs
 using .Config: Volumes, ExpandConfig
 
 struct DownloadPotentials{T} <: Action{T} end
-function (x::DownloadPotentials)(template::Input, args...)
+function (x::DownloadPotentials)(template::Input)
     dir = getpseudodir(template)
     potentials = getpotentials(template)
     return map(potentials) do potential
-        download_potential(potential, joinpath(dir, potential))
+        path = joinpath(dir, potential)
+        if !isfile(path)
+            download_potential(potential, path)
+        end
     end
 end
 
