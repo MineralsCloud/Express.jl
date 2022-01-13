@@ -5,6 +5,7 @@ using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Logging: with_logger, current_logger
+using Pseudopotentials: download_potential
 using Serialization: serialize, deserialize
 using SimpleWorkflows: AtomicJob
 using Unitful: ustrip, unit
@@ -13,6 +14,19 @@ using ...Express: Action, calculation
 using ..EquationOfStateWorkflow: ScfOrOptim, Scf, Optimization
 using ..Shell: distprocs
 using .Config: Volumes, ExpandConfig
+
+struct DownloadPotentials{T} <: Action{T} end
+function (x::DownloadPotentials)(template::Input, args...)
+    dir = getpseudodir(template)
+    potentials = getpotentials(template)
+    return map(potentials) do potential
+        download_potential(potential, joinpath(dir, potential))
+    end
+end
+
+function getpseudodir end
+
+function getpotentials end
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
