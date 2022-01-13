@@ -6,7 +6,7 @@ using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
 
 using ..Config: ExpandConfig
 using ..EquationOfStateWorkflow:
-    Scf, VcOptim, LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
+    Scf, VcOptim, DownloadPotentials, LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
 
 export buildworkflow, run!
 
@@ -17,6 +17,7 @@ function buildworkflow(cfgfile)
         typeassert(w, Workflow)
         return w
     else
+        a0 = buildjob(DownloadPotentials{Scf}(), cfgfile)
         a = AtomicJob(() -> LogMsg{Scf}()(; start = true))
         b = buildjob(MakeInput{Scf}(), cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
@@ -27,8 +28,8 @@ function buildworkflow(cfgfile)
         i = buildjob(RunCmd{VcOptim}(), cfgfile)
         j = buildjob(FitEos{VcOptim}(), cfgfile)
         l = AtomicJob(() -> LogMsg{VcOptim}()(; start = false))
-        (((((((a ⋲ b) ▷ c) ⋺ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j) ▷ l
-        return Workflow(a, b..., c..., d, f, g, h..., i..., j, l)
+        ((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j) ▷ l
+        return Workflow(a0, a, b..., c..., d, f, g, h..., i..., j, l)
     end
 end
 
