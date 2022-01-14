@@ -2,6 +2,7 @@ using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt
 using Dates: now, format
 using Logging: with_logger, current_logger
+using Pseudopotentials: download_potential
 using Serialization: serialize, deserialize
 using SimpleWorkflows: AtomicJob
 using Unitful: ustrip, unit
@@ -9,6 +10,28 @@ using Unitful: ustrip, unit
 using ...Express: Action, calculation
 using ..Shell: distprocs
 using .Config: ExpandConfig
+
+struct DownloadPotentials{T} <: Action{T} end
+function (x::DownloadPotentials)(template::Input)
+    dir = getpseudodir(template)
+    potentials = getpotentials(template)
+    return map(potentials) do potential
+        path = joinpath(dir, potential)
+        if !isfile(path)
+            download_potential(potential, path)
+        end
+    end
+end
+
+function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
+    return AtomicJob(() -> x(config.template))
+end
+
+function getpseudodir end
+
+function getpotentials end
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
