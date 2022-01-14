@@ -2,12 +2,36 @@ using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, writetxt
 using Dates: now, format
 using Logging: with_logger, current_logger
+using Pseudopotentials: download_potential
 using SimpleWorkflows: AtomicJob
+
 using ...Express: Action, Calculation, LatticeDynamics, Scf, calculation
 using ..Shell: distprocs
 using ..EquationOfStateWorkflow: VcOptim
 using ..PhononWorkflow: Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using .Config: ExpandConfig
+
+struct DownloadPotentials{T} <: Action{T} end
+function (x::DownloadPotentials)(template::Input)
+    dir = getpseudodir(template)
+    potentials = getpotentials(template)
+    return map(potentials) do potential
+        path = joinpath(dir, potential)
+        if !isfile(path)
+            download_potential(potential, path)
+        end
+    end
+end
+
+function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
+    dict = load(cfgfile)
+    config = ExpandConfig{T}()(dict)
+    return AtomicJob(() -> x(config.template))
+end
+
+function getpseudodir end
+
+function getpotentials end
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
