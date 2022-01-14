@@ -9,6 +9,7 @@ using ..PhononWorkflow:
     RealSpaceForceConstants,
     PhononDispersion,
     VDos,
+    DownloadPotentials,
     LogMsg,
     MakeInput,
     RunCmd,
@@ -30,6 +31,7 @@ function buildworkflow(cfgfile)
         else
             error("unsupported option!")
         end
+        a0 = buildjob(DownloadPotentials{Scf}(), cfgfile)
         a = AtomicJob(() -> LogMsg{Scf}()(; start = true))
         b = buildjob(MakeInput{Scf}(), cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
@@ -48,11 +50,18 @@ function buildworkflow(cfgfile)
         p = AtomicJob(() -> LogMsg{x}()(; start = false))
         (
             (
-                ((((((((((((a ⋲ b) ▷ c) ⋺ d) ▷ e) ⋲ f) ▷ g) ⋺ h) ▷ i) ⋲ j) ▷ k) ⋺ l) ▷ m) ⋲
-                n
+                (
+                    (
+                        (
+                            ((((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d) ▷ e) ⋲ f) ▷ g) ⋺ h) ▷ i) ⋲ j) ▷
+                            k
+                        ) ⋺ l
+                    ) ▷ m
+                ) ⋲ n
             ) ▷ o
         ) ⋺ p
         return Workflow(
+            a0,
             a,
             b...,
             c...,
