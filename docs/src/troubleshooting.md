@@ -13,7 +13,7 @@ This page collects some possible errors you may encounter and trick how to fix t
 ### Cannot find the Julia executable
 
 Make sure you have Julia installed in your environment. Please download the latest
-[stable version](https://julialang.org/downloads/) for your platform.
+[stable version](https://julialang.org/downloads/#current_stable_release) for your platform.
 If you are using macOS, the recommended way is to use [Homebrew](https://brew.sh).
 If you do not want to install Homebrew or you are using other platforms that Julia supports,
 download the corresponding binaries. And then create a symbolic link `/usr/local/bin/julia`
