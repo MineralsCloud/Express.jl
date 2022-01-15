@@ -12,10 +12,10 @@ If you have [Homebrew](https://brew.sh) installed, open
 `Terminal.app` and type
 
 ```shell
-$ brew install --cask julia  # on macOS
+$ brew install --cask julia
 ```
 
-or
+if you want to install it as a prebuilt binary app, or
 
 ```shell
 $ brew install julia
@@ -37,13 +37,15 @@ $ asdf global julia 1.6.5
 to install Julia and
 [set `v1.6.5` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
 
+You can also try another cross-platform installer for the Julia programming language [`juliaup`](https://github.com/JuliaLang/juliaup).
+
 ### Compatibility
 
 Versions higher than `v1.3`,
 especially `v1.6`, are strongly recommended. This package may not work on `v1.0` and below.
 Since the Julia team has set `v1.6` as the long-term support (LTS) release, support for versions below `v1.6` will gradually drop.
 
-Julia and Julia packages support multiple operating systems and cpu architectures, check [this table](https://julialang.org/downloads/#supported_platforms) to see if it can be installed on your machine. For Mac computers with M-series processors, this package and its depedencies may not work. Please install the Intel compatible version of Julia (for macOS x86).
+Julia and Julia packages support multiple operating systems and CPU architectures; check [this table](https://julialang.org/downloads/#supported_platforms) to see if it can be installed on your machine. For Mac computers with M-series processors, this package and its dependencies may not work. Please install the Intel-compatible version of Julia (for macOS x86).
 
 ## Install `Express`
 
