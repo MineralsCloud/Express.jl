@@ -112,11 +112,10 @@ See [Fredrik Ekre's talk](https://youtu.be/IuwxE3m0_QQ?t=313) for details.
      ...
    ```
 
-Then you probably forget loading a plugin package for `Express.jl`. For example, you should
-run
+   Then you probably forget loading a plugin package for `Express.jl`. For example, you should run
 
    ```julia-repl
    julia> using QuantumESPRESSOExpress
    ```
 
-to fix this error.
+   to fix this error.
