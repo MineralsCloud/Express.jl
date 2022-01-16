@@ -26,7 +26,7 @@ end
 function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(() -> x(config.template))
+    return AtomicJob(() -> x(config.template.scf))  # This `scf` is important!
 end
 
 struct MakeInput{T} <: Action{T} end
