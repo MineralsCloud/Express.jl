@@ -1,5 +1,5 @@
 using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.Inputs: Input, writetxt
+using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
 using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
@@ -32,10 +32,6 @@ function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
     config = ExpandConfig{T}()(dict)
     return AtomicJob(() -> x(config.template))
 end
-
-function getpseudodir end
-
-function getpotentials end
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
