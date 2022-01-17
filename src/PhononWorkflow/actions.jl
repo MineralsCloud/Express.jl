@@ -14,6 +14,9 @@ using .Config: ExpandConfig
 struct DownloadPotentials{T} <: Action{T} end
 function (x::DownloadPotentials)(template::Input)
     dir = getpseudodir(template)
+    if !isdir(dir)
+        mkpath(dir)
+    end
     potentials = getpotentials(template)
     return map(potentials) do potential
         path = joinpath(dir, potential)
