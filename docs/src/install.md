@@ -112,3 +112,32 @@ in Julia REPL.
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
    reinstall `Express`.
+
+## Install a plugin for `express`
+
+Plugins are packages that handle *ab initio* software such as Quantum ESPRESSO
+in the `express` framework. The current plugin is
+[`QuantumESPRESSOExpress`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl).
+To install `QuantumESPRESSOExpress.jl`, run
+
+```@repl
+using Pkg; Pkg.update(); Pkg.add("QuantumESPRESSOExpress")
+```
+
+in Julia REPL.
+
+## Install command-line tools
+
+We provide a command-line interface of `express` for non-developers:
+[`ExpressCommands.jl`](https://github.com/MineralsCloud/ExpressCommands.jl).
+It installs an executable '`xps`' that can execute code from configuration
+files provided by users. To install `ExpressCommands`, run
+
+```@repl
+using Pkg; Pkg.update(); Pkg.add("ExpressCommands")
+```
+
+in Julia REPL.
+
+After installation, the path to `xps` is `$HOME/.julia/bin/xps` by default.
+So please add `$HOME/.julia/bin` to your `PATH` environment variable.
