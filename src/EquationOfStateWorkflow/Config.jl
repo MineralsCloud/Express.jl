@@ -40,7 +40,7 @@ end
 
 @option struct TrialEquationOfState
     type::String
-    values::Union{AbstractVector,AbstractDict}
+    values::AbstractVector
 end
 
 @option struct Directories
