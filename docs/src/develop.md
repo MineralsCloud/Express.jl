@@ -9,10 +9,9 @@ triage.
 
 Then, similar to section "[Installation](@ref)", run
 
-```julia
-julia> using Pkg; Pkg.update()
-
-julia> pkg"dev Express"
+```@repl
+using Pkg; Pkg.update()
+pkg"dev Express"
 ```
 
 Then the package will be cloned to your local machine at a path. On macOS, by
@@ -25,8 +24,8 @@ on how to do this.) In the following text, we will call it `PKGROOT`.
 
 Go to `PKGROOT`, start a new Julia session and run
 
-```julia
-julia> using Pkg; Pkg.instantiate()
+```@repl
+using Pkg; Pkg.instantiate()
 ```
 
 ## How to build docs

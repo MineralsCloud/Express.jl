@@ -2,20 +2,22 @@
 
 ## Install Julia
 
-First, you should install Julia. We recommend downloading it from
-[its official website](https://julialang.org/downloads/). Please follow the detailed instructions on its website if you have to
-[build Julia from source](https://github.com/JuliaLang/julia/blob/master/doc/build/build.md).
+First, you should install [Julia](https://julialang.org/). We recommend downloading it from
+[its official website](https://julialang.org/downloads/). Please follow the detailed
+instructions on its website if you have to
+[build Julia from source](https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/build.md).
 Some computing centers provide preinstalled Julia. Please contact your administrator for
 more information in that case.
 
-If you have [Homebrew](https://brew.sh) installed, open
-`Terminal.app` and type
+If you have [Homebrew](https://brew.sh) installed,
+[open `Terminal.app`](https://support.apple.com/guide/terminal/open-or-quit-terminal-apd5265185d-f365-44cb-8b09-71a064a42125/mac)
+and type
 
 ```shell
 $ brew install --cask julia
 ```
 
-if you want to install it as a prebuilt binary app, or
+if you want to install it as a prebuilt binary app. Type
 
 ```shell
 $ brew install julia
@@ -37,15 +39,21 @@ $ asdf global julia 1.6.5
 to install Julia and
 [set `v1.6.5` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
 
-You can also try another cross-platform installer for the Julia programming language [`juliaup`](https://github.com/JuliaLang/juliaup).
+You can also try another cross-platform installer for the Julia programming language
+[`juliaup`](https://github.com/JuliaLang/juliaup).
 
 ### Compatibility
 
 Versions higher than `v1.3`,
 especially `v1.6`, are strongly recommended. This package may not work on `v1.0` and below.
-Since the Julia team has set `v1.6` as the long-term support (LTS) release, support for versions below `v1.6` will gradually drop.
+Since the Julia team has set `v1.6` as the long-term support (LTS) release, support for
+versions below `v1.6` will gradually drop.
 
-Julia and Julia packages support multiple operating systems and CPU architectures; check [this table](https://julialang.org/downloads/#supported_platforms) to see if it can be installed on your machine. For Mac computers with M-series processors, this package and its dependencies may not work. Please install the Intel-compatible version of Julia (for macOS x86).
+Julia and Julia packages support multiple operating systems and CPU architectures; check
+[this table](https://julialang.org/downloads/#supported_platforms) to see if it can be
+installed on your machine. For Mac computers with M-series processors, this package and its
+dependencies may not work. Please install the Intel-compatible version of Julia (for macOS
+x86).
 
 ## Install `Express`
 
@@ -57,16 +65,15 @@ platform to explain the following steps:
 
 2. Run the following commands and wait for them to finish:
 
-   ```julia
-   julia> using Pkg; Pkg.update()
-
-   julia> Pkg.add("Express")
+   ```@repl
+   using Pkg; Pkg.update()
+   Pkg.add("Express")
    ```
 
 3. Run
 
-   ```julia
-   julia> using Express
+   ```@repl
+   using Express
    ```
 
    and have fun!
@@ -76,21 +83,61 @@ platform to explain the following steps:
 
 If you want to install the latest in development (maybe buggy) version of `Express`, type
 
-```julia
-julia> using Pkg; Pkg.update()
-
-julia> pkg"add Express#master"
+```@repl
+using Pkg; Pkg.update()
+pkg"add Express#master"
 ```
 
 in the second step instead.
+
+## Update `Express`
+
+Please [watch](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
+our [GitHub repository](https://github.com/MineralsCloud/Express.jl) for new releases.
+Once we release a new version, you can update `Express` by typing
+
+```@repl
+using Pkg; Pkg.update("Express"); Pkg.gc()
+```
+
+in Julia REPL.
 
 ## Uninstall and reinstall `Express`
 
 1. To uninstall, in a Julia session, run
 
-   ```julia
-   julia> Pkg.rm("Express"); Pkg.gc()
+   ```@repl
+   using Pkg; Pkg.rm("Express"); Pkg.gc()
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
    reinstall `Express`.
+
+## Install a plugin for `express`
+
+Plugins are packages that handle *ab initio* software such as Quantum ESPRESSO
+in the `express` framework. The current plugin is
+[`QuantumESPRESSOExpress`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl).
+To install `QuantumESPRESSOExpress.jl`, run
+
+```@repl
+using Pkg; Pkg.update(); Pkg.add("QuantumESPRESSOExpress")
+```
+
+in Julia REPL.
+
+## Install command-line tools
+
+We provide a command-line interface of `express` for non-developers:
+[`ExpressCommands.jl`](https://github.com/MineralsCloud/ExpressCommands.jl).
+It installs an executable '`xps`' that can execute code from configuration
+files provided by users. To install `ExpressCommands`, run
+
+```@repl
+using Pkg; Pkg.update(); Pkg.add("ExpressCommands")
+```
+
+in Julia REPL.
+
+After installation, the path to `xps` is `$HOME/.julia/bin/xps` by default.
+So please add `$HOME/.julia/bin` to your `PATH` environment variable.

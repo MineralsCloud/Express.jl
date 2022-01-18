@@ -18,7 +18,7 @@ Steps to reproduce the behavior:
 4. See error
 5. Run code
     ```julia
-    julia> using Pkg
+    using Pkg
     ```
 
 **Expected behavior**
