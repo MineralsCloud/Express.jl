@@ -40,7 +40,7 @@ end
 
 @option struct TrialEquationOfState
     type::String
-    values::Union{AbstractVector,AbstractDict}
+    values::AbstractVector
 end
 
 @option struct Directories
@@ -108,13 +108,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    if trial_eos.values isa AbstractVector
-        return T(map(myuparse, trial_eos.values)...)
-    elseif trial_eos.values isa AbstractDict
-        return T((myuparse(trial_eos.values[string(f)]) for f in fieldnames(T))...)
-    else
-        @assert false "this is a bug!"
-    end
+    return T(map(myuparse, trial_eos.values)...)
 end
 function (::ExpandConfig)(pressures::Pressures)
     unit = myuparse(pressures.unit)
