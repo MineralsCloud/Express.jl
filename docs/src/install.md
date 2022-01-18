@@ -115,7 +115,7 @@ in Julia REPL.
 
 ## Install a plugin for `express`
 
-Plugins are packages that handle *ab initio* software such as Quantum ESPRESSO
+Plugins are packages that handle _ab initio_ software such as Quantum ESPRESSO
 in the `express` framework. The current plugin is
 [`QuantumESPRESSOExpress`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl).
 To install `QuantumESPRESSOExpress.jl`, run
