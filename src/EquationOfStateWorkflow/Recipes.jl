@@ -21,15 +21,17 @@ function buildworkflow(cfgfile)
         a = AtomicJob(() -> LogMsg{Scf}()(; start = true))
         b = buildjob(MakeInput{Scf}(), cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
+        d0 = buildjob(GetData{Scf}(), cfgfile)
         d = buildjob(FitEos{Scf}(), cfgfile)
         f = AtomicJob(() -> LogMsg{Scf}()(; start = false))
         g = AtomicJob(() -> LogMsg{VcOptim}()(; start = true))
         h = buildjob(MakeInput{VcOptim}(), cfgfile)
         i = buildjob(RunCmd{VcOptim}(), cfgfile)
+        j0 = buildjob(GetData{Scf}(), cfgfile)
         j = buildjob(FitEos{VcOptim}(), cfgfile)
         l = AtomicJob(() -> LogMsg{VcOptim}()(; start = false))
-        ((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j) ▷ l
-        return Workflow(a0, a, b..., c..., d, f, g, h..., i..., j, l)
+        ((((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d0) ▷ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j0) ▷ j) ▷ l
+        return Workflow(a0, a, b..., c..., d0, d, f, g, h..., i..., j0, j, l)
     end
 end
 
