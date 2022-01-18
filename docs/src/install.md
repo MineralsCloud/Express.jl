@@ -82,6 +82,18 @@ pkg"add Express#master"
 
 in the second step instead.
 
+## Update `Express`
+
+Please [watch](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
+our [GitHub repository](https://github.com/MineralsCloud/Express.jl) for new releases.
+Once we release a new version, you can update `Express` by typing
+
+```@repl
+using Pkg; Pkg.update("Express"); Pkg.gc()
+```
+
+in Julia REPL.
+
 ## Uninstall and reinstall `Express`
 
 1. To uninstall, in a Julia session, run
