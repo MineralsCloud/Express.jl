@@ -6,7 +6,7 @@ Pages = ["troubleshooting.md"]
 
 This page collects some possible errors you may encounter and trick how to fix them.
 
-*If you have additional tips, please submit a PR with suggestions.*
+_If you have additional tips, please submit a PR with suggestions._
 
 ## Installation problems
 
@@ -47,7 +47,7 @@ Another solution is to configure `PyCall` to use a Julia-specific Python
 distribution via the [`Conda.jl` package](https://github.com/JuliaPy/Conda.jl)
 (which installs a private Anaconda
 Python distribution), which has the advantage that packages can be installed
-and kept up-to-date via Julia.  As explained in the `PyCall` documentation, in Julia,
+and kept up-to-date via Julia. As explained in the `PyCall` documentation, in Julia,
 set `ENV["PYTHON"]=""`, run `Pkg.build("PyCall")`, and re-launch Julia.
 
 ## Loading settings
