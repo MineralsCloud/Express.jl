@@ -57,16 +57,15 @@ platform to explain the following steps:
 
 2. Run the following commands and wait for them to finish:
 
-   ```julia
-   julia> using Pkg; Pkg.update()
-
-   julia> Pkg.add("Express")
+   ```@repl
+   using Pkg; Pkg.update()
+   Pkg.add("Express")
    ```
 
 3. Run
 
-   ```julia
-   julia> using Express
+   ```@repl
+   using Express
    ```
 
    and have fun!
@@ -76,10 +75,9 @@ platform to explain the following steps:
 
 If you want to install the latest in development (maybe buggy) version of `Express`, type
 
-```julia
-julia> using Pkg; Pkg.update()
-
-julia> pkg"add Express#master"
+```@repl
+using Pkg; Pkg.update()
+pkg"add Express#master"
 ```
 
 in the second step instead.
@@ -88,8 +86,8 @@ in the second step instead.
 
 1. To uninstall, in a Julia session, run
 
-   ```julia
-   julia> Pkg.rm("Express"); Pkg.gc()
+   ```@repl
+   using Pkg; Pkg.rm("Express"); Pkg.gc()
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
