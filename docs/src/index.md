@@ -95,11 +95,12 @@ such as Quantum ESPRESSO. Other plugins for other software are possible. The dep
 Pages = [
     "install.md",
     "develop.md",
-    "configuration.md",
+    "run/configuration.md",
+    "run/cli.md",
     "troubleshooting.md",
-    "api/EquationOfStateWorkflow.md",
+    "questions.md",
 ]
-Depth = 3
+Depth = 5
 ```
 
 ### [Index](@id main-index)
