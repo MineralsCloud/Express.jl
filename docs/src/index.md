@@ -2,7 +2,7 @@
 CurrentModule = Express
 ```
 
-# Express
+# Express: an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate _ab initio_ calculations
 
 Documentation for [Express](https://github.com/MineralsCloud/Express.jl).
 
