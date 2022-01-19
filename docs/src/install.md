@@ -138,7 +138,7 @@ Pkg.add("QuantumESPRESSOExpress");
 
 in Julia REPL.
 
-## Install command-line tools
+## [Install command-line tools](@id cli)
 
 We provide a command-line interface of `express` for non-developers:
 [`ExpressCommands.jl`](https://github.com/MineralsCloud/ExpressCommands.jl).
