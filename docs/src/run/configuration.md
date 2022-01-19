@@ -97,25 +97,12 @@ The JSON and TOML equivalents of the above file are:
   "fixed": {
     "pressures": {
       "unit": "GPa",
-      "values": [
-        -5,
-        -2,
-        0,
-        5,
-        10,
-        15,
-        17,
-        20
-      ]
+      "values": [-5, -2, 0, 5, 10, 15, 17, 20]
     }
   },
   "trial_eos": {
     "type": "bm3",
-    "values": [
-      "300.44 bohr^3",
-      "74.88 GPa",
-      4.82
-    ]
+    "values": ["300.44 bohr^3", "74.88 GPa", 4.82]
   }
 }
 ```
@@ -224,16 +211,7 @@ The JSON and TOML equivalents of the above file are:
   "fixed": {
     "pressures": {
       "unit": "GPa",
-      "values": [
-        -5,
-        -2,
-        0,
-        5,
-        10,
-        15,
-        17,
-        20
-      ]
+      "values": [-5, -2, 0, 5, 10, 15, 17, 20]
     }
   }
 }
