@@ -58,7 +58,9 @@ volumes along with the raw data. The corresponding command is
 xps plot <file-name>
 ```
 
-where `<file-name>` refers to the EOS binary file with extension `.jls`. These are the three
+where `<file-name>` refers to the EOS binary file with extension `.jls`.
+
+These are the three
 most important commands of `express`. These catchy commands cover all the functionalities we
 have promised, including but not limited to unit conversion, pseudopotential downloading,
 input validation and generation, calculation monitoring, task distribution, gathering and
