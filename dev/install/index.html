@@ -1,7 +1,530 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Installation · Express.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://MineralsCloud.github.io/Express.jl/install/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="Express.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">Express.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li class="is-active"><a class="tocitem" href>Installation</a><ul class="internal"><li><a class="tocitem" href="#Install-Julia"><span>Install Julia</span></a></li><li><a class="tocitem" href="#Install-Express"><span>Install <code>Express</code></span></a></li><li><a class="tocitem" href="#Uninstall-and-reinstall-Express"><span>Uninstall and reinstall <code>Express</code></span></a></li></ul></li><li><a class="tocitem" href="../develop/">Development</a></li><li><a class="tocitem" href="../configuration/">Configuration files</a></li></ul></li><li><a class="tocitem" href="../troubleshooting/">Troubleshooting</a></li><li><a class="tocitem" href="../questions/">Other questions</a></li><li><span class="tocitem">API by module</span><ul><li><a class="tocitem" href="../api/EquationOfStateWorkflow/"><code>EquationOfStateWorkflow</code> module</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Installation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Installation</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/MineralsCloud/Express.jl/blob/master/docs/src/install.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h1><h2 id="Install-Julia"><a class="docs-heading-anchor" href="#Install-Julia">Install Julia</a><a id="Install-Julia-1"></a><a class="docs-heading-anchor-permalink" href="#Install-Julia" title="Permalink"></a></h2><p>First, you should install Julia. We recommend downloading it from <a href="https://julialang.org/downloads/">its official website</a>. Please follow the detailed instructions on its website if you have to <a href="https://github.com/JuliaLang/julia/blob/master/doc/build/build.md">build Julia from source</a>. Some computing centers provide preinstalled Julia. Please contact your administrator for more information in that case.</p><p>If you have <a href="https://brew.sh">Homebrew</a> installed, open <code>Terminal.app</code> and type</p><pre><code class="language-shell hljs">$ brew install --cask julia</code></pre><p>if you want to install it as a prebuilt binary app, or</p><pre><code class="language-shell hljs">$ brew install julia</code></pre><p>if you want to install it as a <a href="https://docs.brew.sh/Formula-Cookbook">formula</a>.</p><p>If you want to install multiple Julia versions in the same operating system, a suggested way is to use a version manager such as <a href="https://asdf-vm.com/guide/introduction.html"><code>asdf</code></a>. First, <a href="https://asdf-vm.com/guide/getting-started.html#_3-install-asdf">install <code>asdf</code></a>. Then, run</p><pre><code class="language-shell hljs">$ asdf install julia 1.6.5   # or other versions of Julia
-$ asdf global julia 1.6.5</code></pre><p>to install Julia and <a href="https://asdf-vm.com/guide/getting-started.html#_6-set-a-version">set <code>v1.6.5</code> as a global version</a>.</p><p>You can also try another cross-platform installer for the Julia programming language <a href="https://github.com/JuliaLang/juliaup"><code>juliaup</code></a>.</p><h3 id="Compatibility"><a class="docs-heading-anchor" href="#Compatibility">Compatibility</a><a id="Compatibility-1"></a><a class="docs-heading-anchor-permalink" href="#Compatibility" title="Permalink"></a></h3><p>Versions higher than <code>v1.3</code>, especially <code>v1.6</code>, are strongly recommended. This package may not work on <code>v1.0</code> and below. Since the Julia team has set <code>v1.6</code> as the long-term support (LTS) release, support for versions below <code>v1.6</code> will gradually drop.</p><p>Julia and Julia packages support multiple operating systems and CPU architectures; check <a href="https://julialang.org/downloads/#supported_platforms">this table</a> to see if it can be installed on your machine. For Mac computers with M-series processors, this package and its dependencies may not work. Please install the Intel-compatible version of Julia (for macOS x86).</p><h2 id="Install-Express"><a class="docs-heading-anchor" href="#Install-Express">Install <code>Express</code></a><a id="Install-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Install-Express" title="Permalink"></a></h2><p>Now I am using <a href="https://en.wikipedia.org/wiki/MacOS">macOS</a> as a standard platform to explain the following steps:</p><ol><li><p>Open <code>Terminal.app</code>, and type <code>julia</code> to start an interactive session (known as <a href="https://docs.julialang.org/en/v1/stdlib/REPL/">REPL</a>).</p></li><li><p>Run the following commands and wait for them to finish:</p><pre><code class="language-julia hljs">julia&gt; using Pkg; Pkg.update()
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Installation · Express.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://MineralsCloud.github.io/Express.jl/install/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><script src="../../copy.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="Express.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">Express.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li class="is-active"><a class="tocitem" href>Installation</a><ul class="internal"><li><a class="tocitem" href="#Install-Julia"><span>Install Julia</span></a></li><li><a class="tocitem" href="#Install-Express"><span>Install <code>Express</code></span></a></li><li><a class="tocitem" href="#Update-Express"><span>Update <code>Express</code></span></a></li><li><a class="tocitem" href="#Uninstall-and-reinstall-Express"><span>Uninstall and reinstall <code>Express</code></span></a></li><li><a class="tocitem" href="#Install-a-plugin-for-express"><span>Install a plugin for <code>express</code></span></a></li><li><a class="tocitem" href="#Install-command-line-tools"><span>Install command-line tools</span></a></li></ul></li><li><a class="tocitem" href="../develop/">Development</a></li><li><a class="tocitem" href="../configuration/">Configuration files</a></li></ul></li><li><a class="tocitem" href="../troubleshooting/">Troubleshooting</a></li><li><a class="tocitem" href="../questions/">Other questions</a></li><li><span class="tocitem">API by module</span><ul><li><a class="tocitem" href="../api/EquationOfStateWorkflow/"><code>EquationOfStateWorkflow</code> module</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Installation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Installation</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/MineralsCloud/Express.jl/blob/master/docs/src/install.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h1><p>Here are the installation instructions for <a href="https://github.com/MineralsCloud/Express.jl"><code>Express.jl</code></a>. If you have trouble installing it, please refer to our <a href="../troubleshooting/#Troubleshooting">Troubleshooting</a> page for more information.</p><h2 id="Install-Julia"><a class="docs-heading-anchor" href="#Install-Julia">Install Julia</a><a id="Install-Julia-1"></a><a class="docs-heading-anchor-permalink" href="#Install-Julia" title="Permalink"></a></h2><p>First, you should install <a href="https://julialang.org/">Julia</a>. We recommend downloading it from <a href="https://julialang.org/downloads/">its official website</a>. Please follow the detailed instructions on its website if you have to <a href="https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/build.md">build Julia from source</a>. Some computing centers provide preinstalled Julia. Please contact your administrator for more information in that case.</p><p>If you have <a href="https://brew.sh">Homebrew</a> installed, <a href="https://support.apple.com/guide/terminal/open-or-quit-terminal-apd5265185d-f365-44cb-8b09-71a064a42125/mac">open <code>Terminal.app</code></a> and type</p><pre><code class="language-shell hljs">$ brew install --cask julia</code></pre><p>if you want to install it as a prebuilt binary app. Type</p><pre><code class="language-shell hljs">$ brew install julia</code></pre><p>if you want to install it as a <a href="https://docs.brew.sh/Formula-Cookbook">formula</a>.</p><p>If you want to install multiple Julia versions in the same operating system, a suggested way is to use a version manager such as <a href="https://asdf-vm.com/guide/introduction.html"><code>asdf</code></a>. First, <a href="https://asdf-vm.com/guide/getting-started.html#_3-install-asdf">install <code>asdf</code></a>. Then, run</p><pre><code class="language-shell hljs">$ asdf install julia 1.6.5   # or other versions of Julia
+$ asdf global julia 1.6.5</code></pre><p>to install Julia and <a href="https://asdf-vm.com/guide/getting-started.html#_6-set-a-version">set <code>v1.6.5</code> as a global version</a>.</p><p>You can also try another cross-platform installer for the Julia programming language <a href="https://github.com/JuliaLang/juliaup"><code>juliaup</code></a>.</p><h3 id="Compatibility"><a class="docs-heading-anchor" href="#Compatibility">Compatibility</a><a id="Compatibility-1"></a><a class="docs-heading-anchor-permalink" href="#Compatibility" title="Permalink"></a></h3><p>Versions higher than <code>v1.3</code>, especially <code>v1.6</code>, are strongly recommended. This package may not work on <code>v1.0</code> and below. Since the Julia team has set <code>v1.6</code> as the long-term support (LTS) release, support for versions below <code>v1.6</code> will gradually drop.</p><p>Julia and Julia packages support multiple operating systems and CPU architectures; check <a href="https://julialang.org/downloads/#supported_platforms">this table</a> to see if it can be installed on your machine. For Mac computers with M-series processors, this package and its dependencies may not work. Please install the Intel-compatible version of Julia (for macOS x86).</p><h2 id="Install-Express"><a class="docs-heading-anchor" href="#Install-Express">Install <code>Express</code></a><a id="Install-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Install-Express" title="Permalink"></a></h2><p>Now I am using <a href="https://en.wikipedia.org/wiki/MacOS">macOS</a> as a standard platform to explain the following steps:</p><ol><li><p>Open <code>Terminal.app</code>, and type <code>julia</code> to start an interactive session (known as <a href="https://docs.julialang.org/en/v1/stdlib/REPL/">REPL</a>).</p></li><li><p>Run the following commands and wait for them to finish:</p><pre><code class="language- hljs">using Pkg; Pkg.update()
+Pkg.add(&quot;Express&quot;)</code></pre></li><li><p>Run</p><pre><code class="language- hljs">using Express</code></pre><p>and have fun!</p></li><li><p>While using, please keep this Julia session alive. Restarting might recompile the package and cost some time.</p></li></ol><p>If you want to install the latest in development (maybe buggy) version of <code>Express</code>, type</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg; Pkg.update()</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Project.toml`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Manifest.toml`</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; pkg&quot;add Express#master&quot;</code><code class="nohighlight hljs ansi" style="display:block;">     Cloning git-repo `https://github.com/MineralsCloud/Express.jl.git`
+    Updating git-repo `https://github.com/MineralsCloud/Express.jl.git`
+   Resolving package versions...
+    Updating `~/work/Express.jl/Express.jl/docs/Project.toml`
+  [b12df14e] ~ Express v0.6.3 `~/.julia/dev/Express` ⇒ v0.6.3 `https://github.com/MineralsCloud/Express.jl.git#master`
+    Updating `~/work/Express.jl/Express.jl/docs/Manifest.toml`
+  [b12df14e] ~ Express v0.6.3 `~/.julia/dev/Express` ⇒ v0.6.3 `https://github.com/MineralsCloud/Express.jl.git#master`
+Precompiling project...
+<span class="sgr33">  ✓ </span>Express
+  1 dependency successfully precompiled in 9 seconds (98 already precompiled)
+  <span class="sgr33">1</span> dependency precompiled but a different version is currently loaded. Restart julia to access the new version</code></pre><p>in the second step instead.</p><h2 id="Update-Express"><a class="docs-heading-anchor" href="#Update-Express">Update <code>Express</code></a><a id="Update-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Update-Express" title="Permalink"></a></h2><p>Please <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">watch</a> our <a href="https://github.com/MineralsCloud/Express.jl">GitHub repository</a> for new releases. Once we release a new version, you can update <code>Express</code> by typing</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg; Pkg.update(&quot;Express&quot;); Pkg.gc()</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
+    Updating git-repo `https://github.com/MineralsCloud/Express.jl.git`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Project.toml`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Manifest.toml`
+      Active manifest files: 1 found
+      Active artifact files: 4 found
+      Active scratchspaces: 1 found
+     Deleted no artifacts, repos, packages or scratchspaces</code></pre><p>in Julia REPL.</p><h2 id="Uninstall-and-reinstall-Express"><a class="docs-heading-anchor" href="#Uninstall-and-reinstall-Express">Uninstall and reinstall <code>Express</code></a><a id="Uninstall-and-reinstall-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Uninstall-and-reinstall-Express" title="Permalink"></a></h2><ol><li><p>To uninstall, in a Julia session, run</p><pre><code class="language- hljs">using Pkg; Pkg.rm(&quot;Express&quot;); Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall <code>Express</code>.</p></li></ol><h2 id="Install-a-plugin-for-express"><a class="docs-heading-anchor" href="#Install-a-plugin-for-express">Install a plugin for <code>express</code></a><a id="Install-a-plugin-for-express-1"></a><a class="docs-heading-anchor-permalink" href="#Install-a-plugin-for-express" title="Permalink"></a></h2><p>Plugins are packages that handle <em>ab initio</em> software such as Quantum ESPRESSO in the <code>express</code> framework. The current plugin is <a href="https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl"><code>QuantumESPRESSOExpress</code></a>. To install <code>QuantumESPRESSOExpress.jl</code>, run</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg; Pkg.update(); Pkg.add(&quot;QuantumESPRESSOExpress&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
+    Updating git-repo `https://github.com/MineralsCloud/Express.jl.git`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Project.toml`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Manifest.toml`
+   Resolving package versions...
+   Installed spglib_jll ─────────────────── v1.16.3+0
+   Installed RelocatableFolders ─────────── v0.1.3
+   Installed Configurations ─────────────── v0.16.6
+   Installed Crystallography ────────────── v0.3.2
+   Installed Tricks ─────────────────────── v0.1.6
+   Installed QuantumESPRESSOParser ──────── v0.3.2
+   Installed FileIO ─────────────────────── v1.12.0
+   Installed QuantumESPRESSOBase ────────── v0.5.1
+   Installed TypeTransform ──────────────── v0.1.3
+   Installed Functors ───────────────────── v0.2.7
+   Installed EzXML ──────────────────────── v1.1.0
+   Installed JLD2 ───────────────────────── v0.4.17
+   Installed CrystallographyBase ────────── v0.4.2
+   Installed QuantumESPRESSO ────────────── v0.7.0
+   Installed Spglib ─────────────────────── v0.5.3
+   Installed Counters ───────────────────── v0.3.3
+   Installed TranscodingStreams ─────────── v0.9.6
+   Installed MatchCore ──────────────────── v0.1.1
+   Installed AbInitioSoftwareBase ───────── v0.6.2
+   Installed Scratch ────────────────────── v1.1.0
+   Installed PackageCompiler ────────────── v1.7.7
+   Installed MLStyle ────────────────────── v0.4.10
+   Installed Comonicon ──────────────────── v0.9.1
+   Installed Combinatorics ──────────────── v1.0.2
+   Installed Conda ──────────────────────── v1.6.0
+   Installed PyCall ─────────────────────── v1.93.0
+   Installed CoordinateTransformations ──── v0.6.2
+   Installed PyFortran90Namelists ───────── v0.1.0
+   Installed UnifiedPseudopotentialFormat ─ v0.4.0
+   Installed QuantumESPRESSOFormatter ───── v0.2.8
+   Installed QuantumESPRESSOExpress ─────── v0.5.2
+   Installed ReadableRegex ──────────────── v0.3.2
+   Installed XML2_jll ───────────────────── v2.9.12+0
+   Installed VersionParsing ─────────────── v1.2.1
+   Installed Parameters ─────────────────── v0.12.3
+   Installed QuantumESPRESSOCommands ────── v0.6.2
+   Installed AcuteML ────────────────────── v0.11.3
+    Updating `~/work/Express.jl/Express.jl/docs/Project.toml`
+  [524a00d3] + QuantumESPRESSOExpress v0.5.2
+    Updating `~/work/Express.jl/Express.jl/docs/Manifest.toml`
+  [df5135bc] ↓ AbInitioSoftwareBase v0.8.1 ⇒ v0.6.2
+  [6b84a0a3] + AcuteML v0.11.3
+  [861a8166] + Combinatorics v1.0.2
+  [863f3e99] + Comonicon v0.9.1
+  [8f4d0f93] + Conda v1.6.0
+  [5218b696] ↓ Configurations v0.17.0 ⇒ v0.16.6
+  [150eb455] + CoordinateTransformations v0.6.2
+  [5a653867] + Counters v0.3.3
+  [3bff3928] + Crystallography v0.3.2
+  [93b1d1cd] + CrystallographyBase v0.4.2
+  [8f5d6c58] + EzXML v1.1.0
+  [5789e2e9] + FileIO v1.12.0
+  [d9f16b24] + Functors v0.2.7
+  [033835bb] + JLD2 v0.4.17
+  [d8e11817] + MLStyle v0.4.10
+  [5dd3f0b1] + MatchCore v0.1.1
+  [9b87118b] + PackageCompiler v1.7.7
+  [d96e819e] + Parameters v0.12.3
+  [438e738f] + PyCall v1.93.0
+  [e44308e6] + PyFortran90Namelists v0.1.0
+  [95228164] + QuantumESPRESSO v0.7.0
+  [51b62caa] + QuantumESPRESSOBase v0.5.1
+  [f713baf6] + QuantumESPRESSOCommands v0.6.2
+  [524a00d3] + QuantumESPRESSOExpress v0.5.2
+  [a4e7ca57] + QuantumESPRESSOFormatter v0.2.8
+  [a780ab42] + QuantumESPRESSOParser v0.3.2
+  [cbbcb084] + ReadableRegex v0.3.2
+  [05181044] + RelocatableFolders v0.1.3
+  [6c6a2e73] + Scratch v1.1.0
+  [f761d5c5] + Spglib v0.5.3
+  [3bb67fe8] + TranscodingStreams v0.9.6
+  [410a4b4d] + Tricks v0.1.6
+  [0fb2cfb0] + TypeTransform v0.1.3
+  [8030dd95] + UnifiedPseudopotentialFormat v0.4.0
+  [81def892] + VersionParsing v1.2.1
+  [02c8fc9c] + XML2_jll v2.9.12+0
+  [ac4a9f1e] + spglib_jll v1.16.3+0
+  [8bf52ea8] + CRC32c
+    Building QuantumESPRESSOCommands → `~/.julia/scratchspaces/44cfe95a-1eb2-52ea-b672-e2afdf69b78f/535bcbea949e5f25a4dc28636595b976a3b2e4dc/build.log`
+    Building Conda ──────────────────→ `~/.julia/scratchspaces/44cfe95a-1eb2-52ea-b672-e2afdf69b78f/6cdc8832ba11c7695f494c9d9a1c31e90959ce0f/build.log`
+    Building PyCall ─────────────────→ `~/.julia/scratchspaces/44cfe95a-1eb2-52ea-b672-e2afdf69b78f/71fd4022ecd0c6d20180e23ff1b3e05a143959c2/build.log`
+Precompiling project...
+<span class="sgr32">  ✓ </span><span class="sgr90">ReadableRegex</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Parameters</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">TypeTransform</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Combinatorics</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Tricks</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Counters</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Functors</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">CoordinateTransformations</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">TranscodingStreams</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">FileIO</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">spglib_jll</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">XML2_jll</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">JLD2</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">PyCall</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">EzXML</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Spglib</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">AcuteML</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">CrystallographyBase</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">MLStyle</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Crystallography</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">QuantumESPRESSOBase</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">UnifiedPseudopotentialFormat</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">PyFortran90Namelists</span>
+<span class="sgr91">  ✗ </span><span class="sgr90">QuantumESPRESSOParser</span>
+<span class="sgr91">  ✗ </span><span class="sgr90">QuantumESPRESSOFormatter</span>
+<span class="sgr91">  ✗ </span><span class="sgr90">QuantumESPRESSO</span>
+<span class="sgr91">  ✗ </span>QuantumESPRESSOExpress
+  23 dependencies successfully precompiled in 73 seconds (107 already precompiled)
+  <span class="sgr91">4</span> dependencies errored. To see a full report either run `import Pkg; Pkg.precompile()` or load the packages</code></pre><p>in Julia REPL.</p><h2 id="Install-command-line-tools"><a class="docs-heading-anchor" href="#Install-command-line-tools">Install command-line tools</a><a id="Install-command-line-tools-1"></a><a class="docs-heading-anchor-permalink" href="#Install-command-line-tools" title="Permalink"></a></h2><p>We provide a command-line interface of <code>express</code> for non-developers: <a href="https://github.com/MineralsCloud/ExpressCommands.jl"><code>ExpressCommands.jl</code></a>. It installs an executable &#39;<code>xps</code>&#39; that can execute code from configuration files provided by users. To install <code>ExpressCommands</code>, run</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg; Pkg.update(); Pkg.add(&quot;ExpressCommands&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
+    Updating git-repo `https://github.com/MineralsCloud/Express.jl.git`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Project.toml`
+  No Changes to `~/work/Express.jl/Express.jl/docs/Manifest.toml`
+   Resolving package versions...
+   Installed GR_jll ─────────────────────── v0.63.1+0
+   Installed JpegTurbo_jll ──────────────── v2.1.0+0
+   Installed x265_jll ───────────────────── v3.5.0+0
+   Installed Xorg_xkbcomp_jll ───────────── v1.4.2+4
+   Installed libfdk_aac_jll ─────────────── v2.0.2+0
+   Installed Opus_jll ───────────────────── v1.3.2+0
+   Installed Libmount_jll ───────────────── v2.35.0+0
+   Installed Grisu ──────────────────────── v1.0.2
+   Installed Measures ───────────────────── v0.3.1
+   Installed EarCut_jll ─────────────────── v2.2.3+0
+   Installed Xorg_xcb_util_wm_jll ───────── v0.4.1+1
+   Installed ExpressCommands ────────────── v0.3.0
+   Installed Contour ────────────────────── v0.5.7
+   Installed Xorg_libpthread_stubs_jll ──── v0.1.0+3
+   Installed Xorg_xcb_util_image_jll ────── v0.4.0+1
+   Installed ColorSchemes ───────────────── v3.16.0
+   Installed PlotUtils ──────────────────── v1.1.2
+   Installed RecipesPipeline ────────────── v0.5.0
+   Installed Cairo_jll ──────────────────── v1.16.1+1
+   Installed HTTP ───────────────────────── v0.9.17
+   Installed Xorg_xcb_util_jll ──────────── v0.4.0+1
+   Installed Libgpg_error_jll ───────────── v1.42.0+0
+   Installed Fontconfig_jll ─────────────── v2.13.93+0
+   Installed Xorg_libXau_jll ────────────── v1.0.9+4
+   Installed Xorg_libxkbfile_jll ────────── v1.1.0+4
+   Installed Xorg_libXinerama_jll ───────── v1.1.4+4
+   Installed FFMPEG ─────────────────────── v0.4.1
+   Installed Showoff ────────────────────── v1.0.3
+   Installed TikzGraphs ─────────────────── v1.3.0
+   Installed PrettyPrint ────────────────── v0.2.0
+   Installed HarfBuzz_jll ───────────────── v2.8.1+1
+   Installed xkbcommon_jll ──────────────── v0.9.1+5
+   Installed Qt5Base_jll ────────────────── v5.15.3+0
+   Installed Xorg_xcb_util_keysyms_jll ──── v0.4.0+1
+   Installed PlotThemes ─────────────────── v2.0.1
+   Installed LZO_jll ────────────────────── v2.10.1+0
+   Installed Bzip2_jll ──────────────────── v1.0.8+0
+   Installed FriBidi_jll ────────────────── v1.0.10+0
+   Installed UnicodeFun ─────────────────── v0.4.1
+   Installed x264_jll ───────────────────── v2021.5.5+0
+   Installed FreeType2_jll ──────────────── v2.10.4+0
+   Installed GLFW_jll ───────────────────── v3.3.5+1
+   Installed EquationOfStateRecipes ─────── v0.1.3
+   Installed Xorg_libxcb_jll ────────────── v1.13.0+3
+   Installed libpng_jll ─────────────────── v1.6.38+0
+   Installed MbedTLS ────────────────────── v1.0.3
+   Installed ColorTypes ─────────────────── v0.11.0
+   Installed Colors ─────────────────────── v0.12.8
+   Installed PCRE_jll ───────────────────── v8.44.0+0
+   Installed Zstd_jll ───────────────────── v1.5.0+0
+   Installed Libtiff_jll ────────────────── v4.3.0+0
+   Installed Expat_jll ──────────────────── v2.2.10+0
+   Installed Poppler_jll ────────────────── v0.87.0+2
+   Installed Xorg_libXext_jll ───────────── v1.3.4+4
+   Installed GR ─────────────────────────── v0.63.1
+   Installed Plots ──────────────────────── v1.25.6
+   Installed Xorg_libXrender_jll ────────── v0.9.10+4
+   Installed Libffi_jll ─────────────────── v3.2.2+1
+   Installed Ogg_jll ────────────────────── v1.3.5+1
+   Installed Xorg_libXcursor_jll ────────── v1.2.0+4
+   Installed LittleCMS_jll ──────────────── v2.12.0+0
+   Installed XSLT_jll ───────────────────── v1.1.34+0
+   Installed Xorg_libXi_jll ─────────────── v1.7.10+4
+   Installed Tectonic ───────────────────── v0.8.0
+   Installed Libuuid_jll ────────────────── v2.36.0+0
+   Installed Xorg_xcb_util_renderutil_jll ─ v0.3.9+1
+   Installed Wayland_protocols_jll ──────── v1.23.0+0
+   Installed Adapt ──────────────────────── v3.3.3
+   Installed Pixman_jll ─────────────────── v0.40.1+0
+   Installed Graphite2_jll ──────────────── v1.3.14+0
+   Installed Gettext_jll ────────────────── v0.21.0+0
+   Installed TikzPictures ───────────────── v3.4.2
+   Installed Wayland_jll ────────────────── v1.19.0+0
+   Installed libass_jll ─────────────────── v0.15.1+0
+   Installed Latexify ───────────────────── v0.15.9
+   Installed IterTools ──────────────────── v1.4.0
+   Installed OpenSSL_jll ────────────────── v1.1.13+0
+   Installed Xorg_xtrans_jll ────────────── v1.4.0+3
+   Installed Xorg_xkeyboard_config_jll ──── v2.27.0+4
+   Installed FFMPEG_jll ─────────────────── v4.4.0+0
+   Installed FixedPointNumbers ──────────── v0.8.4
+   Installed GeometryBasics ─────────────── v0.4.1
+   Installed OpenJpeg_jll ───────────────── v2.4.0+0
+   Installed Libgcrypt_jll ──────────────── v1.8.7+0
+   Installed Xorg_libXfixes_jll ─────────── v5.0.3+4
+   Installed Xorg_libXrandr_jll ─────────── v1.5.2+4
+   Installed LAME_jll ───────────────────── v3.100.1+0
+   Installed IniFile ────────────────────── v0.5.0
+   Installed Glib_jll ───────────────────── v2.68.3+2
+   Installed LaTeXStrings ───────────────── v1.3.0
+   Installed StructArrays ───────────────── v0.6.4
+   Installed Libglvnd_jll ───────────────── v1.3.0+3
+   Installed libvorbis_jll ──────────────── v1.3.7+0
+   Installed Xorg_libX11_jll ────────────── v1.6.9+4
+   Installed URIs ───────────────────────── v1.3.0
+   Installed Xorg_libXdmcp_jll ──────────── v1.1.3+4
+   Installed Unzip ──────────────────────── v0.1.2
+    Updating `~/work/Express.jl/Express.jl/docs/Project.toml`
+  [0fa58581] + ExpressCommands v0.3.0
+    Updating `~/work/Express.jl/Express.jl/docs/Manifest.toml`
+  [79e6a3ab] + Adapt v3.3.3
+  [35d6a980] + ColorSchemes v3.16.0
+  [3da002f7] + ColorTypes v0.11.0
+  [5ae59095] + Colors v0.12.8
+  [d38c429a] + Contour v0.5.7
+  [8d49d7c9] + EquationOfStateRecipes v0.1.3
+  [0fa58581] + ExpressCommands v0.3.0
+  [c87230d0] + FFMPEG v0.4.1
+  [53c48c17] + FixedPointNumbers v0.8.4
+  [28b8d3ca] + GR v0.63.1
+  [5c1252a2] + GeometryBasics v0.4.1
+  [42e2da0e] + Grisu v1.0.2
+  [cd3eb016] + HTTP v0.9.17
+  [83e8ac13] + IniFile v0.5.0
+  [c8e1da08] + IterTools v1.4.0
+  [b964fa9f] + LaTeXStrings v1.3.0
+  [23fbe1c1] + Latexify v0.15.9
+  [739be429] + MbedTLS v1.0.3
+  [442fdcdd] + Measures v0.3.1
+  [ccf2f8ad] + PlotThemes v2.0.1
+  [995b91a9] + PlotUtils v1.1.2
+  [91a5bcdd] + Plots v1.25.6
+  [8162dcfd] + PrettyPrint v0.2.0
+  [01d81517] + RecipesPipeline v0.5.0
+  [992d4aef] + Showoff v1.0.3
+  [09ab397b] + StructArrays v0.6.4
+  [9ac5f52a] + Tectonic v0.8.0
+  [b4f28e30] + TikzGraphs v1.3.0
+  [37f6aa50] + TikzPictures v3.4.2
+  [5c2747f8] + URIs v1.3.0
+  [1cfade01] + UnicodeFun v0.4.1
+  [41fe7b60] + Unzip v0.1.2
+  [6e34b625] + Bzip2_jll v1.0.8+0
+  [83423d85] + Cairo_jll v1.16.1+1
+  [5ae413db] + EarCut_jll v2.2.3+0
+  [2e619515] + Expat_jll v2.2.10+0
+  [b22a6f82] + FFMPEG_jll v4.4.0+0
+  [a3f928ae] + Fontconfig_jll v2.13.93+0
+  [d7e528f0] + FreeType2_jll v2.10.4+0
+  [559328eb] + FriBidi_jll v1.0.10+0
+  [0656b61e] + GLFW_jll v3.3.5+1
+  [d2c73de3] + GR_jll v0.63.1+0
+  [78b55507] + Gettext_jll v0.21.0+0
+  [7746bdde] + Glib_jll v2.68.3+2
+  [3b182d85] + Graphite2_jll v1.3.14+0
+  [2e76f6c2] + HarfBuzz_jll v2.8.1+1
+  [aacddb02] + JpegTurbo_jll v2.1.0+0
+  [c1c5ebd0] + LAME_jll v3.100.1+0
+  [dd4b983a] + LZO_jll v2.10.1+0
+  [e9f186c6] + Libffi_jll v3.2.2+1
+  [d4300ac3] + Libgcrypt_jll v1.8.7+0
+  [7e76a0d4] + Libglvnd_jll v1.3.0+3
+  [7add5ba3] + Libgpg_error_jll v1.42.0+0
+  [4b2f31a3] + Libmount_jll v2.35.0+0
+  [89763e89] + Libtiff_jll v4.3.0+0
+  [38a345b3] + Libuuid_jll v2.36.0+0
+  [d3a379c0] + LittleCMS_jll v2.12.0+0
+  [e7412a2a] + Ogg_jll v1.3.5+1
+  [643b3616] + OpenJpeg_jll v2.4.0+0
+  [458c3c95] + OpenSSL_jll v1.1.13+0
+  [91d4177d] + Opus_jll v1.3.2+0
+  [2f80f16e] + PCRE_jll v8.44.0+0
+  [30392449] + Pixman_jll v0.40.1+0
+  [9c32591e] + Poppler_jll v0.87.0+2
+  [ea2cea3b] + Qt5Base_jll v5.15.3+0
+  [a2964d1f] + Wayland_jll v1.19.0+0
+  [2381bf8a] + Wayland_protocols_jll v1.23.0+0
+  [aed1982a] + XSLT_jll v1.1.34+0
+  [4f6342f7] + Xorg_libX11_jll v1.6.9+4
+  [0c0b7dd1] + Xorg_libXau_jll v1.0.9+4
+  [935fb764] + Xorg_libXcursor_jll v1.2.0+4
+  [a3789734] + Xorg_libXdmcp_jll v1.1.3+4
+  [1082639a] + Xorg_libXext_jll v1.3.4+4
+  [d091e8ba] + Xorg_libXfixes_jll v5.0.3+4
+  [a51aa0fd] + Xorg_libXi_jll v1.7.10+4
+  [d1454406] + Xorg_libXinerama_jll v1.1.4+4
+  [ec84b674] + Xorg_libXrandr_jll v1.5.2+4
+  [ea2f1a96] + Xorg_libXrender_jll v0.9.10+4
+  [14d82f49] + Xorg_libpthread_stubs_jll v0.1.0+3
+  [c7cfdc94] + Xorg_libxcb_jll v1.13.0+3
+  [cc61e674] + Xorg_libxkbfile_jll v1.1.0+4
+  [12413925] + Xorg_xcb_util_image_jll v0.4.0+1
+  [2def613f] + Xorg_xcb_util_jll v0.4.0+1
+  [975044d2] + Xorg_xcb_util_keysyms_jll v0.4.0+1
+  [0d47668e] + Xorg_xcb_util_renderutil_jll v0.3.9+1
+  [c22f9ab0] + Xorg_xcb_util_wm_jll v0.4.1+1
+  [35661453] + Xorg_xkbcomp_jll v1.4.2+4
+  [33bec58e] + Xorg_xkeyboard_config_jll v2.27.0+4
+  [c5fb5394] + Xorg_xtrans_jll v1.4.0+3
+  [3161d3a3] + Zstd_jll v1.5.0+0
+  [0ac62f75] + libass_jll v0.15.1+0
+  [f638f0a6] + libfdk_aac_jll v2.0.2+0
+  [b53b4c65] + libpng_jll v1.6.38+0
+  [f27f6e37] + libvorbis_jll v1.3.7+0
+  [1270edf5] + x264_jll v2021.5.5+0
+  [dfaa095f] + x265_jll v3.5.0+0
+  [d8fb68d0] + xkbcommon_jll v0.9.1+5
+    Building GR ─────────────→ `~/.julia/scratchspaces/44cfe95a-1eb2-52ea-b672-e2afdf69b78f/4a740db447aae0fbeb3ee730de1afbb14ac798a1/build.log`
+    Building ExpressCommands → `~/.julia/scratchspaces/44cfe95a-1eb2-52ea-b672-e2afdf69b78f/f062b2b78ba909025886c4f0269042481e36276a/build.log`
+ERROR: Error building `ExpressCommands`:
+ERROR: LoadError: InitError: PyError (PyImport_ImportModule
 
-julia&gt; Pkg.add(&quot;Express&quot;)</code></pre></li><li><p>Run</p><pre><code class="language-julia hljs">julia&gt; using Express</code></pre><p>and have fun!</p></li><li><p>While using, please keep this Julia session alive. Restarting might recompile the package and cost some time.</p></li></ol><p>If you want to install the latest in development (maybe buggy) version of <code>Express</code>, type</p><pre><code class="language-julia hljs">julia&gt; using Pkg; Pkg.update()
+The Python package f90nml could not be imported by pyimport. Usually this means
+that you did not install f90nml in the Python version being used by PyCall.
 
-julia&gt; pkg&quot;add Express#master&quot;</code></pre><p>in the second step instead.</p><h2 id="Uninstall-and-reinstall-Express"><a class="docs-heading-anchor" href="#Uninstall-and-reinstall-Express">Uninstall and reinstall <code>Express</code></a><a id="Uninstall-and-reinstall-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Uninstall-and-reinstall-Express" title="Permalink"></a></h2><ol><li><p>To uninstall, in a Julia session, run</p><pre><code class="language-julia hljs">julia&gt; Pkg.rm(&quot;Express&quot;); Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall <code>Express</code>.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../develop/">Development »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Sunday 16 January 2022 06:55">Sunday 16 January 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+PyCall is currently configured to use the Python version at:
+
+/usr/bin/python3
+
+and you should use whatever mechanism you usually use (apt-get, pip, conda,
+etcetera) to install the Python package containing the f90nml module.
+
+One alternative is to re-configure PyCall to use a different Python
+version on your system: set ENV[&quot;PYTHON&quot;] to the path/name of the python
+executable you want to use, run Pkg.build(&quot;PyCall&quot;), and re-launch Julia.
+
+Another alternative is to configure PyCall to use a Julia-specific Python
+distribution via the Conda.jl package (which installs a private Anaconda
+Python distribution), which has the advantage that packages can be installed
+and kept up-to-date via Julia.  As explained in the PyCall documentation,
+set ENV[&quot;PYTHON&quot;]=&quot;&quot;, run Pkg.build(&quot;PyCall&quot;), and re-launch Julia. Then,
+To install the f90nml module, you can use `pyimport_conda(&quot;f90nml&quot;, PKG)`,
+where PKG is the Anaconda package that contains the module f90nml,
+or alternatively you can use the Conda package directly (via
+`using Conda` followed by `Conda.add` etcetera).
+
+) &lt;class &#39;ModuleNotFoundError&#39;&gt;
+ModuleNotFoundError(&quot;No module named &#39;f90nml&#39;&quot;)
+
+Stacktrace:
+  [1] pyimport(name::String)
+    @ PyCall ~/.julia/packages/PyCall/L0fLP/src/PyCall.jl:550
+  [2] pyimport_conda(modulename::String, condapkg::String, channel::String)
+    @ PyCall ~/.julia/packages/PyCall/L0fLP/src/PyCall.jl:708
+  [3] __init__()
+    @ PyFortran90Namelists ~/.julia/packages/PyFortran90Namelists/FF2P2/src/init.jl:16
+  [4] _include_from_serialized(path::String, depmods::Vector{Any})
+    @ Base ./loading.jl:768
+  [5] _require_search_from_serialized(pkg::Base.PkgId, sourcepath::String)
+    @ Base ./loading.jl:854
+  [6] _require(pkg::Base.PkgId)
+    @ Base ./loading.jl:1097
+  [7] require(uuidkey::Base.PkgId)
+    @ Base ./loading.jl:1013
+  [8] require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:997
+  [9] include(mod::Module, _path::String)
+    @ Base ./Base.jl:418
+ [10] include(x::String)
+    @ QuantumESPRESSOParser ~/.julia/packages/QuantumESPRESSOParser/wuqxr/src/QuantumESPRESSOParser.jl:1
+ [11] top-level scope
+    @ ~/.julia/packages/QuantumESPRESSOParser/wuqxr/src/QuantumESPRESSOParser.jl:3
+ [12] include
+    @ ./Base.jl:418 [inlined]
+ [13] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt64}}, source::String)
+    @ Base ./loading.jl:1318
+ [14] top-level scope
+    @ none:1
+ [15] eval
+    @ ./boot.jl:373 [inlined]
+ [16] eval(x::Expr)
+    @ Base.MainInclude ./client.jl:453
+ [17] top-level scope
+    @ none:1
+during initialization of module PyFortran90Namelists
+in expression starting at /home/runner/.julia/packages/QuantumESPRESSOParser/wuqxr/src/Inputs/Inputs.jl:1
+in expression starting at /home/runner/.julia/packages/QuantumESPRESSOParser/wuqxr/src/QuantumESPRESSOParser.jl:1
+ERROR: LoadError: Failed to precompile QuantumESPRESSOParser [a780ab42-b33a-11e9-16c1-a92d75b2a626] to /home/runner/.julia/compiled/v1.7/QuantumESPRESSOParser/jl_gtq5h5.
+Stacktrace:
+  [1] error(s::String)
+    @ Base ./error.jl:33
+  [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, ignore_loaded_modules::Bool)
+    @ Base ./loading.jl:1466
+  [3] compilecache(pkg::Base.PkgId, path::String)
+    @ Base ./loading.jl:1410
+  [4] _require(pkg::Base.PkgId)
+    @ Base ./loading.jl:1120
+  [5] require(uuidkey::Base.PkgId)
+    @ Base ./loading.jl:1013
+  [6] require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:997
+  [7] include(mod::Module, _path::String)
+    @ Base ./Base.jl:418
+  [8] include(x::String)
+    @ QuantumESPRESSO ~/.julia/packages/QuantumESPRESSO/INn6U/src/QuantumESPRESSO.jl:1
+  [9] top-level scope
+    @ ~/.julia/packages/QuantumESPRESSO/INn6U/src/QuantumESPRESSO.jl:3
+ [10] include
+    @ ./Base.jl:418 [inlined]
+ [11] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt64}}, source::String)
+    @ Base ./loading.jl:1318
+ [12] top-level scope
+    @ none:1
+ [13] eval
+    @ ./boot.jl:373 [inlined]
+ [14] eval(x::Expr)
+    @ Base.MainInclude ./client.jl:453
+ [15] top-level scope
+    @ none:1
+in expression starting at /home/runner/.julia/packages/QuantumESPRESSO/INn6U/src/Inputs.jl:1
+in expression starting at /home/runner/.julia/packages/QuantumESPRESSO/INn6U/src/QuantumESPRESSO.jl:1
+ERROR: LoadError: Failed to precompile QuantumESPRESSO [95228164-aa68-11e9-35aa-d79ea5c4658d] to /home/runner/.julia/compiled/v1.7/QuantumESPRESSO/jl_MsEA6r.
+Stacktrace:
+  [1] error(s::String)
+    @ Base ./error.jl:33
+  [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, ignore_loaded_modules::Bool)
+    @ Base ./loading.jl:1466
+  [3] compilecache(pkg::Base.PkgId, path::String)
+    @ Base ./loading.jl:1410
+  [4] _require(pkg::Base.PkgId)
+    @ Base ./loading.jl:1120
+  [5] require(uuidkey::Base.PkgId)
+    @ Base ./loading.jl:1013
+  [6] require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:997
+  [7] include(mod::Module, _path::String)
+    @ Base ./Base.jl:418
+  [8] include(x::String)
+    @ QuantumESPRESSOExpress ~/.julia/packages/QuantumESPRESSOExpress/3XRaB/src/QuantumESPRESSOExpress.jl:1
+  [9] top-level scope
+    @ ~/.julia/packages/QuantumESPRESSOExpress/3XRaB/src/QuantumESPRESSOExpress.jl:14
+ [10] include
+    @ ./Base.jl:418 [inlined]
+ [11] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt64}}, source::String)
+    @ Base ./loading.jl:1318
+ [12] top-level scope
+    @ none:1
+ [13] eval
+    @ ./boot.jl:373 [inlined]
+ [14] eval(x::Expr)
+    @ Base.MainInclude ./client.jl:453
+ [15] top-level scope
+    @ none:1
+in expression starting at /home/runner/.julia/packages/QuantumESPRESSOExpress/3XRaB/src/ConvergenceTestWorkflow/ConvergenceTestWorkflow.jl:1
+in expression starting at /home/runner/.julia/packages/QuantumESPRESSOExpress/3XRaB/src/QuantumESPRESSOExpress.jl:1
+ERROR: LoadError: Failed to precompile QuantumESPRESSOExpress [524a00d3-5d12-4323-9774-d2c11dc9d82e] to /home/runner/.julia/compiled/v1.7/QuantumESPRESSOExpress/jl_wu06UF.
+Stacktrace:
+  [1] error(s::String)
+    @ Base ./error.jl:33
+  [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, ignore_loaded_modules::Bool)
+    @ Base ./loading.jl:1466
+  [3] compilecache(pkg::Base.PkgId, path::String)
+    @ Base ./loading.jl:1410
+  [4] _require(pkg::Base.PkgId)
+    @ Base ./loading.jl:1120
+  [5] require(uuidkey::Base.PkgId)
+    @ Base ./loading.jl:1013
+  [6] require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:997
+  [7] include(mod::Module, _path::String)
+    @ Base ./Base.jl:418
+  [8] include(x::String)
+    @ ExpressCommands ~/.julia/packages/ExpressCommands/DsqvJ/src/ExpressCommands.jl:1
+  [9] top-level scope
+    @ ~/.julia/packages/ExpressCommands/DsqvJ/src/ExpressCommands.jl:89
+ [10] include
+    @ ./Base.jl:418 [inlined]
+ [11] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt64}}, source::String)
+    @ Base ./loading.jl:1318
+ [12] top-level scope
+    @ none:1
+ [13] eval
+    @ ./boot.jl:373 [inlined]
+ [14] eval(x::Expr)
+    @ Base.MainInclude ./client.jl:453
+ [15] top-level scope
+    @ none:1
+in expression starting at /home/runner/.julia/packages/ExpressCommands/DsqvJ/src/EOS.jl:1
+in expression starting at /home/runner/.julia/packages/ExpressCommands/DsqvJ/src/ExpressCommands.jl:1
+ERROR: LoadError: Failed to precompile ExpressCommands [0fa58581-61d8-4f50-b6a2-2e2dd41ab979] to /home/runner/.julia/compiled/v1.7/ExpressCommands/jl_Bfozbq.
+Stacktrace:
+ [1] error(s::String)
+   @ Base ./error.jl:33
+ [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, ignore_loaded_modules::Bool)
+   @ Base ./loading.jl:1466
+ [3] compilecache(pkg::Base.PkgId, path::String)
+   @ Base ./loading.jl:1410
+ [4] _require(pkg::Base.PkgId)
+   @ Base ./loading.jl:1120
+ [5] require(uuidkey::Base.PkgId)
+   @ Base ./loading.jl:1013
+ [6] require(into::Module, mod::Symbol)
+   @ Base ./loading.jl:997
+ [7] include(fname::String)
+   @ Base.MainInclude ./client.jl:451
+ [8] top-level scope
+   @ none:5
+in expression starting at /home/runner/.julia/packages/ExpressCommands/DsqvJ/deps/build.jl:1</code></pre><p>in Julia REPL.</p><p>After installation, the path to <code>xps</code> is <code>$HOME/.julia/bin/xps</code> by default. So please add <code>$HOME/.julia/bin</code> to your <code>PATH</code> environment variable.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../develop/">Development »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.12 on <span class="colophon-date" title="Wednesday 19 January 2022 05:54">Wednesday 19 January 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
