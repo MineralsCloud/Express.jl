@@ -41,6 +41,6 @@ using .Shell
 include("ConvergenceTestWorkflow/ConvergenceTestWorkflow.jl")
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
 include("PhononWorkflow/PhononWorkflow.jl")
-# include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
+include("QuasiHarmonicApproxWorkflow/QuasiHarmonicApproxWorkflow.jl")
 
 end
