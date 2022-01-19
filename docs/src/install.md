@@ -70,8 +70,9 @@ platform to explain the following steps:
 2. Run the following commands and wait for them to finish:
 
    ```@repl
-   using Pkg; Pkg.update()
-   Pkg.add("Express")
+   using Pkg
+   Pkg.update();
+   Pkg.add("Express");
    ```
 
 3. Run
@@ -88,8 +89,9 @@ platform to explain the following steps:
 If you want to install the latest in development (maybe buggy) version of `Express`, type
 
 ```@repl
-using Pkg; Pkg.update()
-pkg"add Express#master"
+using Pkg
+Pkg.update();
+pkg"add Express#master";
 ```
 
 in the second step instead.
@@ -101,7 +103,9 @@ our [GitHub repository](https://github.com/MineralsCloud/Express.jl) for new rel
 Once we release a new version, you can update `Express` by typing
 
 ```@repl
-using Pkg; Pkg.update("Express"); Pkg.gc()
+using Pkg
+Pkg.update("Express");
+Pkg.gc();
 ```
 
 in Julia REPL.
@@ -111,7 +115,9 @@ in Julia REPL.
 1. To uninstall, in a Julia session, run
 
    ```@repl
-   using Pkg; Pkg.rm("Express"); Pkg.gc()
+   using Pkg
+   Pkg.rm("Express");
+   Pkg.gc();
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
@@ -125,7 +131,9 @@ in the `express` framework. The current plugin is
 To install `QuantumESPRESSOExpress.jl`, run
 
 ```@repl
-using Pkg; Pkg.update(); Pkg.add("QuantumESPRESSOExpress")
+using Pkg
+Pkg.update();
+Pkg.add("QuantumESPRESSOExpress");
 ```
 
 in Julia REPL.
@@ -138,7 +146,9 @@ It installs an executable '`xps`' that can execute code from configuration
 files provided by users. To install `ExpressCommands`, run
 
 ```@repl
-using Pkg; Pkg.update(); Pkg.add("ExpressCommands")
+using Pkg
+Pkg.update();
+Pkg.add("ExpressCommands");
 ```
 
 in Julia REPL.

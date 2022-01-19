@@ -55,7 +55,7 @@ using Pkg
 ENV["PYTHON"] = "... path of the python executable ..."
 # ENV["PYTHON"] = raw"C:\Python37-x64\python.exe" # example for Windows, "raw" to not have to escape: "C:\\Python37-x64\\python.exe"
 # ENV["PYTHON"] = "/usr/bin/python3.7"            # example for *nix
-Pkg.build("PyCall")
+Pkg.build("PyCall");
 ```
 
 Please see [this part](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version)
@@ -71,7 +71,7 @@ run
 ```@repl
 using Pkg
 ENV["PYTHON"] = "" # empty string
-Pkg.build("PyCall")
+Pkg.build("PyCall");
 ```
 
 Then re-launch Julia.
