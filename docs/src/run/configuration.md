@@ -22,7 +22,7 @@ The configuration file for the EOS workflow has the following syntax:
     (Murnaghan), `bm2` (Birch--Murnaghan second order), `bm3`, `bm4`, `vinet` (Vinet), `pt2`
     (Poirier--Tarantola second order), `pt3`, and `pt4`.
   - `values`: A vector of strings that specifies each value of the EOS.
-    The default order is ``V_0``, ``B_0``, ``B'_0``(, ``B''_0``, etc.). Units must be provided.
+    The default order is `V_0`, `B_0`, `B'_0`(, `B''_0`, etc.). Units must be provided.
 - `fixed`:
   - `pressures` or `volumes`: Whether to fix pressures of volumes.
     - `values`: Specify the pressures or volumes. It can be a vector of numbers, or a string
@@ -40,7 +40,7 @@ The configuration file for the EOS workflow has the following syntax:
     - `root`: The path of the root directory of output files.
     - `pattern`: A string specifying the naming convention of the output directories. Its
       default value is `p=`. For example, if `fixed.pressures.values` is a vector of
-      pressures `[10, 20, 30]` which represents the relaxations are done from ``10-30``GPa,
+      pressures `[10, 20, 30]` which represents the relaxations are done from `10-30`GPa,
       then the generated inputs and outputs will be stored in directories `p=10`, `p=20` and
       `p=30`.
 - `save`:
@@ -97,25 +97,12 @@ The JSON and TOML equivalents of the above file are:
   "fixed": {
     "pressures": {
       "unit": "GPa",
-      "values": [
-        -5,
-        -2,
-        0,
-        5,
-        10,
-        15,
-        17,
-        20
-      ]
+      "values": [-5, -2, 0, 5, 10, 15, 17, 20]
     }
   },
   "trial_eos": {
     "type": "bm3",
-    "values": [
-      "300.44 bohr^3",
-      "74.88 GPa",
-      4.82
-    ]
+    "values": ["300.44 bohr^3", "74.88 GPa", 4.82]
   }
 }
 ```
@@ -165,7 +152,7 @@ The configuration file for the phonon workflow has the following syntax:
     - `root`: The path of the root directory of output files.
     - `pattern`: A string specifying the naming convention of the output directories. Its
       default value is `p=`. For example, if `fixed.pressures.values` is a vector of
-      pressures `[10, 20, 30]` which represents the relaxations are done from ``10-30``GPa,
+      pressures `[10, 20, 30]` which represents the relaxations are done from `10-30`GPa,
       then the generated inputs and outputs will be stored in directories `p=10`, `p=20` and
       `p=30`.
 - `save`:
@@ -224,16 +211,7 @@ The JSON and TOML equivalents of the above file are:
   "fixed": {
     "pressures": {
       "unit": "GPa",
-      "values": [
-        -5,
-        -2,
-        0,
-        5,
-        10,
-        15,
-        17,
-        20
-      ]
+      "values": [-5, -2, 0, 5, 10, 15, 17, 20]
     }
   }
 }
