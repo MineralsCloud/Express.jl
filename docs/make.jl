@@ -19,8 +19,8 @@ makedocs(;
             "Installation" => "install.md",
             "Development" => "develop.md",
             "Running" => [
-                "Configuration files" => "configuration.md",
-                "How to run `Express` from command line" => "run.md",
+                "Configuration files" => "run/configuration.md",
+                "How to run `Express` from command line" => "run/cli.md",
             ],
         ],
         "Troubleshooting" => "troubleshooting.md",
