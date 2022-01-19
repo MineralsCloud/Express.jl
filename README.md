@@ -2,7 +2,7 @@
   <img src="docs/src/assets/logo.png" height="400"><br>
 </div>
 
-# Express
+# Express: an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate _ab initio_ calculations
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MineralsCloud.github.io/Express.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MineralsCloud.github.io/Express.jl/dev)
