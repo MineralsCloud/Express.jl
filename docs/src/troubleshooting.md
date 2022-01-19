@@ -22,7 +22,7 @@ already have Julia installed as a module, you may
 just `module load julia` to use it. If not, either install by yourself or contact your
 administrator.
 
-### Have trouble installing [`PyCall.jl`](https://github.com/JuliaPy/PyCall.jl)
+### Have trouble installing [`qha`](https://github.com/MineralsCloud/qha)
 
 If you are seeing error message like this:
 
@@ -31,11 +31,33 @@ ERROR: LoadError: InitError: PyError (PyImport_ImportModule
 
 The Python package qha could not be imported by pyimport. Usually this means
 that you did not install qha in the Python version being used by PyCall.
+
+PyCall is currently configured to use the Python version at:
+
+/usr/bin/python3
+
+and you should use whatever mechanism you usually use (apt-get, pip, conda,
+etcetera) to install the Python package containing the qha module.
 ```
 
-One solution is to re-configure `PyCall` to use a different Python
+It is because on some operating systems, `python` is already installed, and Julia
+selects it as the default binary. But that `python` cannot install third-party Python packages.
+So [`qha`](https://github.com/MineralsCloud/qha) cannot be automatically installed
+by Julia.
+
+One solution is to re-configure [`PyCall`](https://github.com/JuliaPy/PyCall.jl) to use a different Python
 version on your system: set `ENV["PYTHON"]` to the path of the python
 executable you want to use, run `Pkg.build("PyCall")`, and re-launch Julia.
+For example, in Julia REPL, run
+
+```@repl
+using Pkg
+ENV["PYTHON"] = "... path of the python executable ..."
+# ENV["PYTHON"] = raw"C:\Python37-x64\python.exe" # example for Windows, "raw" to not have to escape: "C:\\Python37-x64\\python.exe"
+# ENV["PYTHON"] = "/usr/bin/python3.7"            # example for *nix
+Pkg.build("PyCall")
+```
+
 Please see [this part](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version)
 for more detailed instructions.
 
@@ -44,7 +66,29 @@ distribution via the [`Conda.jl` package](https://github.com/JuliaPy/Conda.jl)
 (which installs a private Anaconda
 Python distribution), which has the advantage that packages can be installed
 and kept up-to-date via Julia. As explained in the `PyCall` documentation, in Julia,
-set `ENV["PYTHON"]=""`, run `Pkg.build("PyCall")`, and re-launch Julia.
+run
+
+```@repl
+using Pkg
+ENV["PYTHON"] = "" # empty string
+Pkg.build("PyCall")
+```
+
+Then re-launch Julia.
+
+If `qha` still cannot be installed, go to the Python binary directory you specified
+(for the second solution, go to [`$JULIA_DEPOT_PATH/conda/3/bin`](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_DEPOT_PATH))
+and run the following command
+
+```shell
+$ ./pip install qha
+```
+
+!!! note
+
+    At least Python 3.6 and above is required to install qha.
+    Please read its [manual](https://mineralscloud.github.io/qha/tutorials/installing.html)
+    for more information.
 
 ## Loading settings
 
