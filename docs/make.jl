@@ -18,9 +18,11 @@ makedocs(;
         "Manual" => [
             "Installation" => "install.md",
             "Development" => "develop.md",
-            "Configuration files" => "configuration.md",
+            "Running" => [
+                "Configuration files" => "configuration.md",
+                "How to run `Express` from command line" => "run.md",
+            ],
         ],
-        # "Examples" => ["hcp-GaN example" => "examples/GaN.md"],
         "Troubleshooting" => "troubleshooting.md",
         "Other questions" => "questions.md",
         "API by module" => ["`EquationOfStateWorkflow` module" => "api/EquationOfStateWorkflow.md"],
