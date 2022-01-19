@@ -14,11 +14,11 @@ using Pkg; Pkg.update()
 pkg"dev Express"
 ```
 
-Then the package will be cloned to your local machine at a path. On macOS, by
+Then the package will be cloned to your local machine at a path. On Unix-like systems, by
 default is located at `~/.julia/dev/Express` unless you modify the
-`JULIA_DEPOT_PATH` environment variable. (See
-[Julia's official documentation](http://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_DEPOT_PATH-1)
-on how to do this.) In the following text, we will call it `PKGROOT`.
+`JULIA_DEPOT_PATH` environment variable (See
+[Julia's official documentation](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_DEPOT_PATH)).
+In the following text, we will call it `PKGROOT`.
 
 ## [Instantiate the project](@id instantiating)
 
