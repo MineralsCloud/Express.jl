@@ -3,8 +3,8 @@
 `Express` can be run from a configuration file, with some preset rules.
 The following sections introduce how to write such configuration files.
 By now, only
-[YAML](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html),
-[JSON](https://restfulapi.net/json-syntax/), and
+[YAML](https://yaml.org/),
+[JSON](https://www.json.org/json-en.html), and
 [TOML](https://toml.io/en/) formats are supported. Please refer their official
 documentation for their syntax.
 In the examples below, we will use YAML syntax for configuration files.
