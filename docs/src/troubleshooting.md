@@ -68,7 +68,7 @@ ERROR: while scanning a simple key at line n, column 0: could not find expected 
 
 Check whether you have no space between the `YAML` key and its value like
 `key:1` or `key:some text`, etc. To correct, change to `key: 1`, `key: some text`, etc.
-Otherwise check other `YAML` syntax you may have broken.
+Otherwise, check other `YAML` syntax you may have broken.
 
 ## Loading `Express`
 
