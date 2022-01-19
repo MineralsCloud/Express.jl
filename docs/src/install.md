@@ -1,5 +1,9 @@
 # Installation
 
+Here are the installation instructions
+for [`Express.jl`](https://github.com/MineralsCloud/Express.jl). If you have
+trouble installing it, please refer to our [Troubleshooting](@ref) page for more information.
+
 ## Install Julia
 
 First, you should install [Julia](https://julialang.org/). We recommend downloading it from
