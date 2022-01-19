@@ -1,9 +1,5 @@
 # Troubleshooting
 
-```@contents
-Pages = ["troubleshooting.md"]
-```
-
 This page collects some possible errors you may encounter and trick how to fix them.
 
 _If you have additional tips, please submit a PR with suggestions._
