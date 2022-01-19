@@ -27,7 +27,7 @@ function buildworkflow(cfgfile)
         g = AtomicJob(() -> LogMsg{VcOptim}()(; start = true))
         h = buildjob(MakeInput{VcOptim}(), cfgfile)
         i = buildjob(RunCmd{VcOptim}(), cfgfile)
-        j0 = buildjob(GetData{Scf}(), cfgfile)
+        j0 = buildjob(GetData{VcOptim}(), cfgfile)
         j = buildjob(FitEos{VcOptim}(), cfgfile)
         l = AtomicJob(() -> LogMsg{VcOptim}()(; start = false))
         ((((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d0) ▷ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j0) ▷ j) ▷ l
