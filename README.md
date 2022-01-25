@@ -13,6 +13,7 @@
 [![pipeline status](https://gitlab.com/singularitti/Express.jl/badges/master/pipeline.svg)](https://gitlab.com/singularitti/Express.jl/-/pipelines)
 [![coverage report](https://gitlab.com/singularitti/Express.jl/badges/master/coverage.svg)](https://gitlab.com/singularitti/Express.jl/-/jobs)
 [![Coverage](https://codecov.io/gh/MineralsCloud/Express.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/Express.jl)
+[![PkgEval](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/E/Express.svg)](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/report.html)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
 
 Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite this package as:
