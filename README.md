@@ -17,6 +17,7 @@
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
 
 Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite this package as:
+
 ```bibtex
 @misc{zhang2021textttexpress,
       title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling},
@@ -29,7 +30,7 @@ Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite 
 ```
 
 `Express` is an extensible, high-throughput, high-level workflow framework that aims to
-automate *ab initio* calculations for the materials science community. `Express` is shipped
+automate _ab initio_ calculations for the materials science community. `Express` is shipped
 with well-tested workflow templates, including structure optimization, equation of state
 (EOS) fitting, phonon spectrum (lattice dynamics) calculation, and thermodynamic property
 calculation in the framework of the quasi-harmonic approximation (QHA). It is designed to be
