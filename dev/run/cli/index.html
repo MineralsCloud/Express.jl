@@ -1,112 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>How to run Express from command line · Express.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://MineralsCloud.github.io/Express.jl/run/cli/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><script src="../../../copy.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="Express.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Express.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../install/">Installation</a></li><li><a class="tocitem" href="../../develop/">Development</a></li><li><input class="collapse-toggle" id="menuitem-2-3" type="checkbox" checked/><label class="tocitem" for="menuitem-2-3"><span class="docs-label">Running</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../configuration/">Configuration files</a></li><li class="is-active"><a class="tocitem" href>How to run <code>Express</code> from command line</a></li></ul></li></ul></li><li><a class="tocitem" href="../../troubleshooting/">Troubleshooting</a></li><li><a class="tocitem" href="../../questions/">Other questions</a></li><li><span class="tocitem">API by module</span><ul><li><a class="tocitem" href="../../api/EquationOfStateWorkflow/"><code>EquationOfStateWorkflow</code> module</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li><a class="is-disabled">Running</a></li><li class="is-active"><a href>How to run <code>Express</code> from command line</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>How to run <code>Express</code> from command line</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/MineralsCloud/Express.jl/blob/master/docs/src/run/cli.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="How-to-run-Express-from-command-line"><a class="docs-heading-anchor" href="#How-to-run-Express-from-command-line">How to run <code>Express</code> from command line</a><a id="How-to-run-Express-from-command-line-1"></a><a class="docs-heading-anchor-permalink" href="#How-to-run-Express-from-command-line" title="Permalink"></a></h1><p>To carry out a computation, first, users need to prepare the input files introduced in section &quot;<a href="../configuration/#Configuration-files">Configuration files</a>&quot;. Then if <a href="../../install/#cli">the <code>xps</code> command</a> is installed, run in terminal:</p><pre><code class="language-shell hljs">$ xps run eos.toml  # equation of state workflow
 $ xps run vdos.toml  # phonon workflow
-$ xps run qha.toml  # QHA workflow</code></pre><p>As explained in &quot;<a href="../configuration/#Configuration-files">Configuration files</a>&quot;, the file name (<code>eos.toml</code>, etc.) of the configuration file does not matter. It is the <code>recipe</code> field that determines the type of workflow.</p><p>It is often suggested to put the above commands in a script file with a header and submit it to a workload manager like <a href="https://www.schedmd.com/">Slurm</a>. However, users can also request an interactive session and run code Julia REPL.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Express.EquationOfStateWorkflow.Recipes</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; using QuantumESPRESSOExpress</code><code class="nohighlight hljs ansi" style="display:block;">┌ Warning: Module Express with build ID 168855196902 is missing from the cache.
-│ This may mean Express [b12df14e-adf7-11e9-0606-d5813a258349] does not support precompilation but is imported by a module that does.
-└ @ Base loading.jl:1107
-ERROR: LoadError: InitError: PyError (PyImport_ImportModule
+$ xps run qha.toml  # QHA workflow</code></pre><p>As explained in &quot;<a href="../configuration/#Configuration-files">Configuration files</a>&quot;, the file name (<code>eos.toml</code>, etc.) of the configuration file does not matter. It is the <code>recipe</code> field that determines the type of workflow.</p><p>It is often suggested to put the above commands in a script file with a header and submit it to a workload manager like <a href="https://www.schedmd.com/">Slurm</a>. However, users can also request an interactive session and run code Julia REPL.</p><pre><code class="language-julia-repl hljs">julia&gt; using Express.EquationOfStateWorkflow.Recipes
 
-The Python package f90nml could not be imported by pyimport. Usually this means
-that you did not install f90nml in the Python version being used by PyCall.
+julia&gt; using QuantumESPRESSOExpress
 
-PyCall is currently configured to use the Python version at:
+julia&gt; workflow = buildworkflow(&quot;eos.toml&quot;);
 
-/usr/bin/python3
-
-and you should use whatever mechanism you usually use (apt-get, pip, conda,
-etcetera) to install the Python package containing the f90nml module.
-
-One alternative is to re-configure PyCall to use a different Python
-version on your system: set ENV[&quot;PYTHON&quot;] to the path/name of the python
-executable you want to use, run Pkg.build(&quot;PyCall&quot;), and re-launch Julia.
-
-Another alternative is to configure PyCall to use a Julia-specific Python
-distribution via the Conda.jl package (which installs a private Anaconda
-Python distribution), which has the advantage that packages can be installed
-and kept up-to-date via Julia.  As explained in the PyCall documentation,
-set ENV[&quot;PYTHON&quot;]=&quot;&quot;, run Pkg.build(&quot;PyCall&quot;), and re-launch Julia. Then,
-To install the f90nml module, you can use `pyimport_conda(&quot;f90nml&quot;, PKG)`,
-where PKG is the Anaconda package that contains the module f90nml,
-or alternatively you can use the Conda package directly (via
-`using Conda` followed by `Conda.add` etcetera).
-
-) &lt;class &#39;ModuleNotFoundError&#39;&gt;
-ModuleNotFoundError(&quot;No module named &#39;f90nml&#39;&quot;)
-
-Stacktrace:
-  [1] pyimport(name::String)
-    @ PyCall ~/.julia/packages/PyCall/L0fLP/src/PyCall.jl:550
-  [2] pyimport_conda(modulename::String, condapkg::String, channel::String)
-    @ PyCall ~/.julia/packages/PyCall/L0fLP/src/PyCall.jl:708
-  [3] __init__()
-    @ PyFortran90Namelists ~/.julia/packages/PyFortran90Namelists/FF2P2/src/init.jl:16
-  [4] _include_from_serialized(path::String, depmods::Vector{Any})
-    @ Base ./loading.jl:768
-  [5] _require_search_from_serialized(pkg::Base.PkgId, sourcepath::String)
-    @ Base ./loading.jl:854
-  [6] _require(pkg::Base.PkgId)
-    @ Base ./loading.jl:1097
-  [7] require(uuidkey::Base.PkgId)
-    @ Base ./loading.jl:1013
-  [8] require(into::Module, mod::Symbol)
-    @ Base ./loading.jl:997
-  [9] include(mod::Module, _path::String)
-    @ Base ./Base.jl:418
- [10] include(x::String)
-    @ QuantumESPRESSOParser ~/.julia/packages/QuantumESPRESSOParser/wuqxr/src/QuantumESPRESSOParser.jl:1
- [11] top-level scope
-    @ ~/.julia/packages/QuantumESPRESSOParser/wuqxr/src/QuantumESPRESSOParser.jl:3
- [12] include
-    @ ./Base.jl:418 [inlined]
- [13] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt64}}, source::String)
-    @ Base ./loading.jl:1318
- [14] top-level scope
-    @ none:1
- [15] eval
-    @ ./boot.jl:373 [inlined]
- [16] eval(x::Expr)
-    @ Base.MainInclude ./client.jl:453
- [17] top-level scope
-    @ none:1
-during initialization of module PyFortran90Namelists
-in expression starting at /home/runner/.julia/packages/QuantumESPRESSOParser/wuqxr/src/Inputs/Inputs.jl:1
-in expression starting at /home/runner/.julia/packages/QuantumESPRESSOParser/wuqxr/src/QuantumESPRESSOParser.jl:1
-ERROR: LoadError: Failed to precompile QuantumESPRESSOParser [a780ab42-b33a-11e9-16c1-a92d75b2a626] to /home/runner/.julia/compiled/v1.7/QuantumESPRESSOParser/jl_qc5e1B.
-Stacktrace:
-  [1] error(s::String)
-    @ Base ./error.jl:33
-  [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, ignore_loaded_modules::Bool)
-    @ Base ./loading.jl:1466
-  [3] compilecache(pkg::Base.PkgId, path::String)
-    @ Base ./loading.jl:1410
-  [4] _require(pkg::Base.PkgId)
-    @ Base ./loading.jl:1120
-  [5] require(uuidkey::Base.PkgId)
-    @ Base ./loading.jl:1013
-  [6] require(into::Module, mod::Symbol)
-    @ Base ./loading.jl:997
-  [7] include(mod::Module, _path::String)
-    @ Base ./Base.jl:418
-  [8] include(x::String)
-    @ QuantumESPRESSO ~/.julia/packages/QuantumESPRESSO/INn6U/src/QuantumESPRESSO.jl:1
-  [9] top-level scope
-    @ ~/.julia/packages/QuantumESPRESSO/INn6U/src/QuantumESPRESSO.jl:3
- [10] include
-    @ ./Base.jl:418 [inlined]
- [11] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt64}}, source::String)
-    @ Base ./loading.jl:1318
- [12] top-level scope
-    @ none:1
- [13] eval
-    @ ./boot.jl:373 [inlined]
- [14] eval(x::Expr)
-    @ Base.MainInclude ./client.jl:453
- [15] top-level scope
-    @ none:1
-in expression starting at /home/runner/.julia/packages/QuantumESPRESSO/INn6U/src/Inputs.jl:1
-in expression starting at /home/runner/.julia/packages/QuantumESPRESSO/INn6U/src/QuantumESPRESSO.jl:1
-ERROR: LoadError: Failed to precompile QuantumESPRESSO [95228164-aa68-11e9-35aa-d79ea5c4658d] to /home/runner/.julia/compiled/v1.7/QuantumESPRESSO/jl_CdE95s.
-in expression starting at /home/runner/.julia/packages/QuantumESPRESSOExpress/3XRaB/src/ConvergenceTestWorkflow/ConvergenceTestWorkflow.jl:1
-in expression starting at /home/runner/.julia/packages/QuantumESPRESSOExpress/3XRaB/src/QuantumESPRESSOExpress.jl:1</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; workflow = buildworkflow(&quot;eos.toml&quot;);</code><code class="nohighlight hljs ansi" style="display:block;">ERROR: file &quot;eos.toml&quot; does not exists!</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; run!(workflow)</code><code class="nohighlight hljs ansi" style="display:block;">ERROR: UndefVarError: workflow not defined</code></pre><p>For phonon and the QHA workflow, run <code>using Express.PhononWorkflow.Recipes</code> and <code>using Express.QuasiHarmonicApproxWorkflow.Recipes</code> in the first step.</p><p>In an EOS workflow, the final results include outputs returned by Quantum ESPRESSO, a list of raw data (volume-energy pairs), and a fitted EOS. If something goes wrong, the workflow might be terminated. The state of the workflow (i.e., the status of each job) and errors will be saved in a file for debugging. Once the bug is fixed, run <code>xps run &lt;path-to-config-file&gt;</code> again, and <code>express</code> will retry the failed jobs. To print either input or output data in a formatted, readable form, run</p><pre><code class="language-shell hljs">$ xps print &lt;file-name&gt;</code></pre><p>where the allowed extensions of <code>&lt;file-name&gt;</code> are <code>.jls</code>, <code>.json</code>, <code>.yaml</code> or <code>.yml</code>, and <code>.toml</code>. The last four extensions correspond to three human-readable data-serialization file formats, i.e., <a href="https://www.json.org/json-en.html">JSON</a>, <a href="https://yaml.org/">YAML</a>, and <a href="https://toml.io/en/">TOML</a>, while <code>.jls</code> is a binary serialization format only recognizable to Julia. For example,</p><pre><code class="language-shell hljs">$ xps print eos.toml
+julia&gt; run!(workflow);</code></pre><p>For phonon and the QHA workflow, run <code>using Express.PhononWorkflow.Recipes</code> and <code>using Express.QuasiHarmonicApproxWorkflow.Recipes</code> in the first step.</p><p>In an EOS workflow, the final results include outputs returned by Quantum ESPRESSO, a list of raw data (volume-energy pairs), and a fitted EOS. If something goes wrong, the workflow might be terminated. The state of the workflow (i.e., the status of each job) and errors will be saved in a file for debugging. Once the bug is fixed, run <code>xps run &lt;path-to-config-file&gt;</code> again, and <code>express</code> will retry the failed jobs. To print either input or output data in a formatted, readable form, run</p><pre><code class="language-shell hljs">$ xps print &lt;file-name&gt;</code></pre><p>where the allowed extensions of <code>&lt;file-name&gt;</code> are <code>.jls</code>, <code>.json</code>, <code>.yaml</code> or <code>.yml</code>, and <code>.toml</code>. The last four extensions correspond to three human-readable data-serialization file formats, i.e., <a href="https://www.json.org/json-en.html">JSON</a>, <a href="https://yaml.org/">YAML</a>, and <a href="https://toml.io/en/">TOML</a>, while <code>.jls</code> is a binary serialization format only recognizable to Julia. For example,</p><pre><code class="language-shell hljs">$ xps print eos.toml
 $ xps print raw.json
-$ xps print eos.jls</code></pre><p><code>express</code> can also plot some data, such as the fitted EOS applied to a certain range of volumes along with the raw data. The corresponding command is</p><pre><code class="language-shell hljs">xps plot &lt;file-name&gt;</code></pre><p>where <code>&lt;file-name&gt;</code> refers to the EOS binary file with extension <code>.jls</code>. These are the three most important commands of <code>express</code>. These catchy commands cover all the functionalities we have promised, including but not limited to unit conversion, pseudopotential downloading, input validation and generation, calculation monitoring, task distribution, gathering and analysis of results, error handling, logging, and visualization. We hope they can facilitate tedious work as much as possible.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../configuration/">« Configuration files</a><a class="docs-footer-nextpage" href="../../troubleshooting/">Troubleshooting »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.12 on <span class="colophon-date" title="Wednesday 19 January 2022 17:01">Wednesday 19 January 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+$ xps print eos.jls</code></pre><p><code>express</code> can also plot some data, such as the fitted EOS applied to a certain range of volumes along with the raw data. The corresponding command is</p><pre><code class="language-shell hljs">xps plot &lt;file-name&gt;</code></pre><p>where <code>&lt;file-name&gt;</code> refers to the EOS binary file with extension <code>.jls</code>.</p><p>These are the three most important commands of <code>express</code>. These catchy commands cover all the functionalities we have promised, including but not limited to unit conversion, pseudopotential downloading, input validation and generation, calculation monitoring, task distribution, gathering and analysis of results, error handling, logging, and visualization. We hope they can facilitate tedious work as much as possible.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../configuration/">« Configuration files</a><a class="docs-footer-nextpage" href="../../troubleshooting/">Troubleshooting »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.12 on <span class="colophon-date" title="Friday 4 February 2022 06:56">Friday 4 February 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
