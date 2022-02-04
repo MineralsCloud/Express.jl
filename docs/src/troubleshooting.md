@@ -50,12 +50,14 @@ version on your system: set `ENV["PYTHON"]` to the path of the python
 executable you want to use, run `Pkg.build("PyCall")`, and re-launch Julia.
 For example, in Julia REPL, run
 
-```@repl
-using Pkg
-ENV["PYTHON"] = "... path of the python executable ..."
+```julia-repl
+julia> using Pkg
+
+julia> ENV["PYTHON"] = "... path of the python executable ..."
 # ENV["PYTHON"] = raw"C:\Python37-x64\python.exe" # example for Windows, "raw" to not have to escape: "C:\\Python37-x64\\python.exe"
 # ENV["PYTHON"] = "/usr/bin/python3.7"            # example for *nix
-Pkg.build("PyCall");
+
+julia> Pkg.build("PyCall");
 ```
 
 Please see [this part](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version)
@@ -68,10 +70,12 @@ Python distribution), which has the advantage that packages can be installed
 and kept up-to-date via Julia. As explained in the `PyCall` documentation, in Julia,
 run
 
-```@repl
-using Pkg
-ENV["PYTHON"] = "" # empty string
-Pkg.build("PyCall");
+```julia-repl
+julia> using Pkg
+
+julia> ENV["PYTHON"] = "" # empty string
+
+julia> Pkg.build("PyCall");
 ```
 
 Then re-launch Julia.
@@ -154,8 +158,8 @@ See [Fredrik Ekre's talk](https://youtu.be/IuwxE3m0_QQ?t=313) for details.
 
    Then you probably forget loading a plugin package for `Express.jl`. For example, you should run
 
-   ```@repl
-   using QuantumESPRESSOExpress
+   ```julia-repl
+   julia> using QuantumESPRESSOExpress
    ```
 
    to fix this error.
