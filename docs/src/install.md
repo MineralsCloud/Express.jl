@@ -69,16 +69,18 @@ platform to explain the following steps:
 
 2. Run the following commands and wait for them to finish:
 
-   ```@repl
-   using Pkg
-   Pkg.update();
-   Pkg.add("Express");
+   ```julia-repl
+   julia> using Pkg
+
+   julia> Pkg.update()
+
+   julia> Pkg.add("Express")
    ```
 
 3. Run
 
-   ```@repl
-   using Express
+   ```julia-repl
+   julia> using Express
    ```
 
    and have fun!
@@ -88,10 +90,12 @@ platform to explain the following steps:
 
 If you want to install the latest in development (maybe buggy) version of `Express`, type
 
-```@repl
-using Pkg
-Pkg.update();
-pkg"add Express#master";
+```julia-repl
+julia> using Pkg
+
+julia> Pkg.update()
+
+julia> pkg"add Express#master"
 ```
 
 in the second step instead.
@@ -102,10 +106,12 @@ Please [watch](https://docs.github.com/en/account-and-profile/managing-subscript
 our [GitHub repository](https://github.com/MineralsCloud/Express.jl) for new releases.
 Once we release a new version, you can update `Express` by typing
 
-```@repl
-using Pkg
-Pkg.update("Express");
-Pkg.gc();
+```julia-repl
+julia> using Pkg
+
+julia> Pkg.update("Express")
+
+julia> Pkg.gc()
 ```
 
 in Julia REPL.
@@ -114,10 +120,12 @@ in Julia REPL.
 
 1. To uninstall, in a Julia session, run
 
-   ```@repl
-   using Pkg
-   Pkg.rm("Express");
-   Pkg.gc();
+   ```julia-repl
+   julia> using Pkg
+
+   julia> Pkg.rm("Express")
+
+   julia> Pkg.gc()
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
@@ -130,10 +138,12 @@ in the `express` framework. The current plugin is
 [`QuantumESPRESSOExpress`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl).
 To install `QuantumESPRESSOExpress.jl`, run
 
-```@repl
-using Pkg
-Pkg.update();
-Pkg.add("QuantumESPRESSOExpress");
+```julia-repl
+julia> using Pkg
+
+julia> Pkg.update()
+
+julia> Pkg.add("QuantumESPRESSOExpress")
 ```
 
 in Julia REPL.
@@ -145,10 +155,12 @@ We provide a command-line interface of `express` for non-developers:
 It installs an executable '`xps`' that can execute code from configuration
 files provided by users. To install `ExpressCommands`, run
 
-```@repl
-using Pkg
-Pkg.update();
-Pkg.add("ExpressCommands");
+```julia-repl
+julia> using Pkg
+
+julia> Pkg.update()
+
+julia> Pkg.add("ExpressCommands")
 ```
 
 in Julia REPL.

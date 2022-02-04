@@ -18,11 +18,14 @@ It is often suggested to put the above commands in a script file with a header
 and submit it to a workload manager like [Slurm](https://www.schedmd.com/).
 However, users can also request an interactive session and run code Julia REPL.
 
-```@repl
-using Express.EquationOfStateWorkflow.Recipes
-using QuantumESPRESSOExpress
-workflow = buildworkflow("eos.toml");
-run!(workflow)
+```julia-repl
+julia> using Express.EquationOfStateWorkflow.Recipes
+
+julia> using QuantumESPRESSOExpress
+
+julia> workflow = buildworkflow("eos.toml");
+
+julia> run!(workflow);
 ```
 
 For phonon and the QHA workflow, run `using Express.PhononWorkflow.Recipes`
