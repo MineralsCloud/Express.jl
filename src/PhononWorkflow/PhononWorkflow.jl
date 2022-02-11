@@ -14,8 +14,7 @@ using ..Express:
     Scf,
     FixedIonSelfConsistentField,
     Action,
-    current_software,
-    myuparse
+    current_software
 using ..EquationOfStateWorkflow: VcOptim
 using ..Shell: distprocs
 
