@@ -3,9 +3,8 @@ module Config
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using Formatting: sprintf1
-using Unitful: @u_str
 
-using ...Express: Calculation, Action, UnitfulVector
+using ...Express: Calculation, Action, UnitfulVector, myuparse
 
 @option "ecutwfc" struct CutoffEnergies <: UnitfulVector
     values::AbstractVector
@@ -65,7 +64,7 @@ end
 
 struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(energies::CutoffEnergies)
-    unit = @u_str(energies.unit)
+    unit = myuparse(energies.unit)
     return energies.values .* unit
 end
 function (::ExpandConfig)(x::MonkhorstPackGrids)
