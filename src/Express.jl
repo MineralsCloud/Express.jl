@@ -4,7 +4,6 @@ using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using Unitful: uparse
 import Unitful
-import UnitfulAtomic
 
 import Configurations: convert_to_option
 
