@@ -7,6 +7,8 @@ import Unitful
 
 import Configurations: convert_to_option
 
+myuparse(str::AbstractString) = uparse(str; unit_context = Unitful.unitmodules)
+
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
 struct SelfConsistentField <: ElectronicStructure end
