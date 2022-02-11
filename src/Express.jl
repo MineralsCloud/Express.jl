@@ -7,6 +7,10 @@ import Unitful
 
 import Configurations: convert_to_option
 
+myuparse(str::AbstractString) =
+    uparse(filter(!isspace, str); unit_context = [Unitful, UnitfulAtomic])
+myuparse(num::Number) = num  # FIXME: this might be error-prone!
+
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
 struct SelfConsistentField <: ElectronicStructure end
