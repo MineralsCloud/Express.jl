@@ -13,8 +13,9 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet
 using Formatting: sprintf1
+using Unitful: @u_str
 
-using ...Express: Calculation, Action, UnitfulVector, myuparse
+using ...Express: Calculation, Action, UnitfulVector
 
 @option "pressures" struct Pressures <: UnitfulVector
     values::AbstractVector
@@ -108,10 +109,10 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(map(myuparse, trial_eos.values)...)
+    return T(map(@u_str, trial_eos.values)...)
 end
 function (::ExpandConfig)(pressures::Pressures)
-    unit = myuparse(pressures.unit)
+    unit = @u_str(pressures.unit)
     expanded = pressures.values .* unit
     if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
         @warn "for better fitting result, provide at least 1 negative pressure!"
@@ -119,7 +120,7 @@ function (::ExpandConfig)(pressures::Pressures)
     return expanded
 end
 function (::ExpandConfig)(volumes::Volumes)
-    unit = myuparse(volumes.unit)
+    unit = @u_str(volumes.unit)
     return volumes.values .* unit
 end
 function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}

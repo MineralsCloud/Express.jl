@@ -3,7 +3,7 @@ module Config
 using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
-using ...Express: Action, UnitfulVector, myuparse
+using ...Express: Action, UnitfulVector
 
 @option struct Pressures <: UnitfulVector
     values::AbstractVector
@@ -20,7 +20,7 @@ end
     values::AbstractVector
     unit::String
     function Temperatures(values, unit = "K")
-        @assert minimum(values) * myuparse(unit) >= 0u"K" "the minimum temperature is less than 0K!"
+        @assert minimum(values) * @u_str(unit) >= 0u"K" "the minimum temperature is less than 0K!"
         return new(values, unit)
     end
 end
@@ -97,7 +97,7 @@ end
 
 struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(pressures::Pressures)
-    unit = myuparse(pressures.unit)
+    unit = @u_str(pressures.unit)
     expanded = pressures.values .* unit
     if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
         @warn "for better fitting result, provide at least 1 negative pressure!"
@@ -105,7 +105,7 @@ function (::ExpandConfig)(pressures::Pressures)
     return expanded
 end
 function (::ExpandConfig)(temperatures::Temperatures)
-    unit = myuparse(temperatures.unit)
+    unit = @u_str(temperatures.unit)
     return temperatures.values .* unit
 end
 function (x::ExpandConfig)(config::AbstractDict)

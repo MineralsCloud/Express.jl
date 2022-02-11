@@ -14,7 +14,6 @@ Pseudopotentials = "1b2dc2e6-48aa-4f00-b8f4-19d1a71d7a0e"
 Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 SimpleWorkflows = "6a97d125-85da-4b66-b300-4bba10360563"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
 AbInitioSoftwareBase = "0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8"
@@ -24,7 +23,6 @@ Formatting = "0.4"
 Pseudopotentials = "0.8"
 SimpleWorkflows = "0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13"
 Unitful = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 1"
-UnitfulAtomic = "1"
 julia = "1"
 
 [extras]

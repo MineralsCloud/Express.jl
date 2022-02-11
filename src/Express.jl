@@ -4,13 +4,8 @@ using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using Unitful: uparse
 import Unitful
-import UnitfulAtomic
 
 import Configurations: convert_to_option
-
-myuparse(str::AbstractString) =
-    uparse(filter(!isspace, str); unit_context = [Unitful, UnitfulAtomic])
-myuparse(num::Number) = num  # FIXME: this might be error-prone!
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
