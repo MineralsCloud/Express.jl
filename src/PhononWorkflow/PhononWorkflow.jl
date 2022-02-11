@@ -6,7 +6,6 @@ using Serialization: deserialize
 using SimpleWorkflows: Workflow, run!, ▷
 using Unitful: ustrip, @u_str
 
-import ..Express
 using ..Express:
     Calculation,
     LatticeDynamics,

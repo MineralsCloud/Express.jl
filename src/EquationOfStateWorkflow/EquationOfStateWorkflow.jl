@@ -1,6 +1,5 @@
 module EquationOfStateWorkflow
 
-import ..Express
 using ..Express:
     Optimization,
     SelfConsistentField,
