@@ -3,8 +3,8 @@ module Config
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using Formatting: sprintf1
-using Unitful: ustrip, @u_str
-using ...Express: Action, UnitfulVector
+using Unitful: ustrip
+using ...Express: Action, UnitfulVector, myuparse
 using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics
 
 @option struct Template
@@ -82,7 +82,7 @@ end
 
 struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
-    unit = @u_str(fixed.unit)
+    unit = myuparse(fixed.unit)
     return fixed.values .* unit
 end
 function (::ExpandConfig)(save::Save)
