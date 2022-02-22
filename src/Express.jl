@@ -2,13 +2,12 @@ module Express
 
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
-using Unitful: uparse
-import Unitful
+using Unitful: Unitful, uparse, unitmodules
 
 import Configurations: convert_to_option
 
 myuparse(str::AbstractString) =
-    uparse(filter(!isspace, str); unit_context = Unitful.unitmodules)
+    uparse(filter(!isspace, str); unit_context = push!(unitmodules, Unitful))
 
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
