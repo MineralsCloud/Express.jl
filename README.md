@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/src/assets/logo.png" height="400"><br>
+  <img src="https://raw.githubusercontent.com/MineralsCloud/Express.jl/master/docs/src/assets/logo.png" height="400"><br>
 </div>
 
 # Express: an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate _ab initio_ calculations
