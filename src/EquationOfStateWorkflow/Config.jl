@@ -108,7 +108,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(map(myuparse, trial_eos.values)...)
+    return T(map(myuparse ∘ string, trial_eos.values)...)
 end
 function (::ExpandConfig)(pressures::Pressures)
     unit = myuparse(pressures.unit)
