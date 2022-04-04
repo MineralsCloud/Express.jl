@@ -62,7 +62,7 @@ end
     end
 end
 
-struct ExpandConfig{T} <: Action{T} end
+struct ExpandConfig{T} end
 function (::ExpandConfig)(energies::CutoffEnergies)
     unit = myuparse(energies.unit)
     return energies.values .* unit
