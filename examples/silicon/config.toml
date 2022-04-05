@@ -1,8 +1,8 @@
 recipe = "single qha"
-input = "input"
-inp_file_list = "filelist.yaml"
-static = "static"
-q_points = "q_points"
+input = "../examples/silicon/input"
+inp_file_list = "../examples/silicon/filelist.yaml"
+static = "../examples/silicon/static"
+q_points = "../examples/silicon/q_points"
 static_only = false
 order = 3
 energy_unit = "ry"
@@ -234,6 +234,6 @@ Bs = true
 gamma = true
 
 [dirs]
-root = "./"
+root = "../examples/silicon/"
 pattern = "p=%.1f"
 group_by_step = false
