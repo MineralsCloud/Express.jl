@@ -25,7 +25,7 @@ end
     end
 end
 
-@option struct Thermo
+@option mutable struct Thermo
     F::Bool = true
     G::Bool = true
     U::Bool = true
