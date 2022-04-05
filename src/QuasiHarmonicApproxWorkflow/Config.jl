@@ -144,9 +144,9 @@ function (x::ExpandConfig)(config::AbstractDict)
     return (
         input = abspath(expanduser(dict["input"])),
         config = path,
-        inp_file_list = config.inp_file_list,
-        static = config.static,
-        q_points = config.q_points,
+        inp_file_list = abspath(expanduser(config.inp_file_list)),
+        static = abspath(expanduser(config.static)),
+        q_points = abspath(expanduser(config.q_points)),
     )
 end
 
