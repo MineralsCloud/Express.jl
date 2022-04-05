@@ -84,7 +84,7 @@ end
     end
 end
 
-struct ExpandConfig{T} <: Action{T} end
+struct ExpandConfig{T} end
 function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")

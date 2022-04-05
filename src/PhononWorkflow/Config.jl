@@ -80,7 +80,7 @@ end
     end
 end
 
-struct ExpandConfig{T} <: Action{T} end
+struct ExpandConfig{T} end
 function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
     unit = myuparse(fixed.unit)
     return fixed.values .* unit

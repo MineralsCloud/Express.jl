@@ -95,7 +95,7 @@ end
     end
 end
 
-struct ExpandConfig{T} <: Action{T} end
+struct ExpandConfig{T} end
 function (::ExpandConfig)(pressures::Pressures)
     unit = myuparse(pressures.unit)
     expanded = pressures.values .* unit
