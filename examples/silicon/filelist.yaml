@@ -1,0 +1,14 @@
+comment: Si calculated by Quantum ESPRESSO
+formula_unit_number: 2
+frequency_files:
+    - ../examples/silicon/V+5.freq
+    - ../examples/silicon/V+4.freq
+    - ../examples/silicon/V+3.freq
+    - ../examples/silicon/V+2.freq
+    - ../examples/silicon/V+1.freq
+    - ../examples/silicon/V0.freq
+    - ../examples/silicon/V-1.freq
+    - ../examples/silicon/V-2.freq
+    - ../examples/silicon/V-3.freq
+    - ../examples/silicon/V-4.freq
+    - ../examples/silicon/V-5.freq

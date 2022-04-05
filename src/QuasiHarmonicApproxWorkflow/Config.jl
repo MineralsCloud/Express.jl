@@ -25,7 +25,7 @@ end
     end
 end
 
-@option struct Thermo
+@option mutable struct Thermo
     F::Bool = true
     G::Bool = true
     U::Bool = true
@@ -38,6 +38,16 @@ end
     Btp::Bool = true
     Bs::Bool = true
     gamma::Bool = true
+end
+
+# From https://github.com/mauro3/Parameters.jl/blob/ecbf8df/src/Parameters.jl#L554-L561
+function Base.show(io::IO, x::Thermo)
+    if get(io, :compact, false) || get(io, :typeinfo, nothing) == typeof(x)
+        Base.show_default(IOContext(io, :limit => true), x)
+    else
+        # just dumping seems to give ok output, in particular for big data-sets:
+        dump(IOContext(io, :limit => true), x, maxdepth = 1)
+    end
 end
 
 @option struct Directories
@@ -144,9 +154,9 @@ function (x::ExpandConfig)(config::AbstractDict)
     return (
         input = abspath(expanduser(dict["input"])),
         config = path,
-        inp_file_list = config.inp_file_list,
-        static = config.static,
-        q_points = config.q_points,
+        inp_file_list = abspath(expanduser(config.inp_file_list)),
+        static = abspath(expanduser(config.static)),
+        q_points = abspath(expanduser(config.q_points)),
     )
 end
 
