@@ -19,4 +19,4 @@ task:
   test_script:
     - cirrusjl test
   coverage_script:
-    - cirrusjl coverage codecov coveralls
+    - cirrusjl coverage codecov
