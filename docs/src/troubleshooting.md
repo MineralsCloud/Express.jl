@@ -144,6 +144,50 @@ See [Fredrik Ekre's talk](https://youtu.be/IuwxE3m0_QQ?t=313) for details.
 
 ## Running workflows
 
+### How to solve the error `come across ProcessFailedException`?
+
+The reasons for this error are manifold.
+One common reason is that express did not find the executables of Quantum ESPRESSO or
+`mpiexec` (e.g., their parent directory is not in the `PATH` environment variable) or the
+template input files. If so, please specify the paths to these executables in the absolute
+path format:
+
+```yaml
+cli:
+  mpi:
+    np: 64
+    path: /usr/local/bin/gcc-10.2.0/openmpi/bin/mpiexec
+  pw:
+    path: /usr/local/bin/gcc-9.2.0/qe-6.5/bin/pw.x
+  ph:
+    path: /usr/local/bin/gcc-9.2.0/qe-6.5/bin/ph.x
+  q2r:
+    path: /usr/local/bin/gcc-9.2.0/qe-6.5/bin/q2r.x
+  matdyn:
+    path: /usr/local/bin/gcc-9.2.0/qe-6.5/bin/matdyn.x
+template:
+  scf: /home/qe/template.in
+  dfpt: /home/qe/ph.in
+  q2r: /home/qe/q2r.in
+  disp: /home/qe/phdos.in
+```
+
+Besides, the paths to the directories in the template files could also be absolute to
+avoid unexpected errors:
+
+```fortran
+&CONTROL
+  verbosity = 'high'
+  tstress = .true.
+  tprnfor = .true.
+  outdir = '/home/qe/temp'
+  prefix = 'Ge'
+  disk_io = 'high'
+  pseudo_dir = '/home/qe/pseudo'
+/
+```
+
+
 ### Why does `buildworkflow` return the same `Workflow` object if I am starting a new workflow?
 
 This happens when running a workflow (say, a phonon workflow, for example) followed by a
