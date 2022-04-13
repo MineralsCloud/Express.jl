@@ -187,7 +187,6 @@ avoid unexpected errors:
 /
 ```
 
-
 ### Why does `buildworkflow` return the same `Workflow` object if I am starting a new workflow?
 
 This happens when running a workflow (say, a phonon workflow, for example) followed by a
