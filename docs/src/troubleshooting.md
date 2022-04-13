@@ -187,6 +187,23 @@ avoid unexpected errors:
 /
 ```
 
+### How to solve error `EOFError: read end of file`?
+
+If it happens when you run
+
+```julia
+wf = buildworkflow("workflow.yaml")
+run!(wf)
+```
+
+Check the value of the key `status` in the `save` dictionary in `workflow.yaml`:
+
+```yaml
+save:
+  status: status.jls
+```
+
+Then delete the file `status.jls` and retry running `run!(wf)`.
 
 ### Why does `buildworkflow` return the same `Workflow` object if I am starting a new workflow?
 
