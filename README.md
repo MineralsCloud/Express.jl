@@ -10,7 +10,6 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/MineralsCloud/Express.jl?svg=true)](https://ci.appveyor.com/project/singularitti/Express-jl)
 [![Build Status](https://api.cirrus-ci.com/github/MineralsCloud/Express.jl.svg)](https://cirrus-ci.com/github/MineralsCloud/Express.jl)
 [![pipeline status](https://gitlab.com/singularitti/Express.jl/badges/master/pipeline.svg)](https://gitlab.com/singularitti/Express.jl/-/pipelines)
-[![coverage report](https://gitlab.com/singularitti/Express.jl/badges/master/coverage.svg)](https://gitlab.com/singularitti/Express.jl/-/jobs)
 [![Coverage](https://codecov.io/gh/MineralsCloud/Express.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/Express.jl)
 [![PkgEval](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/E/Express.svg)](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/report.html)
 [![GitHub license](https://img.shields.io/github/license/MineralsCloud/Express.jl)](https://github.com/MineralsCloud/Express.jl/blob/master/LICENSE)
