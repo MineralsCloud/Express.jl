@@ -142,6 +142,34 @@ $ julia --sysimage custom-image.so
 
 See [Fredrik Ekre's talk](https://youtu.be/IuwxE3m0_QQ?t=313) for details.
 
+## Running workflows
+
+### Why does `buildworkflow` return the same `Workflow` object if I am starting a new workflow?
+
+This happens when running a workflow (say, a phonon workflow, for example) followed by a
+workflow (an equation of state workflow in this case). And after the following Julia
+commands:
+
+```julia
+using Express.PhononWorkflow.Recipes
+using QuantumESPRESSOExpress
+
+wf = buildworkflow("phonon.yaml")
+```
+
+you find that `wf` still contains the jobs from the previous workflow, and they are probably
+all succeeded (because that is when you want to run the next workflow). The cause is likely
+in your configuration file (`phonon.yaml`). You probably have the following setting:
+
+```yaml
+save:
+  status: status.jls
+```
+
+where the `status.jls` already exists and is the serialized `Workflow` object saved from
+the previous (equation of state) workflow. `Express.jl` will first load this file if
+it exists. To fix this, change the value of the `status` key to another path.
+
 ## Miscellaneous errors
 
 1. If you see the following error message
