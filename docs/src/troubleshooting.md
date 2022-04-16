@@ -231,6 +231,14 @@ where the `status.jls` already exists and is the serialized `Workflow` object sa
 the previous (equation of state) workflow. `Express.jl` will first load this file if
 it exists. To fix this, change the value of the `status` key to another path.
 
+### How to solve the `LoadError: Only one AND undecorated format string is allowed`?
+
+The probable reason for the error is that you changed the values of `files.dirs.pattern`,
+`files.pattern.input`, and `files.pattern.output` in the configuration file
+(their default values are `"p=%.1f"`, `"%s.in"`, and `"%s.out"`) to some strings with more
+than one [C-style format specifiers](https://www.tutorialspoint.com/format-specifiers-in-c)
+(such as `"p=%d%d"`).
+
 ## Miscellaneous errors
 
 1. If you see the following error message
