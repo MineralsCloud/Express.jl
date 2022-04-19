@@ -97,6 +97,7 @@ Pages = [
     "develop.md",
     "run/configuration.md",
     "run/cli.md",
+    "run/jobs.md",
     "troubleshooting.md",
     "questions.md",
 ]

@@ -21,6 +21,7 @@ makedocs(;
             "Running" => [
                 "Configuration files" => "run/configuration.md",
                 "How to run `Express` from command line" => "run/cli.md",
+                "Tracking and monitoring jobs in a workflow" => "run/jobs.md",
             ],
         ],
         "Troubleshooting" => "troubleshooting.md",
