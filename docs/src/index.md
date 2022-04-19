@@ -9,7 +9,7 @@ Documentation for [Express](https://github.com/MineralsCloud/Express.jl).
 ## Package Features
 
 `Express` is an extensible, high-throughput, high-level workflow framework that aims to
-automate *ab initio* calculations for the materials science community. `Express` is shipped
+automate _ab initio_ calculations for the materials science community. `Express` is shipped
 with well-tested workflow templates, including structure optimization, equation of state
 (EOS) fitting, phonon spectrum (lattice dynamics) calculation, and thermodynamic property
 calculation in the framework of the quasi-harmonic approximation (QHA). It is designed to be
@@ -55,7 +55,7 @@ The direct components of `express` are:
   properties obtained with the QHA workflow.
 
 - [`Pseudopotentials.jl`](https://github.com/MineralsCloud/Pseudopotentials.jl) presents a
-  database for storing and querying pseudopotentials used in *ab initio* calculations.
+  database for storing and querying pseudopotentials used in _ab initio_ calculations.
 
 - [`SimpleWorkflows.jl`](https://github.com/MineralsCloud/SimpleWorkflows.jl) is the
   skeleton of the workflow system, which defines building blocks, composition rules, and
@@ -63,12 +63,12 @@ The direct components of `express` are:
 
 The
 [`QuantumESPRESSOExpress.jl`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl) is
-a special type of package called "plugin of `express`" for handling *ab initio* software
+a special type of package called "plugin of `express`" for handling _ab initio_ software
 such as Quantum ESPRESSO. Other plugins for other software are possible. The dependencies of
 `QuantumESPRESSOExpress.jl` are listed below.
 
 - [`AbInitioSoftwareBase.jl`](https://github.com/MineralsCloud/AbInitioSoftwareBase.jl)
-  provides a standard API for some popular *ab initio* software such as Quantum ESPRESSO.
+  provides a standard API for some popular _ab initio_ software such as Quantum ESPRESSO.
 
 - [`QuantumESPRESSOBase.jl`](https://github.com/MineralsCloud/QuantumESPRESSOBase.jl)
   declares basic data types and methods for manipulating crystal structures, generating
@@ -107,4 +107,5 @@ Depth = 5
 ### [Index](@id main-index)
 
 ```@index
+
 ```
