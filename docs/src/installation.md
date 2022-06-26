@@ -1,8 +1,9 @@
-# Installation
+# Installation guide
 
-Here are the installation instructions
-for [`Express.jl`](https://github.com/MineralsCloud/Express.jl). If you have
-trouble installing it, please refer to our [Troubleshooting](@ref) page for more information.
+Here are the installation instructions for package
+[`Express`](https://github.com/MineralsCloud/Express.jl).
+If you have trouble installing it, please refer to our [Troubleshooting](@ref) page
+for more information.
 
 ## Install Julia
 
@@ -18,13 +19,13 @@ If you have [Homebrew](https://brew.sh) installed,
 and type
 
 ```shell
-$ brew install --cask julia
+brew install --cask julia
 ```
 
 if you want to install it as a prebuilt binary app. Type
 
 ```shell
-$ brew install julia
+brew install julia
 ```
 
 if you want to install it as a [formula](https://docs.brew.sh/Formula-Cookbook).
@@ -36,22 +37,40 @@ First, [install `asdf`](https://asdf-vm.com/guide/getting-started.html#_3-instal
 Then, run
 
 ```shell
-$ asdf install julia 1.6.5   # or other versions of Julia
-$ asdf global julia 1.6.5
+asdf install julia 1.6.6  # or other versions of Julia
+asdf global julia 1.6.6
 ```
 
 to install Julia and
-[set `v1.6.5` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
+[set `v1.6.6` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
 
 You can also try another cross-platform installer for the Julia programming language
 [`juliaup`](https://github.com/JuliaLang/juliaup).
 
-### Compatibility
+### Which version should I pick?
+
+You can install the "Current stable release" or the "Long-term support (LTS)
+release".
+
+- The "Current stable release" is the latest release of Julia. It has access to
+  newer features, and is likely faster.
+- The "Long-term support release" is an older version of Julia that has
+  continued to receive bug and security fixes. However, it may not have the
+  latest features or performance improvements.
+
+For most users, you should install the "Current stable release", and whenever
+Julia releases a new version of the current stable release, you should update
+your version of Julia. Note that any code you write on one version of the
+current stable release will continue to work on all subsequent releases.
+
+For users in restricted software environments (e.g., your enterprise IT controls
+what software you can install), you may be better off installing the long-term
+support release because you will not have to update Julia as frequently.
 
 Versions higher than `v1.3`,
 especially `v1.6`, are strongly recommended. This package may not work on `v1.0` and below.
-Since the Julia team has set `v1.6` as the long-term support (LTS) release, support for
-versions below `v1.6` will gradually drop.
+Since the Julia team has set `v1.6` as the LTS release,
+we will gradually drop support for versions below `v1.6`.
 
 Julia and Julia packages support multiple operating systems and CPU architectures; check
 [this table](https://julialang.org/downloads/#supported_platforms) to see if it can be
@@ -64,7 +83,7 @@ x86).
 Now I am using [macOS](https://en.wikipedia.org/wiki/MacOS) as a standard
 platform to explain the following steps:
 
-1. Open `Terminal.app`, and type `julia` to start an interactive session (known as
+1. Open `Terminal.app`, and type `julia` to start an interactive session (known as the
    [REPL](https://docs.julialang.org/en/v1/stdlib/REPL/)).
 
 2. Run the following commands and wait for them to finish:
@@ -88,30 +107,28 @@ platform to explain the following steps:
 4. While using, please keep this Julia session alive. Restarting might recompile
    the package and cost some time.
 
-If you want to install the latest in development (maybe buggy) version of `Express`, type
+If you want to install the latest in-development (probably buggy)
+version of `Express`, type
 
-```julia-repl
-julia> using Pkg
-
-julia> Pkg.update()
-
-julia> pkg"add Express#master"
+```@repl
+using Pkg
+Pkg.update()
+pkg"add Express#master"
 ```
 
-in the second step instead.
+in the second step above.
 
 ## Update `Express`
 
 Please [watch](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
-our [GitHub repository](https://github.com/MineralsCloud/Express.jl) for new releases.
+our [GitHub repository](https://github.com/MineralsCloud/Express.jl)
+for new releases.
 Once we release a new version, you can update `Express` by typing
 
-```julia-repl
-julia> using Pkg
-
-julia> Pkg.update("Express")
-
-julia> Pkg.gc()
+```@repl
+using Pkg
+Pkg.update("Express")
+Pkg.gc()
 ```
 
 in Julia REPL.
@@ -138,12 +155,10 @@ in the `express` framework. The current plugin is
 [`QuantumESPRESSOExpress`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl).
 To install `QuantumESPRESSOExpress.jl`, run
 
-```julia-repl
-julia> using Pkg
-
-julia> Pkg.update()
-
-julia> Pkg.add("QuantumESPRESSOExpress")
+```@repl
+using Pkg
+Pkg.update()
+Pkg.add("QuantumESPRESSOExpress")
 ```
 
 in Julia REPL.
@@ -155,12 +170,10 @@ We provide a command-line interface of `express` for non-developers:
 It installs an executable '`xps`' that can execute code from configuration
 files provided by users. To install `ExpressCommands`, run
 
-```julia-repl
-julia> using Pkg
-
-julia> Pkg.update()
-
-julia> Pkg.add("ExpressCommands")
+```@repl
+using Pkg
+Pkg.update()
+Pkg.add("ExpressCommands")
 ```
 
 in Julia REPL.

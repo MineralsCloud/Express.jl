@@ -16,7 +16,7 @@ makedocs(;
     pages = [
         "Home" => "index.md",
         "Manual" => [
-            "Installation" => "install.md",
+            "Installation" => "installation.md",
             "Development" => "develop.md",
             "Running" => [
                 "Configuration files" => "run/configuration.md",

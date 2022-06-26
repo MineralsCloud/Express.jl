@@ -93,7 +93,7 @@ such as Quantum ESPRESSO. Other plugins for other software are possible. The dep
 
 ```@contents
 Pages = [
-    "install.md",
+    "installation.md",
     "develop.md",
     "run/configuration.md",
     "run/cli.md",
