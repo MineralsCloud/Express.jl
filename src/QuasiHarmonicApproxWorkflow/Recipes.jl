@@ -1,6 +1,6 @@
 module Recipes
 
-using SimpleWorkflows: AtomicJob, Workflow, run!, ▷
+using SimpleWorkflows: Job, Workflow, run!, ▷
 using ..QuasiHarmonicApproxWorkflow:
     QuasiHarmonicApprox, MakeInput, CalculateThermodyn, Plot, buildjob
 

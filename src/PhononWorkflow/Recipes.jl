@@ -2,7 +2,7 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
-using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
+using SimpleWorkflows: Job, Workflow, run!, ▷, ⋲, ⋺
 using ..PhononWorkflow:
     Scf,
     Dfpt,
@@ -32,22 +32,22 @@ function buildworkflow(cfgfile)
             error("unsupported option!")
         end
         a0 = buildjob(DownloadPotentials{Scf}(), cfgfile)
-        a = AtomicJob(() -> LogMsg{Scf}()(; start = true))
+        a = Job(() -> LogMsg{Scf}()(; start = true))
         b = buildjob(MakeInput{Scf}(), cfgfile)
         c = buildjob(RunCmd{Scf}(), cfgfile)
-        d = AtomicJob(() -> LogMsg{Scf}()(; start = false))
-        e = AtomicJob(() -> LogMsg{Dfpt}()(; start = true))
+        d = Job(() -> LogMsg{Scf}()(; start = false))
+        e = Job(() -> LogMsg{Dfpt}()(; start = true))
         f = buildjob(MakeInput{Dfpt}(), cfgfile)
         g = buildjob(RunCmd{Dfpt}(), cfgfile)
-        h = AtomicJob(() -> LogMsg{Dfpt}()(; start = false))
-        i = AtomicJob(() -> LogMsg{RealSpaceForceConstants}()(; start = true))
+        h = Job(() -> LogMsg{Dfpt}()(; start = false))
+        i = Job(() -> LogMsg{RealSpaceForceConstants}()(; start = true))
         j = buildjob(MakeInput{RealSpaceForceConstants}(), cfgfile)
         k = buildjob(RunCmd{RealSpaceForceConstants}(), cfgfile)
-        l = AtomicJob(() -> LogMsg{RealSpaceForceConstants}()(; start = false))
-        m = AtomicJob(() -> LogMsg{x}()(; start = true))
+        l = Job(() -> LogMsg{RealSpaceForceConstants}()(; start = false))
+        m = Job(() -> LogMsg{x}()(; start = true))
         n = buildjob(MakeInput{x}(), cfgfile)
         o = buildjob(RunCmd{x}(), cfgfile)
-        p = AtomicJob(() -> LogMsg{x}()(; start = false))
+        p = Job(() -> LogMsg{x}()(; start = false))
         (
             (
                 (

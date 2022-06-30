@@ -1,6 +1,6 @@
 using AbInitioSoftwareBase: load
 using PyQHA: converter, runcode, plot
-using SimpleWorkflows: AtomicJob
+using SimpleWorkflows: Job
 
 using ...Express: Action
 using ..QuasiHarmonicApproxWorkflow: QuasiHarmonicApprox
@@ -14,7 +14,7 @@ end
 function buildjob(x::MakeInput{QuasiHarmonicApprox}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{QuasiHarmonicApprox}()(dict)
-    return AtomicJob(function ()
+    return Job(function ()
         return cd(dirname(config.input)) do
             x(config.inp_file_list, config.static, config.q_points)
         end
@@ -26,7 +26,7 @@ struct CalculateThermodyn{T} <: Action{T} end
 function buildjob(::CalculateThermodyn{QuasiHarmonicApprox}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{QuasiHarmonicApprox}()(dict)
-    return AtomicJob(() -> runcode(config.config))
+    return Job(() -> runcode(config.config))
 end
 
 struct Plot{T} <: Action{T} end
@@ -34,5 +34,5 @@ struct Plot{T} <: Action{T} end
 function buildjob(::Plot{QuasiHarmonicApprox}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{QuasiHarmonicApprox}()(dict)
-    return AtomicJob(() -> plot(config.config))
+    return Job(() -> plot(config.config))
 end
