@@ -7,7 +7,7 @@ using EquationsOfStateOfSolids.Fitting: eosfit
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
 using Serialization: serialize, deserialize
-using SimpleWorkflows: AtomicJob
+using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
 using ...Express: Action, calculation
@@ -33,7 +33,7 @@ end
 function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(() -> x(config.template))
+    return Job(() -> x(config.template))
 end
 
 struct MakeInput{T} <: Action{T} end
@@ -50,16 +50,14 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     inputs = first.(config.files)
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
-            AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
+            Job(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
         end
     else  # Pressure
         return map(inputs, config.fixed) do input, pressure
-            AtomicJob(
-                function ()
-                    trial_eos = PressureEquation(config.trial_eos)
-                    return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
-                end,
-            )
+            Job(function ()
+                trial_eos = PressureEquation(config.trial_eos)
+                return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
+            end)
         end
     end
 end
@@ -69,11 +67,11 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T<:Optimization}
     inputs = first.(config.files)
     if config.fixed isa Volumes
         return map(inputs, config.fixed) do input, volume
-            AtomicJob(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
+            Job(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
         end
     else  # Pressure
         return map(inputs, config.fixed) do input, pressure
-            AtomicJob(
+            Job(
                 function ()
                     trial_eos = PressureEquation(
                         FitEos{Scf}()(
@@ -95,7 +93,7 @@ function buildjob(x::RunCmd{T}, cfgfile) where {T}
     config = ExpandConfig{T}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files))
     return map(config.files) do (input, output)
-        AtomicJob(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np = np))
     end
 end
 
@@ -108,7 +106,7 @@ end
 function buildjob(x::GetData{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    AtomicJob(
+    Job(
         function ()
             data = x(last.(config.files))
             savedata = Dict(
@@ -139,7 +137,7 @@ function (x::FitEos)(outputs, trial_eos::EnergyEquation)
 end
 
 function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
-    return AtomicJob(
+    return Job(
         function ()
             dict = load(cfgfile)
             config = ExpandConfig{T}()(dict)

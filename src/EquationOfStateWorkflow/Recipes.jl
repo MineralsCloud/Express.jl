@@ -2,7 +2,7 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
-using SimpleWorkflows: AtomicJob, Workflow, run!, ▷, ⋲, ⋺
+using SimpleWorkflows: Job, Workflow, run!, ▷, ⋲, ⋺
 
 using ..Config: ExpandConfig
 using ..EquationOfStateWorkflow:
@@ -19,19 +19,19 @@ function buildworkflow(cfgfile)
     else
         stage = Scf
         a0 = buildjob(DownloadPotentials{stage}(), cfgfile)
-        a = AtomicJob(() -> LogMsg{stage}()(; start = true))
+        a = Job(() -> LogMsg{stage}()(; start = true))
         b = buildjob(MakeInput{stage}(), cfgfile)
         c = buildjob(RunCmd{stage}(), cfgfile)
         d0 = buildjob(GetData{stage}(), cfgfile)
         d = buildjob(FitEos{stage}(), cfgfile)
-        f = AtomicJob(() -> LogMsg{stage}()(; start = false))
+        f = Job(() -> LogMsg{stage}()(; start = false))
         stage = VcOptim
-        g = AtomicJob(() -> LogMsg{stage}()(; start = true))
+        g = Job(() -> LogMsg{stage}()(; start = true))
         h = buildjob(MakeInput{stage}(), cfgfile)
         i = buildjob(RunCmd{stage}(), cfgfile)
         j0 = buildjob(GetData{stage}(), cfgfile)
         j = buildjob(FitEos{stage}(), cfgfile)
-        l = AtomicJob(() -> LogMsg{stage}()(; start = false))
+        l = Job(() -> LogMsg{stage}()(; start = false))
         ((((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d0) ▷ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j0) ▷ j) ▷ l
         return Workflow(a0, a, b..., c..., d0, d, f, g, h..., i..., j0, j, l)
     end

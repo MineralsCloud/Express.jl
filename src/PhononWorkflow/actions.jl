@@ -3,7 +3,7 @@ using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
 using Dates: now, format
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
-using SimpleWorkflows: AtomicJob
+using SimpleWorkflows: Job
 
 using ...Express: Action, Calculation, LatticeDynamics, Scf, calculation
 using ..Shell: distprocs
@@ -29,7 +29,7 @@ end
 function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(() -> x(config.template.scf))  # This `scf` is important!
+    return Job(() -> x(config.template.scf))  # This `scf` is important!
 end
 
 struct MakeInput{T} <: Action{T} end
@@ -48,7 +48,7 @@ function buildjob(x::MakeInput{Dfpt}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Dfpt}()(dict)
     return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
-        AtomicJob(function ()
+        Job(function ()
             str = read(previnput, String)
             prev = parse(inputtype(Scf), str)
             return x(input, config.template.dfpt, prev)
@@ -59,7 +59,7 @@ function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
     return map(config.files[3], config.files[2]) do (input, _), (previnput, _)
-        AtomicJob(function ()
+        Job(function ()
             str = read(previnput, String)
             prev = parse(inputtype(Dfpt), str)
             return x(input, config.template.q2r, prev)
@@ -74,7 +74,7 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDo
         config.files[3],
         config.files[2],
     ) do (input, _), (previnput, _), (pprevinput, _)
-        AtomicJob(function ()
+        Job(function ()
             str = read(previnput, String)
             q2r = parse(inputtype(RealSpaceForceConstants), str)
             str = read(pprevinput, String)
@@ -87,7 +87,7 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     return map(config.files[1]) do (input, _)
-        AtomicJob(function ()
+        Job(function ()
             vcout = joinpath(dirname(input), string(nameof(VcOptim)) * ".out")
             str = read(vcout, String)
             cell = parsecell(str)
@@ -112,7 +112,7 @@ function buildjob(x::RunCmd{Scf}, cfgfile)
     config = ExpandConfig{Scf}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[1]))
     return map(config.files[1]) do (input, output)
-        AtomicJob(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np = np))
     end
 end
 function buildjob(x::RunCmd{Dfpt}, cfgfile)
@@ -120,7 +120,7 @@ function buildjob(x::RunCmd{Dfpt}, cfgfile)
     config = ExpandConfig{Dfpt}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[2]))
     return map(config.files[2]) do (input, output)
-        AtomicJob(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np = np))
     end
 end
 function buildjob(x::RunCmd{RealSpaceForceConstants}, cfgfile)
@@ -128,7 +128,7 @@ function buildjob(x::RunCmd{RealSpaceForceConstants}, cfgfile)
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[3]))
     return map(config.files[3]) do (input, output)
-        AtomicJob(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np = np))
     end
 end
 function buildjob(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
@@ -136,7 +136,7 @@ function buildjob(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
     config = ExpandConfig{T}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[4]))
     return map(config.files[4]) do (input, output)
-        AtomicJob(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np = np))
     end
 end
 

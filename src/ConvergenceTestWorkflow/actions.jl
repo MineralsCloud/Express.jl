@@ -4,7 +4,7 @@ using Dates: now, format
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
 using Serialization: serialize, deserialize
-using SimpleWorkflows: AtomicJob
+using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
 using ...Express: Action, calculation
@@ -29,7 +29,7 @@ end
 function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(() -> x(config.template))
+    return Job(() -> x(config.template))
 end
 
 struct MakeInput{T} <: Action{T} end
@@ -46,11 +46,11 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     inputs = first.(config.files)
     if config.parameters isa AbstractVector{<:Tuple}
         return map(inputs, config.parameters) do input, (mesh, shift)
-            AtomicJob(() -> x(input, config.template, mesh, shift, "Y-m-d_H:M:S"))
+            Job(() -> x(input, config.template, mesh, shift, "Y-m-d_H:M:S"))
         end
     else
         return map(inputs, config.parameters) do input, energy
-            AtomicJob(() -> x(input, config.template, energy, "Y-m-d_H:M:S"))
+            Job(() -> x(input, config.template, energy, "Y-m-d_H:M:S"))
         end
     end
 end
@@ -62,7 +62,7 @@ function buildjob(x::RunCmd{T}, cfgfile) where {T}
     config = ExpandConfig{T}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files))
     return map(config.files) do (input, output)
-        AtomicJob(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np = np))
     end
 end
 
@@ -77,7 +77,7 @@ end
 function buildjob(x::GetData{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(function ()
+    return Job(function ()
         data = x(last.(config.files))
         saved = Dict("results" => (ustrip ∘ last).(data))
         save(config.save_raw, saved)
@@ -91,7 +91,7 @@ struct TestConvergence{T} <: Action{T} end
 function buildjob(x::TestConvergence{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    return AtomicJob(function ()
+    return Job(function ()
         data = GetData{T}()(last.(config.files))
         saved = Dict("results" => (ustrip ∘ last).(data))
         save(config.save_raw, saved)
