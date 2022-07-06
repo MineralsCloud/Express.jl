@@ -17,7 +17,7 @@ SimpleWorkflows = "6a97d125-85da-4b66-b300-4bba10360563"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
-AbInitioSoftwareBase = "0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9"
+AbInitioSoftwareBase = "0.2, 0.3, 0.4, 0.5, 0.6"
 Configurations = "0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17"
 EquationsOfStateOfSolids = "0.2, 0.3, 0.4"
 Formatting = "0.4"
