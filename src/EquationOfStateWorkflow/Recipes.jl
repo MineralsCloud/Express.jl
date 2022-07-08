@@ -2,7 +2,7 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
-using SimpleWorkflows: Job, Workflow, run!, ▷, ⋲, ⋺
+using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..Config: ExpandConfig
 using ..EquationOfStateWorkflow:
@@ -32,8 +32,8 @@ function buildworkflow(cfgfile)
         j0 = buildjob(GetData{stage}(), cfgfile)
         j = buildjob(FitEos{stage}(), cfgfile)
         l = Job(() -> LogMsg{stage}()(; start = false))
-        ((((((((((a0 ▷ a) ⋲ b) ▷ c) ⋺ d0) ▷ d) ▷ f) ▷ g ⋲ h) ▷ i) ⋺ j0) ▷ j) ▷ l
-        return Workflow(a0, a, b..., c..., d0, d, f, g, h..., i..., j0, j, l)
+        a0 → a ⇉ b ⇶ c ⭃ d0 → d → f → g ⇉ h ⇶ i ⭃ j0 → j → l
+        return Workflow(a0)
     end
 end
 
