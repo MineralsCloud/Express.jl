@@ -2,7 +2,7 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using Serialization: deserialize
-using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⭃
+using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 using ..PhononWorkflow:
     Scf,
     Dfpt,
@@ -48,7 +48,7 @@ function buildworkflow(cfgfile)
         n = buildjob(MakeInput{x}(), cfgfile)
         o = buildjob(RunCmd{x}(), cfgfile)
         p = Job(() -> LogMsg{x}()(; start = false))
-        a0 → a ⇉ b → c ⭃ d → e ⇉ f → g ⭃ h → i ⇉ j → k ⭃ l → m ⇉ n → o ⭃ p
+        a0 → a ⇉ b ⇶ c ⭃ d → e ⇉ f ⇶ g ⭃ h → i ⇉ j ⇶ k ⭃ l → m ⇉ n ⇶ o ⭃ p
         return Workflow(a0)
     end
 end
