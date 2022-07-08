@@ -23,7 +23,7 @@ EquationsOfStateOfSolids = "0.2, 0.3, 0.4"
 Formatting = "0.4"
 Pseudopotentials = "0.8"
 PyQHA = "0.1"
-SimpleWorkflows = "0.14, 0.15"
+SimpleWorkflows = "0.14, 0.15, 0.16"
 Unitful = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 1"
 julia = "1"
 
