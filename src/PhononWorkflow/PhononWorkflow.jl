@@ -3,7 +3,7 @@ module PhononWorkflow
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using Serialization: deserialize
-using SimpleWorkflows: Workflow, run!, ▷
+using SimpleWorkflows: Workflow, run!, →
 using Unitful: ustrip, @u_str
 
 using ..Express:
