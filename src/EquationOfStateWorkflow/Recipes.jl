@@ -33,6 +33,7 @@ function buildworkflow(cfgfile)
         j = buildjob(FitEos{stage}(), cfgfile)
         l = Job(() -> LogMsg{stage}()(; start = false))
         a0 → a ⇉ b → c ⭃ d0 → d → f → g ⇉ h → i ⭃ j0 → j → l
+        return Workflow(a0)
     end
 end
 

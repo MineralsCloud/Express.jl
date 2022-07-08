@@ -48,26 +48,8 @@ function buildworkflow(cfgfile)
         n = buildjob(MakeInput{x}(), cfgfile)
         o = buildjob(RunCmd{x}(), cfgfile)
         p = Job(() -> LogMsg{x}()(; start = false))
-        return Workflow(
-            a0,
-            a,
-            b...,
-            c...,
-            d,
-            e,
-            f...,
-            g...,
-            h,
-            i,
-            j...,
-            k...,
-            l,
-            m,
-            n...,
-            o...,
-            p,
-        )
         a0 → a ⇉ b → c ⭃ d → e ⇉ f → g ⭃ h → i ⇉ j → k ⭃ l → m ⇉ n → o ⭃ p
+        return Workflow(a0)
     end
 end
 

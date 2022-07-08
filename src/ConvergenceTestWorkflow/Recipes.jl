@@ -23,6 +23,7 @@ function buildworkflow(cfgfile)
         d = buildjob(TestConvergence{Scf}(), cfgfile)
         e = Job(() -> LogMsg{Scf}()(; start = false))
         a0 → a ⇉ b → c ⭃ d → e
+        return Workflow(a0)
     end
 end
 

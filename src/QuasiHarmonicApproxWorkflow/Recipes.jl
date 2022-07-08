@@ -10,8 +10,8 @@ function buildworkflow(cfgfile)
     a = buildjob(MakeInput{QuasiHarmonicApprox}(), cfgfile)
     b = buildjob(CalculateThermodyn{QuasiHarmonicApprox}(), cfgfile)
     c = buildjob(Plot{QuasiHarmonicApprox}(), cfgfile)
-    return Workflow(a, b, c)
     a → b → c
+    return Workflow(a)
 end
 
 end
