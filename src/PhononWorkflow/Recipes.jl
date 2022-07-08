@@ -1,7 +1,6 @@
 module Recipes
 
 using AbInitioSoftwareBase: load
-using Serialization: deserialize
 using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 using ..PhononWorkflow:
     Scf,

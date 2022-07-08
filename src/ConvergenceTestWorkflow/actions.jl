@@ -3,7 +3,6 @@ using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
 using Dates: now, format
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
-using Serialization: serialize, deserialize
 using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
