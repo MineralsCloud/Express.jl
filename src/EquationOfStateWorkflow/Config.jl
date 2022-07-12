@@ -58,7 +58,7 @@ end
 
 @option struct Save
     raw::String = "raw.json"
-    eos::String = "eos.jls"
+    eos::String = "eos.jld2"
     status::String = ""
 end
 

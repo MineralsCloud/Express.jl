@@ -4,9 +4,9 @@ using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
+import JLD2
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
-using Serialization: serialize, deserialize
 using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
@@ -144,7 +144,7 @@ function buildjob(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
             outputs = last.(config.files)
             trial_eos =
                 calculation(x) isa Scf ? config.trial_eos :
-                deserialize(config.save_eos)[string(nameof(Scf))]
+                JLD2.load(config.save_eos)[string(nameof(Scf))]
             eos = x(outputs, EnergyEquation(trial_eos))
             SaveEos{T}()(config.save_eos, eos)
             return eos
@@ -154,10 +154,10 @@ end
 
 struct SaveEos{T} <: Action{T} end
 function (::SaveEos{T})(file, eos::Parameters) where {T}
-    @assert extension(file) == "jls"
-    dict = isfile(file) ? deserialize(file) : Dict()
+    @assert extension(file) == "jld2"
+    dict = isfile(file) ? JLD2.load(file) : Dict{String,Any}()
     dict[string(nameof(T))] = eos
-    serialize(file, dict)
+    JLD2.save(file, dict)
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
