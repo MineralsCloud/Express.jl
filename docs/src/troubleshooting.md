@@ -85,7 +85,7 @@ If `qha` still cannot be installed, go to the Python binary directory you specif
 and run the following command
 
 ```shell
-$ ./pip install qha
+./pip install qha
 ```
 
 !!! note
@@ -124,20 +124,20 @@ has the best performance.
 If you just want Julia to do a simple task and only once, you could start Julia REPL with
 
 ```shell
-$ julia --compile=min
+julia --compile=min
 ```
 
 to minimize compilation or
 
 ```shell
-$ julia --optimize=0
+julia --optimize=0
 ```
 
 to minimize optimizations, or just use both. Or you could make a system image
 and run with
 
 ```shell
-$ julia --sysimage custom-image.so
+julia --sysimage custom-image.so
 ```
 
 See [Fredrik Ekre's talk](https://youtu.be/IuwxE3m0_QQ?t=313) for details.
@@ -200,10 +200,10 @@ Check the value of the key `status` in the `save` dictionary in `workflow.yaml`:
 
 ```yaml
 save:
-  status: status.jls
+  status: status.jld2
 ```
 
-Then delete the file `status.jls` and retry running `run!(wf)`.
+Then delete the file `status.jld2` and retry running `run!(wf)`.
 
 ### Why does `buildworkflow` return the same `Workflow` object if I am starting a new workflow?
 
@@ -224,10 +224,10 @@ in your configuration file (`phonon.yaml`). You probably have the following sett
 
 ```yaml
 save:
-  status: status.jls
+  status: status.jld2
 ```
 
-where the `status.jls` already exists and is the serialized `Workflow` object saved from
+where the `status.jld2` already exists and is the serialized `Workflow` object saved from
 the previous (equation of state) workflow. `Express.jl` will first load this file if
 it exists. To fix this, change the value of the `status` key to another path.
 

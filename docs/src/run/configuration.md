@@ -59,7 +59,7 @@ cli:
     np: 16
 template: template.in
 save:
-  status: status.jls
+  status: status.jld2
 fixed:
   pressures:
     unit: GPa
@@ -92,7 +92,7 @@ The JSON and TOML equivalents of the above file are:
   },
   "template": "template.in",
   "save": {
-    "status": "status.jls"
+    "status": "status.jld2"
   },
   "fixed": {
     "pressures": {
@@ -121,7 +121,7 @@ values = ['300.44 bohr^3', '74.88 GPa', 4.82]
 np = 16
 
 [save]
-status = 'status.jls'
+status = 'status.jld2'
 ```
 
 ## Phonon density of states or phonon dispersion relation
@@ -174,7 +174,7 @@ template:
   q2r: q2r.in
   disp: disp.in
 save:
-  status: status.jls
+  status: status.jld2
 fixed:
   pressures:
     unit: GPa
@@ -206,7 +206,7 @@ The JSON and TOML equivalents of the above file are:
     "disp": "disp.in"
   },
   "save": {
-    "status": "status.jls"
+    "status": "status.jld2"
   },
   "fixed": {
     "pressures": {
@@ -232,5 +232,5 @@ unit = 'GPa'
 values = [-5, -2, 0, 5, 10, 15, 17, 20]
 
 [save]
-status = 'status.jls'
+status = 'status.jld2'
 ```
