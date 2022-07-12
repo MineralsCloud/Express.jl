@@ -1,4 +1,4 @@
-# Installation guide
+# [Installation guide](@id installation)
 
 Here are the installation instructions for package
 [`Express`](https://github.com/MineralsCloud/Express.jl).
@@ -13,6 +13,8 @@ instructions on its website if you have to
 [build Julia from source](https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/build.md).
 Some computing centers provide preinstalled Julia. Please contact your administrator for
 more information in that case.
+Here's some additional information on
+[how to set up Julia on HPC systems](https://github.com/hlrs-tasc/julia-on-hpc-systems).
 
 If you have [Homebrew](https://brew.sh) installed,
 [open `Terminal.app`](https://support.apple.com/guide/terminal/open-or-quit-terminal-apd5265185d-f365-44cb-8b09-71a064a42125/mac)
