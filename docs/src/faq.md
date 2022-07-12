@@ -1,4 +1,4 @@
-# Some other questions about `Express`
+# FAQ
 
 ## What is the difference between `Express` and `express`?
 

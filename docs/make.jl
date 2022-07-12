@@ -16,8 +16,8 @@ makedocs(;
     pages = [
         "Home" => "index.md",
         "Manual" => [
-            "Installation" => "installation.md",
-            "Development" => "develop.md",
+            "Installation guide" => "installation.md",
+            "Contributing" => "contributing.md",
             "Running" => [
                 "Configuration files" => "run/configuration.md",
                 "How to run `Express` from command line" => "run/cli.md",
@@ -25,8 +25,7 @@ makedocs(;
             ],
         ],
         "Troubleshooting" => "troubleshooting.md",
-        "Other questions" => "questions.md",
-        "API by module" => ["`EquationOfStateWorkflow` module" => "api/EquationOfStateWorkflow.md"],
+        "FAQ" => "faq.md",
     ],
 )
 

@@ -89,23 +89,62 @@ such as Quantum ESPRESSO. Other plugins for other software are possible. The dep
   `QuantumESPRESSOParser.jl`, `QuantumESPRESSOFormatter.jl`, and
   `QuantumESPRESSOCommands.jl` under a common namespace.
 
+## Installation
+
+The package can be installed with the Julia package manager.
+From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
+
+```
+pkg> add Express
+```
+
+Or, equivalently, via the `Pkg` API:
+
+```julia
+julia> import Pkg; Pkg.add("Express")
+```
+
+## Documentation
+
+- [**STABLE**](https://MineralsCloud.github.io/Express.jl/stable) &mdash; **documentation of the most recently tagged version.**
+- [**DEV**](https://MineralsCloud.github.io/Express.jl/dev) &mdash; _documentation of the in-development version._
+
+## Project Status
+
+The package is tested against, and being developed for, Julia `1.6` and above on Linux,
+macOS, and Windows.
+
+## Questions and Contributions
+
+Usage questions can be posted on
+[our discussion page](https://github.com/MineralsCloud/Express.jl/discussions).
+
+Contributions are very welcome, as are feature requests and suggestions. Please open an
+[issue](https://github.com/MineralsCloud/Express.jl/issues)
+if you encounter any problems. The [contributing](@ref) page has
+a few guidelines that should be followed when opening pull requests and contributing code.
+
 ## Manual Outline
 
 ```@contents
 Pages = [
     "installation.md",
-    "develop.md",
+    "contributing.md",
     "run/configuration.md",
     "run/cli.md",
     "run/jobs.md",
     "troubleshooting.md",
-    "questions.md",
+    "faq.md",
 ]
-Depth = 5
+Depth = 3
+```
+
+## Library Outline
+
+```@contents
 ```
 
 ### [Index](@id main-index)
 
 ```@index
-
 ```
