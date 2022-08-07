@@ -38,3 +38,7 @@ customized workflows can be built on top of that.
 Please go to our website for the most updated version of
 [code](https://github.com/MineralsCloud/Express.jl) and
 [documentation](https://mineralscloud.github.io/Express.jl/dev/).
+
+Here is a video introduction to this code:
+
+[![Watch the video](https://img.youtube.com/vi/N5_NUIaXnng/maxresdefault.jpg)](https://youtu.be/N5_NUIaXnng)
