@@ -6,6 +6,9 @@ CurrentModule = ExpressBase
 
 Documentation for [ExpressBase](https://github.com/MineralsCloud/ExpressBase.jl).
 
+This package defines some basic types and functions used by the
+[`Express.jl`](https://github.com/MineralsCloud/Express.jl) package.
+
 See the [Index](@ref main-index) for the complete list of documented functions
 and types.
 

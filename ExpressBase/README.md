@@ -21,6 +21,9 @@
 [license-img]: https://img.shields.io/github/license/MineralsCloud/ExpressBase.jl
 [license-url]: https://github.com/MineralsCloud/ExpressBase.jl/blob/master/LICENSE
 
+This package defines some basic types and functions used by the
+[`Express.jl`](https://github.com/MineralsCloud/Express.jl) package.
+
 The code is [hosted on GitHub](https://github.com/MineralsCloud/ExpressBase.jl),
 with some continuous integration services to test its validity.
 
