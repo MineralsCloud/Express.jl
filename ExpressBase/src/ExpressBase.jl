@@ -22,6 +22,7 @@ export SelfConsistentField,
 export calculation
 
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
+"Represent all materials calculations."
 abstract type Calculation end
 abstract type ElectronicStructure <: Calculation end
 struct SelfConsistentField <: ElectronicStructure end
@@ -49,8 +50,14 @@ const VDos = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For British users
 const Qha = QuasiHarmonicApproximation
 
+"Represent an atomic action for a specific `Calculation` type."
 abstract type Action{T<:Calculation} end
 
+"""
+    calculation(::Action)
+
+Return the calculation type of the `Action`.
+"""
 calculation(::Action{T}) where {T} = T()
 
 end
