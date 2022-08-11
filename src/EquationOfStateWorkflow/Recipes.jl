@@ -4,8 +4,9 @@ using AbInitioSoftwareBase: load
 using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..Config: ExpandConfig
+using ExpressBase: Scf, VariableCellOptimization
 using ..EquationOfStateWorkflow:
-    Scf, VcOptim, DownloadPotentials, LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
+    DownloadPotentials, LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
 
 export buildworkflow, run!
 
@@ -18,7 +19,7 @@ function buildworkflow(cfgfile)
     d0 = buildjob(GetData{stage}(), cfgfile)
     d = buildjob(FitEos{stage}(), cfgfile)
     f = Job(() -> LogMsg{stage}()(; start = false))
-    stage = VcOptim
+    stage = VariableCellOptimization
     g = Job(() -> LogMsg{stage}()(; start = true))
     h = buildjob(MakeInput{stage}(), cfgfile)
     i = buildjob(RunCmd{stage}(), cfgfile)

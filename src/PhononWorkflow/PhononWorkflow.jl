@@ -5,40 +5,18 @@ using AbInitioSoftwareBase.Inputs: Input
 using SimpleWorkflows: Workflow, run!, →
 using Unitful: ustrip, @u_str
 
-using ..Express:
+using ExpressBase:
     Calculation,
     LatticeDynamics,
     SelfConsistentField,
     Scf,
     FixedIonSelfConsistentField,
-    Action,
-    current_software
-using ..EquationOfStateWorkflow: VcOptim
+    VariableCellOptimization,
+    Action
+using ..Express: current_software
 using ..Shell: distprocs
 
-export Dfpt,
-    Dfpt,
-    SelfConsistentField,
-    Scf,
-    FixedIonSelfConsistentField,
-    RealSpaceForceConstants,
-    PhononDispersion,
-    PhononDensityOfStates,
-    VDos,
-    ZoneCenterPhonons,
-    ZoneCentrePhonons,
-    MakeInput,
-    LogMsg,
-    run!
-
-struct LinearResponse <: LatticeDynamics end
-struct RealSpaceForceConstants <: LatticeDynamics end
-struct PhononDispersion <: LatticeDynamics end
-struct PhononDensityOfStates <: LatticeDynamics end
-struct ZoneCenterPhonons <: LatticeDynamics end
-const Dfpt = LinearResponse
-const VDos = PhononDensityOfStates
-const ZoneCentrePhonons = ZoneCenterPhonons  # For English users
+export Dfpt, MakeInput, LogMsg, run!
 
 include("Config.jl")
 include("actions.jl")

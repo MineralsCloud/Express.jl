@@ -2,10 +2,11 @@ module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
+using ExpressBase: Scf, LatticeDynamics, Dfpt, RealSpaceForceConstants, Action
 using Formatting: sprintf1
 using Unitful: ustrip
-using ...Express: Action, UnitfulVector, myuparse
-using ..PhononWorkflow: Scf, Dfpt, RealSpaceForceConstants, LatticeDynamics
+
+using ...Express: UnitfulVector, myuparse
 
 @option struct Template
     scf::String

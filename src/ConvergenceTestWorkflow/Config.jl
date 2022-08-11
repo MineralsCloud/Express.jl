@@ -2,9 +2,10 @@ module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
+using ExpressBase: Calculation, Action
 using Formatting: sprintf1
 
-using ...Express: Calculation, Action, UnitfulVector, myuparse
+using ...Express: UnitfulVector, myuparse
 
 @option "ecutwfc" struct CutoffEnergies <: UnitfulVector
     values::AbstractVector

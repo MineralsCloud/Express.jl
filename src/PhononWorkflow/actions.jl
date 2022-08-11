@@ -1,14 +1,22 @@
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
 using Dates: now, format
+using ExpressBase:
+    Calculation,
+    LatticeDynamics,
+    Scf,
+    Dfpt,
+    RealSpaceForceConstants,
+    PhononDispersion,
+    VDos,
+    Action,
+    calculation
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
 using SimpleWorkflows: Job
 
-using ...Express: Action, Calculation, LatticeDynamics, Scf, calculation
 using ..Shell: distprocs
-using ..EquationOfStateWorkflow: VcOptim
-using ..PhononWorkflow: Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
+using ..EquationOfStateWorkflow: VariableCellOptimization
 using .Config: ExpandConfig
 
 struct DownloadPotentials{T} <: Action{T} end
@@ -87,17 +95,22 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     return map(config.files[1]) do (input, _)
-        Job(function ()
-            vcout = joinpath(dirname(input), string(nameof(VcOptim)) * ".out")
-            str = read(vcout, String)
-            cell = parsecell(str)
-            if any(x === nothing for x in cell)
-                error("set cell failed!")
-            else
-                cell
-            end
-            return x(input, config.template.scf, first(cell), last(cell))
-        end)
+        Job(
+            function ()
+                vcout = joinpath(
+                    dirname(input),
+                    string(nameof(VariableCellOptimization)) * ".out",
+                )
+                str = read(vcout, String)
+                cell = parsecell(str)
+                if any(x === nothing for x in cell)
+                    error("set cell failed!")
+                else
+                    cell
+                end
+                return x(input, config.template.scf, first(cell), last(cell))
+            end,
+        )
     end
 end
 

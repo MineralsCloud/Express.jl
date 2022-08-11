@@ -1,18 +1,10 @@
 module Recipes
 
 using AbInitioSoftwareBase: load
+using ExpressBase: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
-using ..PhononWorkflow:
-    Scf,
-    Dfpt,
-    RealSpaceForceConstants,
-    PhononDispersion,
-    VDos,
-    DownloadPotentials,
-    LogMsg,
-    MakeInput,
-    RunCmd,
-    buildjob
+
+using ..PhononWorkflow: DownloadPotentials, LogMsg, MakeInput, RunCmd, buildjob
 
 export buildworkflow, run!
 

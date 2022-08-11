@@ -1,6 +1,6 @@
 module ConvergenceTestWorkflow
 
-using ..Express: Scf, calculation
+using ExpressBase: Scf, calculation
 
 function isconvergent(a::AbstractVector)
     terms = abs.(diff(a))

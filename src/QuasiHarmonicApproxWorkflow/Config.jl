@@ -2,8 +2,10 @@ module Config
 
 using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
+using ExpressBase: Action
 using Unitful: ustrip, @u_str
-using ...Express: Action, UnitfulVector, myuparse
+
+using ...Express: UnitfulVector, myuparse
 
 @option struct Pressures <: UnitfulVector
     values::AbstractVector

@@ -1,10 +1,11 @@
 module Recipes
 
 using AbInitioSoftwareBase: load
+using ExpressBase: Scf
 using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..ConvergenceTestWorkflow:
-    Scf, DownloadPotentials, LogMsg, MakeInput, RunCmd, TestConvergence, buildjob
+    DownloadPotentials, LogMsg, MakeInput, RunCmd, TestConvergence, buildjob
 
 export buildworkflow, run!
 

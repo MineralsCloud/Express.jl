@@ -14,7 +14,8 @@ using EquationsOfStateOfSolids:
     Vinet
 using Formatting: sprintf1
 
-using ...Express: Calculation, Action, UnitfulVector, myuparse
+using ExpressBase: Calculation, Action
+using ..Express: UnitfulVector, myuparse
 
 @option "pressures" struct Pressures <: UnitfulVector
     values::AbstractVector
