@@ -19,27 +19,6 @@ using ..Shell: distprocs
 using ..EquationOfStateWorkflow: VariableCellOptimization
 using .Config: ExpandConfig
 
-struct DownloadPotentials{T} <: Action{T} end
-function (x::DownloadPotentials)(template::Input)
-    dir = getpseudodir(template)
-    if !isdir(dir)
-        mkpath(dir)
-    end
-    potentials = getpotentials(template)
-    return map(potentials) do potential
-        path = joinpath(dir, potential)
-        if !isfile(path)
-            download_potential(potential, path)
-        end
-    end
-end
-
-function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    return Job(() -> x(config.template.scf))  # This `scf` is important!
-end
-
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
     file,
