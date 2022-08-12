@@ -11,8 +11,6 @@ using ExpressBase:
     VDos,
     Action,
     calculation
-using Logging: with_logger, current_logger
-using Pseudopotentials: download_potential
 using SimpleWorkflows: Job
 
 using ..Shell: distprocs

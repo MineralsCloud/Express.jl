@@ -6,8 +6,6 @@ using EquationsOfStateOfSolids:
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase: Action, ScfOrOptim, Scf, Optimization, calculation
 import JLD2
-using Logging: with_logger, current_logger
-using Pseudopotentials: download_potential
 using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
