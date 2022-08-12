@@ -138,13 +138,3 @@ function (::SaveEos{T})(file, eos::Parameters) where {T}
     JLD2.save(file, dict)
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
-
-struct LogMsg{T} <: Action{T} end
-function (x::LogMsg)(; start = true)
-    act = start ? "starts" : "ends"
-    with_logger(current_logger()) do
-        println(
-            "The calculation $(calculation(x)) $act at $(format(now(), "HH:MM:SS u dd, yyyy")).",
-        )
-    end
-end
