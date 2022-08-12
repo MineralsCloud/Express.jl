@@ -2,9 +2,10 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using ExpressBase: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
+using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
 using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 
-using ..PhononWorkflow: DownloadPotentials, LogMsg, MakeInput, RunCmd, buildjob
+using ..PhononWorkflow: MakeInput, buildjob
 
 export buildworkflow, run!
 
@@ -18,23 +19,19 @@ function buildworkflow(cfgfile)
         error("unsupported option!")
     end
     a0 = buildjob(DownloadPotentials{Scf}(), cfgfile)
-    a = Job(() -> LogMsg{Scf}()(; start = true))
+    a = Job(() -> LogTime{Scf}()())
     b = buildjob(MakeInput{Scf}(), cfgfile)
     c = buildjob(RunCmd{Scf}(), cfgfile)
-    d = Job(() -> LogMsg{Scf}()(; start = false))
-    e = Job(() -> LogMsg{Dfpt}()(; start = true))
+    d = Job(() -> LogTime{Scf}()())
     f = buildjob(MakeInput{Dfpt}(), cfgfile)
     g = buildjob(RunCmd{Dfpt}(), cfgfile)
-    h = Job(() -> LogMsg{Dfpt}()(; start = false))
-    i = Job(() -> LogMsg{RealSpaceForceConstants}()(; start = true))
+    i = Job(() -> LogTime{RealSpaceForceConstants}()())
     j = buildjob(MakeInput{RealSpaceForceConstants}(), cfgfile)
     k = buildjob(RunCmd{RealSpaceForceConstants}(), cfgfile)
-    l = Job(() -> LogMsg{RealSpaceForceConstants}()(; start = false))
-    m = Job(() -> LogMsg{x}()(; start = true))
+    m = Job(() -> LogTime{x}()())
     n = buildjob(MakeInput{x}(), cfgfile)
     o = buildjob(RunCmd{x}(), cfgfile)
-    p = Job(() -> LogMsg{x}()(; start = false))
-    a0 → a ⇉ b ⇶ c ⭃ d → e ⇉ f ⇶ g ⭃ h → i ⇉ j ⇶ k ⭃ l → m ⇉ n ⇶ o ⭃ p
+    a0 → a ⇉ b ⇶ c ⭃ d ⇉ f ⇶ g ⭃ i ⇉ j ⇶ k ⭃ m ⇉ n ⇶ o
     return Workflow(a0)
 end
 

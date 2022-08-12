@@ -1,8 +1,10 @@
 module EquationOfStateWorkflow
 
+using ExpressWorkflowMaker.Templates: LogTime, RunCmd
+
 using ..Express: current_software
 
-export MakeInput, FitEos, GetData, SaveEos, RunCmd, LogMsg, calculation
+export MakeInput, FitEos, GetData, SaveEos, RunCmd, LogTime, calculation
 
 const ScfOrOptim = Union{SelfConsistentField,Optimization}
 
