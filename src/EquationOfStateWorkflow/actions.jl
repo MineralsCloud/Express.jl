@@ -62,17 +62,6 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T<:Optimization}
     end
 end
 
-struct RunCmd{T} <: Action{T} end
-
-function buildjob(x::RunCmd{T}, cfgfile) where {T}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files))
-    return map(config.files) do (input, output)
-        Job(() -> x(input, output; np = np))
-    end
-end
-
 struct GetData{T} <: Action{T} end
 function (x::GetData)(outputs)
     raw = (parseoutput(calculation(x))(output) for output in outputs)  # `ntuple` cannot work with generators

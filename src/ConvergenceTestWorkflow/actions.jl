@@ -31,17 +31,6 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     end
 end
 
-struct RunCmd{T} <: Action{T} end
-
-function buildjob(x::RunCmd{T}, cfgfile) where {T}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files))
-    return map(config.files) do (input, output)
-        Job(() -> x(input, output; np = np))
-    end
-end
-
 function parseoutput end
 
 struct GetData{T} <: Action{T} end

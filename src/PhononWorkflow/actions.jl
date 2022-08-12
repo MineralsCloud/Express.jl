@@ -95,8 +95,6 @@ function parsecell end
 
 function inputtype end
 
-struct RunCmd{T} <: Action{T} end
-
 function buildjob(x::RunCmd{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
