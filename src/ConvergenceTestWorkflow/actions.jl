@@ -8,6 +8,8 @@ using Unitful: ustrip, unit
 using ..Shell: distprocs
 using .Config: ExpandConfig
 
+import ExpressWorkflowMaker.Templates: jobify
+
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
     input = x(template, args...)
@@ -16,7 +18,7 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
-function buildjob(x::MakeInput{Scf}, cfgfile)
+function jobify(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     inputs = first.(config.files)
@@ -39,7 +41,7 @@ function (x::GetData)(outputs)
     return collect(Iterators.filter(x -> x !== nothing, raw))  # A vector of pairs
 end
 
-function buildjob(x::GetData{T}, cfgfile) where {T}
+function jobify(x::GetData{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return Job(function ()
@@ -53,7 +55,7 @@ end
 struct TestConvergence{T} <: Action{T} end
 (x::TestConvergence)(data) = isconvergent(data)
 
-function buildjob(x::TestConvergence{T}, cfgfile) where {T}
+function jobify(x::TestConvergence{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return Job(function ()

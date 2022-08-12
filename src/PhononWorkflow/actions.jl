@@ -17,6 +17,8 @@ using ..Shell: distprocs
 using ..EquationOfStateWorkflow: VariableCellOptimization
 using .Config: ExpandConfig
 
+import ExpressWorkflowMaker.Templates: jobify
+
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
     file,
@@ -29,7 +31,7 @@ function (x::MakeInput{T})(
     return input
 end
 
-function buildjob(x::MakeInput{Dfpt}, cfgfile)
+function jobify(x::MakeInput{Dfpt}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Dfpt}()(dict)
     return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
@@ -40,7 +42,7 @@ function buildjob(x::MakeInput{Dfpt}, cfgfile)
         end)
     end
 end
-function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
+function jobify(x::MakeInput{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
     return map(config.files[3], config.files[2]) do (input, _), (previnput, _)
@@ -51,7 +53,7 @@ function buildjob(x::MakeInput{RealSpaceForceConstants}, cfgfile)
         end)
     end
 end
-function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
+function jobify(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return map(
@@ -68,7 +70,7 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDo
         end)
     end
 end
-function buildjob(x::MakeInput{Scf}, cfgfile)
+function jobify(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     return map(config.files[1]) do (input, _)
@@ -95,7 +97,7 @@ function parsecell end
 
 function inputtype end
 
-function buildjob(x::RunCmd{Scf}, cfgfile)
+function jobify(x::RunCmd{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[1]))
@@ -103,7 +105,7 @@ function buildjob(x::RunCmd{Scf}, cfgfile)
         Job(() -> x(input, output; np = np))
     end
 end
-function buildjob(x::RunCmd{Dfpt}, cfgfile)
+function jobify(x::RunCmd{Dfpt}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Dfpt}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[2]))
@@ -111,7 +113,7 @@ function buildjob(x::RunCmd{Dfpt}, cfgfile)
         Job(() -> x(input, output; np = np))
     end
 end
-function buildjob(x::RunCmd{RealSpaceForceConstants}, cfgfile)
+function jobify(x::RunCmd{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[3]))
@@ -119,7 +121,7 @@ function buildjob(x::RunCmd{RealSpaceForceConstants}, cfgfile)
         Job(() -> x(input, output; np = np))
     end
 end
-function buildjob(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
+function jobify(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     np = distprocs(config.cli.mpi.np, length(config.files[4]))
