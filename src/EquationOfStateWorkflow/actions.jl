@@ -1,6 +1,5 @@
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
-using Dates: now, format
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
@@ -10,7 +9,7 @@ using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
 using ..Shell: distprocs
-using .Config: Volumes, ExpandConfig
+using .Config: ExpandConfig
 
 import ExpressWorkflowMaker.Templates: jobify
 

@@ -1,6 +1,5 @@
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
-using Dates: now, format
 using ExpressBase:
     Calculation,
     LatticeDynamics,
