@@ -3,27 +3,20 @@ module Config
 using AbInitioSoftwareBase: save, load, parentdir
 using Configurations: from_dict, @option
 using ExpressBase: Action
+using ExpressWorkflowMaker.Config: @vopt
 using Unitful: ustrip, @u_str
 
-using ...Express: UnitfulVector, myuparse
-
-@option struct Pressures <: UnitfulVector
-    values::AbstractVector
-    unit::String
-    function Pressures(values, unit = "GPa")
+@vopt Pressures "GPa" "pressures" begin
+    function (values, _)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
-        return new(values, unit)
     end
 end
 
-@option struct Temperatures <: UnitfulVector
-    values::AbstractVector
-    unit::String
-    function Temperatures(values, unit = "K")
-        @assert minimum(values) * myuparse(unit) >= 0u"K" "the minimum temperature is less than 0K!"
-        return new(values, unit)
+@vopt Temperatures "K" "temperatures" begin
+    function (values, unit)
+        @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
     end
 end
 
@@ -109,17 +102,13 @@ end
 
 struct ExpandConfig{T} end
 function (::ExpandConfig)(pressures::Pressures)
-    unit = myuparse(pressures.unit)
-    expanded = pressures.values .* unit
+    expanded = pressures.values .* pressures.unit
     if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
         @warn "for better fitting result, provide at least 1 negative pressure!"
     end
     return expanded
 end
-function (::ExpandConfig)(temperatures::Temperatures)
-    unit = myuparse(temperatures.unit)
-    return temperatures.values .* unit
-end
+(::ExpandConfig)(temperatures::Temperatures) = temperatures.values .* temperatures.unit
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     temperatures = x(config.temperatures)

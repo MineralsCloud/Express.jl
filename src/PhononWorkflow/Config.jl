@@ -6,8 +6,6 @@ using ExpressBase: Scf, LatticeDynamics, Dfpt, RealSpaceForceConstants, Action
 using Formatting: sprintf1
 using Unitful: ustrip
 
-using ...Express: UnitfulVector, myuparse
-
 @option struct Template
     scf::String
     dfpt::String
@@ -30,15 +28,9 @@ using ...Express: UnitfulVector, myuparse
     end
 end
 
-@option "pressures" struct Pressures <: UnitfulVector
-    values::AbstractVector
-    unit::String = "GPa"
-end
+@vopt Pressures "GPa" "pressures"
 
-@option "volumes" struct Volumes <: UnitfulVector
-    values::AbstractVector
-    unit::String = "bohr^3"
-end
+@vopt Volumes "bohr^3" "volumes"
 
 @option struct Directories
     root::String = pwd()
@@ -83,8 +75,7 @@ end
 
 struct ExpandConfig{T} end
 function (::ExpandConfig)(fixed::Union{Pressures,Volumes})
-    unit = myuparse(fixed.unit)
-    return fixed.values .* unit
+    return fixed.values .* fixed.unit
 end
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f

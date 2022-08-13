@@ -3,14 +3,10 @@ module Config
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using ExpressBase: Calculation, Action
+using ExpressWorkflowMaker.Config: @vopt
 using Formatting: sprintf1
 
-using ...Express: UnitfulVector, myuparse
-
-@option "ecutwfc" struct CutoffEnergies <: UnitfulVector
-    values::AbstractVector
-    unit::String = "Ry"
-end
+@vopt CutoffEnergies "Ry" "ecutwfc"
 
 @option "k_mesh" struct MonkhorstPackGrids
     meshes::AbstractVector{<:AbstractVector{<:Integer}}
@@ -64,10 +60,7 @@ end
 end
 
 struct ExpandConfig{T} end
-function (::ExpandConfig)(energies::CutoffEnergies)
-    unit = myuparse(energies.unit)
-    return energies.values .* unit
-end
+(::ExpandConfig)(energies::CutoffEnergies) = energies.values .* energies.unit
 function (::ExpandConfig)(x::MonkhorstPackGrids)
     return map(x.meshes, x.shifts) do mesh, shift
         (mesh, shift)

@@ -12,30 +12,23 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
+using ExpressBase: Calculation, Action
+using ExpressWorkflowMaker.Config: @vopt
 using Formatting: sprintf1
 
-using ExpressBase: Calculation, Action
-using ..Express: UnitfulVector, myuparse
-
-@option "pressures" struct Pressures <: UnitfulVector
-    values::AbstractVector
-    unit::String
-    function Pressures(values, unit = "GPa")
+@vopt Pressures "GPa" "pressures" begin
+    function (values, _)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
-        return new(values, unit)
     end
 end
 
-@option "volumes" struct Volumes <: UnitfulVector
-    values::AbstractVector
-    unit::String
-    function Volumes(values, unit = "bohr^3")
+@vopt Volumes "bohr^3" "volumes" begin
+    function (values, _)
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
-        return new(values, unit)
     end
 end
 
@@ -112,17 +105,13 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(map(myuparse ∘ string, trial_eos.values)...)
 end
 function (::ExpandConfig)(pressures::Pressures)
-    unit = myuparse(pressures.unit)
-    expanded = pressures.values .* unit
+    expanded = pressures.values .* pressures.unit
     if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
         @warn "for better fitting result, provide at least 1 negative pressure!"
     end
     return expanded
 end
-function (::ExpandConfig)(volumes::Volumes)
-    unit = myuparse(volumes.unit)
-    return volumes.values .* unit
-end
+(::ExpandConfig)(volumes::Volumes) = volumes.values .* volumes.unit
 function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}
     dirs = map(fixed.values) do value
         abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
