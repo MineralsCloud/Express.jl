@@ -23,3 +23,7 @@ makedocs(;
         "Troubleshooting" => "troubleshooting.md",
     ],
 )
+
+deploydocs(;
+    repo="github.com/MineralsCloud/ExpressBase.jl",
+)
