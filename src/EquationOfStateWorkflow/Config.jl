@@ -15,7 +15,6 @@ using EquationsOfStateOfSolids:
 using ExpressBase: Calculation, Action
 using ExpressWorkflowMaker.Config: @vopt
 using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
-using Formatting: sprintf1
 
 @vopt Pressures "GPa" "pressures" begin
     function (values, _)

@@ -4,7 +4,6 @@ using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using ExpressBase: Scf, LatticeDynamics, Dfpt, RealSpaceForceConstants, Action
 using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
-using Formatting: sprintf1
 using Unitful: ustrip
 
 @option struct Template
