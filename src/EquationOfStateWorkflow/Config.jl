@@ -14,6 +14,7 @@ using EquationsOfStateOfSolids:
     Vinet
 using ExpressBase: Calculation, Action
 using ExpressWorkflowMaker.Config: @vopt
+using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
 using Formatting: sprintf1
 
 @vopt Pressures "GPa" "pressures" begin
@@ -37,28 +38,10 @@ end
     values::AbstractVector
 end
 
-@option struct Directories
-    root::String = pwd()
-    pattern::String = "p=%.1f"
-    group_by_step::Bool = false
-    Directories(root, pattern, group_by_step) =
-        new(abspath(expanduser(root)), pattern, group_by_step)
-end
-
-@option struct FileNamePatterns
-    input::String = "%s.in"
-    output::String = "%s.out"
-end
-
 @option struct Save
     raw::String = "raw.json"
     eos::String = "eos.jld2"
     status::String = ""
-end
-
-@option struct IOFiles
-    dirs::Directories = Directories()
-    pattern::FileNamePatterns = FileNamePatterns()
 end
 
 @option struct RuntimeConfig
@@ -66,15 +49,15 @@ end
     template::String
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
-    files::IOFiles = IOFiles()
+    dirstructure::DirStructure
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(recipe, template, trial_eos, fixed, files, save, cli)
+    function RuntimeConfig(recipe, template, trial_eos, fixed, dirstructure, save, cli)
         @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, trial_eos, fixed, files, save, cli)
+        return new(recipe, template, trial_eos, fixed, dirstructure, save, cli)
     end
 end
 
@@ -112,16 +95,8 @@ function (::ExpandConfig)(pressures::Pressures)
     return expanded
 end
 (::ExpandConfig)(volumes::Volumes) = volumes.values .* volumes.unit
-function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}
-    dirs = map(fixed.values) do value
-        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
-    end
-    return map(dirs) do dir
-        type = string(nameof(T))
-        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
-        joinpath(dir, in) => joinpath(dir, out)
-    end
-end
+(::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
+    iofiles(ds, fixed.values, string(nameof(T)))
 function (::ExpandConfig)(save::Save)
     return map((:raw, :eos, :status)) do f
         v = getfield(save, f)
