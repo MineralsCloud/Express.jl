@@ -1,5 +1,6 @@
 module Recipes
 
+using CompositionsBase: ⨟
 using ExpressBase.Recipes: Recipe
 using Test: @testset, @test
 
@@ -21,10 +22,13 @@ const d = RecipeD()
     @test a ∘ b ∘ c ∘ d == ∘(a, b, c, d)
 end
 
-@testset "Test `inv` of `ComposedRecipe`" begin
-    @test inv(a ∘ b) == b ∘ a
-    @test inv(a ∘ b ∘ c) == c ∘ b ∘ a
-    @test inv(a ∘ b ∘ c ∘ d) == d ∘ c ∘ b ∘ a
+@testset "Test `⨟` of `ComposedRecipe`" begin
+    @test ⨟(a) == a
+    @test a ⨟ b == b ∘ a
+    @test ⨟(a, b, c) == c ∘ b ∘ a == (c ∘ b) ∘ a
+    @test a ⨟ b ⨟ c == c ∘ (b ∘ a) != c ∘ b ∘ a
+    @test ⨟(a, b, c, d) == d ∘ c ∘ b ∘ a == ((d ∘ c) ∘ b) ∘ a
+    @test a ⨟ b ⨟ c ⨟ d == d ∘ (c ∘ (b ∘ a)) != d ∘ c ∘ b ∘ a
 end
 
 end
