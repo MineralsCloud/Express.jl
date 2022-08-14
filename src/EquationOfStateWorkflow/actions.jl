@@ -4,11 +4,11 @@ using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase: Action, ScfOrOptim, Scf, Optimization, calculation
+using ExpressWorkflowMaker: distribute_procs
 import JLD2
 using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
-using ..Shell: distprocs
 using .Config: ExpandConfig
 
 import ExpressWorkflowMaker.Templates: jobify

@@ -15,7 +15,6 @@ using ExpressBase:
     VariableCellOptimization,
     Action
 using ..Express: current_software
-using ..Shell: distprocs
 
 export Dfpt, MakeInput, LogTime, run!
 

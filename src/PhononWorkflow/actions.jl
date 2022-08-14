@@ -10,9 +10,9 @@ using ExpressBase:
     VDos,
     Action,
     calculation
+using ExpressWorkflowMaker: distribute_procs
 using SimpleWorkflows: Job
 
-using ..Shell: distprocs
 using ..EquationOfStateWorkflow: VariableCellOptimization
 using .Config: ExpandConfig
 
@@ -99,7 +99,7 @@ function inputtype end
 function jobify(x::RunCmd{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files[1]))
+    np = distribute_procs(config.cli.mpi.np, length(config.files[1]))
     return map(config.files[1]) do (input, output)
         Job(() -> x(input, output; np = np))
     end
@@ -107,7 +107,7 @@ end
 function jobify(x::RunCmd{Dfpt}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Dfpt}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files[2]))
+    np = distribute_procs(config.cli.mpi.np, length(config.files[2]))
     return map(config.files[2]) do (input, output)
         Job(() -> x(input, output; np = np))
     end
@@ -115,7 +115,7 @@ end
 function jobify(x::RunCmd{RealSpaceForceConstants}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files[3]))
+    np = distribute_procs(config.cli.mpi.np, length(config.files[3]))
     return map(config.files[3]) do (input, output)
         Job(() -> x(input, output; np = np))
     end
@@ -123,7 +123,7 @@ end
 function jobify(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files[4]))
+    np = distribute_procs(config.cli.mpi.np, length(config.files[4]))
     return map(config.files[4]) do (input, output)
         Job(() -> x(input, output; np = np))
     end
