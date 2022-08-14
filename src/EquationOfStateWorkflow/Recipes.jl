@@ -1,31 +1,29 @@
 module Recipes
 
 using AbInitioSoftwareBase: load
+using ExpressBase: Scf, VariableCellOptimization
+using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
 using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
 
-using ..Config: ExpandConfig
-using ..EquationOfStateWorkflow:
-    Scf, VcOptim, DownloadPotentials, LogMsg, MakeInput, RunCmd, GetData, FitEos, buildjob
+using ..EquationOfStateWorkflow: MakeInput, GetData, FitEos
 
 export buildworkflow, run!
 
 function buildworkflow(cfgfile)
     stage = Scf
-    a0 = buildjob(DownloadPotentials{stage}(), cfgfile)
-    a = Job(() -> LogMsg{stage}()(; start = true))
-    b = buildjob(MakeInput{stage}(), cfgfile)
-    c = buildjob(RunCmd{stage}(), cfgfile)
-    d0 = buildjob(GetData{stage}(), cfgfile)
-    d = buildjob(FitEos{stage}(), cfgfile)
-    f = Job(() -> LogMsg{stage}()(; start = false))
-    stage = VcOptim
-    g = Job(() -> LogMsg{stage}()(; start = true))
-    h = buildjob(MakeInput{stage}(), cfgfile)
-    i = buildjob(RunCmd{stage}(), cfgfile)
-    j0 = buildjob(GetData{stage}(), cfgfile)
-    j = buildjob(FitEos{stage}(), cfgfile)
-    l = Job(() -> LogMsg{stage}()(; start = false))
-    a0 → a ⇉ b ⇶ c ⭃ d0 → d → f → g ⇉ h ⇶ i ⭃ j0 → j → l
+    a0 = jobify(DownloadPotentials{stage}(), cfgfile)
+    a = jobify(LogTime{stage}())
+    b = jobify(MakeInput{stage}(), cfgfile)
+    c = jobify(RunCmd{stage}(), cfgfile)
+    d0 = jobify(GetData{stage}(), cfgfile)
+    d = jobify(FitEos{stage}(), cfgfile)
+    stage = VariableCellOptimization
+    g = a = jobify(LogTime{stage}())
+    h = jobify(MakeInput{stage}(), cfgfile)
+    i = jobify(RunCmd{stage}(), cfgfile)
+    j0 = jobify(GetData{stage}(), cfgfile)
+    j = jobify(FitEos{stage}(), cfgfile)
+    a0 → a ⇉ b ⇶ c ⭃ d0 → d → g ⇉ h ⇶ i ⭃ j0 → j
     return Workflow(a0)
 end
 

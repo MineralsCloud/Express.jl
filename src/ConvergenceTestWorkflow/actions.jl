@@ -1,35 +1,13 @@
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
-using Dates: now, format
-using Logging: with_logger, current_logger
-using Pseudopotentials: download_potential
+using ExpressBase: Action, calculation
 using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
-using ...Express: Action, calculation
 using ..Shell: distprocs
 using .Config: ExpandConfig
 
-struct DownloadPotentials{T} <: Action{T} end
-function (x::DownloadPotentials)(template::Input)
-    dir = getpseudodir(template)
-    if !isdir(dir)
-        mkpath(dir)
-    end
-    potentials = getpotentials(template)
-    return map(potentials) do potential
-        path = joinpath(dir, potential)
-        if !isfile(path)
-            download_potential(potential, path)
-        end
-    end
-end
-
-function buildjob(x::DownloadPotentials{T}, cfgfile) where {T}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    return Job(() -> x(config.template))
-end
+import ExpressWorkflowMaker.Templates: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
@@ -39,7 +17,7 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
-function buildjob(x::MakeInput{Scf}, cfgfile)
+function jobify(x::MakeInput{Scf}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{Scf}()(dict)
     inputs = first.(config.files)
@@ -54,17 +32,6 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
     end
 end
 
-struct RunCmd{T} <: Action{T} end
-
-function buildjob(x::RunCmd{T}, cfgfile) where {T}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    np = distprocs(config.cli.mpi.np, length(config.files))
-    return map(config.files) do (input, output)
-        Job(() -> x(input, output; np = np))
-    end
-end
-
 function parseoutput end
 
 struct GetData{T} <: Action{T} end
@@ -73,7 +40,7 @@ function (x::GetData)(outputs)
     return collect(Iterators.filter(x -> x !== nothing, raw))  # A vector of pairs
 end
 
-function buildjob(x::GetData{T}, cfgfile) where {T}
+function jobify(x::GetData{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return Job(function ()
@@ -87,7 +54,7 @@ end
 struct TestConvergence{T} <: Action{T} end
 (x::TestConvergence)(data) = isconvergent(data)
 
-function buildjob(x::TestConvergence{T}, cfgfile) where {T}
+function jobify(x::TestConvergence{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return Job(function ()
@@ -96,14 +63,4 @@ function buildjob(x::TestConvergence{T}, cfgfile) where {T}
         save(config.save_raw, saved)
         return x(data)
     end)
-end
-
-struct LogMsg{T} <: Action{T} end
-function (x::LogMsg)(; start = true)
-    act = start ? "starts" : "ends"
-    with_logger(current_logger()) do
-        println(
-            "The calculation $(calculation(x)) $act at $(format(now(), "HH:MM:SS u dd, yyyy")).",
-        )
-    end
 end

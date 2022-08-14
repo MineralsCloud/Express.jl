@@ -12,29 +12,24 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
+using ExpressBase: Calculation, Action
+using ExpressWorkflowMaker.Config: @vopt
+using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
 using Formatting: sprintf1
 
-using ...Express: Calculation, Action, UnitfulVector, myuparse
-
-@option "pressures" struct Pressures <: UnitfulVector
-    values::AbstractVector
-    unit::String
-    function Pressures(values, unit = "GPa")
+@vopt Pressures "GPa" "pressures" begin
+    function (values, _)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
-        return new(values, unit)
     end
 end
 
-@option "volumes" struct Volumes <: UnitfulVector
-    values::AbstractVector
-    unit::String
-    function Volumes(values, unit = "bohr^3")
+@vopt Volumes "bohr^3" "volumes" begin
+    function (values, _)
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
         end
-        return new(values, unit)
     end
 end
 
@@ -43,28 +38,10 @@ end
     values::AbstractVector
 end
 
-@option struct Directories
-    root::String = pwd()
-    pattern::String = "p=%.1f"
-    group_by_step::Bool = false
-    Directories(root, pattern, group_by_step) =
-        new(abspath(expanduser(root)), pattern, group_by_step)
-end
-
-@option struct FileNamePatterns
-    input::String = "%s.in"
-    output::String = "%s.out"
-end
-
 @option struct Save
     raw::String = "raw.json"
     eos::String = "eos.jld2"
     status::String = ""
-end
-
-@option struct IOFiles
-    dirs::Directories = Directories()
-    pattern::FileNamePatterns = FileNamePatterns()
 end
 
 @option struct RuntimeConfig
@@ -72,15 +49,15 @@ end
     template::String
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
-    files::IOFiles = IOFiles()
+    dirstructure::DirStructure
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(recipe, template, trial_eos, fixed, files, save, cli)
+    function RuntimeConfig(recipe, template, trial_eos, fixed, dirstructure, save, cli)
         @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, trial_eos, fixed, files, save, cli)
+        return new(recipe, template, trial_eos, fixed, dirstructure, save, cli)
     end
 end
 
@@ -111,27 +88,15 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(map(myuparse ∘ string, trial_eos.values)...)
 end
 function (::ExpandConfig)(pressures::Pressures)
-    unit = myuparse(pressures.unit)
-    expanded = pressures.values .* unit
+    expanded = pressures.values .* pressures.unit
     if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
         @warn "for better fitting result, provide at least 1 negative pressure!"
     end
     return expanded
 end
-function (::ExpandConfig)(volumes::Volumes)
-    unit = myuparse(volumes.unit)
-    return volumes.values .* unit
-end
-function (::ExpandConfig{T})(files::IOFiles, fixed::Union{Pressures,Volumes}) where {T}
-    dirs = map(fixed.values) do value
-        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
-    end
-    return map(dirs) do dir
-        type = string(nameof(T))
-        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
-        joinpath(dir, in) => joinpath(dir, out)
-    end
-end
+(::ExpandConfig)(volumes::Volumes) = volumes.values .* volumes.unit
+(::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
+    iofiles(ds, fixed.values, string(nameof(T)))
 function (::ExpandConfig)(save::Save)
     return map((:raw, :eos, :status)) do f
         v = getfield(save, f)

@@ -1,15 +1,17 @@
 module Recipes
 
 using SimpleWorkflows: Job, Workflow, run!, →
-using ..QuasiHarmonicApproxWorkflow:
-    QuasiHarmonicApprox, MakeInput, CalculateThermodyn, Plot, buildjob
+using ExpressBase: QuasiHarmonicApproximation
+using ExpressWorkflowMaker.Templates: jobify
+
+using ..QuasiHarmonicApproxWorkflow: MakeInput, CalculateThermodyn, Plot
 
 export buildworkflow, run!
 
 function buildworkflow(cfgfile)
-    a = buildjob(MakeInput{QuasiHarmonicApprox}(), cfgfile)
-    b = buildjob(CalculateThermodyn{QuasiHarmonicApprox}(), cfgfile)
-    c = buildjob(Plot{QuasiHarmonicApprox}(), cfgfile)
+    a = jobify(MakeInput{QuasiHarmonicApproximation}(), cfgfile)
+    b = jobify(CalculateThermodyn{QuasiHarmonicApproximation}(), cfgfile)
+    c = jobify(Plot{QuasiHarmonicApproximation}(), cfgfile)
     a → b → c
     return Workflow(a)
 end

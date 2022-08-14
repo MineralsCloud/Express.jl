@@ -2,14 +2,12 @@ module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
+using ExpressBase: Calculation, Action
+using ExpressWorkflowMaker.Config: @vopt
+using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
 using Formatting: sprintf1
 
-using ...Express: Calculation, Action, UnitfulVector, myuparse
-
-@option "ecutwfc" struct CutoffEnergies <: UnitfulVector
-    values::AbstractVector
-    unit::String = "Ry"
-end
+@vopt CutoffEnergies "Ry" "ecutwfc"
 
 @option "k_mesh" struct MonkhorstPackGrids
     meshes::AbstractVector{<:AbstractVector{<:Integer}}
@@ -26,73 +24,38 @@ end
     end
 end
 
-@option struct Directories
-    root::String = pwd()
-    pattern::String = "e=%.1f"
-end
-
-@option struct FileNamePatterns
-    input::String = "%s.in"
-    output::String = "%s.out"
-end
-
 @option struct Save
     raw::String = "raw.json"
     status::String = ""
-end
-
-@option struct IOFiles
-    dirs::Directories = Directories()
-    pattern::FileNamePatterns = FileNamePatterns()
 end
 
 @option struct RuntimeConfig
     recipe::String
     template::String
     parameters::Union{CutoffEnergies,MonkhorstPackGrids}
-    files::IOFiles = IOFiles()
+    dirstructure::DirStructure = DirStructure()
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(recipe, template, parameters, files, save, cli)
+    function RuntimeConfig(recipe, template, parameters, dirstructure, save, cli)
         @assert recipe in ("ecut", "k_mesh")
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, parameters, files, save, cli)
+        return new(recipe, template, parameters, dirstructure, save, cli)
     end
 end
 
 struct ExpandConfig{T} end
-function (::ExpandConfig)(energies::CutoffEnergies)
-    unit = myuparse(energies.unit)
-    return energies.values .* unit
-end
+(::ExpandConfig)(energies::CutoffEnergies) = energies.values .* energies.unit
 function (::ExpandConfig)(x::MonkhorstPackGrids)
     return map(x.meshes, x.shifts) do mesh, shift
         (mesh, shift)
     end
 end
-function (::ExpandConfig{T})(files::IOFiles, energies::CutoffEnergies) where {T}
-    dirs = map(energies.values) do value
-        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
-    end
-    return map(dirs) do dir
-        type = string(nameof(T))
-        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
-        joinpath(dir, in) => joinpath(dir, out)
-    end
-end
-function (::ExpandConfig{T})(files::IOFiles, grids::MonkhorstPackGrids) where {T}
-    values = zip(grids.meshes, grids.shifts)
-    dirs = map(values) do value
-        abspath(joinpath(files.dirs.root, sprintf1(files.dirs.pattern, value)))
-    end
-    return map(dirs) do dir
-        type = string(nameof(T))
-        in, out = sprintf1(files.pattern.input, type), sprintf1(files.pattern.output, type)
-        joinpath(dir, in) => joinpath(dir, out)
-    end
-end
+(::ExpandConfig{T})(ds::DirStructure, energies::CutoffEnergies) where {T} =
+    iofiles(ds, energies.values, string(nameof(T)))
+(::ExpandConfig{T})(ds::DirStructure, grids::MonkhorstPackGrids) where {T} =
+    iofiles(ds, zip(grids.meshes, grids.shifts), string(nameof(T)))
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
         v = getfield(save, f)
