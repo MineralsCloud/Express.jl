@@ -60,4 +60,6 @@ Return the calculation type of the `Action`.
 """
 calculation(::Action{T}) where {T} = T()
 
+include("Recipes.jl")
+
 end
