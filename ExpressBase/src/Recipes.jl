@@ -16,10 +16,6 @@ end
 # See https://github.com/JuliaLang/julia/blob/3fa2d26/base/operators.jl#L1088
 Base.:∘(r1::Recipe, r2::Recipe) = ComposedRecipe(r1, r2)
 
-# See https://github.com/JuliaGeometry/CoordinateTransformations.jl/blob/ff9ea6e/src/core.jl#L78
-Base.inv(r::ComposedRecipe) = inv(r.r2) ∘ inv(r.r1)
-Base.inv(r::Recipe) = r
-
 # See https://github.com/JuliaGeometry/CoordinateTransformations.jl/blob/ff9ea6e/src/core.jl#L34
 Base.show(io::IO, r::ComposedRecipe) = print(io, '(', r.r1, " ∘ ", r.r2, ')')
 
