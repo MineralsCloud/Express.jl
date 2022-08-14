@@ -7,6 +7,7 @@ version = "0.2.0"
 CompositionsBase = "a33af91c-f02d-484b-be07-31d278c5ca2b"
 
 [compat]
+CompositionsBase = "0.1"
 julia = "1"
 
 [extras]
