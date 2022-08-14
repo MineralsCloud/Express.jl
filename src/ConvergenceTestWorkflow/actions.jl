@@ -1,10 +1,10 @@
 using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
 using ExpressBase: Action, calculation
+using ExpressWorkflowMaker: distribute_procs
 using SimpleWorkflows: Job
 using Unitful: ustrip, unit
 
-using ..Shell: distprocs
 using .Config: ExpandConfig
 
 import ExpressWorkflowMaker.Templates: jobify
