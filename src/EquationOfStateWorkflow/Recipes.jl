@@ -2,29 +2,41 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using ExpressBase: Scf, VariableCellOptimization
+using ExpressBase.Recipes: Recipe
 using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
-using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..EquationOfStateWorkflow: MakeInput, GetData, FitEos
 
-export buildworkflow, run!
+export build, run!
 
-function buildworkflow(cfgfile)
-    stage = Scf
-    a0 = jobify(DownloadPotentials{stage}(), cfgfile)
-    a = jobify(LogTime{stage}())
-    b = jobify(MakeInput{stage}(), cfgfile)
-    c = jobify(RunCmd{stage}(), cfgfile)
-    d0 = jobify(GetData{stage}(), cfgfile)
-    d = jobify(FitEos{stage}(), cfgfile)
-    stage = VariableCellOptimization
-    g = a = jobify(LogTime{stage}())
-    h = jobify(MakeInput{stage}(), cfgfile)
-    i = jobify(RunCmd{stage}(), cfgfile)
-    j0 = jobify(GetData{stage}(), cfgfile)
-    j = jobify(FitEos{stage}(), cfgfile)
-    a0 → a ⇉ b ⇶ c ⭃ d0 → d → g ⇉ h ⇶ i ⭃ j0 → j
-    return Workflow(a0)
+struct ParallelEosFittingRecipe <: Recipe
+    config
+end
+
+function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
+    a = jobify(DownloadPotentials{Scf}(), r.config)
+    b = jobify(LogTime{Scf}())
+    c = jobify(MakeInput{Scf}(), r.config)
+    d = jobify(RunCmd{Scf}(), r.config)
+    e = jobify(GetData{Scf}(), r.config)
+    f = jobify(FitEos{Scf}(), r.config)
+    g = jobify(LogTime{VariableCellOptimization}())
+    h = jobify(MakeInput{VariableCellOptimization}(), r.config)
+    i = jobify(RunCmd{VariableCellOptimization}(), r.config)
+    j = jobify(GetData{VariableCellOptimization}(), r.config)
+    k = jobify(FitEos{VariableCellOptimization}(), r.config)
+    a → b ⇉ c ⇶ d ⭃ e → f → g ⇉ h ⇶ i ⭃ j → k
+    return Workflow(a)
+end
+function build(::Type{Workflow}, file)
+    dict = load(file)
+    recipe = dict["recipe"]
+    if recipe == "eos"
+        return build(Workflow, ParallelEosFittingRecipe(dict))
+    else
+        error("unsupported recipe $recipe.")
+    end
 end
 
 end
