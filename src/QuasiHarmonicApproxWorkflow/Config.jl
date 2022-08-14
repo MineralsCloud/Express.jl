@@ -7,9 +7,12 @@ using ExpressWorkflowMaker.Config: @vopt
 using Unitful: ustrip, @u_str
 
 @vopt Pressures "GPa" "pressures" begin
-    function (values, _)
+    function (values, unit)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
+        end
+        if minimum(values * unit) >= 0 * unit  # values may have eltype `Any`
+            @warn "for better fitting result, provide at least 1 negative pressure!"
         end
     end
 end
@@ -101,14 +104,7 @@ end
 end
 
 struct ExpandConfig{T} end
-function (::ExpandConfig)(pressures::Pressures)
-    expanded = pressures.values .* pressures.unit
-    if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
-        @warn "for better fitting result, provide at least 1 negative pressure!"
-    end
-    return expanded
-end
-(::ExpandConfig)(temperatures::Temperatures) = temperatures.values .* temperatures.unit
+(::ExpandConfig)(data::Union{Pressures,Temperatures}) = collect(datum for datum in data)
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     temperatures = x(config.temperatures)
