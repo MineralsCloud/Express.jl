@@ -2,21 +2,49 @@ module Recipes
 
 using AbInitioSoftwareBase: load
 using ExpressBase: Scf
+using ExpressBase.Recipes: Recipe
 using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
-using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..ConvergenceTestWorkflow: MakeInput, TestConvergence
 
-export buildworkflow, run!
+export build, run!
 
-function buildworkflow(cfgfile)
-    a0 = jobify(DownloadPotentials{Scf}(), cfgfile)
-    a = jobify(LogTime{Scf}())
-    b = jobify(MakeInput{Scf}(), cfgfile)
-    c = jobify(RunCmd{Scf}(), cfgfile)
-    d = jobify(TestConvergence{Scf}(), cfgfile)
-    a0 → a ⇉ b ⇶ c ⭃ d
-    return Workflow(a0)
+struct TestCutoffEnergyRecipe <: Recipe
+    config
+end
+struct TestKPointsRecipe <: Recipe
+    config
+end
+
+function build(::Type{Workflow}, r::TestCutoffEnergyRecipe)
+    a = jobify(DownloadPotentials{Scf}(), r.config)
+    b = jobify(LogTime{Scf}())
+    c = jobify(MakeInput{Scf}(), r.config)
+    d = jobify(RunCmd{Scf}(), r.config)
+    e = jobify(TestConvergence{Scf}(), r.config)
+    a → b ⇉ c ⇶ d ⭃ e
+    return Workflow(a)
+end
+function build(::Type{Workflow}, r::TestKPointsRecipe)
+    a = jobify(DownloadPotentials{Scf}(), r.config)
+    b = jobify(LogTime{Scf}())
+    c = jobify(MakeInput{Scf}(), r.config)
+    d = jobify(RunCmd{Scf}(), r.config)
+    e = jobify(TestConvergence{Scf}(), r.config)
+    a → b ⇉ c ⇶ d ⭃ e
+    return Workflow(a)
+end
+function build(::Type{Workflow}, file)
+    dict = load(file)
+    recipe = dict["recipe"]
+    if recipe == "ecut"
+        return build(Workflow, TestCutoffEnergyRecipe(dict))
+    elseif recipe == "k_mesh"
+        return build(Workflow, TestKPointsRecipe(dict))
+    else
+        error("unsupported recipe $recipe.")
+    end
 end
 
 end
