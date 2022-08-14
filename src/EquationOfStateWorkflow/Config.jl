@@ -17,9 +17,12 @@ using ExpressWorkflowMaker.Config: @vopt
 using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
 
 @vopt Pressures "GPa" "pressures" begin
-    function (values, _)
+    function (values, unit)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
+        end
+        if minimum(values * unit) >= 0 * unit  # values may have eltype `Any`
+            @warn "for better fitting result, provide at least 1 negative pressure!"
         end
     end
 end
@@ -86,14 +89,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     end
     return T(map(myuparse ∘ string, trial_eos.values)...)
 end
-function (::ExpandConfig)(pressures::Pressures)
-    expanded = pressures.values .* pressures.unit
-    if minimum(expanded) >= zero(eltype(expanded))  # values may have eltype `Any`
-        @warn "for better fitting result, provide at least 1 negative pressure!"
-    end
-    return expanded
-end
-(::ExpandConfig)(volumes::Volumes) = volumes.values .* volumes.unit
+(::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 (::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
     iofiles(ds, fixed.values, string(nameof(T)))
 function (::ExpandConfig)(save::Save)

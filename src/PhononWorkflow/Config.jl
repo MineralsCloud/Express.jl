@@ -56,7 +56,7 @@ end
 end
 
 struct ExpandConfig{T} end
-(::ExpandConfig)(fixed::Union{Pressures,Volumes}) = fixed.values .* fixed.unit
+(::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
         v = getfield(save, f)
