@@ -15,10 +15,12 @@ end
 #     return wf1 → wf2
 # end
 
-# See https://github.com/JuliaFunctional/CompositionsBase.jl/blob/ac505d4/src/CompositionsBase.jl#L61
+# See https://github.com/JuliaFunctional/CompositionsBase.jl/blob/ac505d4/src/CompositionsBase.jl#L60-L61
+decompose(r::Recipe) = (r,)
 decompose(r::ComposedRecipe) = (decompose(r.r1)..., decompose(r.r2)...)
 
-# See https://github.com/JuliaFunctional/CompositionsBase.jl/blob/ac505d4/src/CompositionsBase.jl#L80
+# See https://github.com/JuliaFunctional/CompositionsBase.jl/blob/ac505d4/src/CompositionsBase.jl#L79-L80
+deopcompose(r::Recipe) = (r,)
 deopcompose(r::ComposedRecipe) = (deopcompose(r.r2)..., deopcompose(r.r1)...)
 
 # See https://github.com/JuliaLang/julia/blob/3fa2d26/base/operators.jl#L1088
