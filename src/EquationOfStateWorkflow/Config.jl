@@ -12,8 +12,9 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
+using ExpressBase: Action
 
-using ...Config: DirStructure, iofiles, @sp
+using ...Config: DirStructure, iofiles, _uparse, @sp
 
 @sp Pressures "GPa" "pressures" begin
     function (values, unit)
@@ -62,7 +63,7 @@ end
     end
 end
 
-struct ExpandConfig{T} end
+struct ExpandConfig{T} <: Action{T} end
 function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
@@ -86,7 +87,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(map(myuparse ∘ string, trial_eos.values)...)
+    return T(map(_uparse ∘ string, trial_eos.values)...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 (::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
