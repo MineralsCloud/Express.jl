@@ -2,9 +2,9 @@ module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
-using ExpressBase: Calculation, Action
-using ExpressWorkflowMaker.Config: @vopt
-using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
+using ExpressBase: Action
+
+using ...Config: DirStructure, iofiles, @vopt
 
 @vopt CutoffEnergies "Ry" "ecutwfc"
 
@@ -44,7 +44,7 @@ end
     end
 end
 
-struct ExpandConfig{T} end
+struct ExpandConfig{T} <: Action{T} end
 (::ExpandConfig)(energies::CutoffEnergies) = energies.values .* energies.unit
 function (::ExpandConfig)(x::MonkhorstPackGrids)
     return map(x.meshes, x.shifts) do mesh, shift

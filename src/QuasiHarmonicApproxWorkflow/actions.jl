@@ -5,7 +5,7 @@ using SimpleWorkflows.Jobs: Job
 
 using .Config: ExpandConfig
 
-import ExpressWorkflowMaker.Templates: jobify
+import ..Express: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{QuasiHarmonicApproximation})(inp_file_list, inp_static, inp_q_points)

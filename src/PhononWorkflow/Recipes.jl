@@ -3,13 +3,11 @@ module Recipes
 using AbInitioSoftwareBase: load
 using ExpressBase: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using ExpressBase.Recipes: Recipe
-using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
 using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
+using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
 using ..PhononWorkflow: MakeInput
-
-export build, run!
 
 struct PhononDispersionRecipe <: Recipe
     config

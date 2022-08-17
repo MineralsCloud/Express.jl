@@ -2,9 +2,8 @@ module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
-using ExpressBase: Scf, LatticeDynamics, Dfpt, RealSpaceForceConstants, Action
-using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
-using Unitful: ustrip
+
+using ...Config: DirStructure, iofiles, @vopt
 
 @option struct Template
     scf::String

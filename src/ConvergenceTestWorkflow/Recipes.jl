@@ -3,9 +3,9 @@ module Recipes
 using AbInitioSoftwareBase: load
 using ExpressBase: Scf
 using ExpressBase.Recipes: Recipe
-using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
+using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
 using ..ConvergenceTestWorkflow: MakeInput, TestConvergence
 
 export build, run!

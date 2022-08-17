@@ -1,22 +1,20 @@
 using AbInitioSoftwareBase: load
-using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
+using AbInitioSoftwareBase.Inputs: Input, writetxt
 using ExpressBase:
-    Calculation,
+    VariableCellOptimization,
     LatticeDynamics,
     Scf,
     Dfpt,
     RealSpaceForceConstants,
     PhononDispersion,
     VDos,
-    Action,
-    calculation
-using ExpressWorkflowMaker: distribute_procs
+    Action
 using SimpleWorkflows.Jobs: Job
 
-using ..EquationOfStateWorkflow: VariableCellOptimization
+using ..Express: RunCmd, distribute_procs
 using .Config: ExpandConfig
 
-import ExpressWorkflowMaker.Templates: jobify
+import ..Express: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(

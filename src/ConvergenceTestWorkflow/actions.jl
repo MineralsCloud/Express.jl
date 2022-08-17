@@ -1,13 +1,13 @@
-using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
-using ExpressBase: Action, calculation
-using ExpressWorkflowMaker: distribute_procs
+using AbInitioSoftwareBase: save, load
+using AbInitioSoftwareBase.Inputs: Input, writetxt
+using ExpressBase: Action, Scf
 using SimpleWorkflows.Jobs: Job
-using Unitful: ustrip, unit
+using Unitful: ustrip
 
+using ..Express: distribute_procs
 using .Config: ExpandConfig
 
-import ExpressWorkflowMaker.Templates: jobify
+import ..Express: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
@@ -63,4 +63,10 @@ function jobify(x::TestConvergence{T}, cfgfile) where {T}
         save(config.save_raw, saved)
         return x(data)
     end)
+end
+
+function isconvergent(a::AbstractVector)
+    terms = abs.(diff(a))
+    x, y, z = last(terms, 3)
+    return all(0 <= r < 1 for r in (y / x, z / y))
 end
