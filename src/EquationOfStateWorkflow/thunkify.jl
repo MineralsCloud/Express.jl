@@ -27,9 +27,20 @@ function thunkify(f::MakeInput{<:Optimization}, config::NamedTuple)
         return thunkify(f, config.files, config.template, config.fixed, trial_eos)
     end
 end
+function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
+    return Thunk(function ()
+        data = x(last.(config.files))
+        dict = isfile(config.save_raw) ? load(config.save_raw) : Dict()
+        dict[string(nameof(T))] = data
+        save(config.save_raw, dict)
+        return data
+    end, ())
+end
 # Action
 function thunkify(f::Action{T}, file::ConfigFile) where {T}
     raw_config = load(file)
     config = ExpandConfig{T}()(raw_config)
     return thunkify(f, config)
 end
+
+jobify(f::Action, args...) = Job.(thunkify(f, args...))

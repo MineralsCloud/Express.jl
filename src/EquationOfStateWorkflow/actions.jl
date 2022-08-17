@@ -33,26 +33,6 @@ function (x::GetRawData)(outputs)
     return filter(!isnothing, raw)
 end
 
-function jobify(x::GetData{T}, cfgfile) where {T}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    Job(
-        function ()
-            data = x(last.(config.files))
-            savedata = Dict(
-                "volume" => (ustrip ∘ first).(data),
-                "energy" => (ustrip ∘ last).(data),
-                "vunit" => string(unit(first(data).first)),
-                "eunit" => string(unit(first(data).second)),
-            )
-            dict = isfile(config.save_raw) ? load(config.save_raw) : Dict()
-            dict[string(nameof(T))] = savedata
-            save(config.save_raw, dict)
-            return data
-        end,
-    )
-end
-
 function parseoutput end
 
 struct FitEos{T} <: Action{T} end
@@ -92,4 +72,3 @@ end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
 include("thunkify.jl")
-include("jobify.jl")
