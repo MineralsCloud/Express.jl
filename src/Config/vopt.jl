@@ -1,5 +1,5 @@
 using Configurations: OptionField, option_m
-using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension
+using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension, lookup_units
 using UnitfulAtomic: UnitfulAtomic
 
 import Configurations: from_dict
@@ -23,7 +23,7 @@ macro vopt(type, unit, alias, check = (_, _) -> nothing)
 end
 
 _uparse(str::AbstractString) =
-    uparse(filter(!isspace, str); unit_context = [Unitful, UnitfulAtomic])
+    lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
 
 from_dict(
     ::Type{<:VectorWithUnitOption},
