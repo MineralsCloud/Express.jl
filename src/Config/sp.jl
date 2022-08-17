@@ -4,8 +4,6 @@ using UnitfulAtomic: UnitfulAtomic
 
 import Configurations: from_dict
 
-export @sp
-
 abstract type SamplingPoints end
 
 # See https://github.com/Roger-luo/Configurations.jl/blob/933fd46/src/codegen.jl#L82-L84
