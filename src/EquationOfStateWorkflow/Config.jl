@@ -11,7 +11,8 @@ using EquationsOfStateOfSolids:
     PoirierTarantola2nd,
     PoirierTarantola3rd,
     PoirierTarantola4th,
-    Vinet
+    Vinet,
+    PressureEquation
 using ExpressBase: Action
 
 using ...Config: DirStructure, iofiles, _uparse, @sp
@@ -103,7 +104,7 @@ function (x::ExpandConfig)(config::AbstractDict)
     save_raw, save_eos, save_status = x(config.save)
     return (
         template = x(config.template),
-        trial_eos = x(config.trial_eos),
+        trial_eos = PressureEquation(x(config.trial_eos)),
         fixed = x(config.fixed),
         root = config.files.dirs.root,
         files = x(config.files, config.fixed),
