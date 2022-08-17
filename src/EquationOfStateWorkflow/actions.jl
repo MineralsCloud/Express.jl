@@ -14,12 +14,10 @@ using .Config: ExpandConfig, Pressures, Volumes
 
 import Express: jobify
 
-struct MakeInput{T} <: Action{T} end
-(x::MakeInput)(file, template::Input, pressure::Pressure, eos::PressureEquation, args...) =
-    x(file, x(template, pressure, eos, args...))
-(x::MakeInput)(file, template::Input, volume::Volume, args...) =
-    x(file, x(template, volume, args...))
-function (x::MakeInput)(file, input::Input)
+struct UpdateTemplate{T} <: Action{T} end
+
+struct GenerateInputFile{T} <: Action{T} end
+function (x::GenerateInputFile)(file, input::Input)
     mkpath(dirname(file))  # In case its parent directory is not created
     writetxt(file, input)
     return input
