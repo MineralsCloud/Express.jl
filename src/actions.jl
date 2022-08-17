@@ -1,15 +1,58 @@
-using ExpressBase: Action
+using AbInitioSoftwareBase: load
+using AbInitioSoftwareBase.Inputs: Input, getpseudodir, getpotentials
+using Dates: format, now
+using ExpressBase: Action, calculation
+using Logging: with_logger, current_logger
+using Pseudopotentials: download_potential
+using SimpleWorkflows.Jobs: Job
 
-export distribute_procs
+using ..Express: distribute_procs
+using .Config: ConfigFile
 
-function distribute_procs(nprocs, jobsize)
-    quotient, remainder = divrem(nprocs, jobsize)
-    if !iszero(remainder)
-        @warn "the processes are not fully balanced! Consider the number of subjobs!"
+struct DownloadPotentials{T} <: Action{T} end
+function (::DownloadPotentials)(template::Input)
+    dir = getpseudodir(template)
+    if !isdir(dir)
+        mkpath(dir)
     end
-    return quotient
+    potentials = getpotentials(template)
+    return map(potentials) do potential
+        path = joinpath(dir, potential)
+        if !isfile(path)
+            download_potential(potential, path)
+        end
+    end
 end
 
-function jobify end
+jobify(x::DownloadPotentials, template::Input) = Job(() -> x(template))
+jobify(x::DownloadPotentials, config) = Job(() -> x(config.template))
+function jobify(x::DownloadPotentials{T}, file::ConfigFile) where {T}
+    raw_config = load(file)
+    config = ExpandConfig{T}()(raw_config)
+    return jobify(x, config)
+end
 
-struct ExpandConfig{T} <: Action{T} end  # To be extended
+struct LogTime{T} <: Action{T} end
+function (x::LogTime)()
+    with_logger(current_logger()) do
+        println(
+            "The calculation ",
+            calculation(x),
+            "starts at ",
+            format(now(), "HH:MM:SS u dd, yyyy"),
+            '.',
+        )
+    end
+end
+
+jobify(x::LogTime) = Job(() -> x())
+
+struct RunCmd{T} <: Action{T} end
+
+function jobify(x::RunCmd, np::Integer, files, kwargs...)
+    jobsize = length(files)
+    np = distribute_procs(np, jobsize)
+    return map(files) do (input, output)
+        Job(() -> x(input, output; np = np, kwargs...))
+    end
+end
