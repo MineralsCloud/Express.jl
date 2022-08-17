@@ -7,7 +7,7 @@ using ExpressBase: Action, Scf, Optimization, calculation
 import JLD2
 using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Thunks: Thunk
-using Unitful: ustrip, unit
+using Unitful: Pressure, Volume, ustrip, unit
 
 using ..Config: ConfigFile
 using .Config: ExpandConfig, Pressures, Volumes
@@ -15,8 +15,11 @@ using .Config: ExpandConfig, Pressures, Volumes
 import Express: jobify
 
 struct MakeInput{T} <: Action{T} end
-function (x::MakeInput)(file, template::Input, args...)
-    input = x(template, args...)
+(x::MakeInput)(file, template::Input, pressure::Pressure, eos::PressureEquation, args...) =
+    x(file, x(template, pressure, eos, args...))
+(x::MakeInput)(file, template::Input, volume::Volume, args...) =
+    x(file, x(template, volume, args...))
+function (x::MakeInput)(file, input::Input)
     mkpath(dirname(file))  # In case its parent directory is not created
     writetxt(file, input)
     return input
