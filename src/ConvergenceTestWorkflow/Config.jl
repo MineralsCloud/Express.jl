@@ -4,9 +4,9 @@ using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 using ExpressBase: Action
 
-using ...Config: DirStructure, iofiles, @vopt
+using ...Config: DirStructure, iofiles, @sp
 
-@vopt CutoffEnergies "Ry" "ecutwfc"
+@sp CutoffEnergies "Ry" "ecutwfc"
 
 @option "k_mesh" struct MonkhorstPackGrids
     meshes::AbstractVector{<:AbstractVector{<:Integer}}
