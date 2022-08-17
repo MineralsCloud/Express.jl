@@ -36,7 +36,21 @@ function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
         return data
     end, ())
 end
-# Action
+# FitEos
+function thunkify(x::FitEos, config::NamedTuple)
+    return Thunk(
+        function ()
+            outputs = last.(config.files)
+            trial_eos =
+                calculation(x) isa Scf ? config.trial_eos :
+                JLD2.load(config.save_eos)[string(nameof(Scf))]
+            eos = x(outputs, EnergyEquation(trial_eos))
+            SaveEos{typeof(calculation(x))}()(config.save_eos, eos)
+            return eos
+        end,
+    )
+end
+# Any Action
 function thunkify(f::Action{T}, file::ConfigFile) where {T}
     raw_config = load(file)
     config = ExpandConfig{T}()(raw_config)
