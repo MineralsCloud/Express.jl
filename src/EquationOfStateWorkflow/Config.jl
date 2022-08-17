@@ -12,9 +12,8 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet
-using ExpressBase: Calculation, Action
-using ExpressWorkflowMaker.Config: @vopt
-using ExpressWorkflowMaker.Templates.Config: DirStructure, iofiles
+
+using ...Config: DirStructure, iofiles, @vopt
 
 @vopt Pressures "GPa" "pressures" begin
     function (values, unit)

@@ -5,11 +5,10 @@ using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Workflows: Workflow, run!, →
 using ExpressBase: QuasiHarmonicApproximation
 using ExpressBase.Recipes: Recipe
-using ExpressWorkflowMaker.Templates: jobify
 
 using ..QuasiHarmonicApproxWorkflow: MakeInput, CalculateThermodyn, Plot
 
-export build, run!
+import ...Express: jobify
 
 struct SingleConfigurationRecipe <: Recipe
     config

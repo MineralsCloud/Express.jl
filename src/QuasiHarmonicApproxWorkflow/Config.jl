@@ -1,10 +1,10 @@
 module Config
 
-using AbInitioSoftwareBase: save, load, parentdir
+using AbInitioSoftwareBase: save, parentdir
 using Configurations: from_dict, @option
-using ExpressBase: Action
-using ExpressWorkflowMaker.Config: @vopt
 using Unitful: ustrip, @u_str
+
+using ...Config: @vopt
 
 @vopt Pressures "GPa" "pressures" begin
     function (values, unit)

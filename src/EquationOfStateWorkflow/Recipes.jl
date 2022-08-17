@@ -3,12 +3,10 @@ module Recipes
 using AbInitioSoftwareBase: load
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Recipes: Recipe
-using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
+using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
 using ..EquationOfStateWorkflow: MakeInput, GetData, FitEos
-
-export build, run!
 
 struct ParallelEosFittingRecipe <: Recipe
     config

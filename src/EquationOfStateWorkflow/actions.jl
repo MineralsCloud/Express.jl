@@ -1,17 +1,16 @@
 using AbInitioSoftwareBase: save, load, extension
-using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
+using AbInitioSoftwareBase.Inputs: Input, writetxt
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using ExpressBase: Action, ScfOrOptim, Scf, Optimization, calculation
-using ExpressWorkflowMaker: distribute_procs
+using ExpressBase: Action, Scf, Optimization, calculation
 import JLD2
 using SimpleWorkflows.Jobs: Job
 using Unitful: ustrip, unit
 
 using .Config: ExpandConfig
 
-import ExpressWorkflowMaker.Templates: jobify
+import Express: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(file, template::Input, args...)
@@ -102,7 +101,7 @@ function (x::FitEos)(outputs, trial_eos::EnergyEquation)
     return x(data, trial_eos)
 end
 
-function jobify(x::FitEos{T}, cfgfile) where {T<:ScfOrOptim}
+function jobify(x::FitEos{T}, cfgfile) where {T<:Union{Scf,Optimization}}
     return Job(
         function ()
             dict = load(cfgfile)
