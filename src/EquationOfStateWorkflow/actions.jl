@@ -6,9 +6,11 @@ using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase: Action, Scf, Optimization, calculation
 import JLD2
 using SimpleWorkflows.Jobs: Job
+using SimpleWorkflows.Thunks: Thunk
 using Unitful: ustrip, unit
 
-using .Config: ExpandConfig
+using ..Config: ConfigFile
+using .Config: ExpandConfig, Pressures, Volumes
 
 import Express: jobify
 
@@ -20,46 +22,28 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
-function jobify(x::MakeInput{Scf}, cfgfile)
-    dict = load(cfgfile)
-    config = ExpandConfig{Scf}()(dict)
-    inputs = first.(config.files)
-    if config.fixed isa Volumes
-        return map(inputs, config.fixed) do input, volume
-            Job(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
-        end
-    else  # Pressure
-        return map(inputs, config.fixed) do input, pressure
-            Job(function ()
-                trial_eos = PressureEquation(config.trial_eos)
-                return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
-            end)
-        end
+function jobify(x::MakeInput, inputs, template::Input, pressures::Pressures, trial_eos)
+    return map(inputs, pressures) do input, pressure
+        Job(Thunk(x, input, template, trial_eos, pressure, "Y-m-d_H:M:S"))
     end
 end
-function jobify(x::MakeInput{T}, cfgfile) where {T<:Optimization}
-    dict = load(cfgfile)
-    config = ExpandConfig{T}()(dict)
-    inputs = first.(config.files)
-    if config.fixed isa Volumes
-        return map(inputs, config.fixed) do input, volume
-            Job(() -> x(input, config.template, volume, "Y-m-d_H:M:S"))
-        end
-    else  # Pressure
-        return map(inputs, config.fixed) do input, pressure
-            Job(
-                function ()
-                    trial_eos = PressureEquation(
-                        FitEos{Scf}()(
-                            last.(ExpandConfig{Scf}()(dict).files),
-                            EnergyEquation(config.trial_eos),
-                        ),
-                    )
-                    return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
-                end,
-            )
-        end
+function jobify(x::MakeInput, inputs, template::Input, volumes::Volumes, args...)
+    return map(inputs, volumes) do input, volume
+        Job(Thunk(x, input, template, volume, "Y-m-d_H:M:S"))
     end
+end
+jobify(x::MakeInput{Scf}, config::NamedTuple) =
+    jobify(x, first.(config.files), config.template, config.fixed, config.trial_eos)
+function jobify(x::MakeInput{<:Optimization}, config::NamedTuple)
+    trial_eos = PressureEquation(
+        FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos)),
+    )
+    return jobify(x, first.(config.files), config.template, config.fixed, trial_eos)
+end
+function jobify(x::MakeInput{T}, file::ConfigFile) where {T}
+    raw_config = load(file)
+    config = ExpandConfig{T}()(raw_config)
+    return jobify(x, config)
 end
 
 struct GetData{T} <: Action{T} end
