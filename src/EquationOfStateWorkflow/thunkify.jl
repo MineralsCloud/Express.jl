@@ -1,3 +1,4 @@
+# UpdateTemplate
 thunkify(
     f::UpdateTemplate,
     template::Input,
@@ -18,7 +19,14 @@ function thunkify(f::UpdateTemplate{<:Optimization}, config::NamedTuple)
         return thunkify(f, config.template, config.fixed, trial_eos)
     end
 end
-function thunkify(f::UpdateTemplate{T}, file::ConfigFile) where {T}
+# GenerateInputFile
+thunkify(f::GenerateInputFile, files, inputs) =
+    collect(Thunk(f, file, input) for (file, input) in zip(files, inputs))
+function thunkify(f::GenerateInputFile, config::NamedTuple)
+    thunkify(f, first.(config.files), config.template)
+end
+# Action
+function thunkify(f::Action{T}, file::ConfigFile) where {T}
     raw_config = load(file)
     config = ExpandConfig{T}()(raw_config)
     return thunkify(f, config)
