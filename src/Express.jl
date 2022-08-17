@@ -1,7 +1,5 @@
 module Express
 
-function current_software end
-
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
 include("manager.jl")
