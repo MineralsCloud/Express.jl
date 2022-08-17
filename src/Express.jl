@@ -4,7 +4,7 @@ function current_software end
 
 # include("SelfConsistentField.jl")
 # include("BandStructure.jl")
-include("Config.jl")
+include("Config/Config.jl")
 include("actions.jl")
 include("ConvergenceTestWorkflow/ConvergenceTestWorkflow.jl")
 include("EquationOfStateWorkflow/EquationOfStateWorkflow.jl")
