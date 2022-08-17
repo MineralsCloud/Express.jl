@@ -4,9 +4,9 @@ using AbInitioSoftwareBase: save, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
 
-using ...Config: @vopt
+using ...Config: @sp
 
-@vopt Pressures "GPa" "pressures" begin
+@sp Pressures "GPa" "pressures" begin
     function (values, unit)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
@@ -17,7 +17,7 @@ using ...Config: @vopt
     end
 end
 
-@vopt Temperatures "K" "temperatures" begin
+@sp Temperatures "K" "temperatures" begin
     function (values, unit)
         @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
     end

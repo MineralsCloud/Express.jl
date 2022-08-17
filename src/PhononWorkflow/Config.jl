@@ -3,7 +3,7 @@ module Config
 using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
 
-using ...Config: DirStructure, iofiles, @vopt
+using ...Config: DirStructure, iofiles, @sp
 
 @option struct Template
     scf::String
@@ -27,9 +27,9 @@ using ...Config: DirStructure, iofiles, @vopt
     end
 end
 
-@vopt Pressures "GPa" "pressures"
+@sp Pressures "GPa" "pressures"
 
-@vopt Volumes "bohr^3" "volumes"
+@sp Volumes "bohr^3" "volumes"
 
 @option struct Save
     raw::String = "raw.json"

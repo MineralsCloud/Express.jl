@@ -13,9 +13,9 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet
 
-using ...Config: DirStructure, iofiles, @vopt
+using ...Config: DirStructure, iofiles, @sp
 
-@vopt Pressures "GPa" "pressures" begin
+@sp Pressures "GPa" "pressures" begin
     function (values, unit)
         if length(values) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
@@ -26,7 +26,7 @@ using ...Config: DirStructure, iofiles, @vopt
     end
 end
 
-@vopt Volumes "bohr^3" "volumes" begin
+@sp Volumes "bohr^3" "volumes" begin
     function (values, _)
         if length(values) <= 5
             @info "less than 6 volumes may not fit accurately, consider adding more!"
