@@ -7,7 +7,7 @@ using ExpressBase: Action, Scf, Optimization, calculation
 import JLD2
 using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Thunks: Thunk
-using Unitful: Pressure, Volume, ustrip, unit
+using Unitful: ustrip, unit
 
 using ..Config: ConfigFile
 using .Config: ExpandConfig, Pressures, Volumes
@@ -86,3 +86,6 @@ function (::SaveEos{T})(file, eos::Parameters) where {T}
     JLD2.save(file, dict)
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
+
+include("thunkify.jl")
+include("jobify.jl")
