@@ -25,8 +25,8 @@ function (x::MakeInput)(file, input::Input)
     return input
 end
 
-struct GetData{T} <: Action{T} end
-function (x::GetData)(outputs)
+struct GetRawData{T} <: Action{T} end
+function (x::GetRawData)(outputs)
     raw = map(outputs) do output
         parseoutput(calculation(x))(output)
     end
@@ -59,7 +59,7 @@ struct FitEos{T} <: Action{T} end
 (x::FitEos)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
     eosfit(trial_eos, first.(data), last.(data))
 function (x::FitEos)(outputs, trial_eos::EnergyEquation)
-    data = GetData{typeof(calculation(x))}()(outputs)
+    data = GetRawData{typeof(calculation(x))}()(outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
