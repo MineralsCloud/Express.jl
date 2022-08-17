@@ -46,22 +46,6 @@ function (x::FitEos)(outputs, trial_eos::EnergyEquation)
     return x(data, trial_eos)
 end
 
-function jobify(x::FitEos{T}, cfgfile) where {T<:Union{Scf,Optimization}}
-    return Job(
-        function ()
-            dict = load(cfgfile)
-            config = ExpandConfig{T}()(dict)
-            outputs = last.(config.files)
-            trial_eos =
-                calculation(x) isa Scf ? config.trial_eos :
-                JLD2.load(config.save_eos)[string(nameof(Scf))]
-            eos = x(outputs, EnergyEquation(trial_eos))
-            SaveEos{T}()(config.save_eos, eos)
-            return eos
-        end,
-    )
-end
-
 struct SaveEos{T} <: Action{T} end
 function (::SaveEos{T})(file, eos::Parameters) where {T}
     @assert extension(file) == "jld2"
