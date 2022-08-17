@@ -10,7 +10,7 @@ Base.open(file::ConfigFile, args...; kwargs...) = open(file.source, args...; kwa
 Base.open(f::Function, file::ConfigFile, args...; kwargs...) =
     open(f, file.source, args...; kwargs...)
 
-include("vopt.jl")
+include("sp.jl")
 include("io.jl")
 
 end
