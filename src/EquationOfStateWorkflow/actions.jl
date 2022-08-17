@@ -27,8 +27,10 @@ end
 
 struct GetData{T} <: Action{T} end
 function (x::GetData)(outputs)
-    raw = (parseoutput(calculation(x))(output) for output in outputs)  # `ntuple` cannot work with generators
-    return collect(Iterators.filter(x -> x !== nothing, raw))  # A vector of pairs
+    raw = map(outputs) do output
+        parseoutput(calculation(x))(output)
+    end
+    return filter(!isnothing, raw)
 end
 
 function jobify(x::GetData{T}, cfgfile) where {T}
