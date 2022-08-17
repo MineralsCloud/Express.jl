@@ -7,7 +7,7 @@ using ExpressBase: Action, Scf, Optimization, calculation
 import JLD2
 using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Thunks: Thunk
-using Unitful: ustrip, unit
+using Unitful: Pressure, Volume, ustrip, unit
 
 using ..Config: ConfigFile
 using .Config: ExpandConfig, Pressures, Volumes
