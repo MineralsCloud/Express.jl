@@ -13,6 +13,7 @@ JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 PyQHA = "5a1273f0-a906-4eb0-8178-7035f457d819"
 SimpleWorkflows = "6a97d125-85da-4b66-b300-4bba10360563"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
 AbInitioSoftwareBase = "0.2, 0.3, 0.4, 0.5, 0.6"
