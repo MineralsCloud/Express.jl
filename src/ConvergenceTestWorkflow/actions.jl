@@ -2,7 +2,7 @@ using AbInitioSoftwareBase: save, load, extension
 using AbInitioSoftwareBase.Inputs: Input, writetxt, getpseudodir, getpotentials
 using ExpressBase: Action, calculation
 using ExpressWorkflowMaker: distribute_procs
-using SimpleWorkflows: Job
+using SimpleWorkflows.Jobs: Job
 using Unitful: ustrip, unit
 
 using .Config: ExpandConfig

@@ -3,7 +3,7 @@ module PhononWorkflow
 using AbInitioSoftwareBase: load
 using AbInitioSoftwareBase.Inputs: Input
 using ExpressWorkflowMaker.Templates: LogTime, RunCmd
-using SimpleWorkflows: Workflow, run!, →
+using SimpleWorkflows.Workflows: Workflow, run!, →
 using Unitful: ustrip, @u_str
 
 using ExpressBase:

@@ -4,7 +4,8 @@ using AbInitioSoftwareBase: load
 using ExpressBase: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using ExpressBase.Recipes: Recipe
 using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
-using SimpleWorkflows: Job, Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows.Jobs: Job
+using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..PhononWorkflow: MakeInput
 
