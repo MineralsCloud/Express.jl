@@ -56,14 +56,14 @@ end
 
 struct ExpandConfig{T} end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
+(::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
+    iofiles(ds, fixed.values, string(nameof(T)))
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
         v = getfield(save, f)
         isempty(v) ? abspath(mktemp(; cleanup = false)[1]) : abspath(expanduser(v))
     end
 end
-(::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
-    iofiles(ds, fixed.values, string(nameof(T)))
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     save_raw, save_status = x(config.save)
