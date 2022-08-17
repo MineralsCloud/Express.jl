@@ -1,7 +1,8 @@
 module Recipes
 
 using AbInitioSoftwareBase: load
-using SimpleWorkflows: Job, Workflow, run!, →
+using SimpleWorkflows.Jobs: Job
+using SimpleWorkflows.Workflows: Workflow, run!, →
 using ExpressBase: QuasiHarmonicApproximation
 using ExpressBase.Recipes: Recipe
 using ExpressWorkflowMaker.Templates: jobify

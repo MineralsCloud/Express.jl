@@ -1,7 +1,7 @@
 using AbInitioSoftwareBase: load
 using ExpressBase: QuasiHarmonicApproximation, Action
 using PyQHA: converter, runcode, plot
-using SimpleWorkflows: Job
+using SimpleWorkflows.Jobs: Job
 
 using .Config: ExpandConfig
 

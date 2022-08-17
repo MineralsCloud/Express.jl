@@ -11,7 +11,7 @@ using ExpressBase:
     Action,
     calculation
 using ExpressWorkflowMaker: distribute_procs
-using SimpleWorkflows: Job
+using SimpleWorkflows.Jobs: Job
 
 using ..EquationOfStateWorkflow: VariableCellOptimization
 using .Config: ExpandConfig

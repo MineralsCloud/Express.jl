@@ -4,7 +4,7 @@ using AbInitioSoftwareBase: load
 using ExpressBase: Scf
 using ExpressBase.Recipes: Recipe
 using ExpressWorkflowMaker.Templates: DownloadPotentials, LogTime, RunCmd, jobify
-using SimpleWorkflows: Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ..ConvergenceTestWorkflow: MakeInput, TestConvergence
 
