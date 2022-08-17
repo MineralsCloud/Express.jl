@@ -1,29 +1,31 @@
-# UpdateTemplate
-thunkify(
-    f::UpdateTemplate,
-    template::Input,
+# MakeInput
+function thunkify(
+    f::MakeInput,
+    files,
+    template,
     pressures::Pressures,
-    trial_eos::PressureEquation,
-) = map(pressure -> Thunk(f, template, trial_eos, pressure), pressures)
-thunkify(f::UpdateTemplate, template::Input, volumes::Volumes) =
-    map(volume -> Thunk(f, template, volume), volumes)
-thunkify(f::UpdateTemplate{Scf}, config::NamedTuple) =
-    thunkify(f, config.template, config.fixed, config.trial_eos)
-function thunkify(f::UpdateTemplate{<:Optimization}, config::NamedTuple)
+    eos::PressureEquation,
+)
+    return map(files, pressures) do file, pressure
+        Thunk(f, file, template, pressure, eos)
+    end
+end
+function thunkify(f::MakeInput, files, template, volumes::Volumes)
+    return map(files, volumes) do file, volume
+        Thunk(f, file, template, volume)
+    end
+end
+thunkify(f::MakeInput{Scf}, config::NamedTuple) =
+    thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
+function thunkify(f::MakeInput{<:Optimization}, config::NamedTuple)
     if config.fixed isa Volumes
-        thunkify(f, config.template, config.fixed)
+        thunkify(f, config.files, config.template, config.fixed)
     else  # Pressures
         trial_eos = PressureEquation(
             FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos)),
         )
-        return thunkify(f, config.template, config.fixed, trial_eos)
+        return thunkify(f, config.files, config.template, config.fixed, trial_eos)
     end
-end
-# GenerateInputFile
-thunkify(f::GenerateInputFile, files, inputs) =
-    collect(Thunk(f, file, input) for (file, input) in zip(files, inputs))
-function thunkify(f::GenerateInputFile, config::NamedTuple)
-    thunkify(f, first.(config.files), config.template)
 end
 # Action
 function thunkify(f::Action{T}, file::ConfigFile) where {T}

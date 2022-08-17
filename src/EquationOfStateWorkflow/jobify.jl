@@ -1,2 +1,2 @@
 # MakeInput
-jobify(f::UpdateTemplate, args...) = Job.(thunkify(f, args...))
+jobify(f::MakeInput, args...) = Job.(thunkify(f, args...))
