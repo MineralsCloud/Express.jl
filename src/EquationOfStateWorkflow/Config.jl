@@ -15,7 +15,7 @@ using EquationsOfStateOfSolids:
     PressureEquation
 using ExpressBase: Action
 
-using ...Config: DirStructure, iofiles, _uparse, @sp
+using ...Config: Directory, getfiles, _uparse, @sp
 
 @sp Pressures "GPa" "pressures" begin
     function (values, unit)
@@ -42,9 +42,9 @@ end
 end
 
 @option struct Save
-    raw::String = "raw.json"
+    ev::String = "ev.json"
     eos::String = "eos.jld2"
-    status::String = ""
+    wf::String = "wf.jld2"
 end
 
 @option struct RuntimeConfig
@@ -52,15 +52,15 @@ end
     template::String
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
-    dirstructure::DirStructure
+    dir::Directory = Directory()
     save::Save = Save()
     cli::CommandConfig
-    function RuntimeConfig(recipe, template, trial_eos, fixed, dirstructure, save, cli)
+    function RuntimeConfig(recipe, template, trial_eos, fixed, dir, save, cli)
         @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, trial_eos, fixed, dirstructure, save, cli)
+        return new(recipe, template, trial_eos, fixed, dir, save, cli)
     end
 end
 
@@ -91,26 +91,23 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(map(_uparse ∘ string, trial_eos.values)...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-(::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
-    iofiles(ds, fixed.values, string(nameof(T)))
-function (::ExpandConfig)(save::Save)
-    return map((:raw, :eos, :status)) do f
-        v = getfield(save, f)
-        isempty(v) ? abspath(mktemp(; cleanup = false)[1]) : abspath(expanduser(v))
+function (::ExpandConfig{T})(dir::Directory, fixed::Union{Pressures,Volumes}) where {T}
+    return map(fixed.vector) do value
+        getfiles(dir, value, string(nameof(T)))
     end
 end
-function (x::ExpandConfig)(config::AbstractDict)
-    config = from_dict(RuntimeConfig, config)
-    save_raw, save_eos, save_status = x(config.save)
+function (::ExpandConfig)(save::Save)
+    keys = fieldnames(Save)
+    values = (abspath(expanduser(getfield(save, key))) for key in keys)
+    return (; zip(keys, values)...)
+end
+function (x::ExpandConfig)(config::RuntimeConfig)
     return (
         template = x(config.template),
         trial_eos = PressureEquation(x(config.trial_eos)),
         fixed = x(config.fixed),
-        root = config.files.dirs.root,
-        files = x(config.files, config.fixed),
-        save_raw = save_raw,
-        save_eos = save_eos,
-        save_status = save_status,
+        files = x(config.dir, config.fixed),
+        save = x(config.save),
         cli = config.cli,
     )
 end

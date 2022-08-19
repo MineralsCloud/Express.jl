@@ -30,9 +30,9 @@ end
 function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
     return Thunk(function ()
         data = x(last.(config.files))
-        dict = isfile(config.save_raw) ? load(config.save_raw) : Dict()
+        dict = isfile(config.save.ev) ? load(config.save.ev) : Dict()
         dict[string(nameof(T))] = data
-        save(config.save_raw, dict)
+        save(config.save.ev, dict)
         return data
     end, ())
 end
@@ -43,9 +43,9 @@ function thunkify(x::FitEos, config::NamedTuple)
             outputs = last.(config.files)
             trial_eos =
                 calculation(x) isa Scf ? config.trial_eos :
-                JLD2.load(config.save_eos)[string(nameof(Scf))]
+                JLD2.load(config.save.eos)[string(nameof(Scf))]
             eos = x(outputs, EnergyEquation(trial_eos))
-            SaveEos{typeof(calculation(x))}()(config.save_eos, eos)
+            SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
             return eos
         end,
     )
