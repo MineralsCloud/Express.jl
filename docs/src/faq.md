@@ -7,7 +7,7 @@
 linked to a specific programming language: who says we cannot have a Python version of
 `express` in the future?
 
-## Why do you create `express`, given that [`AiiDA`](https://www.aiida.net/), [`ASE`](https://gitlab.com/ase/ase), [`atomate`](https://atomate.org/), etc., are already there?
+## Why do you create `express`?
 
 Those projects are of very high quality and are de facto standards of the materials
 simulation community. They have much larger teams and longer history than us, so
@@ -16,8 +16,7 @@ of `express`. However, it does not mean we cannot have our features or advantage
 Our code is better at modularity, extensibility, and readability.
 
 First, some packages only implement workflows for specific software. By far, Quantum
-ESPRESSO is only supported by a few packages. Even the largest one, `Aiida`, covers limited
-use cases of Quantum ESPRESSO. Considering the number of users in the Quantum ESPRESSO
+ESPRESSO is only supported by a few packages. Considering the number of users in the Quantum ESPRESSO
 community (1000-2000 citations per year), there is a great need for an advanced and eclectic
 workflow ecosystem.
 
