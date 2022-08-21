@@ -1,7 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Configurations: from_dict, @option
+using Configurations: OptionField, @option
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -14,8 +14,11 @@ using EquationsOfStateOfSolids:
     Vinet,
     PressureEquation
 using ExpressBase: Action
+using Unitful: Quantity
 
 using ...Config: Directory, getfiles, _uparse, @sp
+
+import Configurations: from_dict
 
 @sp Pressures "GPa" "pressures" begin
     function (numbers, unit)
@@ -38,7 +41,7 @@ end
 
 @option struct TrialEquationOfState
     type::String
-    values::AbstractVector
+    params::Vector{Quantity{Float64}}
 end
 
 @option struct Save
@@ -88,7 +91,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(map(_uparse ∘ string, trial_eos.values)...)
+    return T(trial_eos.params...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 function (::ExpandConfig{T})(dir::Directory, fixed::Union{Pressures,Volumes}) where {T}
@@ -110,6 +113,12 @@ function (x::ExpandConfig)(config::RuntimeConfig)
         save=x(config.save),
         cli=config.cli,
     )
+end
+
+function from_dict(
+    ::Type{TrialEquationOfState}, ::OptionField{:params}, ::Type{<:Quantity}, param
+)
+    return eval(_uparse(string(param)))
 end
 
 end
