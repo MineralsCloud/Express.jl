@@ -1,7 +1,7 @@
 module Config
 
 using AbInitioSoftwareBase.Commands: CommandConfig
-using Configurations: from_dict, @option
+using Configurations: OptionField, @option
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -91,7 +91,7 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(map(_uparse ∘ string, trial_eos.values)...)
+    return T(trial_eos.params...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 function (::ExpandConfig{T})(dir::Directory, fixed::Union{Pressures,Volumes}) where {T}
