@@ -7,19 +7,19 @@ using Unitful: ustrip, @u_str
 using ...Config: @sp
 
 @sp Pressures "GPa" "pressures" begin
-    function (values, unit)
-        if length(values) <= 5
+    function (numbers, unit)
+        if length(numbers) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
-        if minimum(values * unit) >= 0 * unit  # values may have eltype `Any`
+        if minimum(numbers * unit) >= 0 * unit  # `numbers` may have eltype `Any`
             @warn "for better fitting result, provide at least 1 negative pressure!"
         end
     end
 end
 
 @sp Temperatures "K" "temperatures" begin
-    function (values, unit)
-        @assert minimum(values) * unit >= 0u"K" "the minimum temperature is less than 0K!"
+    function (numbers, unit)
+        @assert minimum(numbers) * unit >= 0u"K" "the minimum temperature is less than 0K!"
     end
 end
 
