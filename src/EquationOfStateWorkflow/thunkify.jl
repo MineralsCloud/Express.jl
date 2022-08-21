@@ -1,4 +1,8 @@
+using Configurations: from_dict
 using SimpleWorkflows.Thunks: Thunk
+
+using ..Express: DownloadPotentials
+using .Config: RuntimeConfig
 
 import ..Express: thunkify
 
@@ -52,8 +56,12 @@ function thunkify(x::FitEos, config::NamedTuple)
     end)
 end
 # Any Action
-function thunkify(f::Action{T}, file::ConfigFile) where {T}
-    raw_config = load(file)
+function thunkify(f::Action{T}, raw_config::RuntimeConfig) where {T}
     config = ExpandConfig{T}()(raw_config)
+    return thunkify(f, config)
+end
+function thunkify(f::Action{T}, file::ConfigFile) where {T}
+    dict = load(file)
+    config = from_dict(RuntimeConfig, dict)
     return thunkify(f, config)
 end
