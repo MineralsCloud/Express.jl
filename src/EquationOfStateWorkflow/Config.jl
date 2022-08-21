@@ -14,8 +14,11 @@ using EquationsOfStateOfSolids:
     Vinet,
     PressureEquation
 using ExpressBase: Action
+using Unitful: Quantity
 
 using ...Config: Directory, getfiles, _uparse, @sp
+
+import Configurations: from_dict
 
 @sp Pressures "GPa" "pressures" begin
     function (numbers, unit)
@@ -110,6 +113,12 @@ function (x::ExpandConfig)(config::RuntimeConfig)
         save=x(config.save),
         cli=config.cli,
     )
+end
+
+function from_dict(
+    ::Type{TrialEquationOfState}, ::OptionField{:params}, ::Type{<:Quantity}, param
+)
+    return eval(_uparse(string(param)))
 end
 
 end
