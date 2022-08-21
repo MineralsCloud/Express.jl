@@ -1,3 +1,7 @@
+using SimpleWorkflows.Thunks: Thunk
+
+import ..Express: thunkify
+
 # MakeInput
 function thunkify(
     f::MakeInput, files, template, pressures::Pressures, eos::PressureEquation
@@ -35,19 +39,17 @@ function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
 end
 # FitEos
 function thunkify(x::FitEos, config::NamedTuple)
-    return Thunk(
-        function ()
-            outputs = last.(config.files)
-            trial_eos = if calculation(x) isa Scf
-                config.trial_eos
-            else
-                JLD2.load(config.save.eos)[string(nameof(Scf))]
-            end
-            eos = x(outputs, EnergyEquation(trial_eos))
-            SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
-            return eos
-        end,
-    )
+    return Thunk(function ()
+        outputs = last.(config.files)
+        trial_eos = if calculation(x) isa Scf
+            config.trial_eos
+        else
+            JLD2.load(config.save.eos)[string(nameof(Scf))]
+        end
+        eos = x(outputs, EnergyEquation(trial_eos))
+        SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
+        return eos
+    end)
 end
 # Any Action
 function thunkify(f::Action{T}, file::ConfigFile) where {T}
@@ -55,5 +57,3 @@ function thunkify(f::Action{T}, file::ConfigFile) where {T}
     config = ExpandConfig{T}()(raw_config)
     return thunkify(f, config)
 end
-
-jobify(f::Action, args...) = Job.(thunkify(f, args...))
