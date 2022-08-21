@@ -7,8 +7,9 @@ struct ConfigFile{T}
 end
 
 Base.open(file::ConfigFile, args...; kwargs...) = open(file.source, args...; kwargs...)
-Base.open(f::Function, file::ConfigFile, args...; kwargs...) =
-    open(f, file.source, args...; kwargs...)
+function Base.open(f::Function, file::ConfigFile, args...; kwargs...)
+    return open(f, file.source, args...; kwargs...)
+end
 
 include("sp.jl")
 include("io.jl")

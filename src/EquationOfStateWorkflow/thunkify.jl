@@ -1,10 +1,6 @@
 # MakeInput
 function thunkify(
-    f::MakeInput,
-    files,
-    template,
-    pressures::Pressures,
-    eos::PressureEquation,
+    f::MakeInput, files, template, pressures::Pressures, eos::PressureEquation
 )
     return map(files, pressures) do file, pressure
         Thunk(f, file, template, pressure, eos)
@@ -15,14 +11,15 @@ function thunkify(f::MakeInput, files, template, volumes::Volumes)
         Thunk(f, file, template, volume)
     end
 end
-thunkify(f::MakeInput{Scf}, config::NamedTuple) =
-    thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
+function thunkify(f::MakeInput{Scf}, config::NamedTuple)
+    return thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
+end
 function thunkify(f::MakeInput{<:Optimization}, config::NamedTuple)
     if config.fixed isa Volumes
         thunkify(f, config.files, config.template, config.fixed)
     else  # Pressures
         trial_eos = PressureEquation(
-            FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos)),
+            FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos))
         )
         return thunkify(f, config.files, config.template, config.fixed, trial_eos)
     end
@@ -41,9 +38,11 @@ function thunkify(x::FitEos, config::NamedTuple)
     return Thunk(
         function ()
             outputs = last.(config.files)
-            trial_eos =
-                calculation(x) isa Scf ? config.trial_eos :
+            trial_eos = if calculation(x) isa Scf
+                config.trial_eos
+            else
                 JLD2.load(config.save.eos)[string(nameof(Scf))]
+            end
             eos = x(outputs, EnergyEquation(trial_eos))
             SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
             return eos

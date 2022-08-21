@@ -7,12 +7,12 @@ import Configurations: from_dict
 abstract type SamplingPoints end
 
 # See https://github.com/Roger-luo/Configurations.jl/blob/933fd46/src/codegen.jl#L82-L84
-macro sp(type, unit, alias, check = (_, _) -> nothing)
+macro sp(type, unit, alias, check=(_, _) -> nothing)
     unit = _uparse(unit)
     ex = :(struct $type <: $SamplingPoints
         vector::Vector{Float64}
         unit::$FreeUnits
-        function $type(vector, unit = $unit)
+        function $type(vector, unit=$unit)
             $check(vector, unit)
             return new(vector, unit)
         end
@@ -20,24 +20,26 @@ macro sp(type, unit, alias, check = (_, _) -> nothing)
     return esc(option_m(__module__, ex, alias))
 end
 
-_uparse(str::AbstractString) =
-    lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
+function _uparse(str::AbstractString)
+    return lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
+end
 
-from_dict(
+function from_dict(
     ::Type{<:SamplingPoints},
     ::OptionField{:vector},
     ::Type{Vector{Float64}},
     str::AbstractString,
-) = eval(Meta.parse(str))
-from_dict(
-    ::Type{<:SamplingPoints},
-    ::OptionField{:unit},
-    ::Type{<:FreeUnits},
-    str::AbstractString,
-) = _uparse(str)
+)
+    return eval(Meta.parse(str))
+end
+function from_dict(
+    ::Type{<:SamplingPoints}, ::OptionField{:unit}, ::Type{<:FreeUnits}, str::AbstractString
+)
+    return _uparse(str)
+end
 
 # Similar to https://github.com/JuliaCollections/IterTools.jl/blob/0ecaa88/src/IterTools.jl#L1028-L1032
-function Base.iterate(iter::SamplingPoints, state = 1)
+function Base.iterate(iter::SamplingPoints, state=1)
     if state > length(iter.vector)
         return nothing
     else

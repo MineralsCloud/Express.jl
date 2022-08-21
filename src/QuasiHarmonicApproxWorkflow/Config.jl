@@ -44,7 +44,7 @@ function Base.show(io::IO, x::Thermo)
         Base.show_default(IOContext(io, :limit => true), x)
     else
         # just dumping seems to give ok output, in particular for big data-sets:
-        dump(IOContext(io, :limit => true), x, maxdepth = 1)
+        dump(IOContext(io, :limit => true), x; maxdepth=1)
     end
 end
 
@@ -52,8 +52,9 @@ end
     root::String = pwd()
     pattern::String = "p=%.1f"
     group_by_step::Bool = false
-    Directories(root, pattern, group_by_step) =
-        new(abspath(expanduser(root)), pattern, group_by_step)
+    function Directories(root, pattern, group_by_step)
+        return new(abspath(expanduser(root)), pattern, group_by_step)
+    end
 end
 
 @option struct RuntimeConfig
@@ -127,11 +128,13 @@ function (x::ExpandConfig)(config::AbstractDict)
         "DELTA_P" => ustrip(u"GPa", minimum(diff(pressures))),
         "DELTA_P_SAMPLE" => ustrip(u"GPa", minimum(diff(pressures))),
         "input" => config.input,
-        "thermodynamic_properties" => collect(map(fieldnames(Thermo)) do f
-            if getfield(config.thermo, f)
-                string(f)
-            end
-        end),
+        "thermodynamic_properties" => collect(
+            map(fieldnames(Thermo)) do f
+                if getfield(config.thermo, f)
+                    string(f)
+                end
+            end,
+        ),
         "energy_unit" => config.energy_unit,
         "high_verbosity" => true,
         "output_directory" => joinpath(config.dirs.root, "results"),
@@ -139,11 +142,11 @@ function (x::ExpandConfig)(config::AbstractDict)
     path = expanduser(joinpath(parentdir(dict["input"]), "settings.yaml"))
     save(path, dict)
     return (
-        input = abspath(expanduser(dict["input"])),
-        config = path,
-        inp_file_list = abspath(expanduser(config.inp_file_list)),
-        static = abspath(expanduser(config.static)),
-        q_points = abspath(expanduser(config.q_points)),
+        input=abspath(expanduser(dict["input"])),
+        config=path,
+        inp_file_list=abspath(expanduser(config.inp_file_list)),
+        static=abspath(expanduser(config.static)),
+        q_points=abspath(expanduser(config.q_points)),
     )
 end
 

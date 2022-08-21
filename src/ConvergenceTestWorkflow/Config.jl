@@ -51,27 +51,29 @@ function (::ExpandConfig)(x::MonkhorstPackGrids)
         (mesh, shift)
     end
 end
-(::ExpandConfig{T})(ds::DirStructure, energies::CutoffEnergies) where {T} =
-    iofiles(ds, energies.values, string(nameof(T)))
-(::ExpandConfig{T})(ds::DirStructure, grids::MonkhorstPackGrids) where {T} =
-    iofiles(ds, zip(grids.meshes, grids.shifts), string(nameof(T)))
+function (::ExpandConfig{T})(ds::DirStructure, energies::CutoffEnergies) where {T}
+    return iofiles(ds, energies.values, string(nameof(T)))
+end
+function (::ExpandConfig{T})(ds::DirStructure, grids::MonkhorstPackGrids) where {T}
+    return iofiles(ds, zip(grids.meshes, grids.shifts), string(nameof(T)))
+end
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
         v = getfield(save, f)
-        isempty(v) ? abspath(mktemp(; cleanup = false)[1]) : abspath(expanduser(v))
+        isempty(v) ? abspath(mktemp(; cleanup=false)[1]) : abspath(expanduser(v))
     end
 end
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     save_raw, save_status = x(config.save)
     return (
-        template = x(config.template),
-        parameters = x(config.parameters),
-        root = config.files.dirs.root,
-        files = x(config.files, config.parameters),
-        save_raw = save_raw,
-        save_status = save_status,
-        cli = config.cli,
+        template=x(config.template),
+        parameters=x(config.parameters),
+        root=config.files.dirs.root,
+        files=x(config.files, config.parameters),
+        save_raw=save_raw,
+        save_status=save_status,
+        cli=config.cli,
     )
 end
 

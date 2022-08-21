@@ -103,12 +103,12 @@ function (::ExpandConfig)(save::Save)
 end
 function (x::ExpandConfig)(config::RuntimeConfig)
     return (
-        template = x(config.template),
-        trial_eos = PressureEquation(x(config.trial_eos)),
-        fixed = x(config.fixed),
-        files = x(config.dir, config.fixed),
-        save = x(config.save),
-        cli = config.cli,
+        template=x(config.template),
+        trial_eos=PressureEquation(x(config.trial_eos)),
+        fixed=x(config.fixed),
+        files=x(config.dir, config.fixed),
+        save=x(config.save),
+        cli=config.cli,
     )
 end
 
