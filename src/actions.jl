@@ -31,11 +31,6 @@ end
 
 thunkify(x::DownloadPotentials, template::Input) = Thunk(x, template)
 thunkify(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
-function thunkify(x::DownloadPotentials{T}, file::ConfigFile) where {T}
-    raw_config = load(file)
-    config = ExpandConfig{T}()(raw_config)
-    return thunkify(x, config)
-end
 
 struct LogTime{T} <: Action{T} end
 function (x::LogTime)()
