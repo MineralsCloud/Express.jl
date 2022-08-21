@@ -38,7 +38,7 @@ end
 
 @option struct TrialEquationOfState
     type::String
-    values::AbstractVector
+    params::Vector{Quantity{Float64}}
 end
 
 @option struct Save
