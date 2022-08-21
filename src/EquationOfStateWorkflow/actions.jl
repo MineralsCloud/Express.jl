@@ -5,14 +5,10 @@ using EquationsOfStateOfSolids:
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase: Action, Scf, Optimization, calculation
 using JLD2: JLD2
-using SimpleWorkflows.Jobs: Job
-using SimpleWorkflows.Thunks: Thunk
 using Unitful: Pressure, Volume, ustrip, unit
 
 using ..Config: ConfigFile
 using .Config: ExpandConfig, Pressures, Volumes
-
-import Express: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput)(
