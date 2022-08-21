@@ -5,6 +5,7 @@ using ExpressBase: Action, calculation
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
 using SimpleWorkflows.Jobs: Job
+using SimpleWorkflows.Thunks: Thunk
 
 using ..Express: distribute_procs
 using .Config: ConfigFile
@@ -24,8 +25,8 @@ function (::DownloadPotentials)(template::Input)
     end
 end
 
-jobify(x::DownloadPotentials, template::Input) = Job(() -> x(template))
-jobify(x::DownloadPotentials, config) = Job(() -> x(config.template))
+jobify(x::DownloadPotentials, template::Input) = Job(Thunk(x, template))
+jobify(x::DownloadPotentials, config::NamedTuple) = Job(Thunk(x, config.template))
 function jobify(x::DownloadPotentials{T}, file::ConfigFile) where {T}
     raw_config = load(file)
     config = ExpandConfig{T}()(raw_config)
@@ -45,7 +46,7 @@ function (x::LogTime)()
     end
 end
 
-jobify(x::LogTime) = Job(() -> x())
+jobify(x::LogTime) = Job(Thunk(x, ()))
 
 struct RunCmd{T} <: Action{T} end
 
@@ -53,6 +54,6 @@ function jobify(x::RunCmd, np::Integer, files, kwargs...)
     jobsize = length(files)
     np = distribute_procs(np, jobsize)
     return map(files) do (input, output)
-        Job(() -> x(input, output; np = np, kwargs...))
+        Job(Thunk(x, input, output; np = np, kwargs...))
     end
 end

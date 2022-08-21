@@ -6,7 +6,7 @@ using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
-using ..EquationOfStateWorkflow: MakeInput, GetData, FitEos
+using ..EquationOfStateWorkflow: MakeInput, GetRawData, FitEos
 
 struct ParallelEosFittingRecipe <: Recipe
     config
@@ -17,12 +17,12 @@ function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
     b = jobify(LogTime{Scf}())
     c = jobify(MakeInput{Scf}(), r.config)
     d = jobify(RunCmd{Scf}(), r.config)
-    e = jobify(GetData{Scf}(), r.config)
+    e = jobify(GetRawData{Scf}(), r.config)
     f = jobify(FitEos{Scf}(), r.config)
     g = jobify(LogTime{VariableCellOptimization}())
     h = jobify(MakeInput{VariableCellOptimization}(), r.config)
     i = jobify(RunCmd{VariableCellOptimization}(), r.config)
-    j = jobify(GetData{VariableCellOptimization}(), r.config)
+    j = jobify(GetRawData{VariableCellOptimization}(), r.config)
     k = jobify(FitEos{VariableCellOptimization}(), r.config)
     a → b ⇉ c ⇶ d ⭃ e → f → g ⇉ h ⇶ i ⭃ j → k
     return Workflow(a)
