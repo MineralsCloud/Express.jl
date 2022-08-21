@@ -92,8 +92,8 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 function (::ExpandConfig{T})(dir::Directory, fixed::Union{Pressures,Volumes}) where {T}
-    return map(fixed.vector) do value
-        getfiles(dir, value, string(nameof(T)))
+    return map(fixed.numbers) do number
+        getfiles(dir, number, string(nameof(T)))
     end
 end
 function (::ExpandConfig)(save::Save)

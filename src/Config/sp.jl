@@ -10,11 +10,11 @@ abstract type SamplingPoints end
 macro sp(type, unit, alias, check=(_, _) -> nothing)
     unit = _uparse(unit)
     ex = :(struct $type <: $SamplingPoints
-        vector::Vector{Float64}
+        numbers::Vector{Float64}
         unit::$FreeUnits
-        function $type(vector, unit=$unit)
-            $check(vector, unit)
-            return new(vector, unit)
+        function $type(numbers, unit=$unit)
+            $check(numbers, unit)
+            return new(numbers, unit)
         end
     end)
     return esc(option_m(__module__, ex, alias))
@@ -26,7 +26,7 @@ end
 
 function from_dict(
     ::Type{<:SamplingPoints},
-    ::OptionField{:vector},
+    ::OptionField{:numbers},
     ::Type{Vector{Float64}},
     str::AbstractString,
 )
@@ -40,15 +40,15 @@ end
 
 # Similar to https://github.com/JuliaCollections/IterTools.jl/blob/0ecaa88/src/IterTools.jl#L1028-L1032
 function Base.iterate(iter::SamplingPoints, state=1)
-    if state > length(iter.vector)
+    if state > length(iter.numbers)
         return nothing
     else
-        return getindex(iter.vector, state) * iter.unit, state + 1
+        return getindex(iter.numbers, state) * iter.unit, state + 1
     end
 end
 
 Base.eltype(iter::SamplingPoints) = Quantity{Float64,dimension(iter.unit),typeof(iter.unit)}
 
-Base.length(iter::SamplingPoints) = length(iter.vector)
+Base.length(iter::SamplingPoints) = length(iter.numbers)
 
-Base.size(iter::SamplingPoints) = size(iter.vector)
+Base.size(iter::SamplingPoints) = size(iter.numbers)
