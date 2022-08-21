@@ -45,14 +45,14 @@ end
 end
 
 struct ExpandConfig{T} <: Action{T} end
-(::ExpandConfig)(energies::CutoffEnergies) = energies.values .* energies.unit
+(::ExpandConfig)(energies::CutoffEnergies) = energies.numbers .* energies.unit
 function (::ExpandConfig)(x::MonkhorstPackGrids)
     return map(x.meshes, x.shifts) do mesh, shift
         (mesh, shift)
     end
 end
 function (::ExpandConfig{T})(ds::DirStructure, energies::CutoffEnergies) where {T}
-    return iofiles(ds, energies.values, string(nameof(T)))
+    return iofiles(ds, energies.numbers, string(nameof(T)))
 end
 function (::ExpandConfig{T})(ds::DirStructure, grids::MonkhorstPackGrids) where {T}
     return iofiles(ds, zip(grids.meshes, grids.shifts), string(nameof(T)))

@@ -57,7 +57,7 @@ end
 struct ExpandConfig{T} end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
 (::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
-    iofiles(ds, fixed.values, string(nameof(T)))
+    iofiles(ds, fixed.numbers, string(nameof(T)))
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
         v = getfield(save, f)
