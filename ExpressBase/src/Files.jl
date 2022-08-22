@@ -23,7 +23,8 @@ struct UnsupportedExtensionError <: Exception
 end
 
 format(::Val{:json}) = DataFormat{:JSON}()
-format(::Union{Val{:yaml},Val{:yml}}) = DataFormat{:YAML}()
+format(::Val{:yaml}) = DataFormat{:YAML}()
+format(::Val{:yml}) = DataFormat{:YAML}()
 format(::Val{:toml}) = DataFormat{:TOML}()
 @valsplit format(Val(ext::Symbol)) = throw(UnsupportedExtensionError(string(ext)))
 
