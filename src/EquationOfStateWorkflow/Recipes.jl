@@ -1,7 +1,7 @@
 module Recipes
 
-using ExpressBase: load
 using ExpressBase: Scf, VariableCellOptimization
+using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 

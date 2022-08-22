@@ -1,7 +1,7 @@
 module Config
 
-using ExpressBase: save, parentdir
 using Configurations: from_dict, @option
+using ExpressBase.Files: save, parentdir
 using Unitful: ustrip, @u_str
 
 using ...Config: @sp

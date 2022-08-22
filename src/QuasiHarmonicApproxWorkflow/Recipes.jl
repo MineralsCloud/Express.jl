@@ -1,10 +1,10 @@
 module Recipes
 
-using ExpressBase: load
+using ExpressBase: QuasiHarmonicApproximation
+using ExpressBase.Files: load
+using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Workflows: Workflow, run!, →
-using ExpressBase: QuasiHarmonicApproximation
-using ExpressBase.Recipes: Recipe
 
 using ..QuasiHarmonicApproxWorkflow: MakeInput, CalculateThermodyn, Plot
 
