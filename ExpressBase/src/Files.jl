@@ -17,6 +17,11 @@ end
 File{F}(file::File{F}) where {F<:DataFormat} = file
 File{F}(file::AbstractString) where {F<:DataFormat} = File{F,String}(String(file))
 File{F}(file) where {F<:DataFormat} = File{F,typeof(file)}(file)
+function File(file)
+    ext = extension(file)
+    fmt = format(Symbol(ext))
+    return File{fmt}(file)
+end
 
 struct UnsupportedExtensionError <: Exception
     ext::String
