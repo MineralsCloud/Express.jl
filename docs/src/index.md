@@ -4,7 +4,16 @@ CurrentModule = Express
 
 # Express: an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate _ab initio_ calculations
 
-Documentation for [Express](https://github.com/MineralsCloud/Express.jl).
+Documentation for [`Express`](https://github.com/MineralsCloud/Express.jl).
+
+See the [Index](@ref main-index) for the complete list of documented functions
+and types.
+
+The code is [hosted on GitHub](https://github.com/MineralsCloud/Express.jl),
+with some continuous integration services to test its validity.
+
+This repository is created and maintained by [@singularitti](https://github.com/singularitti).
+You are very welcome to contribute.
 
 ## Package Features
 
@@ -94,27 +103,27 @@ such as Quantum ESPRESSO. Other plugins for other software are possible. The dep
 The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
-```
+```julia
 pkg> add Express
 ```
 
 Or, equivalently, via the `Pkg` API:
 
-```julia
-julia> import Pkg; Pkg.add("Express")
+```@repl
+import Pkg; Pkg.add("Express")
 ```
 
 ## Documentation
 
-- [**STABLE**](https://MineralsCloud.github.io/Express.jl/stable) &mdash; **documentation of the most recently tagged version.**
-- [**DEV**](https://MineralsCloud.github.io/Express.jl/dev) &mdash; _documentation of the in-development version._
+- [**STABLE**](https://MineralsCloud.github.io/Express.jl/stable) — **documentation of the most recently tagged version.**
+- [**DEV**](https://MineralsCloud.github.io/Express.jl/dev) — _documentation of the in-development version._
 
-## Project Status
+## Project status
 
 The package is tested against, and being developed for, Julia `1.6` and above on Linux,
 macOS, and Windows.
 
-## Questions and Contributions
+## Questions and contributions
 
 Usage questions can be posted on
 [our discussion page](https://github.com/MineralsCloud/Express.jl/discussions).
@@ -124,27 +133,30 @@ Contributions are very welcome, as are feature requests and suggestions. Please 
 if you encounter any problems. The [contributing](@ref) page has
 a few guidelines that should be followed when opening pull requests and contributing code.
 
-## Manual Outline
+## Manual outline
 
 ```@contents
 Pages = [
     "installation.md",
-    "contributing.md",
     "run/configuration.md",
     "run/cli.md",
     "run/jobs.md",
+    "developers/contributing.md",
+    "developers/style.md",
     "troubleshooting.md",
     "faq.md",
 ]
 Depth = 3
 ```
 
-## Library Outline
+## Library outline
 
 ```@contents
+Pages = []
 ```
 
 ### [Index](@id main-index)
 
 ```@index
+Pages = []
 ```

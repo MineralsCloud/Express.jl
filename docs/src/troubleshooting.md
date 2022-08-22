@@ -1,19 +1,25 @@
 # Troubleshooting
 
 This page collects some possible errors you may encounter and trick how to fix them.
+If you have some questions about how to use this code, you are welcome to
+[discuss with us](https://github.com/MineralsCloud/Express.jl/discussions).
 
-_If you have additional tips, please submit a PR with suggestions._
+_If you have additional tips, please either
+[report an issue](https://github.com/MineralsCloud/Express.jl/issues/new) or
+[submit a PR](https://github.com/MineralsCloud/Express.jl/compare) with suggestions._
 
 ## Installation problems
 
-### Cannot find the Julia executable
+### I cannot find the `julia` executable
 
 Make sure you have Julia installed in your environment. Please download the latest
 [stable version](https://julialang.org/downloads/#current_stable_release) for your platform.
-If you are using macOS, the recommended way is to use [Homebrew](https://brew.sh).
-If you do not want to install Homebrew or you are using other platforms that Julia supports,
-download the corresponding binaries. And then create a symbolic link `/usr/local/bin/julia`
-to the Julia executable. If `/usr/local/bin/` is not in your `$PATH`, export it to your `$PATH`.
+If you are using a *nix system, the recommended way is to use
+[`juliaup`](https://github.com/JuliaLang/juliaup). If you do not want to install `juliaup`
+or you are using other platforms that Julia supports, download the corresponding binaries.
+Then, create a symbolic link to the Julia executable. If the path is not in your `$PATH`
+environment variable, export it to your `$PATH`.
+
 Some clusters, like
 [`Habanero`](https://confluence.columbia.edu/confluence/display/rcs/Habanero+HPC+Cluster+User+Documentation),
 [`Comet`](https://www.sdsc.edu/support/user_guides/comet.html),
@@ -48,7 +54,7 @@ by Julia.
 One solution is to re-configure [`PyCall`](https://github.com/JuliaPy/PyCall.jl) to use a different Python
 version on your system: set `ENV["PYTHON"]` to the path of the python
 executable you want to use, run `Pkg.build("PyCall")`, and re-launch Julia.
-For example, in Julia REPL, run
+For example, in the Julia REPL, run
 
 ```julia-repl
 julia> using Pkg
@@ -70,12 +76,11 @@ Python distribution), which has the advantage that packages can be installed
 and kept up-to-date via Julia. As explained in the `PyCall` documentation, in Julia,
 run
 
-```julia-repl
-julia> using Pkg
-
-julia> ENV["PYTHON"] = "" # empty string
-
-julia> Pkg.build("PyCall");
+```@repl
+using Pkg
+ENV["PYTHON"] = ""  # empty string
+# Pkg.add("PyCall")
+# Pkg.build("PyCall");
 ```
 
 Then re-launch Julia.
@@ -89,8 +94,7 @@ and run the following command
 ```
 
 !!! note
-
-    At least Python 3.6 and above is required to install qha.
+    At least Python 3.6 and above is required to install `qha`.
     Please read its [manual](https://mineralscloud.github.io/qha/tutorials/installing.html)
     for more information.
 
@@ -100,13 +104,13 @@ and run the following command
 
 If you encounter
 
-```
+```julia
 ERROR: expected '<document start>' but found YAML.BlockMappingStartToken at nothing
 ```
 
 or
 
-```
+```julia
 ERROR: while scanning a simple key at line n, column 0: could not find expected ':' at line n+1, column 0
 ```
 
@@ -121,22 +125,22 @@ Otherwise, check other `YAML` syntax you may have broken.
 First, we recommend you download the latest version of Julia. Usually, the newest version
 has the best performance.
 
-If you just want Julia to do a simple task and only once, you could start Julia REPL with
+If you just want Julia to do a simple task and only once, you could start the Julia REPL with
 
-```shell
+```bash
 julia --compile=min
 ```
 
 to minimize compilation or
 
-```shell
+```bash
 julia --optimize=0
 ```
 
 to minimize optimizations, or just use both. Or you could make a system image
 and run with
 
-```shell
+```bash
 julia --sysimage custom-image.so
 ```
 
@@ -187,7 +191,7 @@ avoid unexpected errors:
 /
 ```
 
-### How to solve error `EOFError: read end of file`?
+### How to solve `EOFError: read end of file`?
 
 If it happens when you run
 
@@ -218,7 +222,7 @@ using QuantumESPRESSOExpress
 wf = buildworkflow("phonon.yaml")
 ```
 
-you find that `wf` still contains the jobs from the previous workflow, and they are probably
+you will find that `wf` still contains the jobs from the previous workflow, and they are probably
 all succeeded (because that is when you want to run the next workflow). The cause is likely
 in your configuration file (`phonon.yaml`). You probably have the following setting:
 
