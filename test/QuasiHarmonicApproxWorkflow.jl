@@ -1,6 +1,6 @@
 module QuasiHarmonicApproxWorkflow
 
-using AbInitioSoftwareBase: load
+using ExpressBase.Files: load
 using Express.QuasiHarmonicApproxWorkflow: QuasiHarmonicApproximation
 using Express.QuasiHarmonicApproxWorkflow.Config: ExpandConfig
 using Test
