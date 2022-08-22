@@ -1,4 +1,4 @@
-module Config
+module Files
 
 using EasyConfig: Config
 using JSON: JSON
@@ -76,8 +76,7 @@ Load data from `file` to a `Dict`.
 By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by `file` extension.
 """
 function load(file)
-    path = filepath(file)
-    ext = extension(path)
+    path, ext = expanduser(file), extension(file)
     return load(File{format(ext)}(path))
 end
 # load(file, ::Type{Config}) = Config(load(file))
@@ -102,6 +101,15 @@ Convert `source` to the format of `destination`. Similar to `oftype`.
 function of_format(destination, source)
     data = load(source)
     return save(destination, data)
+end
+
+"""
+    extension(file)
+Get the extension from `file`. Return an empty string if no extension is found.
+"""
+function extension(file)
+    ext = splitext(file)[2]  # `splitext` works with `FilePathsBase.AbstractPath` since version `v0.7.0`.
+    return isempty(ext) ? "" : lowercase(ext[2:end])
 end
 
 function Base.show(io::IO, error::UnsupportedExtensionError)
