@@ -1,6 +1,5 @@
 module Files
 
-using EasyConfig: Config
 using JSON: JSON
 using TOML: TOML
 using ValSplit: @valsplit
@@ -79,7 +78,6 @@ function load(file)
     path, ext = expanduser(file), extension(file)
     return load(File{format(ext)}(path))
 end
-# load(file, ::Type{Config}) = Config(load(file))
 load(path::File{format"JSON"}) = JSON.parsefile(path)
 function load(path::File{format"TOML"})
     open(path, "r") do io
