@@ -29,7 +29,7 @@ julia&gt; Pkg.add(&quot;Express&quot;)</code></pre></li><li><p>Run</p><pre><code
         Info Packages marked with ⌅ have new versions available but cannot be upgraded. To see why use `status --outdated -m`
 Precompiling project...
 <span class="sgr33">  ✓ </span>Express
-  1 dependency successfully precompiled in 13 seconds. 106 already precompiled.
+  1 dependency successfully precompiled in 10 seconds. 106 already precompiled.
   <span class="sgr33">1</span> dependency precompiled but a different version is currently loaded. Restart julia to access the new version</code></pre><p>in the second step above.</p><h2 id="Update-Express"><a class="docs-heading-anchor" href="#Update-Express">Update <code>Express</code></a><a id="Update-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Update-Express" title="Permalink"></a></h2><p>Please <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">watch</a> our <a href="https://github.com/MineralsCloud/Express.jl">GitHub repository</a> for new releases. Once we release a new version, you can update <code>Express</code> by typing</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update(&quot;Express&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General`
     Updating git-repo `https://github.com/JuliaRegistries/General.git`
     Updating git-repo `https://github.com/MineralsCloud/Express.jl`
@@ -48,34 +48,34 @@ julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the
   No Changes to `~/work/Express.jl/Express.jl/docs/build/developers/Manifest.toml`</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.add(&quot;QuantumESPRESSOExpress&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">   Resolving package versions...
    Installed Crystallography ────────────── v0.5.1
    Installed spglib_jll ─────────────────── v1.16.5+0
-   Installed RelocatableFolders ─────────── v0.1.3
    Installed EzXML ──────────────────────── v1.1.0
+   Installed RelocatableFolders ─────────── v0.1.3
    Installed Functors ───────────────────── v0.2.8
-   Installed Spglib ─────────────────────── v0.5.3
    Installed QuantumESPRESSOParser ──────── v0.3.10
+   Installed Spglib ─────────────────────── v0.5.3
    Installed QuantumESPRESSOBase ────────── v0.7.7
+   Installed Comonicon ──────────────────── v0.12.18
    Installed TypeTransform ──────────────── v0.1.3
+   Installed Counters ───────────────────── v0.3.3
    Installed QuantumESPRESSO ────────────── v0.8.0
    Installed CrystallographyBase ────────── v0.5.2
-   Installed Counters ───────────────────── v0.3.3
-   Installed PackageCompiler ────────────── v2.0.9
    Installed PeriodicTable ──────────────── v1.1.2
    Installed Scratch ────────────────────── v1.1.1
-   Installed UnifiedPseudopotentialFormat ─ v0.4.1
+   Installed PackageCompiler ────────────── v2.0.9
    Installed MLStyle ────────────────────── v0.4.13
-   Installed Comonicon ──────────────────── v0.12.18
-   Installed CoordinateTransformations ──── v0.6.2
    Installed PyFortran90Namelists ───────── v0.1.0
-   Installed Combinatorics ──────────────── v1.0.2
+   Installed UnifiedPseudopotentialFormat ─ v0.4.1
    Installed XML2_jll ───────────────────── v2.9.14+0
+   Installed Combinatorics ──────────────── v1.0.2
    Installed ReadableRegex ──────────────── v0.3.2
-   Installed LLVMOpenMP_jll ─────────────── v14.0.4+0
-   Installed QuantumESPRESSOFormatter ───── v0.3.4
+   Installed CoordinateTransformations ──── v0.6.2
    Installed QuantumESPRESSOExpress ─────── v0.5.7
-   Installed IterTools ──────────────────── v1.4.0
-   Installed AcuteML ────────────────────── v0.11.3
+   Installed QuantumESPRESSOFormatter ───── v0.3.4
+   Installed LLVMOpenMP_jll ─────────────── v14.0.4+0
    Installed QuantumESPRESSOCommands ────── v0.6.3
    Installed Parameters ─────────────────── v0.12.3
+   Installed IterTools ──────────────────── v1.4.0
+   Installed AcuteML ────────────────────── v0.11.3
     Updating `~/work/Express.jl/Express.jl/docs/build/developers/Project.toml`
   [524a00d3] + QuantumESPRESSOExpress v0.5.7
     Updating `~/work/Express.jl/Express.jl/docs/build/developers/Manifest.toml`
@@ -114,18 +114,18 @@ julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the
     Building QuantumESPRESSOCommands → `~/.julia/scratchspaces/44cfe95a-1eb2-52ea-b672-e2afdf69b78f/eee07f6fe79b79c43121f5058c27ad4d079e7c51/build.log`
 Precompiling project...
 <span class="sgr32">  ✓ </span><span class="sgr90">ReadableRegex</span>
-<span class="sgr32">  ✓ </span><span class="sgr90">Combinatorics</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">Parameters</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">Combinatorics</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">TypeTransform</span>
-<span class="sgr32">  ✓ </span><span class="sgr90">IterTools</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">Counters</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">IterTools</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">Functors</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">PeriodicTable</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">PyFortran90Namelists</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">LLVMOpenMP_jll</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">CoordinateTransformations</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">XML2_jll</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">spglib_jll</span>
-<span class="sgr32">  ✓ </span><span class="sgr90">CoordinateTransformations</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">EzXML</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">Spglib</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">CrystallographyBase</span>
@@ -138,7 +138,7 @@ Precompiling project...
 <span class="sgr32">  ✓ </span><span class="sgr90">QuantumESPRESSOFormatter</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">QuantumESPRESSO</span>
 <span class="sgr91">  ✗ </span>QuantumESPRESSOExpress
-  24 dependencies successfully precompiled in 78 seconds. 112 already precompiled.
+  24 dependencies successfully precompiled in 59 seconds. 112 already precompiled.
   <span class="sgr91">1</span> dependency errored. To see a full report either run `import Pkg; Pkg.precompile()` or load the package</code></pre><p>in the Julia REPL.</p><h2 id="cli"><a class="docs-heading-anchor" href="#cli">Install command-line tools</a><a id="cli-1"></a><a class="docs-heading-anchor-permalink" href="#cli" title="Permalink"></a></h2><p>We provide a command-line interface of <code>express</code> for non-developers: <a href="https://github.com/MineralsCloud/ExpressCommands.jl"><code>ExpressCommands.jl</code></a>. It installs an executable &#39;<code>xps</code>&#39; that can execute code from configuration files provided by users. To install <code>ExpressCommands</code>, run</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update()</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General`
     Updating git-repo `https://github.com/JuliaRegistries/General.git`
     Updating git-repo `https://github.com/MineralsCloud/Express.jl`
@@ -157,4 +157,4 @@ ERROR: Unsatisfiable requirements detected for package SimpleWorkflows [6a97d125
  └─restricted by compatibility requirements with ExpressCommands [0fa58581] to versions: 0.6.0-0.16.0 — no versions left
    └─ExpressCommands [0fa58581] log:
      ├─possible versions are: 0.1.0-0.5.0 or uninstalled
-     └─restricted to versions * by an explicit requirement, leaving only versions 0.1.0-0.5.0</code></pre><p>in the Julia REPL.</p><p>After installation, the path to <code>xps</code> is <code>$HOME/.julia/bin/xps</code> by default. So please add <code>$HOME/.julia/bin</code> to your <code>$PATH</code> environment variable.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../run/configuration/">Configuration files »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.22 on <span class="colophon-date" title="Monday 22 August 2022 12:46">Monday 22 August 2022</span>. Using Julia version 1.8.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+     └─restricted to versions * by an explicit requirement, leaving only versions 0.1.0-0.5.0</code></pre><p>in the Julia REPL.</p><p>After installation, the path to <code>xps</code> is <code>$HOME/.julia/bin/xps</code> by default. So please add <code>$HOME/.julia/bin</code> to your <code>$PATH</code> environment variable.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../run/configuration/">Configuration files »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.22 on <span class="colophon-date" title="Monday 22 August 2022 13:03">Monday 22 August 2022</span>. Using Julia version 1.8.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
