@@ -52,7 +52,7 @@ function thunkify(x::FitEos, config::NamedTuple)
         eos = x(outputs, EnergyEquation(trial_eos))
         SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
         return eos
-    end)
+    end, ())
 end
 # Any Action
 function thunkify(f::Action{T}, raw_config::RuntimeConfig) where {T}
