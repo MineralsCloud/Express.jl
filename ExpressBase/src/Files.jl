@@ -43,7 +43,7 @@ end
 
 Save `data` to `file`.
 
-By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by `file` extension.
+By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by the file extension.
 
 If `data` is a `Dict`, its keys should be `String`s so that `load` can return the same `data`.
 
@@ -77,7 +77,7 @@ end
 
 Load data from `file` to a `Dict`.
 
-By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by `file` extension.
+By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by the file extension.
 """
 load(file) = load(File(expanduser(file)))
 load(path::File{format"JSON"}) = JSON.parsefile(path)
@@ -105,7 +105,8 @@ end
 
 """
     extension(file)
-Get the extension from `file`. Return an empty string if no extension is found.
+
+Get the extension from `file`. Return an empty `String` if no extension is found.
 """
 function extension(file)
     ext = splitext(file)[2]  # `splitext` works with `FilePathsBase.AbstractPath` since version `v0.7.0`.
