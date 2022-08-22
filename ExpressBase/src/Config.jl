@@ -6,10 +6,12 @@ using TOML: TOML
 using ValSplit: @valsplit
 using YAML: YAML
 
-export load, save, of_format, format
+export load, save, of_format, @format_str
 
+# See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L14
 struct DataFormat{T} end
 
+# See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L38-L44
 struct File{D<:DataFormat,N}
     filename::N
 end
@@ -25,6 +27,11 @@ format(::Val{:json}) = DataFormat{:JSON}()
 format(::Union{Val{:yaml},Val{:yml}}) = DataFormat{:YAML}()
 format(::Val{:toml}) = DataFormat{:TOML}()
 @valsplit format(Val(ext::Symbol)) = throw(UnsupportedExtensionError(string(ext)))
+
+# See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L16-L18
+macro format_str(s)
+    return :(DataFormat{$(Expr(:quote, Symbol(s)))})
+end
 
 """
     save(file, data)
@@ -45,17 +52,17 @@ function save(file, data)
     save(File{format(ext)}(path), data)
     return nothing
 end
-function save(file::File{DataFormat{:JSON}}, data)
+function save(file::File{format"JSON"}, data)
     open(file, "w") do io
         JSON.print(io, data)
     end
 end
-function save(file::File{DataFormat{:TOML}}, data)
+function save(file::File{format"TOML"}, data)
     open(file, "w") do io
         TOML.print(io, data)
     end
 end
-function save(file::File{DataFormat{:YAML}}, data)
+function save(file::File{format"YAML"}, data)
     open(file, "w") do io
         YAML.write(io, data, "")
     end
@@ -74,13 +81,13 @@ function load(file)
     return load(File{format(ext)}(path))
 end
 # load(file, ::Type{Config}) = Config(load(file))
-load(path::File{DataFormat{:JSON}}) = JSON.parsefile(path)
-function load(path::File{DataFormat{:TOML}})
+load(path::File{format"JSON"}) = JSON.parsefile(path)
+function load(path::File{format"TOML"})
     open(path, "r") do io
         return TOML.parse(io)
     end
 end
-function load(path::File{DataFormat{:YAML}})
+function load(path::File{format"YAML"})
     open(path, "r") do io
         dict = YAML.load(io)
         return JSON.parse(JSON.json(dict))  # To keep up with JSON & TOML results
