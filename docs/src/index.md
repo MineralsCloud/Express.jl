@@ -118,6 +118,10 @@ import Pkg; Pkg.add("Express")
 - [**STABLE**](https://MineralsCloud.github.io/Express.jl/stable) — **documentation of the most recently tagged version.**
 - [**DEV**](https://MineralsCloud.github.io/Express.jl/dev) — _documentation of the in-development version._
 
+Here is a video introduction to this code:
+
+[![Watch the video](https://img.youtube.com/vi/N5_NUIaXnng/maxresdefault.jpg)](https://youtu.be/N5_NUIaXnng)
+
 ## Project status
 
 The package is tested against, and being developed for, Julia `1.6` and above on Linux,
