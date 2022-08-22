@@ -8,9 +8,27 @@ using .Config: RuntimeConfig
 import ..Express: thunkify
 
 # MakeInput
-function thunkify(f::MakeInput, files, template::Input, pressures, eos::PressureEquation)
+function thunkify(
+    f::MakeInput{Scf}, files, template::Input, pressures, eos::PressureEquation
+)
     return map(files, pressures) do file, pressure
         Thunk(f, file, template, pressure, eos)
+    end
+end
+function thunkify(
+    f::MakeInput{<:Optimization}, files, template::Input, pressures, eos::PressureEquation
+)
+    return map(files, pressures) do file, pressure
+        Thunk(
+            function (file, template, pressure, eos)
+                eos = PressureEquation(FitEos{Scf}()(last.(files), EnergyEquation(eos)))
+                return f(file, template, pressure, eos)
+            end,
+            file,
+            template,
+            pressure,
+            eos,
+        )
     end
 end
 function thunkify(f::MakeInput, files, template::Input, volumes)
@@ -18,17 +36,11 @@ function thunkify(f::MakeInput, files, template::Input, volumes)
         Thunk(f, file, template, volume)
     end
 end
-function thunkify(f::MakeInput{Scf}, config::NamedTuple)
-    return thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
-end
-function thunkify(f::MakeInput{<:Optimization}, config::NamedTuple)
+function thunkify(f::MakeInput, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
         thunkify(f, config.files, config.template, config.fixed)
     else  # Pressures
-        trial_eos = PressureEquation(
-            FitEos{Scf}()(last.(config.files), EnergyEquation(config.trial_eos))
-        )
-        return thunkify(f, config.files, config.template, config.fixed, trial_eos)
+        return thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
     end
 end
 function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
