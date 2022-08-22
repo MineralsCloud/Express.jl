@@ -1,6 +1,5 @@
 ```@meta
 CurrentModule = ExpressBase
-DocTestSetup = :(using ExpressBase, ExpressBase.Files)
 ```
 
 # API Reference
@@ -15,6 +14,10 @@ Pages = ["public.md"]
 Calculation
 Action
 calculation
+```
+
+```@meta
+CurrentModule = ExpressBase.Files
 ```
 
 ## `ExpressBase.Files` module

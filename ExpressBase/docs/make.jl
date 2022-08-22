@@ -1,7 +1,9 @@
 using ExpressBase
 using Documenter
 
-DocMeta.setdocmeta!(ExpressBase, :DocTestSetup, :(using ExpressBase); recursive=true)
+DocMeta.setdocmeta!(
+    ExpressBase, :DocTestSetup, :(using ExpressBase, ExpressBase.Files); recursive=true
+)
 
 makedocs(;
     modules=[ExpressBase],
@@ -16,7 +18,7 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Manual" => ["Installation guide" => "installation.md"],
-        "API Reference" => ["API Reference" => "public.md"],
+        "API Reference" => "public.md",
         "Developer Docs" => [
             "Contributing" => "developers/contributing.md",
             "Style Guide" => "developers/style.md",
