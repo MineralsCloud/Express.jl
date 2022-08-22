@@ -1,11 +1,13 @@
 module Recipes
 
+using Configurations: from_dict
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
+using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow: MakeInput, GetRawData, FitEos
 
 struct ParallelEosFittingRecipe <: Recipe
@@ -30,8 +32,9 @@ end
 function build(::Type{Workflow}, file)
     dict = load(file)
     recipe = dict["recipe"]
+    config = from_dict(RuntimeConfig, dict)
     if recipe == "eos"
-        return build(Workflow, ParallelEosFittingRecipe(dict))
+        return build(Workflow, ParallelEosFittingRecipe(config))
     else
         error("unsupported recipe $recipe.")
     end
