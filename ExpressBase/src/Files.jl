@@ -27,10 +27,10 @@ struct UnsupportedExtensionError <: Exception
     ext::String
 end
 
-format(::Val{:json}) = DataFormat{:JSON}()
-format(::Val{:yaml}) = DataFormat{:YAML}()
-format(::Val{:yml}) = DataFormat{:YAML}()
-format(::Val{:toml}) = DataFormat{:TOML}()
+format(::Val{:json}) = format"JSON"
+format(::Val{:yaml}) = format"YAML"
+format(::Val{:yml}) = format"YAML"
+format(::Val{:toml}) = format"TOML"
 @valsplit format(Val(ext::Symbol)) = throw(UnsupportedExtensionError(string(ext)))
 
 # See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L16-L18
