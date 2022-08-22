@@ -1,6 +1,6 @@
 module Config
 
-using AbInitioSoftwareBase: save, parentdir
+using ExpressBase: save, parentdir
 using Configurations: from_dict, @option
 using Unitful: ustrip, @u_str
 

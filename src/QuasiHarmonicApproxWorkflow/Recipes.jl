@@ -1,6 +1,6 @@
 module Recipes
 
-using AbInitioSoftwareBase: load
+using ExpressBase: load
 using SimpleWorkflows.Jobs: Job
 using SimpleWorkflows.Workflows: Workflow, run!, →
 using ExpressBase: QuasiHarmonicApproximation

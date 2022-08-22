@@ -1,6 +1,6 @@
 module Recipes
 
-using AbInitioSoftwareBase: load
+using ExpressBase: load
 using ExpressBase: Scf
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃

@@ -1,6 +1,6 @@
 module Recipes
 
-using AbInitioSoftwareBase: load
+using ExpressBase: load
 using ExpressBase: Scf, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Jobs: Job
