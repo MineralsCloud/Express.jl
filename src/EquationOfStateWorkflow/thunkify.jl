@@ -1,5 +1,6 @@
 using Configurations: from_dict
 using SimpleWorkflows.Thunks: Thunk
+using Unitful: dimension, @u_str
 
 using ..Express: DownloadPotentials
 using .Config: RuntimeConfig
@@ -7,14 +8,12 @@ using .Config: RuntimeConfig
 import ..Express: thunkify
 
 # MakeInput
-function thunkify(
-    f::MakeInput, files, template, pressures::Pressures, eos::PressureEquation
-)
+function thunkify(f::MakeInput, files, template::Input, pressures, eos::PressureEquation)
     return map(files, pressures) do file, pressure
         Thunk(f, file, template, pressure, eos)
     end
 end
-function thunkify(f::MakeInput, files, template, volumes::Volumes)
+function thunkify(f::MakeInput, files, template::Input, volumes)
     return map(files, volumes) do file, volume
         Thunk(f, file, template, volume)
     end
@@ -23,7 +22,7 @@ function thunkify(f::MakeInput{Scf}, config::NamedTuple)
     return thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
 end
 function thunkify(f::MakeInput{<:Optimization}, config::NamedTuple)
-    if config.fixed isa Volumes
+    if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
         thunkify(f, config.files, config.template, config.fixed)
     else  # Pressures
         trial_eos = PressureEquation(
