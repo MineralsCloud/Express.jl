@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-    tags: '*'
+    tags: ['*']
   pull_request:
 concurrency:
   # Skip intermediate builds: always.
@@ -20,9 +20,9 @@ jobs:
         version:
           # - '1.0'
           - '1.3'
-          - '1.4'
           - '1.6'
           - '1.7'
+          - '1.8'
           - 'nightly'
         os:
           - ubuntu-latest
@@ -52,6 +52,8 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
