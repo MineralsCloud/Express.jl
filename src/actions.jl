@@ -56,6 +56,9 @@ thunkify(x::LogTime) = Thunk(x, ())
 
 struct RunCmd{T} <: Action{T} end
 
+function thunkify(f::RunCmd{T}, config::NamedTuple) where {T}
+    return thunkify(f, config.cli.mpi.np, config.files)
+end
 function thunkify(x::RunCmd, np::Integer, files, kwargs...)
     jobsize = length(files)
     np = distribute_procs(np, jobsize)
