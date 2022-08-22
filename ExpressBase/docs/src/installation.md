@@ -10,7 +10,7 @@ for more information.
 First, you should install [Julia](https://julialang.org/). We recommend downloading it from
 [its official website](https://julialang.org/downloads/). Please follow the detailed
 instructions on its website if you have to
-[build Julia from source](https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/build.md).
+[build Julia from source](https://docs.julialang.org/en/v1/devdocs/build/build/).
 Some computing centers provide preinstalled Julia. Please contact your administrator for
 more information in that case.
 Here's some additional information on
@@ -21,33 +21,35 @@ If you have [Homebrew](https://brew.sh) installed,
 and type
 
 ```shell
-brew install --cask julia
-```
-
-if you want to install it as a prebuilt binary app. Type
-
-```shell
 brew install julia
 ```
 
-if you want to install it as a [formula](https://docs.brew.sh/Formula-Cookbook).
+to install it as a [formula](https://docs.brew.sh/Formula-Cookbook).
+
+If you are also using macOS and want to install it as a prebuilt binary app, type
+
+```shell
+brew install --cask julia
+```
+
+instead.
 
 If you want to install multiple Julia versions in the same operating system,
-a suggested way is to use a version manager such as
-[`asdf`](https://asdf-vm.com/guide/introduction.html).
-First, [install `asdf`](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf).
+a recommended way is to use a version manager such as
+[`juliaup`](https://github.com/JuliaLang/juliaup).
+First, [install `juliaup`](https://github.com/JuliaLang/juliaup#installation).
 Then, run
 
 ```shell
-asdf install julia 1.6.7  # or other versions of Julia
-asdf global julia 1.6.7
+juliaup add release
+juliaup default release
 ```
 
-to install Julia and
-[set `v1.6.7` as a global version](https://asdf-vm.com/guide/getting-started.html#_6-set-a-version).
+to configure the `julia` command to start the latest stable version of
+Julia (this is also the default value).
 
-You can also try another cross-platform installer for the Julia programming language
-[`juliaup`](https://github.com/JuliaLang/juliaup).
+There is a [short video introduction to `juliaup`](https://youtu.be/14zfdbzq5BM)
+made by its authors.
 
 ### Which version should I pick?
 
@@ -78,7 +80,7 @@ Julia and Julia packages support multiple operating systems and CPU architecture
 [this table](https://julialang.org/downloads/#supported_platforms) to see if it can be
 installed on your machine. For Mac computers with M-series processors, this package and its
 dependencies may not work. Please install the Intel-compatible version of Julia (for macOS
-x86).
+x86-64) if any platform-related error occurs.
 
 ## Install `ExpressBase`
 
@@ -106,8 +108,7 @@ platform to explain the following steps:
 
    and have fun!
 
-4. While using, please keep this Julia session alive. Restarting might recompile
-   the package and cost some time.
+4. While using, please keep this Julia session alive. Restarting might cost some time.
 
 If you want to install the latest in-development (probably buggy)
 version of `ExpressBase`, type
@@ -115,7 +116,7 @@ version of `ExpressBase`, type
 ```@repl
 using Pkg
 Pkg.update()
-pkg"add ExpressBase#master"
+pkg"add https://github.com/MineralsCloud/ExpressBase.jl"
 ```
 
 in the second step above.
@@ -133,9 +134,12 @@ Pkg.update("ExpressBase")
 Pkg.gc()
 ```
 
-in Julia REPL.
+in the Julia REPL.
 
 ## Uninstall and reinstall `ExpressBase`
+
+Sometimes errors may occur if the package is not properly installed.
+In this case, you may want to uninstall and reinstall the package. Here is how to do that:
 
 1. To uninstall, in a Julia session, run
 

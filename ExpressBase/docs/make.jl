@@ -5,7 +5,7 @@ DocMeta.setdocmeta!(ExpressBase, :DocTestSetup, :(using ExpressBase); recursive=
 
 makedocs(;
     modules=[ExpressBase],
-    authors="Reno <singularitti@outlook.com> and contributors",
+    authors="singularitti <singularitti@outlook.com>",
     repo="https://github.com/MineralsCloud/ExpressBase.jl/blob/{commit}{path}#{line}",
     sitename="ExpressBase.jl",
     format=Documenter.HTML(;
@@ -15,11 +15,12 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Manual" => [
-            "Installation guide" => "installation.md",
-            "Contributing" => "contributing.md",
+        "Manual" => ["Installation guide" => "installation.md"],
+        "API Reference" => ["API Reference" => "public.md"],
+        "Developer Docs" => [
+            "Contributing" => "developers/contributing.md",
+            "Style Guide" => "developers/style.md",
         ],
-        "Library" => "public.md",
         "Troubleshooting" => "troubleshooting.md",
     ],
 )

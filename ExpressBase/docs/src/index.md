@@ -4,7 +4,7 @@ CurrentModule = ExpressBase
 
 # ExpressBase
 
-Documentation for [ExpressBase](https://github.com/MineralsCloud/ExpressBase.jl).
+Documentation for [`ExpressBase`](https://github.com/MineralsCloud/ExpressBase.jl).
 
 This package defines some basic types and functions used by the
 [`Express.jl`](https://github.com/MineralsCloud/Express.jl) package.
@@ -23,27 +23,27 @@ You are very welcome to contribute.
 The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
-```
+```julia
 pkg> add ExpressBase
 ```
 
 Or, equivalently, via the `Pkg` API:
 
-```julia
-julia> import Pkg; Pkg.add("ExpressBase")
+```@repl
+import Pkg; Pkg.add("ExpressBase")
 ```
 
 ## Documentation
 
-- [**STABLE**](https://MineralsCloud.github.io/ExpressBase.jl/stable) &mdash; **documentation of the most recently tagged version.**
-- [**DEV**](https://MineralsCloud.github.io/ExpressBase.jl/dev) &mdash; _documentation of the in-development version._
+- [**STABLE**](https://MineralsCloud.github.io/ExpressBase.jl/stable) — **documentation of the most recently tagged version.**
+- [**DEV**](https://MineralsCloud.github.io/ExpressBase.jl/dev) — _documentation of the in-development version._
 
-## Project Status
+## Project status
 
 The package is tested against, and being developed for, Julia `1.6` and above on Linux,
 macOS, and Windows.
 
-## Questions and Contributions
+## Questions and contributions
 
 Usage questions can be posted on
 [our discussion page](https://github.com/MineralsCloud/ExpressBase.jl/discussions).
@@ -53,18 +53,19 @@ Contributions are very welcome, as are feature requests and suggestions. Please 
 if you encounter any problems. The [contributing](@ref) page has
 a few guidelines that should be followed when opening pull requests and contributing code.
 
-## Manual Outline
+## Manual outline
 
 ```@contents
 Pages = [
     "installation.md",
-    "contributing.md",
+    "developers/contributing.md",
+    "developers/style.md",
     "troubleshooting.md",
 ]
 Depth = 3
 ```
 
-## Library Outline
+## Library outline
 
 ```@contents
 Pages = ["public.md"]
