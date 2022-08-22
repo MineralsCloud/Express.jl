@@ -12,7 +12,14 @@ using .Config: ConfigFile
 
 function thunkify end
 
-jobify(f::Action, args...) = Job.(thunkify(f, args...))
+function jobify(f::Action, args...)
+    thunks = thunkify(f, args...)
+    if thunks isa AbstractArray
+        return map(Job, thunks)
+    else
+        return Job(thunks)
+    end
+end
 
 struct DownloadPotentials{T} <: Action{T} end
 function (::DownloadPotentials)(template::Input)
