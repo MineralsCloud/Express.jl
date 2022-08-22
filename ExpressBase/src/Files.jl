@@ -113,6 +113,13 @@ function extension(file)
     return isempty(ext) ? "" : lowercase(ext[2:end])
 end
 
+# See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L121-L124
+Base.open(@nospecialize(file::File), @nospecialize(args...)) = open(file.filename, args...)
+
+Base.close(@nospecialize(file::File)) = close(file.filename)
+
+Base.read(@nospecialize(file::File), @nospecialize(args...)) = read(file.filename, args...)
+
 function Base.show(io::IO, error::UnsupportedExtensionError)
     return print(io, "unsupported extension `.", error.ext, "`!")
 end
