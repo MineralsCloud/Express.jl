@@ -11,20 +11,20 @@ import ..Express: thunkify
 function thunkify(
     f::MakeInput{Scf}, files, template::Input, pressures, eos::PressureEquation
 )
-    return map(files, pressures) do file, pressure
-        Thunk(f, file, template, pressure, eos)
+    return map(files, pressures) do (input, _), pressure
+        Thunk(f, input, template, pressure, eos)
     end
 end
 function thunkify(
     f::MakeInput{<:Optimization}, files, template::Input, pressures, eos::PressureEquation
 )
-    return map(files, pressures) do file, pressure
+    return map(files, pressures) do (input, _), pressure
         Thunk(
             function (file, template, pressure, eos)
                 eos = PressureEquation(FitEos{Scf}()(last.(files), EnergyEquation(eos)))
                 return f(file, template, pressure, eos)
             end,
-            file,
+            input,
             template,
             pressure,
             eos,
@@ -32,8 +32,8 @@ function thunkify(
     end
 end
 function thunkify(f::MakeInput, files, template::Input, volumes)
-    return map(files, volumes) do file, volume
-        Thunk(f, file, template, volume)
+    return map(files, volumes) do (input, _), volume
+        Thunk(f, input, template, volume)
     end
 end
 function thunkify(f::MakeInput, config::NamedTuple)
