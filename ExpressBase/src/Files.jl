@@ -27,16 +27,16 @@ struct UnsupportedExtensionError <: Exception
     ext::String
 end
 
+# See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L16-L18
+macro format_str(s)
+    return :(DataFormat{$(Expr(:quote, Symbol(s)))})
+end
+
 format(::Val{:json}) = format"JSON"
 format(::Val{:yaml}) = format"YAML"
 format(::Val{:yml}) = format"YAML"
 format(::Val{:toml}) = format"TOML"
 @valsplit format(Val(ext::Symbol)) = throw(UnsupportedExtensionError(string(ext)))
-
-# See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L16-L18
-macro format_str(s)
-    return :(DataFormat{$(Expr(:quote, Symbol(s)))})
-end
 
 """
     save(file, data)
