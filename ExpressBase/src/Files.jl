@@ -53,8 +53,7 @@ If `data` is a `Dict`, its keys should be `String`s so that `load` can return th
     For `TOML` format, only `AbstractDict` type is allowed.
 """
 function save(file, data)
-    path, ext = expanduser(file), extension(file)
-    save(File{format(ext)}(path), data)
+    save(File(expanduser(file)), data)
     return nothing
 end
 function save(file::File{format"JSON"}, data)
@@ -80,10 +79,7 @@ Load data from `file` to a `Dict`.
 
 By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by `file` extension.
 """
-function load(file)
-    path, ext = expanduser(file), extension(file)
-    return load(File{format(ext)}(path))
-end
+load(file) = load(File(expanduser(file)))
 load(path::File{format"JSON"}) = JSON.parsefile(path)
 function load(path::File{format"TOML"})
     open(path, "r") do io
