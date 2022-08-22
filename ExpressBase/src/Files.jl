@@ -80,14 +80,19 @@ Load data from `file` to a `Dict`.
 By now, `YAML`, `JSON`, and `TOML` formats are supported. The format is recognized by the file extension.
 """
 load(file) = load(File(expanduser(file)))
-load(path::File{format"JSON"}) = JSON.parsefile(path)
-function load(path::File{format"TOML"})
-    open(path, "r") do io
+function load(file::File{format"JSON"})
+    open(file, "r") do io
+        str = read(io, String)
+        return JSON.parse(str)
+    end
+end
+function load(file::File{format"TOML"})
+    open(file, "r") do io
         return TOML.parse(io)
     end
 end
-function load(path::File{format"YAML"})
-    open(path, "r") do io
+function load(file::File{format"YAML"})
+    open(file, "r") do io
         dict = YAML.load(io)
         return JSON.parse(JSON.json(dict))  # To keep up with JSON & TOML results
     end
