@@ -10,7 +10,7 @@
 [docs-dev-url]: https://MineralsCloud.github.io/ExpressBase.jl/dev
 [gha-img]: https://github.com/MineralsCloud/ExpressBase.jl/workflows/CI/badge.svg
 [gha-url]: https://github.com/MineralsCloud/ExpressBase.jl/actions
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/singularitti/ExpressBase.jl?svg=true
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/MineralsCloud/ExpressBase.jl?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/singularitti/ExpressBase-jl
 [cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/ExpressBase.jl.svg
 [cirrus-url]: https://cirrus-ci.com/github/MineralsCloud/ExpressBase.jl
