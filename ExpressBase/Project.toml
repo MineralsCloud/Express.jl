@@ -12,6 +12,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 CompositionsBase = "0.1"
+ValSplit = "0.1"
 julia = "1"
 
 [extras]
