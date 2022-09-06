@@ -41,7 +41,7 @@ with some continuous integration services to test its validity.
 This repository is created and maintained by [@singularitti](https://github.com/singularitti).
 You are very welcome to contribute.
 
-Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite this package as:
+Please [cite this package as](https://doi.org/10.1016/j.cpc.2022.108515):
 
 ```bibtex
 @article{ZHANG2022108515,
@@ -56,6 +56,8 @@ Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite 
   keywords = {automation, workflow, high-level, high-throughput, data lineage}
 }
 ```
+
+We also have an [arXiv prepint](https://arxiv.org/abs/2109.11724).
 
 ## Installation
 
