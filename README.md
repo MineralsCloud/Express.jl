@@ -44,13 +44,16 @@ You are very welcome to contribute.
 Please view the [arXiv prepint here](https://arxiv.org/abs/2109.11724) and cite this package as:
 
 ```bibtex
-@misc{zhang2021textttexpress,
-      title={$\texttt{express}$: extensible, high-level workflows for swifter $\textit{ab initio}$ materials modeling},
-      author={Qi Zhang and Chaoxuan Gu and Jingyi Zhuang and Renata M. Wentzcovitch},
-      year={2021},
-      eprint={2109.11724},
-      archivePrefix={arXiv},
-      primaryClass={physics.comp-ph}
+@article{ZHANG2022108515,
+  title    = {express: extensible, high-level workflows for swifter ab initio materials modeling},
+  journal  = {Computer Physics Communications},
+  pages    = {108515},
+  year     = {2022},
+  issn     = {0010-4655},
+  doi      = {https://doi.org/10.1016/j.cpc.2022.108515},
+  url      = {https://www.sciencedirect.com/science/article/pii/S001046552200234X},
+  author   = {Qi Zhang and Chaoxuan Gu and Jingyi Zhuang and Renata M. Wentzcovitch},
+  keywords = {automation, workflow, high-level, high-throughput, data lineage}
 }
 ```
 
