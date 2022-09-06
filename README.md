@@ -41,7 +41,11 @@ with some continuous integration services to test its validity.
 This repository is created and maintained by [@singularitti](https://github.com/singularitti).
 You are very welcome to contribute.
 
-Please [cite this package as](https://doi.org/10.1016/j.cpc.2022.108515):
+Please [cite this package](https://doi.org/10.1016/j.cpc.2022.108515) as:
+
+Q. Zhang, C. Gu, J. Zhuang et al., `express`: extensible, high-level workflows for swifter *ab initio* materials modeling, *Computer Physics Communications*, 108515, doi: https://doi.org/10.1016/j.cpc.2022.108515.
+
+The BibTeX format is: 
 
 ```bibtex
 @article{ZHANG2022108515,
