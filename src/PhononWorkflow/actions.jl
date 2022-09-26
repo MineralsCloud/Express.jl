@@ -1,4 +1,5 @@
 using AbInitioSoftwareBase.Inputs: Input, writetxt
+using EasyJobs: Job
 using ExpressBase:
     VariableCellOptimization,
     LatticeDynamics,
@@ -9,7 +10,6 @@ using ExpressBase:
     VDos,
     Action
 using ExpressBase.Files: load
-using SimpleWorkflows.Jobs: Job
 
 using ..Express: RunCmd, distribute_procs
 using .Config: ExpandConfig
@@ -18,9 +18,7 @@ import ..Express: jobify
 
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
-    file,
-    template::Input,
-    args...,
+    file, template::Input, args...
 ) where {T<:Union{Scf,LatticeDynamics}}
     input = x(template, args...)
     mkpath(dirname(file))  # In case its parent directory is not created
@@ -54,9 +52,7 @@ function jobify(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return map(
-        config.files[4],
-        config.files[3],
-        config.files[2],
+        config.files[4], config.files[3], config.files[2]
     ) do (input, _), (previnput, _), (pprevinput, _)
         Job(function ()
             str = read(previnput, String)
@@ -74,8 +70,7 @@ function jobify(x::MakeInput{Scf}, cfgfile)
         Job(
             function ()
                 vcout = joinpath(
-                    dirname(input),
-                    string(nameof(VariableCellOptimization)) * ".out",
+                    dirname(input), string(nameof(VariableCellOptimization)) * ".out"
                 )
                 str = read(vcout, String)
                 cell = parsecell(str)
@@ -99,7 +94,7 @@ function jobify(x::RunCmd{Scf}, cfgfile)
     config = ExpandConfig{Scf}()(dict)
     np = distribute_procs(config.cli.mpi.np, length(config.files[1]))
     return map(config.files[1]) do (input, output)
-        Job(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np=np))
     end
 end
 function jobify(x::RunCmd{Dfpt}, cfgfile)
@@ -107,7 +102,7 @@ function jobify(x::RunCmd{Dfpt}, cfgfile)
     config = ExpandConfig{Dfpt}()(dict)
     np = distribute_procs(config.cli.mpi.np, length(config.files[2]))
     return map(config.files[2]) do (input, output)
-        Job(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np=np))
     end
 end
 function jobify(x::RunCmd{RealSpaceForceConstants}, cfgfile)
@@ -115,7 +110,7 @@ function jobify(x::RunCmd{RealSpaceForceConstants}, cfgfile)
     config = ExpandConfig{RealSpaceForceConstants}()(dict)
     np = distribute_procs(config.cli.mpi.np, length(config.files[3]))
     return map(config.files[3]) do (input, output)
-        Job(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np=np))
     end
 end
 function jobify(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
@@ -123,6 +118,6 @@ function jobify(x::RunCmd{T}, cfgfile) where {T<:LatticeDynamics}
     config = ExpandConfig{T}()(dict)
     np = distribute_procs(config.cli.mpi.np, length(config.files[4]))
     return map(config.files[4]) do (input, output)
-        Job(() -> x(input, output; np = np))
+        Job(() -> x(input, output; np=np))
     end
 end

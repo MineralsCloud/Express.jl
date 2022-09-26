@@ -4,7 +4,7 @@ using Configurations: from_dict
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
 using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
 using ..Config: RuntimeConfig

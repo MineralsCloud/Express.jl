@@ -3,8 +3,8 @@ module Recipes
 using ExpressBase: QuasiHarmonicApproximation
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows.Jobs: Job
-using SimpleWorkflows.Workflows: Workflow, run!, →
+using EasyJobs: Job
+using SimpleWorkflows: Workflow, run!, →
 
 using ..QuasiHarmonicApproxWorkflow: MakeInput, CalculateThermodyn, Plot
 
@@ -18,8 +18,7 @@ struct MultiConfigurationRecipe <: Recipe
 end
 
 function build(
-    ::Type{Workflow},
-    r::Union{SingleConfigurationRecipe,MultiConfigurationRecipe},
+    ::Type{Workflow}, r::Union{SingleConfigurationRecipe,MultiConfigurationRecipe}
 )
     a = jobify(MakeInput{QuasiHarmonicApproximation}(), r.config)
     b = jobify(CalculateThermodyn{QuasiHarmonicApproximation}(), r.config)

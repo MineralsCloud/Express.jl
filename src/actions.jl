@@ -1,11 +1,11 @@
 using ExpressBase.Files: load
 using AbInitioSoftwareBase.Inputs: Input, getpseudodir, getpotentials
 using Dates: format, now
+using EasyJobs: Job
+using EasyJobs.Thunks: Thunk
 using ExpressBase: Action, calculation
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
-using SimpleWorkflows.Jobs: Job
-using SimpleWorkflows.Thunks: Thunk
 
 using ..Express: distribute_procs
 using .Config: ConfigFile

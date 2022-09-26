@@ -1,5 +1,5 @@
 using Configurations: from_dict
-using SimpleWorkflows.Thunks: Thunk
+using EasyJobs.Thunks: Thunk
 using Unitful: dimension, @u_str
 
 using ..Express: DownloadPotentials
