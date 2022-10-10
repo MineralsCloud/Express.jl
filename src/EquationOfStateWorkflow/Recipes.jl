@@ -1,10 +1,11 @@
 module Recipes
 
 using Configurations: from_dict
+using EasyJobs: →, ⇉, ⇶, ⭃
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows: Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows: Workflow, run!
 
 using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
 using ..Config: RuntimeConfig
