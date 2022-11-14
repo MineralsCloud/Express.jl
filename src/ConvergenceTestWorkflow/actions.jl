@@ -1,7 +1,7 @@
 using AbInitioSoftwareBase.Inputs: Input, writetxt
 using ExpressBase: Action, Scf
 using ExpressBase.Files: save, load
-using EasyJobs: Job
+using EasyJobsBase: Job
 using Unitful: ustrip
 
 using ..Express: distribute_procs

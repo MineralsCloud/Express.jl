@@ -1,5 +1,5 @@
 using AbInitioSoftwareBase.Inputs: Input, writetxt
-using EasyJobs: Job
+using EasyJobsBase: Job
 using ExpressBase:
     VariableCellOptimization,
     LatticeDynamics,

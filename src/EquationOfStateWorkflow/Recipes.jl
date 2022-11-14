@@ -1,7 +1,7 @@
 module Recipes
 
 using Configurations: from_dict
-using EasyJobs: →, ⇉, ⇶, ⭃
+using EasyJobsBase: →, ⇉, ⇶, ⭃
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
