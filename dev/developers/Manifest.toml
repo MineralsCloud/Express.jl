@@ -230,9 +230,9 @@ version = "0.6.8"
 
 [[deps.EasyJobsBase]]
 deps = ["Configurations", "Dates", "UUIDs"]
-git-tree-sha1 = "785b8414b71366268fa0412ab8c724f34c74b130"
+git-tree-sha1 = "c526863ecaec2eed679f57540a216276d3bcb496"
 uuid = "db8ca866-b61f-4bd1-a9b9-75c107d645d4"
-version = "0.2.0"
+version = "0.3.0"
 
 [[deps.EquationsOfState]]
 git-tree-sha1 = "98a5b8742c045c30af566c5046e2e7a9b44481c3"
@@ -252,7 +252,7 @@ version = "0.1.8"
 
 [[deps.Express]]
 deps = ["AbInitioSoftwareBase", "Configurations", "Dates", "EasyJobsBase", "EquationsOfStateOfSolids", "ExpressBase", "Formatting", "JLD2", "Logging", "Pseudopotentials", "PyQHA", "SimpleWorkflows", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "4dca4ac3eab9162cbf5b00ce96d60982198ab94a"
+git-tree-sha1 = "fe9fa788f09c5c6870bfaeb78d415e72b03dc24f"
 repo-rev = "master"
 repo-url = "https://github.com/MineralsCloud/Express.jl"
 uuid = "b12df14e-adf7-11e9-0606-d5813a258349"
@@ -749,9 +749,9 @@ version = "0.9.4"
 
 [[deps.SimpleWorkflows]]
 deps = ["Dates", "EasyJobsBase", "Graphs", "Serialization"]
-git-tree-sha1 = "27f2de71ea447e6abc2ff3e28c5b9a960a20e533"
+git-tree-sha1 = "4bc3914e2f9959a34964fe89b15fb17fa90e8caf"
 uuid = "6a97d125-85da-4b66-b300-4bba10360563"
-version = "0.21.0"
+version = "0.22.0"
 
 [[deps.SnoopPrecompile]]
 git-tree-sha1 = "f604441450a3c0569830946e5b33b78c928e1a85"
