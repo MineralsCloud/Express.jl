@@ -45,7 +45,7 @@ function (x::LogTime)()
         println(
             "The calculation ",
             calculation(x),
-            "starts at ",
+            " starts at ",
             format(now(), "HH:MM:SS u dd, yyyy"),
             '.',
         )
