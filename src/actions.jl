@@ -1,7 +1,7 @@
 using ExpressBase.Files: load
 using AbInitioSoftwareBase.Inputs: Input, getpseudodir, getpotentials
 using Dates: format, now
-using EasyJobsBase: Job
+using EasyJobsBase: DependentJob
 using EasyJobsBase.Thunks: Thunk
 using ExpressBase: Action, calculation
 using Logging: with_logger, current_logger
@@ -15,9 +15,9 @@ function thunkify end
 function jobify(f::Action, args...)
     thunks = thunkify(f, args...)
     if thunks isa AbstractArray
-        return map(Job, thunks)
+        return map(DependentJob, thunks)
     else
-        return Job(thunks)
+        return DependentJob(thunks)
     end
 end
 
