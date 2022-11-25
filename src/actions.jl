@@ -52,7 +52,7 @@ function (x::LogTime)()
     end
 end
 
-thunkify(x::LogTime) = Thunk(x, ())
+thunkify(x::LogTime) = Thunk(x)
 
 struct RunCmd{T} <: Action{T} end
 
