@@ -50,7 +50,7 @@ function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
         dict[string(nameof(T))] = data
         save(config.save.ev, dict)
         return data
-    end, ())
+    end)
 end
 # FitEos
 function thunkify(x::FitEos, config::NamedTuple)
@@ -64,7 +64,7 @@ function thunkify(x::FitEos, config::NamedTuple)
         eos = x(outputs, EnergyEquation(trial_eos))
         SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
         return eos
-    end, ())
+    end)
 end
 # Any Action
 function thunkify(f::Action{T}, raw_config::RuntimeConfig) where {T}
