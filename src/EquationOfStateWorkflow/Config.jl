@@ -110,6 +110,7 @@ function (x::ExpandConfig)(config::RuntimeConfig)
         trial_eos=PressureEquation(x(config.trial_eos)),
         fixed=x(config.fixed),
         files=x(config.dir, config.fixed),
+        scffiles=ExpandConfig{Scf}()(config.dir, config.fixed),
         save=x(config.save),
         cli=config.cli,
     )
