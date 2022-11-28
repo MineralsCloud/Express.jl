@@ -27,6 +27,7 @@ end
 
 struct GetRawData{T} <: Action{T} end
 function (x::GetRawData)(outputs)
+    @show x
     raw = map(outputs) do output
         parseoutput(calculation(x))(output)
     end
