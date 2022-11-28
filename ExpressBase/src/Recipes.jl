@@ -1,5 +1,7 @@
 module Recipes
 
+using SimpleWorkflows: Workflow
+
 import CompositionsBase: decompose, deopcompose
 
 abstract type Recipe end
@@ -9,11 +11,12 @@ struct ComposedRecipe{R1<:Recipe,R2<:Recipe} <: Recipe
     r2::R2
 end
 
-# function build(::Type{Workflow}, r::ComposedRecipe)
-#     wf1 = build(Workflow, r.r1)
-#     wf2 = build(Workflow, r.r2)
-#     return wf1 → wf2
-# end
+function build(::Type{Workflow}, r::ComposedRecipe)
+    wf1 = build(Workflow, r.r1)
+    wf2 = build(Workflow, r.r2)
+    wf1 → wf2
+    return Workflow(last(wf2))
+end
 
 # See https://github.com/JuliaFunctional/CompositionsBase.jl/blob/ac505d4/src/CompositionsBase.jl#L60-L61
 decompose(r::Recipe) = (r,)
