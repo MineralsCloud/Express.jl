@@ -13,7 +13,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet,
     PressureEquation
-using ExpressBase: Action
+using ExpressBase: Action, Scf
 using Unitful: Quantity
 
 using ...Config: Directory, getfiles, _uparse, @sp
