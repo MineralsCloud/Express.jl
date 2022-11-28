@@ -55,14 +55,7 @@ function thunkify(x::GetRawData{Scf}, config::NamedTuple)
 end
 function thunkify(x::GetRawData{T}, config::NamedTuple) where {T<:Optimization}
     return Thunk(function ()
-        @show config.files
-        data = x(
-            map(config.files) do (_, output)
-                rep = string(T) => "SelfConsistentField"
-                @show rep
-                replace(output, rep)
-            end,
-        )
+        data = x(last.(config.scffiles))
         dict = isfile(config.save.ev) ? load(config.save.ev) : Dict()
         dict[string(nameof(T))] = data
         save(config.save.ev, dict)
