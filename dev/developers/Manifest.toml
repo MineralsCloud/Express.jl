@@ -2,7 +2,7 @@
 
 julia_version = "1.8.3"
 manifest_format = "2.0"
-project_hash = "e0961df17676a519eb74392d34ec733277afa1bf"
+project_hash = "9b27af83168cfcbbb48932bf4284df81b5e39c55"
 
 [[deps.AbInitioSoftwareBase]]
 deps = ["Compat", "Configurations", "IsURL", "JSON", "Preferences", "TOML", "YAML"]
@@ -234,6 +234,12 @@ git-tree-sha1 = "030553ff79e76a0e0cc9fd07ec3e115efe3ea955"
 uuid = "db8ca866-b61f-4bd1-a9b9-75c107d645d4"
 version = "0.3.1"
 
+[[deps.EquationOfStateRecipes]]
+deps = ["EquationsOfStateOfSolids", "RecipesBase", "Unitful"]
+git-tree-sha1 = "fd22cd98ebe4659122646ad64490223de45c5dfb"
+uuid = "8d49d7c9-511f-4c38-862f-eeb1232c8dad"
+version = "0.1.3"
+
 [[deps.EquationsOfState]]
 git-tree-sha1 = "98a5b8742c045c30af566c5046e2e7a9b44481c3"
 uuid = "0438fec6-b81c-52d9-9651-d286848f50a8"
@@ -252,7 +258,7 @@ version = "0.1.8"
 
 [[deps.Express]]
 deps = ["AbInitioSoftwareBase", "Configurations", "Dates", "EasyJobsBase", "EquationsOfStateOfSolids", "ExpressBase", "Formatting", "JLD2", "Logging", "Pseudopotentials", "PyQHA", "SimpleWorkflows", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "27461bbc7269732523a7e46895d02ed5afc13afe"
+git-tree-sha1 = "461127d6582abfc913c72b229470990e16f07d0c"
 repo-rev = "master"
 repo-url = "https://github.com/MineralsCloud/Express.jl"
 uuid = "b12df14e-adf7-11e9-0606-d5813a258349"
@@ -263,6 +269,12 @@ deps = ["CompositionsBase", "JSON", "TOML", "ValSplit", "YAML"]
 git-tree-sha1 = "dbbd940537bd2516645686dd29142b7f435297f3"
 uuid = "6bf22d12-b2e3-4e51-8f6d-9d050a32c5d5"
 version = "0.3.0"
+
+[[deps.ExpressCommands]]
+deps = ["AbInitioSoftwareBase", "Comonicon", "EquationOfStateRecipes", "EquationsOfStateOfSolids", "Express", "JLD2", "PrettyPrint", "QuantumESPRESSOExpress", "Requires", "SimpleWorkflows"]
+git-tree-sha1 = "eb40bc516b985a9c32377ce6f998247f435959e4"
+uuid = "0fa58581-61d8-4f50-b6a2-2e2dd41ab979"
+version = "0.6.0"
 
 [[deps.ExproniconLite]]
 git-tree-sha1 = "2321c9c5a07c2658484dacf8e68e3cd8e2470d5d"
@@ -588,6 +600,11 @@ deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
+
+[[deps.PrettyPrint]]
+git-tree-sha1 = "632eb4abab3449ab30c5e1afaa874f0b98b586e4"
+uuid = "8162dcfd-2161-5ef2-ae6c-7681170c5f98"
+version = "0.2.0"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
