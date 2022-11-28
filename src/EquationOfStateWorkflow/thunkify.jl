@@ -43,9 +43,22 @@ function thunkify(f::MakeInput, config::NamedTuple)
         return thunkify(f, config.files, config.template, config.fixed, config.trial_eos)
     end
 end
-function thunkify(x::GetRawData{T}, config::NamedTuple) where {T}
+function thunkify(x::GetRawData{Scf}, config::NamedTuple)
     return Thunk(function ()
         data = x(last.(config.files))
+        dict = isfile(config.save.ev) ? load(config.save.ev) : Dict()
+        dict[string(nameof(Scf))] = data
+        save(config.save.ev, dict)
+        return data
+    end)
+end
+function thunkify(x::GetRawData{T}, config::NamedTuple) where {T<:Optimization}
+    return Thunk(function ()
+        data = x(
+            map(config.files) do (_, output)
+                replace(output, string(T) => "SelfConsistentField")
+            end,
+        )
         dict = isfile(config.save.ev) ? load(config.save.ev) : Dict()
         dict[string(nameof(T))] = data
         save(config.save.ev, dict)
