@@ -56,7 +56,7 @@ function buildjob(x::MakeInput{Scf}, cfgfile)
         return map(inputs, config.fixed) do input, pressure
             Job(function ()
                 trial_eos = PressureEquation(config.trial_eos)
-                return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
+                return x(input, config.template, pressure, trial_eos, "Y-m-d_H:M:S")
             end)
         end
     end
@@ -79,7 +79,7 @@ function buildjob(x::MakeInput{T}, cfgfile) where {T<:Optimization}
                             EnergyEquation(config.trial_eos),
                         ),
                     )
-                    return x(input, config.template, trial_eos, pressure, "Y-m-d_H:M:S")
+                    return x(input, config.template, pressure, trial_eos, "Y-m-d_H:M:S")
                 end,
             )
         end
