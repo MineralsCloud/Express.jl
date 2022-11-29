@@ -258,11 +258,11 @@ version = "0.1.8"
 
 [[deps.Express]]
 deps = ["AbInitioSoftwareBase", "Configurations", "Dates", "EasyJobsBase", "EquationsOfStateOfSolids", "ExpressBase", "Formatting", "JLD2", "Logging", "Pseudopotentials", "PyQHA", "SimpleWorkflows", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "8ba004cc174b536df388580bd2e23c774551680c"
+git-tree-sha1 = "332f88f37639e55e9d16d3ed20e41e464b72d898"
 repo-rev = "master"
 repo-url = "https://github.com/MineralsCloud/Express.jl"
 uuid = "b12df14e-adf7-11e9-0606-d5813a258349"
-version = "0.9.0"
+version = "0.9.1"
 
 [[deps.ExpressBase]]
 deps = ["CompositionsBase", "JSON", "TOML", "ValSplit", "YAML"]
@@ -362,9 +362,9 @@ uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
 
 [[deps.InvertedIndices]]
-git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
+git-tree-sha1 = "82aec7a3dd64f4d9584659dc0b62ef7db2ef3e19"
 uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.1.0"
+version = "1.2.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
