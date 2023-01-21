@@ -1,0 +1,15 @@
+@article{ZHANG2023108515,
+title = {express: Extensible, high-level workflows for swifter ab initio materials modeling},
+journal = {Computer Physics Communications},
+volume = {282},
+pages = {108515},
+year = {2023},
+issn = {0010-4655},
+doi = {https://doi.org/10.1016/j.cpc.2022.108515},
+url = {https://www.sciencedirect.com/science/article/pii/S001046552200234X},
+author = {Qi Zhang and Chaoxuan Gu and Jingyi Zhuang and Renata M. Wentzcovitch},
+keywords = {Automation, Workflow, High-level, High-throughput, Data lineage},
+abstract = {In this work, we introduce an open-source Julia project, express, an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate ab initio calculations for the materials science community. express is shipped with well-tested workflow templates, including structure optimization, equation of state (EOS) fitting, phonon spectrum (lattice dynamics) calculation, and thermodynamic property calculation in the framework of the quasi-harmonic approximation (QHA). It is designed to be highly modularized so that its components can be reused across various occasions, and customized workflows can be built on top of that. Users can also track the status of workflows in real-time, and rerun failed jobs thanks to the data lineage feature express provides. Two working examples, i.e., all workflows applied to lime and akimotoite, are also presented in the code and this paper.
+Program summary
+Program Title: express CPC Library link to program files: https://doi.org/10.17632/bbzzrxsm4b.1 Developer's repository link: https://github.com/MineralsCloud/Express.jl Licensing provisions: GNU General Public License v3.0 Programming language: Julia Nature of problem: High-performance ab initio calculation is gaining more and more popularity when investigating the physical and chemical properties of materials in the scientific community. There are several ab initio programs in the market, but they are often not user-friendly to new users because of their intrinsic complexity. Even for familiar users, dealing with daily preparation and post-analysis could be trivial and fallible. Therefore, plenty of workflow frameworks have been developed to solve this problem. However, most of them cannot meet our expectations for several reasons. They are either too complex to read and modify, or too heavy for simple tasks. Plus, they put little focus on addressing the real pain points of everyday calculations, such as data preparation and output parsing. Solution method: We developed a workflow framework that can simplify this process, i.e., most of the mundane work can be replaced by writing a few lines of configurations. We also automated the three most-used work procedures into configurable workflows: equations of state fitting (structural optimization), phonon spectrum calculation, and thermodynamics calculation.}
+}
