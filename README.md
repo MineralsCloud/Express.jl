@@ -103,3 +103,7 @@ a few guidelines that should be followed when opening pull requests and contribu
 [discussions-url]: https://github.com/MineralsCloud/Express.jl/discussions
 [issues-url]: https://github.com/MineralsCloud/Express.jl/issues
 [contrib-url]: https://github.com/MineralsCloud/Express.jl/discussions
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MineralsCloud/Express.jl&type=Date)](https://star-history.com/#MineralsCloud/Express.jl&Date)
