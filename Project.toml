@@ -33,6 +33,7 @@ PyQHA = "0.1"
 SimpleWorkflows = "0.19, 0.20, 0.21, 0.22, 0.23"
 Unitful = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 1"
 UnitfulAtomic = "1"
+UnitfulParsableString = "0.1"
 julia = "1"
 
 [extras]
