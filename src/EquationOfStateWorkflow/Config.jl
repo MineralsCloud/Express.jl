@@ -15,6 +15,7 @@ using EquationsOfStateOfSolids:
     PressureEquation
 using ExpressBase: Action, Scf
 using Unitful: Quantity
+using UnitfulParsableString
 
 using ...Config: Directory, getfiles, _uparse, @sp
 
