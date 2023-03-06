@@ -18,6 +18,7 @@ PyQHA = "5a1273f0-a906-4eb0-8178-7035f457d819"
 SimpleWorkflows = "6a97d125-85da-4b66-b300-4bba10360563"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
+UnitfulParsableString = "06c00241-927a-4d5b-bb5e-6b5a2ada3567"
 
 [compat]
 AbInitioSoftwareBase = "0.6"
