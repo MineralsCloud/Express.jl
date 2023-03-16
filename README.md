@@ -27,13 +27,13 @@
 [style-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
 [style-url]: https://github.com/invenia/BlueStyle
 
-`Express` is an extensible, high-throughput, high-level workflow framework that aims to
-automate _ab initio_ calculations for the materials science community. `Express` is shipped
-with well-tested workflow templates, including structure optimization, equation of state
-(EOS) fitting, phonon spectrum (lattice dynamics) calculation, and thermodynamic property
-calculation in the framework of the quasi-harmonic approximation (QHA). It is designed to be
-highly modularized so that its components can be reused across various occasions, and
-customized workflows can be built on top of that.
+"Express" is a extensible, high-performance workflow framework designed to automate _ab initio_
+calculations in the field of materials science. This framework includes rigorously tested
+workflow templates for tasks such as structure optimization, equation of state (EOS)
+fitting, phonon spectrum (lattice dynamics) computation, and thermodynamic property
+calculation within the quasi-harmonic approximation (QHA) framework. Express is structured
+with modularity in mind, enabling the reuse of its components across diverse applications
+and facilitating the development of customized workflows.
 
 The code is [hosted on GitHub](https://github.com/MineralsCloud/Express.jl),
 with some continuous integration services to test its validity.
