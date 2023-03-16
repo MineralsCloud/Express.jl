@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/MineralsCloud/Express.jl/master/docs/src/assets/logo.png" height="400"><br>
 </div>
 
-# Express: an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate _ab initio_ calculations
+# express: a high-level, extensible workflow framework for accelerating _ab initio_ calculations
 
 |                                 **Documentation**                                  |                                                                                                 **Build Status**                                                                                                 |                                        **Others**                                         |
 | :--------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------: |
