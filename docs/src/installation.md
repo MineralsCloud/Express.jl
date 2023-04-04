@@ -1,7 +1,12 @@
-# [Installation guide](@id installation)
+# [Installation Guide](@id installation)
+
+```@contents
+Pages = ["installation.md"]
+Depth = 2
+```
 
 Here are the installation instructions for package
-[`Express`](https://github.com/MineralsCloud/Express.jl).
+[Express](https://github.com/MineralsCloud/Express.jl).
 If you have trouble installing it, please refer to our [Troubleshooting](@ref) page
 for more information.
 
@@ -20,7 +25,7 @@ If you have [Homebrew](https://brew.sh) installed,
 [open `Terminal.app`](https://support.apple.com/guide/terminal/open-or-quit-terminal-apd5265185d-f365-44cb-8b09-71a064a42125/mac)
 and type
 
-```shell
+```bash
 brew install julia
 ```
 
@@ -28,7 +33,7 @@ to install it as a [formula](https://docs.brew.sh/Formula-Cookbook).
 
 If you are also using macOS and want to install it as a prebuilt binary app, type
 
-```shell
+```bash
 brew install --cask julia
 ```
 
@@ -40,7 +45,7 @@ a recommended way is to use a version manager such as
 First, [install `juliaup`](https://github.com/JuliaLang/juliaup#installation).
 Then, run
 
-```shell
+```bash
 juliaup add release
 juliaup default release
 ```
@@ -82,7 +87,7 @@ installed on your machine. For Mac computers with M-series processors, this pack
 dependencies may not work. Please install the Intel-compatible version of Julia (for macOS
 x86-64) if any platform-related error occurs.
 
-## Install `Express`
+## Install Express
 
 Now I am using [macOS](https://en.wikipedia.org/wiki/MacOS) as a standard
 platform to explain the following steps:
@@ -111,7 +116,7 @@ platform to explain the following steps:
 4. While using, please keep this Julia session alive. Restarting might cost some time.
 
 If you want to install the latest in-development (probably buggy)
-version of `Express`, type
+version of Express, type
 
 ```@repl
 using Pkg
@@ -121,12 +126,12 @@ pkg"add https://github.com/MineralsCloud/Express.jl"
 
 in the second step above.
 
-## Update `Express`
+## Update Express
 
 Please [watch](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
 our [GitHub repository](https://github.com/MineralsCloud/Express.jl)
 for new releases.
-Once we release a new version, you can update `Express` by typing
+Once we release a new version, you can update Express by typing
 
 ```@repl
 using Pkg
@@ -136,7 +141,7 @@ Pkg.gc()
 
 in the Julia REPL.
 
-## Uninstall and reinstall `Express`
+## Uninstall and reinstall Express
 
 Sometimes errors may occur if the package is not properly installed.
 In this case, you may want to uninstall and reinstall the package. Here is how to do that:
@@ -152,37 +157,4 @@ In this case, you may want to uninstall and reinstall the package. Here is how t
    ```
 
 2. Press `ctrl+d` to quit the current session. Start a new Julia session and
-   reinstall `Express`.
-
-## Install a plugin for `express`
-
-Plugins are packages that handle _ab initio_ software such as Quantum ESPRESSO
-in the `express` framework. The current plugin is
-[`QuantumESPRESSOExpress`](https://github.com/MineralsCloud/QuantumESPRESSOExpress.jl).
-To install `QuantumESPRESSOExpress.jl`, run
-
-```@repl
-using Pkg
-Pkg.update()
-Pkg.add("QuantumESPRESSOExpress")
-```
-
-in the Julia REPL.
-
-## [Install command-line tools](@id cli)
-
-We provide a command-line interface of `express` for non-developers:
-[`ExpressCommands.jl`](https://github.com/MineralsCloud/ExpressCommands.jl).
-It installs an executable '`xps`' that can execute code from configuration
-files provided by users. To install `ExpressCommands`, run
-
-```@repl
-using Pkg
-Pkg.update()
-Pkg.add("ExpressCommands")
-```
-
-in the Julia REPL.
-
-After installation, the path to `xps` is `$HOME/.julia/bin/xps` by default.
-So please add `$HOME/.julia/bin` to your `$PATH` environment variable.
+   reinstall Express.

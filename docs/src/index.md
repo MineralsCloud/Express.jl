@@ -4,7 +4,7 @@ CurrentModule = Express
 
 # Express: an extensible, lightweight, high-throughput, high-level workflow framework that aims to automate _ab initio_ calculations
 
-Documentation for [`Express`](https://github.com/MineralsCloud/Express.jl).
+Documentation for [Express](https://github.com/MineralsCloud/Express.jl).
 
 See the [Index](@ref main-index) for the complete list of documented functions
 and types.
@@ -134,7 +134,7 @@ Usage questions can be posted on
 
 Contributions are very welcome, as are feature requests and suggestions. Please open an
 [issue](https://github.com/MineralsCloud/Express.jl/issues)
-if you encounter any problems. The [contributing](@ref) page has
+if you encounter any problems. The [Contributing](@ref) page has
 a few guidelines that should be followed when opening pull requests and contributing code.
 
 ## Manual outline
@@ -146,7 +146,8 @@ Pages = [
     "run/cli.md",
     "run/jobs.md",
     "developers/contributing.md",
-    "developers/style.md",
+    "developers/style-guide.md",
+    "developers/design-principles.md",
     "troubleshooting.md",
     "faq.md",
 ]
@@ -156,11 +157,11 @@ Depth = 3
 ## Library outline
 
 ```@contents
-Pages = []
+Pages = ["public.md"]
 ```
 
 ### [Index](@id main-index)
 
 ```@index
-Pages = []
+Pages = ["public.md"]
 ```
