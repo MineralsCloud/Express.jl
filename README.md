@@ -18,12 +18,12 @@
 [appveyor-url]: https://ci.appveyor.com/project/singularitti/Express-jl
 [cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/Express.jl.svg
 [cirrus-url]: https://cirrus-ci.com/github/MineralsCloud/Express.jl
-[gitlab-img]: https://gitlab.com/singularitti/Express.jl/badges/master/pipeline.svg
+[gitlab-img]: https://gitlab.com/singularitti/Express.jl/badges/main/pipeline.svg
 [gitlab-url]: https://gitlab.com/singularitti/Express.jl/-/pipelines
-[codecov-img]: https://codecov.io/gh/MineralsCloud/Express.jl/branch/master/graph/badge.svg
+[codecov-img]: https://codecov.io/gh/MineralsCloud/Express.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/MineralsCloud/Express.jl
 [license-img]: https://img.shields.io/github/license/MineralsCloud/Express.jl
-[license-url]: https://github.com/MineralsCloud/Express.jl/blob/master/LICENSE
+[license-url]: https://github.com/MineralsCloud/Express.jl/blob/main/LICENSE
 [style-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
 [style-url]: https://github.com/invenia/BlueStyle
 
@@ -45,7 +45,7 @@ Please [cite this package](https://doi.org/10.1016/j.cpc.2022.108515) as:
 
 Q. Zhang, C. Gu, J. Zhuang et al., `express`: extensible, high-level workflows for swifter *ab initio* materials modeling, *Computer Physics Communications*, 108515, doi: https://doi.org/10.1016/j.cpc.2022.108515.
 
-The BibTeX format is: 
+The BibTeX format is:
 
 ```bibtex
 @article{ZHANG2022108515,
@@ -94,16 +94,15 @@ macOS, and Windows.
 
 ## Questions and contributions
 
-Usage questions can be posted on [our discussion page][discussions-url].
+You are welcome to post usage questions on [our discussion page][discussions-url].
 
 Contributions are very welcome, as are feature requests and suggestions. Please open an
-[issue][issues-url] if you encounter any problems. The [contributing](@ref) page has
-a few guidelines that should be followed when opening pull requests and contributing code.
-
-[discussions-url]: https://github.com/MineralsCloud/Express.jl/discussions
-[issues-url]: https://github.com/MineralsCloud/Express.jl/issues
-[contrib-url]: https://github.com/MineralsCloud/Express.jl/discussions
+[issue][issues-url] if you encounter any problems. The [Contributing](@ref) page has
+guidelines that should be followed when opening pull requests and contributing code.
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=MineralsCloud/Express.jl&type=Date)](https://star-history.com/#MineralsCloud/Express.jl&Date)
+
+[discussions-url]: https://github.com/MineralsCloud/Express.jl/discussions
+[issues-url]: https://github.com/MineralsCloud/Express.jl/issues
