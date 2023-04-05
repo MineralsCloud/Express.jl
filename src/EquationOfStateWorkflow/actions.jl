@@ -57,4 +57,4 @@ function (::SaveEos{T})(file, eos::Parameters) where {T}
 end
 (x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
-include("thunkify.jl")
+include("think.jl")
