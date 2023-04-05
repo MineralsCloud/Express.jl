@@ -5,26 +5,26 @@ juliaup default release</code></pre><p>to configure the <code>julia</code> comma
 julia&gt; Pkg.update()
 
 julia&gt; Pkg.add(&quot;Express&quot;)</code></pre></li><li><p>Run</p><pre><code class="language-julia-repl hljs">julia&gt; using Express</code></pre><p>and have fun!</p></li><li><p>While using, please keep this Julia session alive. Restarting might cost some time.</p></li></ol><p>If you want to install the latest in-development (probably buggy) version of Express, type</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update()</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
-   Installed Adapt ─────────────────────── v3.6.1
+   Installed SentinelArrays ────────────── v1.3.18
    Installed TableTraits ───────────────── v1.0.1
    Installed Tables ────────────────────── v1.10.1
    Installed PooledArrays ──────────────── v1.4.2
-   Installed SentinelArrays ────────────── v1.3.18
    Installed Setfield ──────────────────── v1.1.1
-   Installed IteratorInterfaceExtensions ─ v1.0.0
-   Installed InlineStrings ─────────────── v1.4.0
+   Installed Adapt ─────────────────────── v3.6.1
    Installed DataValueInterfaces ───────── v1.0.0
-   Installed Roots ─────────────────────── v1.2.0
+   Installed InlineStrings ─────────────── v1.4.0
    Installed LaTeXStrings ──────────────── v1.3.0
-   Installed InvertedIndices ───────────── v1.3.0
+   Installed IteratorInterfaceExtensions ─ v1.0.0
    Installed ArrayInterface ────────────── v7.4.3
-   Installed TryCatch ──────────────────── v0.1.1
+   Installed SimpleWorkflows ───────────── v0.16.2
+   Installed PrettyTables ──────────────── v2.2.3
    Installed StringManipulation ────────── v0.3.0
    Installed FiniteDiff ────────────────── v2.19.0
-   Installed SimpleWorkflows ───────────── v0.16.2
    Installed DataFrames ────────────────── v1.5.0
    Installed Express ───────────────────── v0.9.2
-   Installed PrettyTables ──────────────── v2.2.3
+   Installed Roots ─────────────────────── v1.2.0
+   Installed InvertedIndices ───────────── v1.3.0
+   Installed TryCatch ──────────────────── v0.1.1
     Updating `~/work/Express.jl/Express.jl/docs/Project.toml`
   [b12df14e] ↑ Express v0.9.1 ⇒ v0.9.2
     Updating `~/work/Express.jl/Express.jl/docs/Manifest.toml`
@@ -62,15 +62,15 @@ Precompiling project...
 <span class="sgr32">  ✓ </span><span class="sgr90">LaTeXStrings</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">InvertedIndices</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">Adapt</span>
-<span class="sgr32">  ✓ </span><span class="sgr90">SentinelArrays</span>
-<span class="sgr32">  ✓ </span><span class="sgr90">IteratorInterfaceExtensions</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">TryCatch</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">IteratorInterfaceExtensions</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">SentinelArrays</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">PooledArrays</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">StringManipulation</span>
-<span class="sgr33">  ✓ </span><span class="sgr90">Roots</span>
 <span class="sgr33">  ✓ </span><span class="sgr90">Setfield</span>
-<span class="sgr32">  ✓ </span><span class="sgr90">TableTraits</span>
+<span class="sgr33">  ✓ </span><span class="sgr90">Roots</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">ArrayInterface</span>
+<span class="sgr32">  ✓ </span><span class="sgr90">TableTraits</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">InlineStrings</span>
 <span class="sgr32">  ✓ </span><span class="sgr90">Tables</span>
 <span class="sgr33">  ✓ </span><span class="sgr90">FiniteDiff</span>
@@ -82,7 +82,7 @@ Precompiling project...
 <span class="sgr32">  ✓ </span><span class="sgr90">DataFrames</span>
 <span class="sgr33">  ✓ </span><span class="sgr90">SimpleWorkflows</span>
 <span class="sgr33">  ✓ </span>Express
-  24 dependencies successfully precompiled in 70 seconds. 90 already precompiled.
+  24 dependencies successfully precompiled in 69 seconds. 90 already precompiled.
   <span class="sgr33">9</span> dependencies precompiled but different versions are currently loaded. Restart julia to access the new versions</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; pkg&quot;add https://github.com/MineralsCloud/Express.jl&quot;</code><code class="nohighlight hljs ansi" style="display:block;">┌ Warning: The Pkg REPL mode is intended for interactive use only, and should not be used from scripts. It is recommended to use the functional API instead.
 └ @ Pkg.REPLMode /cache/build/default-amdci4-2/julialang/julia-release-1-dot-8/usr/share/julia/stdlib/v1.8/Pkg/src/REPLMode/REPLMode.jl:379
      Cloning git-repo `https://github.com/MineralsCloud/Express.jl`
@@ -116,6 +116,7 @@ Precompiling project...
   [892a3eda] - StringManipulation v0.3.0
   [3783bdb8] - TableTraits v1.0.1
   [bd369af6] - Tables v1.10.1
+  [6d80a3f9] + Thinkers v0.1.0
   [410a4b4d] + Tricks v0.1.7
   [0ca489f0] - TryCatch v0.1.1
   [a7773ee8] + UnitfulAtomic v1.0.0
@@ -133,7 +134,7 @@ Precompiling project...
 <span class="sgr33">  ✓ </span><span class="sgr90">LsqFit</span>
 <span class="sgr33">  ✓ </span><span class="sgr90">EquationsOfStateOfSolids</span>
 <span class="sgr33">  ✓ </span>Express
-  10 dependencies successfully precompiled in 25 seconds. 99 already precompiled.
+  10 dependencies successfully precompiled in 24 seconds. 100 already precompiled.
   <span class="sgr33">10</span> dependencies precompiled but different versions are currently loaded. Restart julia to access the new versions</code></pre><p>in the second step above.</p><h2 id="Update-Express"><a class="docs-heading-anchor" href="#Update-Express">Update Express</a><a id="Update-Express-1"></a><a class="docs-heading-anchor-permalink" href="#Update-Express" title="Permalink"></a></h2><p>Please <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">watch</a> our <a href="https://github.com/MineralsCloud/Express.jl">GitHub repository</a> for new releases. Once we release a new version, you can update Express by typing</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update(&quot;Express&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
     Updating git-repo `https://github.com/MineralsCloud/Express.jl`
   No Changes to `~/work/Express.jl/Express.jl/docs/Project.toml`
@@ -144,4 +145,4 @@ Precompiling project...
 
 julia&gt; Pkg.rm(&quot;Express&quot;)
 
-julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall Express.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../run/configuration/">Configuration files »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 4 April 2023 21:27">Tuesday 4 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall Express.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../run/configuration/">Configuration files »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Wednesday 5 April 2023 00:09">Wednesday 5 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
