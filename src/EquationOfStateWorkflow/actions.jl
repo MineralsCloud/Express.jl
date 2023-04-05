@@ -58,8 +58,9 @@ struct SaveParameters{T} <: Action{T} end
 function (::SaveParameters)(path, parameters::Parameters)
     dict = Dict(
         "type" => string(typeof(parameters)),
-        "params" => string(name) => string(getproperty(parameters, name)) for
-        name in propertynames(parameters)
+        "params" => collect(
+            string(getproperty(parameters, name)) for name in propertynames(parameters)
+        ),
     )
     return save(path, dict)
 end
