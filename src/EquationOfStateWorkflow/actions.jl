@@ -47,13 +47,15 @@ function (fit::FitEquationOfState)(outputs, trial_eos::EnergyEquation)
     return fit(data, trial_eos)
 end
 
-struct SaveEos{T} <: Action{T} end
-function (::SaveEos{T})(file, eos::Parameters) where {T}
-    @assert extension(file) == "jld2"
-    dict = isfile(file) ? JLD2.load(file) : Dict{String,Any}()
-    dict[string(nameof(T))] = eos
-    return JLD2.save(file, dict)
+struct SaveParameters{T} <: Action{T} end
+function (::SaveParameters)(path, parameters::Parameters)
+    dict = Dict(
+        "type" => string(typeof(parameters)),
+        "params" => string(name) => string(getproperty(parameters, name)) for
+        name in propertynames(parameters)
+    )
+    return save(path, dict)
 end
-(x::SaveEos)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
+(x::SaveParameters)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
 include("think.jl")

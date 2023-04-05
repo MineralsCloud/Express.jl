@@ -72,7 +72,7 @@ function think(x::FitEquationOfState, config::NamedTuple)
             JLD2.load(config.save.eos)[string(nameof(Scf))]
         end
         eos = x(outputs, EnergyEquation(trial_eos))
-        SaveEos{typeof(calculation(x))}()(config.save.eos, eos)
+        SaveParameters{typeof(calculation(x))}()(config.save.eos, eos)
         return eos
     end)
 end
