@@ -21,7 +21,7 @@ function thunkify(
     return map(files, pressures) do (input, _), pressure
         Thunk(
             function (file, template, pressure, eos)
-                eos = PressureEquation(FitEos{Scf}()(last.(files), EnergyEquation(eos)))
+                eos = PressureEquation(FitEquationOfState{Scf}()(last.(files), EnergyEquation(eos)))
                 return f(file, template, pressure, eos)
             end,
             input,
@@ -63,7 +63,7 @@ function thunkify(x::GetRawData{T}, config::NamedTuple) where {T<:Optimization}
     end)
 end
 # FitEos
-function thunkify(x::FitEos, config::NamedTuple)
+function thunkify(x::FitEquationOfState, config::NamedTuple)
     return Thunk(function ()
         outputs = last.(config.files)
         trial_eos = if calculation(x) isa Scf

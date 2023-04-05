@@ -36,16 +36,16 @@ end
 
 function parseoutput end
 
-struct FitEos{T} <: Action{T} end
-function (x::FitEos)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation)
+struct FitEquationOfState{T} <: Action{T} end
+function (fit::FitEquationOfState)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation)
     return eosfit(trial_eos, first.(data), last.(data))
 end
-function (x::FitEos)(outputs, trial_eos::EnergyEquation)
+function (fit::FitEquationOfState)(outputs, trial_eos::EnergyEquation)
     data = readdata(calculation(fit), outputs)
     if length(data) <= 5
         @info "pressures <= 5 may give unreliable results, run more if possible!"
     end
-    return x(data, trial_eos)
+    return fit(data, trial_eos)
 end
 
 struct SaveEos{T} <: Action{T} end
