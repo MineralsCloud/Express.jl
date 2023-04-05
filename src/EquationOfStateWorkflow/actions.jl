@@ -36,6 +36,13 @@ end
 
 function parseoutput end
 
+struct SaveVolumeEnergy{T} <: Action{T} end
+function (::SaveVolumeEnergy{T})(path, outputs) where {T}
+    data = readdata(T(), outputs)
+    dict = Dict("volume" => first.(data), "energy" => last.(data))
+    return save(path, dict)
+end
+
 struct FitEquationOfState{T} <: Action{T} end
 (fit::FitEquationOfState)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
     eosfit(trial_eos, first.(data), last.(data))
