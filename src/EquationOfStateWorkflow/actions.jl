@@ -7,7 +7,6 @@ using ExpressBase.Files: save, load, extension
 using JLD2: JLD2
 using Unitful: Pressure, Volume, ustrip, unit
 
-using ..Config: ConfigFile
 using .Config: ExpandConfig, Pressures, Volumes
 
 struct MakeInput{T} <: Action{T} end
