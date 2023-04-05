@@ -37,9 +37,8 @@ end
 function parseoutput end
 
 struct FitEquationOfState{T} <: Action{T} end
-function (fit::FitEquationOfState)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation)
-    return eosfit(trial_eos, first.(data), last.(data))
-end
+(fit::FitEquationOfState)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
+    eosfit(trial_eos, first.(data), last.(data))
 function (fit::FitEquationOfState)(outputs, trial_eos::EnergyEquation)
     data = readdata(calculation(fit), outputs)
     if length(data) <= 5
