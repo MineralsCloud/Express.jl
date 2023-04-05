@@ -73,8 +73,3 @@ function think(f::Action{T}, raw_config::RuntimeConfig) where {T}
     config = ExpandConfig{T}()(raw_config)
     return think(f, config)
 end
-function think(f::Action{T}, file::ConfigFile) where {T}
-    dict = load(file)
-    config = from_dict(RuntimeConfig, dict)
-    return think(f, config)
-end
