@@ -8,7 +8,6 @@ using Pseudopotentials: download_potential
 using Thinkers: Thunk
 
 using ..Express: distribute_procs
-using .Config: ConfigFile
 
 function think end
 
