@@ -1,4 +1,4 @@
-using AbInitioSoftwareBase.Inputs: Input, writetxt
+using AbInitioSoftwareBase.Inputs: Input
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
@@ -11,17 +11,19 @@ using ..Config: ConfigFile
 using .Config: ExpandConfig, Pressures, Volumes
 
 struct MakeInput{T} <: Action{T} end
-function (x::MakeInput)(
-    file, template::Input, pressure::Pressure, eos::PressureEquation, args...
-)
-    return x(file, x(template, pressure, eos, args...))
-end
-function (x::MakeInput)(file, template::Input, volume::Volume, args...)
-    return x(file, x(template, volume, args...))
-end
-function (x::MakeInput)(file, input::Input)
-    mkpath(dirname(file))  # In case its parent directory is not created
-    writetxt(file, input)
+(makeinput::MakeInput)(
+    path, template::Input, pressure::Pressure, eos::PressureEquation, args...
+) = makeinput(path, makeinput(template, pressure, eos, args...))
+(makeinput::MakeInput)(path, template::Input, volume::Volume, args...) =
+    makeinput(path, makeinput(template, volume, args...))
+function (makeinput::MakeInput)(path, input::Input)
+    if isfile(path)
+        @warn "File $path already exists! It will be overwritten!"
+    end
+    mkpath(dirname(path))  # In case its parent directory is not created
+    open(path, "w") do io
+        print(io, input)
+    end
     return input
 end
 
