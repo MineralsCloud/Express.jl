@@ -1,13 +1,27 @@
 using AbInitioSoftwareBase.Inputs: Input
 using EquationsOfStateOfSolids:
-    EquationOfStateOfSolids, EnergyEquation, PressureEquation, Parameters, getparam
+    EquationOfStateOfSolids,
+    EnergyEquation,
+    PressureEquation,
+    Parameters,
+    Murnaghan1st,
+    Murnaghan2nd,
+    BirchMurnaghan2nd,
+    BirchMurnaghan3rd,
+    BirchMurnaghan4th,
+    PoirierTarantola2nd,
+    PoirierTarantola3rd,
+    PoirierTarantola4th,
+    Vinet,
+    getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase: Action, Scf, Optimization, calculation
 using ExpressBase.Files: save, load, extension
 using JLD2: JLD2
 using Unitful: Pressure, Volume, ustrip, unit
+using UnitfulParsableString: string
 
-using .Config: ExpandConfig, Pressures, Volumes
+using .Config: ExpandConfig, Pressures, Volumes, _uparse
 
 struct MakeInput{T} <: Action{T} end
 (makeinput::MakeInput)(
@@ -64,5 +78,33 @@ function (::SaveParameters)(path, parameters::Parameters)
     return save(path, dict)
 end
 (x::SaveParameters)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
+
+struct LoadParameters{T} <: Action{T} end
+function (::LoadParameters)(path)
+    data = load(path)
+    type, params = data["type"], data["params"]
+    T = if type in ("m", "murnaghan")
+        Murnaghan1st
+    elseif type == "m2" || occursin("murnaghan2", type)
+        Murnaghan2nd
+    elseif type == "bm2" || occursin("birchmurnaghan2", type)
+        BirchMurnaghan2nd
+    elseif type == "bm3" || occursin("birchmurnaghan3", type)
+        BirchMurnaghan3rd
+    elseif type == "bm4" || occursin("birchmurnaghan4", type)
+        BirchMurnaghan4th
+    elseif type == "pt2" || occursin("poiriertarantola2", type)
+        PoirierTarantola2nd
+    elseif type == "pt3" || occursin("poiriertarantola3", type)
+        PoirierTarantola3rd
+    elseif type == "pt4" || occursin("poiriertarantola4", type)
+        PoirierTarantola4th
+    elseif type == "v" || occursin("vinet", type)
+        Vinet
+    else
+        error("unsupported eos name `\"$type\"`!")
+    end
+    return T(map(_uparse, params)...)
+end
 
 include("think.jl")
