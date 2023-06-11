@@ -57,14 +57,14 @@ function (::SaveVolumeEnergy{T})(path, outputs) where {T}
 end
 
 struct FitEquationOfState{T} <: Action{T} end
-(fit::FitEquationOfState)(data::AbstractVector{<:Pair}, trial_eos::EnergyEquation) =
-    eosfit(trial_eos, first.(data), last.(data))
-function (fit::FitEquationOfState{T})(outputs, trial_eos::EnergyEquation) where {T}
-    data = readdata(T(), outputs)
-    if length(data) <= 5
-        @info "pressures <= 5 may give unreliable results, run more if possible!"
+function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
+    return function (outputs)
+        data = readdata(T(), outputs)
+        if length(data) <= 5
+            @info "pressures <= 5 may give unreliable results, run more if possible!"
+        end
+        return fit(data, trial_eos)
     end
-    return fit(data, trial_eos)
 end
 
 struct SaveParameters{T} <: Action{T} end
