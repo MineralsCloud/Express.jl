@@ -5,7 +5,7 @@ using EasyJobsBase: →
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows: Workflow
+using SimpleWorkflows: Workflow, eachjob
 
 using ...Express: DownloadPotentials, RunCmd, jobify
 using ..Config: RuntimeConfig
@@ -17,7 +17,7 @@ struct ParallelEosFittingRecipe <: Recipe
 end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
-    for T in (Scf, VariableCellOptimization)
+    stage₁, stage₂ = map((Scf, VariableCellOptimization)) do T
         steps = map((
             DownloadPotentials{T}(),
             MakeInput{T}(),
@@ -30,8 +30,10 @@ function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
         end
         download, makeinput, runcmd, savedata, fiteos, saveparams = steps
         download .→ makeinput .→ runcmd .→ savedata .→ fiteos → saveparams
+        Workflow(download)
     end
-    return Workflow(download)
+    stage₁ → stage₂
+    return Workflow(first(eachjob(stage₁)))
 end
 function build(::Type{Workflow}, file)
     dict = load(file)
