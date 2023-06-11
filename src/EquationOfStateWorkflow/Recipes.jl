@@ -7,7 +7,7 @@ using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, run!
 
-using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
+using ...Express: DownloadPotentials, RunCmd, jobify
 using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow: MakeInput, GetRawData, FitEos
 
@@ -17,12 +17,10 @@ end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
     a = jobify(DownloadPotentials{Scf}(), r.config)
-    b = jobify(LogTime{Scf}())
     c = jobify(MakeInput{Scf}(), r.config)
     d = jobify(RunCmd{Scf}(), r.config)
     e = jobify(GetRawData{Scf}(), r.config)
     f = jobify(FitEos{Scf}(), r.config)
-    g = jobify(LogTime{VariableCellOptimization}())
     h = jobify(MakeInput{VariableCellOptimization}(), r.config)
     i = jobify(RunCmd{VariableCellOptimization}(), r.config)
     j = jobify(GetRawData{VariableCellOptimization}(), r.config)

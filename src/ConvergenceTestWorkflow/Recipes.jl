@@ -5,7 +5,7 @@ using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
 
-using ...Express: DownloadPotentials, LogTime, RunCmd, jobify
+using ...Express: DownloadPotentials, RunCmd, jobify
 using ..ConvergenceTestWorkflow: MakeInput, TestConvergence
 
 export build, run!
@@ -19,7 +19,6 @@ end
 
 function build(::Type{Workflow}, r::TestCutoffEnergyRecipe)
     a = jobify(DownloadPotentials{Scf}(), r.config)
-    b = jobify(LogTime{Scf}())
     c = jobify(MakeInput{Scf}(), r.config)
     d = jobify(RunCmd{Scf}(), r.config)
     e = jobify(TestConvergence{Scf}(), r.config)
@@ -28,7 +27,6 @@ function build(::Type{Workflow}, r::TestCutoffEnergyRecipe)
 end
 function build(::Type{Workflow}, r::TestKPointsRecipe)
     a = jobify(DownloadPotentials{Scf}(), r.config)
-    b = jobify(LogTime{Scf}())
     c = jobify(MakeInput{Scf}(), r.config)
     d = jobify(RunCmd{Scf}(), r.config)
     e = jobify(TestConvergence{Scf}(), r.config)

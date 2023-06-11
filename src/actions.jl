@@ -38,21 +38,6 @@ end
 think(x::DownloadPotentials, template::Input) = Thunk(x, template)
 think(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
 
-struct LogTime{T} <: Action{T} end
-function (x::LogTime)()
-    with_logger(current_logger()) do
-        println(
-            "The calculation ",
-            calculation(x),
-            " starts at ",
-            format(now(), "HH:MM:SS u dd, yyyy"),
-            '.',
-        )
-    end
-end
-
-think(x::LogTime) = Thunk(x)
-
 struct RunCmd{T} <: Action{T} end
 
 function think(f::RunCmd{T}, config::NamedTuple) where {T}
