@@ -1,32 +1,37 @@
 module Recipes
 
 using Configurations: from_dict
-using EasyJobsBase: →, ⇉, ⇶, ⭃
+using EasyJobsBase: →
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows: Workflow, run!
+using SimpleWorkflows: Workflow
 
 using ...Express: DownloadPotentials, RunCmd, jobify
 using ..Config: RuntimeConfig
-using ..EquationOfStateWorkflow: MakeInput, GetRawData, FitEos
+using ..EquationOfStateWorkflow:
+    MakeInput, SaveVolumeEnergy, FitEquationOfState, SaveParameters
 
 struct ParallelEosFittingRecipe <: Recipe
     config
 end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
-    a = jobify(DownloadPotentials{Scf}(), r.config)
-    c = jobify(MakeInput{Scf}(), r.config)
-    d = jobify(RunCmd{Scf}(), r.config)
-    e = jobify(GetRawData{Scf}(), r.config)
-    f = jobify(FitEos{Scf}(), r.config)
-    h = jobify(MakeInput{VariableCellOptimization}(), r.config)
-    i = jobify(RunCmd{VariableCellOptimization}(), r.config)
-    j = jobify(GetRawData{VariableCellOptimization}(), r.config)
-    k = jobify(FitEos{VariableCellOptimization}(), r.config)
-    a → b ⇉ c ⇶ d ⭃ e → f → g ⇉ h ⇶ i ⭃ j → k
-    return Workflow(a)
+    for T in (Scf, VariableCellOptimization)
+        steps = map((
+            DownloadPotentials{T}(),
+            MakeInput{T}(),
+            RunCmd{T}(),
+            SaveVolumeEnergy{T}(),
+            FitEquationOfState{T}(),
+            SaveParameters{T}(),
+        )) do action
+            jobify(action, r.config)
+        end
+        download, makeinput, runcmd, savedata, fiteos, saveparams = steps
+        download .→ makeinput .→ runcmd .→ savedata .→ fiteos → saveparams
+    end
+    return Workflow(download)
 end
 function build(::Type{Workflow}, file)
     dict = load(file)
