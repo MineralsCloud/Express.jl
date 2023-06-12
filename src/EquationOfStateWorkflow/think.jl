@@ -8,32 +8,10 @@ using .Config: RuntimeConfig
 import ..Express: think
 
 function think(
-    makeinput::MakeInput{Scf}, files, template::Input, pressures, eos::PressureEquation
+    makeinput::MakeInput, files, template::Input, pressures, eos::PressureEquation
 )
     return map(files, pressures) do (input, _), pressure
         Thunk(makeinput, input, template, pressure, eos)
-    end
-end
-function think(
-    makeinput::MakeInput{<:Optimization},
-    files,
-    template::Input,
-    pressures,
-    eos::PressureEquation,
-)
-    return map(files, pressures) do (input, _), pressure
-        Thunk(
-            function (file, template, pressure, eos)
-                eos = PressureEquation(
-                    FitEquationOfState{Scf}()(last.(files), EnergyEquation(eos))
-                )
-                return makeinput(file, template, pressure, eos)
-            end,
-            input,
-            template,
-            pressure,
-            eos,
-        )
     end
 end
 function think(makeinput::MakeInput, files, template::Input, volumes)
@@ -50,24 +28,17 @@ function think(makeinput::MakeInput, config::NamedTuple)
         )
     end
 end
-function think(save::SaveVolumeEnergy, config::NamedTuple)
-    return Thunk(function ()
-        data = save(last.(config.files))
-        return save(config.save.ev, data)
-    end)
-end
+think(save::SaveVolumeEnergy, config::NamedTuple) =
+    Thunk(data -> save(config.save.ve, data))
 function think(fit::FitEquationOfState, config::NamedTuple)
-    return Thunk(function ()
-        outputs = last.(config.files)
+    return Thunk(function (data)
         trial_eos = if calculation(fit) isa Scf
             config.trial_eos
         else
-            load(config.save.eos)
+            LoadParameters{Scf}()(config.save.eos)
         end
-        eos = fit(outputs, EnergyEquation(trial_eos))
-        SaveParameters{typeof(calculation(fit))}()(config.save.eos, eos)
-        return eos
-    end)
+        return fit(data, EnergyEquation(trial_eos))
+    end, Set())
 end
 function think(f::Action{T}, raw_config::RuntimeConfig) where {T}
     config = ExpandConfig{T}()(raw_config)
