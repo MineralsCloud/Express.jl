@@ -1,3 +1,5 @@
+# WARNING: `ExpressBase` now lives in https://github.com/MineralsCloud/Express.jl/tree/main/ExpressBase, please open issues [here](https://github.com/MineralsCloud/Express.jl/issues) and PRs [here](https://github.com/MineralsCloud/Express.jl/pulls). This repository will be archived.
+
 # ExpressBase
 
 |                                 **Documentation**                                  |                                                                                                 **Build Status**                                                                                                 |                                        **Others**                                         |
