@@ -26,16 +26,20 @@ function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
             RunCmd{T}(),
             SaveVolumeEnergy{T}(),
             FitEquationOfState{T}(),
-            # SaveParameters{T}(),
+            SaveParameters{T}(),
         )) do action
             think(action, r.config)
         end
-        download = Job(steps[1]; name="download potentials")
-        makeinputs = map(x -> Job(x; name="make input"), steps[2])
-        runcmds = map(x -> WeaklyDependentJob(x; name="run ab initio software"), steps[3])
-        savedata = StronglyDependentJob(steps[4]; name="save E(V) data")
-        fiteos = StronglyDependentJob(steps[5]; name="fit E(V) data")
-        download .→ makeinputs .→ runcmds .→ savedata .→ fiteos
+        download = Job(steps[1]; name="download potentials in $T")
+        makeinputs = map(thunk -> Job(thunk; name="make input in $T"), steps[2])
+        runcmds = map(
+            thunk -> WeaklyDependentJob(thunk; name="run ab initio software in $T"),
+            steps[3],
+        )
+        fiteos = StronglyDependentJob(steps[5]; name="fit E(V) data in $T")
+        saveparams = StronglyDependentJob(steps[6]; name="save EOS parameters in $T")
+        savedata = StronglyDependentJob(steps[4]; name="save E(V) data in $T")
+        download .→ makeinputs .→ runcmds .→ fiteos → saveparams → savedata
         Workflow(download)
     end
     stage₁ → stage₂
