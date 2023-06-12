@@ -1,18 +1,18 @@
 module Recipes
 
 using Configurations: from_dict
-using EasyJobsBase: →
+using EasyJobsBase: Job, WeaklyDependentJob, StronglyDependentJob, →
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows: Workflow, eachjob
+using SimpleWorkflows: Workflow, eachjob, run!
 
-using ...Express: DownloadPotentials, RunCmd, jobify
+using ...Express: DownloadPotentials, RunCmd, think
 using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow:
     MakeInput, SaveVolumeEnergy, FitEquationOfState, SaveParameters
 
-export build
+export build, run!
 
 struct ParallelEosFittingRecipe <: Recipe
     config
@@ -26,12 +26,16 @@ function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
             RunCmd{T}(),
             SaveVolumeEnergy{T}(),
             FitEquationOfState{T}(),
-            SaveParameters{T}(),
+            # SaveParameters{T}(),
         )) do action
-            jobify(action, r.config)
+            think(action, r.config)
         end
-        download, makeinput, runcmd, savedata, fiteos, saveparams = steps
-        download .→ makeinput .→ runcmd .→ savedata .→ fiteos → saveparams
+        download = Job(steps[1]; name="download potentials")
+        makeinputs = map(x -> Job(x; name="make input"), steps[2])
+        runcmds = map(x -> WeaklyDependentJob(x; name="run ab initio software"), steps[3])
+        savedata = StronglyDependentJob(steps[4]; name="save E(V) data")
+        fiteos = StronglyDependentJob(steps[5]; name="fit E(V) data")
+        download .→ makeinputs .→ runcmds .→ savedata .→ fiteos
         Workflow(download)
     end
     stage₁ → stage₂
