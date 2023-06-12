@@ -1,7 +1,7 @@
 using ExpressBase.Files: load
 using AbInitioSoftwareBase.Inputs: Input, getpseudodir, getpotentials
 using Dates: format, now
-using EasyJobsBase: DependentJob
+using EasyJobsBase: WeaklyDependentJob
 using ExpressBase: Action, calculation
 using Logging: with_logger, current_logger
 using Pseudopotentials: download_potential
@@ -14,9 +14,9 @@ function think end
 function jobify(f::Action, args...)
     thunks = think(f, args...)
     if thunks isa AbstractArray
-        return map(DependentJob, thunks)
+        return map(WeaklyDependentJob, thunks)
     else
-        return DependentJob(thunks)
+        return WeaklyDependentJob(thunks)
     end
 end
 
