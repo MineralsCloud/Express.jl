@@ -12,6 +12,8 @@ using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow:
     MakeInput, SaveVolumeEnergy, FitEquationOfState, SaveParameters
 
+export build
+
 struct ParallelEosFittingRecipe <: Recipe
     config
 end
