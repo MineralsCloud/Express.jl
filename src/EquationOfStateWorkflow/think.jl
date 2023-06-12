@@ -19,13 +19,22 @@ function think(makeinput::MakeInput, files, template::Input, volumes)
         Thunk(makeinput, input, template, volume)
     end
 end
-function think(makeinput::MakeInput, config::NamedTuple)
+function think(makeinput::MakeInput{Scf}, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        think(makeinput, config.files, config.template, config.fixed)
+        return think(makeinput, config.files, config.template, config.fixed)
     else  # Pressures
         return think(
             makeinput, config.files, config.template, config.fixed, config.trial_eos
         )
+    end
+end
+function think(makeinput::MakeInput{<:Optimization}, config::NamedTuple)
+    if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
+        return think(makeinput, config.files, config.template, config.fixed)
+    else  # Pressures
+        return map(config.files, config.fixed) do (input, _), pressure
+            Thunk(trial_eos -> makeinput(input, config.template, pressure, trial_eos))
+        end
     end
 end
 think(save::SaveVolumeEnergy, config::NamedTuple) =
