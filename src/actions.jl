@@ -11,15 +11,6 @@ using ..Express: distribute_procs
 
 function think end
 
-function jobify(f::Action, args...)
-    thunks = think(f, args...)
-    if thunks isa AbstractArray
-        return map(WeaklyDependentJob, thunks)
-    else
-        return WeaklyDependentJob(thunks)
-    end
-end
-
 struct DownloadPotentials{T} <: Action{T} end
 function (::DownloadPotentials)(template::Input)
     dir = getpseudodir(template)
