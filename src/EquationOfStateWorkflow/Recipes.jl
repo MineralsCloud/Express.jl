@@ -90,7 +90,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
 end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
-    stage₁, stage₂ = stage(Scf, r), stage(VariableCellOptimization, r)
+    stage₁, stage₂ = stage(Scf(), r), stage(VariableCellOptimization(), r)
     stage₁.fiteos .→ stage₂.makeinputs
     return Workflow(first(eachjob(stage₁)))
 end
