@@ -43,6 +43,7 @@ struct ExtractData{T} <: Action{T} end
 
 struct SaveVolumeEnergy{T} <: Action{T} end
 function (::SaveVolumeEnergy{T})(path, data) where {T}
+    data = sort(collect(data))  # In case the data is not sorted
     dict = Dict("volume" => first.(data), "energy" => last.(data))
     return save(path, dict)
 end
@@ -50,6 +51,7 @@ end
 struct FitEquationOfState{T} <: Action{T} end
 function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
     return function (data)
+        data = sort(collect(data))  # In case the data is not sorted
         if length(data) <= 5
             @info "pressures <= 5 may give unreliable results, run more if possible!"
         end
