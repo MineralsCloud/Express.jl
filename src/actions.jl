@@ -9,8 +9,6 @@ using Thinkers: Thunk
 
 using ..Express: distribute_procs
 
-function think end
-
 struct DownloadPotentials{T} <: Action{T} end
 function (::DownloadPotentials)(template::Input)
     dir = getpseudodir(template)
