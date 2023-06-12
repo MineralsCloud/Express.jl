@@ -10,7 +10,7 @@ using SimpleWorkflows: Workflow, eachjob, run!
 using ...Express: DownloadPotentials, RunCmd, think
 using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow:
-    MakeInput, SaveVolumeEnergy, FitEquationOfState, SaveParameters
+    MakeInput, ExtractData, SaveVolumeEnergy, FitEquationOfState, SaveParameters
 
 export build, run!
 
@@ -24,6 +24,7 @@ function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
             DownloadPotentials{T}(),
             MakeInput{T}(),
             RunCmd{T}(),
+            ExtractData{T}(),
             SaveVolumeEnergy{T}(),
             FitEquationOfState{T}(),
             SaveParameters{T}(),
@@ -36,10 +37,15 @@ function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
             thunk -> WeaklyDependentJob(thunk; name="run ab initio software in $T"),
             steps[3],
         )
-        fiteos = StronglyDependentJob(steps[5]; name="fit E(V) data in $T")
-        saveparams = StronglyDependentJob(steps[6]; name="save EOS parameters in $T")
-        savedata = StronglyDependentJob(steps[4]; name="save E(V) data in $T")
-        download .→ makeinputs .→ runcmds .→ fiteos → saveparams → savedata
+        extractdata = map(
+            thunk -> StronglyDependentJob(thunk; name="extract E(V) data in $T"),
+            steps[4],
+        )
+        savedata = StronglyDependentJob(steps[5]; name="save E(V) data in $T")
+        fiteos = StronglyDependentJob(steps[6]; name="fit E(V) data in $T")
+        saveparams = StronglyDependentJob(steps[7]; name="save EOS parameters in $T")
+        download .→ makeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
+        extractdata .→ savedata
         Workflow(download)
     end
     stage₁ → stage₂
