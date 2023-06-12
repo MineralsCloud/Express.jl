@@ -39,26 +39,17 @@ function (makeinput::MakeInput)(path, input::Input)
     return input
 end
 
-function readdata(x::Calculation, outputs)
-    data = map(outputs) do output
-        parseoutput(calculation(x), output)
-    end
-    return filter(!isnothing, data)
-end
-
-function parseoutput end
+struct ExtractData{T} <: Action{T} end
 
 struct SaveVolumeEnergy{T} <: Action{T} end
-function (::SaveVolumeEnergy{T})(path, outputs) where {T}
-    data = readdata(T(), outputs)
+function (::SaveVolumeEnergy{T})(path, data) where {T}
     dict = Dict("volume" => first.(data), "energy" => last.(data))
     return save(path, dict)
 end
 
 struct FitEquationOfState{T} <: Action{T} end
 function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
-    return function (outputs)
-        data = readdata(T(), outputs)
+    return function (data)
         if length(data) <= 5
             @info "pressures <= 5 may give unreliable results, run more if possible!"
         end
