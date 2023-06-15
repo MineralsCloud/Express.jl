@@ -41,7 +41,8 @@ think(extract::ExtractData, files::AbstractVector) =
     map(input -> Thunk(extract, input), files)
 think(extract::ExtractData, config::NamedTuple) = think(extract, last.(config.files))
 think(save::SaveVolumeEnergy, config::NamedTuple) =
-    Thunk(data -> save(config.save.ve, data))
+    Thunk(data -> save(config.save.ev, data))
+think(save::SaveParameters, config::NamedTuple) = Thunk(data -> save(config.save.eos, data))
 function think(fit::FitEquationOfState, config::NamedTuple)
     return Thunk(function (data)
         trial_eos = if calculation(fit) isa Scf
