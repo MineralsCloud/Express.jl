@@ -65,18 +65,18 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         think(action, r.config)
     end
     makeinputs = map(
-        thunk -> StronglyDependentJob(thunk; name="make input in vc-relax"), steps[2]
+        thunk -> StronglyDependentJob(thunk; name="make input in vc-relax"), steps[1]
     )
     runcmds = map(
         thunk -> WeaklyDependentJob(thunk; name="run ab initio software in vc-relax"),
-        steps[3],
+        steps[2],
     )
     extractdata = map(
-        thunk -> WeaklyDependentJob(thunk; name="extract E(V) data in vc-relax"), steps[4]
+        thunk -> WeaklyDependentJob(thunk; name="extract E(V) data in vc-relax"), steps[3]
     )
-    savedata = StronglyDependentJob(steps[5]; name="save E(V) data in vc-relax")
-    fiteos = StronglyDependentJob(steps[6]; name="fit E(V) data in vc-relax")
-    saveparams = StronglyDependentJob(steps[7]; name="save EOS parameters in vc-relax")
+    savedata = StronglyDependentJob(steps[4]; name="save E(V) data in vc-relax")
+    fiteos = StronglyDependentJob(steps[5]; name="fit E(V) data in vc-relax")
+    saveparams = StronglyDependentJob(steps[6]; name="save EOS parameters in vc-relax")
     makeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
     extractdata .→ savedata
     return steps = (;
