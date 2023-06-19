@@ -1,7 +1,7 @@
 module Recipes
 
 using Configurations: from_dict
-using EasyJobsBase: Job, WeaklyDependentJob, StronglyDependentJob, →
+using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, →
 using ExpressBase: Scf, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
@@ -33,14 +33,14 @@ function stage(::Scf, r::ParallelEosFittingRecipe)
     download = Job(steps[1]; name="download potentials")
     makeinputs = map(thunk -> Job(thunk; name="make input in SCF"), steps[2])
     runcmds = map(
-        thunk -> WeaklyDependentJob(thunk; name="run ab initio software in SCF"), steps[3]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[3]
     )
     extractdata = map(
-        thunk -> WeaklyDependentJob(thunk; name="extract E(V) data in SCF"), steps[4]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), steps[4]
     )
-    savedata = StronglyDependentJob(steps[5]; name="save E(V) data in SCF")
-    fiteos = StronglyDependentJob(steps[6]; name="fit E(V) data in SCF")
-    saveparams = StronglyDependentJob(steps[7]; name="save EOS parameters in SCF")
+    savedata = ArgDependentJob(steps[5]; name="save E(V) data in SCF")
+    fiteos = ArgDependentJob(steps[6]; name="fit E(V) data in SCF")
+    saveparams = ArgDependentJob(steps[7]; name="save EOS parameters in SCF")
     download .→ makeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
     extractdata .→ savedata
     return steps = (;
@@ -65,18 +65,17 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         think(action, r.config)
     end
     makeinputs = map(
-        thunk -> StronglyDependentJob(thunk; name="make input in vc-relax"), steps[1]
+        thunk -> ArgDependentJob(thunk; name="make input in vc-relax"), steps[1]
     )
     runcmds = map(
-        thunk -> WeaklyDependentJob(thunk; name="run ab initio software in vc-relax"),
-        steps[2],
+        thunk -> ConditionalJob(thunk; name="run ab initio software in vc-relax"), steps[2]
     )
     extractdata = map(
-        thunk -> WeaklyDependentJob(thunk; name="extract E(V) data in vc-relax"), steps[3]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"), steps[3]
     )
-    savedata = StronglyDependentJob(steps[4]; name="save E(V) data in vc-relax")
-    fiteos = StronglyDependentJob(steps[5]; name="fit E(V) data in vc-relax")
-    saveparams = StronglyDependentJob(steps[6]; name="save EOS parameters in vc-relax")
+    savedata = ArgDependentJob(steps[4]; name="save E(V) data in vc-relax")
+    fiteos = ArgDependentJob(steps[5]; name="fit E(V) data in vc-relax")
+    saveparams = ArgDependentJob(steps[6]; name="save EOS parameters in vc-relax")
     makeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
     extractdata .→ savedata
     return steps = (;
