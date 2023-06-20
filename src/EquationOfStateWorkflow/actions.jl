@@ -1,4 +1,4 @@
-using AbInitioSoftwareBase.Inputs: Input
+using AbInitioSoftwareBase: Input
 using EquationsOfStateOfSolids:
     EquationOfStateOfSolids,
     EnergyEquation,

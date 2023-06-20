@@ -1,4 +1,4 @@
-using AbInitioSoftwareBase.Inputs: Input, writetxt
+using AbInitioSoftwareBase: Input, writetxt
 using ExpressBase: Action, Scf
 using ExpressBase.Files: save, load
 using EasyJobsBase: Job

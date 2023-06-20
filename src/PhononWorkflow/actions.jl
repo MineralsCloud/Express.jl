@@ -1,4 +1,4 @@
-using AbInitioSoftwareBase.Inputs: Input, writetxt
+using AbInitioSoftwareBase: Input, writetxt
 using EasyJobsBase: Job
 using ExpressBase:
     VariableCellOptimization,

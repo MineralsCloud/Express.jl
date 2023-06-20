@@ -1,5 +1,5 @@
 using ExpressBase.Files: load
-using AbInitioSoftwareBase.Inputs: Input, getpseudodir, getpotentials
+using AbInitioSoftwareBase: Input, getpseudodir, getpotentials
 using Dates: format, now
 using ExpressBase: Action, calculation
 using Logging: with_logger, current_logger
