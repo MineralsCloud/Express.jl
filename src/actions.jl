@@ -1,5 +1,5 @@
 using ExpressBase.Files: load
-using AbInitioSoftwareBase: Input, getpseudodir, getpotentials
+using AbInitioSoftwareBase: Input, getpseudodir, listpotentials
 using Dates: format, now
 using ExpressBase: Action, calculation
 using Logging: with_logger, current_logger
@@ -14,8 +14,7 @@ function (::DownloadPotentials)(template::Input)
     if !isdir(dir)
         mkpath(dir)
     end
-    potentials = getpotentials(template)
-    return map(potentials) do potential
+    return map(listpotentials(template)) do potential
         path = joinpath(dir, potential)
         if !isfile(path)
             download_potential(potential, path)
