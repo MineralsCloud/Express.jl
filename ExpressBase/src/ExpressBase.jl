@@ -60,6 +60,9 @@ Return the calculation type of the `Action`.
 """
 calculation(::Action{T}) where {T} = T()
 
+"Represent the configurations of a command."
+abstract type CommandConfig end
+
 include("Files.jl")
 include("Recipes.jl")
 
