@@ -118,6 +118,15 @@ function extension(file)
     return isempty(ext) ? "" : lowercase(ext[2:end])
 end
 
+"""
+    parentdir(file)
+
+Get the directory of a `file`.
+
+The problem of `dirname` is that it returns an empty string if users do not write `"./"` in the `file` path. This will cause an error in `tempname`.
+"""
+parentdir(file) = dirname(abspath(expanduser(file)))
+
 # See https://github.com/JuliaIO/FileIO.jl/blob/b779539/src/types.jl#L121-L124
 Base.open(@nospecialize(file::File), @nospecialize(args...)) = open(file.filename, args...)
 
