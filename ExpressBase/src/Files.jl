@@ -125,8 +125,7 @@ Base.close(@nospecialize(file::File)) = close(file.filename)
 
 Base.read(@nospecialize(file::File), @nospecialize(args...)) = read(file.filename, args...)
 
-function Base.show(io::IO, error::UnsupportedExtensionError)
-    return print(io, "unsupported extension `.", error.ext, "`!")
-end
+Base.showerror(io::IO, error::UnsupportedExtensionError) =
+    print(io, "unsupported extension `.", error.ext, "`!")
 
 end
