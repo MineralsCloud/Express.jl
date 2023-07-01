@@ -61,20 +61,20 @@ struct ExpandConfig{T} end
 function (::ExpandConfig)(save::Save)
     return map((:raw, :status)) do f
         v = getfield(save, f)
-        isempty(v) ? abspath(mktemp(; cleanup = false)[1]) : abspath(expanduser(v))
+        isempty(v) ? abspath(mktemp(; cleanup=false)[1]) : abspath(expanduser(v))
     end
 end
 function (x::ExpandConfig)(config::AbstractDict)
     config = from_dict(RuntimeConfig, config)
     save_raw, save_status = x(config.save)
     return (
-        template = x(config.template),
-        fixed = x(config.fixed),
-        root = config.files.dirs.root,
-        files = x(config.files, config.fixed),
-        save_raw = save_raw,
-        save_status = save_status,
-        cli = config.cli,
+        template=x(config.template),
+        fixed=x(config.fixed),
+        root=config.files.dirs.root,
+        files=x(config.files, config.fixed),
+        save_raw=save_raw,
+        save_status=save_status,
+        cli=config.cli,
     )
 end
 
