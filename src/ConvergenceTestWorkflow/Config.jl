@@ -1,8 +1,7 @@
 module Config
 
-using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: from_dict, @option
-using ExpressBase: Action
+using ExpressBase: Action, CommandConfig
 
 using ...Config: DirStructure, iofiles, @sp
 

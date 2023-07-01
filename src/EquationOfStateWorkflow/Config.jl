@@ -1,6 +1,5 @@
 module Config
 
-using AbInitioSoftwareBase.Commands: CommandConfig
 using Configurations: OptionField, @option
 using EquationsOfStateOfSolids:
     Murnaghan1st,
@@ -13,7 +12,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet,
     PressureEquation
-using ExpressBase: Action, Scf
+using ExpressBase: Action, Scf, CommandConfig
 using Unitful: Quantity
 using UnitfulParsableString
 
