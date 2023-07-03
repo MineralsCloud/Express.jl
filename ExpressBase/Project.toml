@@ -1,7 +1,7 @@
 name = "ExpressBase"
 uuid = "6bf22d12-b2e3-4e51-8f6d-9d050a32c5d5"
 authors = ["Reno <singularitti@outlook.com> and contributors"]
-version = "0.4.3"
+version = "0.4.4"
 
 [deps]
 CompositionsBase = "a33af91c-f02d-484b-be07-31d278c5ca2b"
