@@ -24,6 +24,9 @@ using .Config: ExpandConfig, Pressures, Volumes, _uparse
 
 struct MakeInput{T} <: Action{T} end
 (makeinput::MakeInput)(
+    path, template::Input, pressure::Pressure, parameters::Parameters, args...
+) = makeinput(path, makeinput(template, pressure, PressureEquation(parameters), args...))
+(makeinput::MakeInput)(
     path, template::Input, pressure::Pressure, eos::PressureEquation, args...
 ) = makeinput(path, makeinput(template, pressure, eos, args...))
 (makeinput::MakeInput)(path, template::Input, volume::Volume, args...) =
