@@ -46,8 +46,8 @@ end
 
 @option struct Save
     ev::String = "ev.json"
-    eos::String = "eos.jld2"
-    wf::String = "wf.jld2"
+    eos::String = "eos.jls"
+    wf::String = "wf.jls"
 end
 
 @option struct RuntimeConfig

@@ -211,10 +211,10 @@ Check the value of the key `status` in the `save` dictionary in `workflow.yaml`:
 
 ```yaml
 save:
-  status: status.jld2
+  status: status.jls
 ```
 
-Then delete the file `status.jld2` and retry running `run!(wf)`.
+Then delete the file `status.jls` and retry running `run!(wf)`.
 
 ### Why does `buildworkflow` return the same `Workflow` object if I am starting a new workflow?
 
@@ -235,10 +235,10 @@ in your configuration file (`phonon.yaml`). You probably have the following sett
 
 ```yaml
 save:
-  status: status.jld2
+  status: status.jls
 ```
 
-where the `status.jld2` already exists and is the serialized `Workflow` object saved from
+where the `status.jls` already exists and is the serialized `Workflow` object saved from
 the previous (equation of state) workflow. `Express.jl` will first load this file if
 it exists. To fix this, change the value of the `status` key to another path.
 

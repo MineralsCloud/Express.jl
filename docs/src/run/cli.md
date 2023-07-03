@@ -42,16 +42,16 @@ To print either input or output data in a formatted, readable form, run
 xps print <file-name>
 ```
 
-where the allowed extensions of `<file-name>` are `.jld2`, `.json`, `.yaml` or `.yml`, and
+where the allowed extensions of `<file-name>` are `.jls`, `.json`, `.yaml` or `.yml`, and
 `.toml`. The last four extensions correspond to three human-readable data-serialization file
 formats, i.e., [JSON](https://www.json.org/json-en.html), [YAML](https://yaml.org/), and
-[TOML](https://toml.io/en/), while `.jld2` is a binary serialization format only recognizable
+[TOML](https://toml.io/en/), while `.jls` is a binary serialization format only recognizable
 to Julia. For example,
 
 ```shell
 xps print eos.toml
 xps print raw.json
-xps print eos.jld2
+xps print eos.jls
 ```
 
 `express` can also plot some data, such as the fitted EOS applied to a certain range of
@@ -61,7 +61,7 @@ volumes along with the raw data. The corresponding command is
 xps plot <file-name>
 ```
 
-where `<file-name>` refers to the EOS binary file with extension `.jld2`.
+where `<file-name>` refers to the EOS binary file with extension `.jls`.
 
 These are the three
 most important commands of `express`. These catchy commands cover all the functionalities we
