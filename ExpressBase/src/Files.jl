@@ -1,6 +1,7 @@
 module Files
 
 using JSON: JSON
+using Serialization: serialize, deserialize
 using TOML: TOML
 using ValSplit: @valsplit
 using YAML: YAML
@@ -72,6 +73,11 @@ function save(file::File{format"YAML"}, data)
         YAML.write(io, data, "")
     end
 end
+function save(file::File{format"JLS"}, data)
+    open(file, "w") do io
+        serialize(io, data)
+    end
+end
 
 """
     load(file)
@@ -96,6 +102,11 @@ function load(file::File{format"YAML"})
     open(file, "r") do io
         dict = YAML.load(io)
         return JSON.parse(JSON.json(dict))  # To keep up with JSON & TOML results
+    end
+end
+function load(file::File{format"JLS"})
+    open(file, "r") do io
+        return deserialize(io)
     end
 end
 
