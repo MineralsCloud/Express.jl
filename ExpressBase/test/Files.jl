@@ -36,6 +36,11 @@ using Test: @testset, @test, @test_throws
         save("mixed.ToMl", dict)
         @test load("mixed.ToMl") == dict
     end
+    @testset "Save to JLS" begin
+        file = "test.jls"
+        save(file, dict)
+        @test load(file) == dict
+    end
     @testset "Other extensions" begin
         @test_throws UnsupportedExtensionError save("x.aml", dict)
         @test_throws UnsupportedExtensionError save("x.jon", dict)
