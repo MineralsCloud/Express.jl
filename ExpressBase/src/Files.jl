@@ -36,6 +36,7 @@ format(::Val{:json}) = format"JSON"
 format(::Val{:yaml}) = format"YAML"
 format(::Val{:yml}) = format"YAML"
 format(::Val{:toml}) = format"TOML"
+format(::Val{:jls}) = format"JLS"
 @valsplit format(Val(ext::Symbol)) = throw(UnsupportedExtensionError(string(ext)))
 
 """
