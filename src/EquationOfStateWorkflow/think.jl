@@ -50,7 +50,7 @@ function think(fit::FitEquationOfState, config::NamedTuple)
         else
             LoadParameters{Scf}()(config.save.eos)
         end
-        return fit(data, EnergyEquation(trial_eos))
+        return fit(EnergyEquation(trial_eos))(data)
     end, Set())
 end
 function think(f::Action{T}, raw_config::RuntimeConfig) where {T}
