@@ -44,8 +44,8 @@ end
 
 struct ExtractData{T} <: Action{T} end
 
-struct SaveVolumeEnergy{T} <: Action{T} end
-function (::SaveVolumeEnergy{T})(path, data) where {T}
+struct SaveData{T} <: Action{T} end
+function (::SaveData{T})(path, data) where {T}
     data = sort(collect(data))  # In case the data is not sorted
     dict = Dict("volume" => first.(data), "energy" => last.(data))
     return save(path, dict)

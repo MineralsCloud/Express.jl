@@ -10,7 +10,7 @@ using SimpleWorkflows: Workflow, eachjob, run!
 using ...Express: DownloadPotentials, RunCmd, think
 using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow:
-    MakeInput, ExtractData, SaveVolumeEnergy, FitEquationOfState, SaveParameters
+    MakeInput, ExtractData, SaveData, FitEquationOfState, SaveParameters
 
 export build, run!
 
@@ -24,7 +24,7 @@ function stage(::Scf, r::ParallelEosFittingRecipe)
         MakeInput{Scf}(),
         RunCmd{Scf}(),
         ExtractData{Scf}(),
-        SaveVolumeEnergy{Scf}(),
+        SaveData{Scf}(),
         FitEquationOfState{Scf}(),
         SaveParameters{Scf}(),
     )) do action
@@ -58,7 +58,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         MakeInput{VariableCellOptimization}(),
         RunCmd{VariableCellOptimization}(),
         ExtractData{VariableCellOptimization}(),
-        SaveVolumeEnergy{VariableCellOptimization}(),
+        SaveData{VariableCellOptimization}(),
         FitEquationOfState{VariableCellOptimization}(),
         SaveParameters{VariableCellOptimization}(),
     )) do action
