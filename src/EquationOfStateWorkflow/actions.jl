@@ -65,7 +65,27 @@ end
 struct SaveParameters{T} <: Action{T} end
 function (::SaveParameters)(path, parameters::Parameters)
     dict = Dict(
-        "type" => string(typeof(parameters)),
+        "type" => if parameters isa Murnaghan1st
+            "murnaghan"
+        elseif parameters isa Murnaghan2nd
+            "murnaghan2"
+        elseif parameters isa BirchMurnaghan2nd
+            "birchmurnaghan2"
+        elseif parameters isa BirchMurnaghan3rd
+            "birchmurnaghan3"
+        elseif parameters isa BirchMurnaghan4th
+            "birchmurnaghan4"
+        elseif parameters isa PoirierTarantola2nd
+            "poiriertarantola2"
+        elseif parameters isa PoirierTarantola3rd
+            "poiriertarantola3"
+        elseif parameters isa PoirierTarantola4th
+            "poiriertarantola4"
+        elseif parameters isa Vinet
+            "vinet"
+        else
+            error("unsupported EOS type `\"$parameters\"`!")
+        end,
         "params" => collect(
             string(getproperty(parameters, name)) for name in propertynames(parameters)
         ),
@@ -77,7 +97,7 @@ end
 struct LoadParameters{T} <: Action{T} end
 function (::LoadParameters)(path)
     data = load(path)
-    type, params = data["type"], data["params"]
+    type, params = lowercase(data["type"]), data["params"]
     T = if type in ("m", "murnaghan")
         Murnaghan1st
     elseif type == "m2" || occursin("murnaghan2", type)
@@ -97,7 +117,7 @@ function (::LoadParameters)(path)
     elseif type == "v" || occursin("vinet", type)
         Vinet
     else
-        error("unsupported eos name `\"$type\"`!")
+        error("unsupported EOS type `\"$type\"`!")
     end
     return T(map(_uparse, params)...)
 end
