@@ -119,7 +119,7 @@ function (::LoadParameters)(path)
     else
         error("unsupported EOS type `\"$type\"`!")
     end
-    return T(map(_uparse, params)...)
+    return T(map(eval ∘ _uparse, params)...)
 end
 
 include("think.jl")
