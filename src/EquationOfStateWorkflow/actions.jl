@@ -58,7 +58,7 @@ function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
         if length(data) <= 5
             @info "pressures <= 5 may give unreliable results, run more if possible!"
         end
-        return eosfit(trial_eos, collect(first.(data)), collect(last.(data)))
+        return eosfit(trial_eos, first.(data), last.(data))
     end
 end
 
