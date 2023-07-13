@@ -55,6 +55,9 @@ struct FitEquationOfState{T} <: Action{T} end
 function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
     return function (data)
         data = sort(collect(data))  # In case the data is not sorted
+        if length(data) < length(fieldnames(typeof(trial_eos.param)))
+            error("not enough data points to fit an EOS!")
+        end
         if length(data) <= 5
             @info "pressures <= 5 may give unreliable results, run more if possible!"
         end
