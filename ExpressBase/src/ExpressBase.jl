@@ -3,7 +3,7 @@ module ExpressBase
 export SelfConsistentField,
     NonSelfConsistentField,
     BandStructure,
-    DftPlusU,
+    DFTPlusU,
     FixedCellOptimization,
     VariableCellOptimization,
     DensityFunctionalPerturbationTheory,
@@ -12,14 +12,14 @@ export SelfConsistentField,
     PhononDensityOfStates,
     ZoneCenterPhonons,
     QuasiHarmonicApproximation,
-    Scf,
-    NScf,
+    SCF,
+    NSCF,
     FixedIonSelfConsistentField,
-    Dfpt,
-    VDos,
+    DFPT,
+    VDOS,
     ZoneCentrePhonons,
-    Qha
-export calculation
+    QHA,
+    calculation
 
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
 "Represent all materials calculations."
@@ -28,7 +28,7 @@ abstract type ElectronicStructure <: Calculation end
 struct SelfConsistentField <: ElectronicStructure end
 struct NonSelfConsistentField <: ElectronicStructure end
 struct BandStructure <: ElectronicStructure end
-struct DftPlusU <: ElectronicStructure end
+struct DFTPlusU <: ElectronicStructure end
 # Optimization
 abstract type Optimization <: Calculation end
 struct FixedCellOptimization <: Optimization end
@@ -42,13 +42,13 @@ struct PhononDensityOfStates <: LatticeDynamics end
 struct ZoneCenterPhonons <: LatticeDynamics end
 struct QuasiHarmonicApproximation <: Calculation end
 # Aliases
-const Scf = SelfConsistentField
-const NScf = NonSelfConsistentField
+const SCF = SelfConsistentField
+const NSCF = NonSelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
-const Dfpt = DensityFunctionalPerturbationTheory
-const VDos = PhononDensityOfStates
+const DFPT = DensityFunctionalPerturbationTheory
+const VDOS = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For British users
-const Qha = QuasiHarmonicApproximation
+const QHA = QuasiHarmonicApproximation
 
 "Represent an atomic action for a specific `Calculation` type."
 abstract type Action{T<:Calculation} end
