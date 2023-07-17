@@ -18,8 +18,7 @@ export SelfConsistentField,
     DFPT,
     VDOS,
     ZoneCentrePhonons,
-    QHA,
-    calculation
+    QHA
 
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
 "Represent all materials calculations."
@@ -52,13 +51,6 @@ const QHA = QuasiHarmonicApproximation
 
 "Represent an atomic action for a specific `Calculation` type."
 abstract type Action{T<:Calculation} end
-
-"""
-    calculation(::Action)
-
-Return the calculation type of the `Action`.
-"""
-calculation(::Action{T}) where {T} = T()
 
 "Represent the configurations of a command."
 abstract type CommandConfig end
