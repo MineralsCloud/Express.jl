@@ -12,6 +12,7 @@ makedocs(;
     sitename="ExpressBase.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
+        canonical="https://MineralsCloud.github.io/ExpressBase.jl",
         edit_link="main",
         assets=String[],
     ),
@@ -29,4 +30,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/MineralsCloud/ExpressBase.jl",
+    devbranch="main",
 )

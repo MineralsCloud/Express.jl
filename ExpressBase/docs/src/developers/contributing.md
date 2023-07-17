@@ -1,26 +1,27 @@
-# [Contributing](@id contributing)
+# Contributing
 
 ```@contents
 Pages = ["contributing.md"]
+Depth = 2
 ```
 
-Welcome! This document explains some ways you can contribute to `ExpressBase`.
+Welcome! This document explains some ways you can contribute to ExpressBase.
 
 ## Code of conduct
 
 This project and everyone participating in it is governed by the
-["Contributor Covenant Code of Conduct"](https://github.com/MineralsCloud/.github/blob/main/CODE_OF_CONDUCT.md).
+[Contributor Covenant Code of Conduct](https://github.com/MineralsCloud/.github/blob/main/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 
 ## Join the community forum
 
 First up, join the [community forum](https://github.com/MineralsCloud/ExpressBase.jl/discussions).
 
-The forum is a good place to ask questions about how to use `ExpressBase`. You can also
+The forum is a good place to ask questions about how to use ExpressBase. You can also
 use the forum to discuss possible feature requests and bugs before raising a
 GitHub issue (more on this below).
 
-Aside from asking questions, the easiest way you can contribute to `ExpressBase` is to
+Aside from asking questions, the easiest way you can contribute to ExpressBase is to
 help answer questions on the forum!
 
 ## Improve the documentation
@@ -33,48 +34,48 @@ person to improve it!
 The docs are written in Markdown and are built using
 [Documenter.jl](https://github.com/JuliaDocs/Documenter.jl).
 You can find the source of all the docs
-[here](https://github.com/MineralsCloud/ExpressBase.jl/tree/master/docs).
+[here](https://github.com/MineralsCloud/ExpressBase.jl/tree/main/docs).
 
-If your change is small (like fixing typos, or one or two sentence corrections),
+If your change is small (like fixing typos or one or two sentence corrections),
 the easiest way to do this is via GitHub's online editor. (GitHub has
 [help](https://help.github.com/articles/editing-files-in-another-user-s-repository/)
 on how to do this.)
 
-If your change is larger, or touches multiple files, you will need to make the
+If your change is larger or touches multiple files, you will need to make the
 change locally and then use Git to submit a
 [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
-(See [Contribute code to `ExpressBase`](@ref) below for more on this.)
+(See [Contribute code to ExpressBase](@ref) below for more on this.)
 
 ## File a bug report
 
-Another way to contribute to `ExpressBase` is to file
+Another way to contribute to ExpressBase is to file
 [bug reports](https://github.com/MineralsCloud/ExpressBase.jl/issues/new?template=bug_report.md).
 
 Make sure you read the info in the box where you write the body of the issue
 before posting. You can also find a copy of that info
-[here](https://github.com/MineralsCloud/ExpressBase.jl/blob/master/.github/ISSUE_TEMPLATE/bug_report.md).
+[here](https://github.com/MineralsCloud/ExpressBase.jl/blob/main/.github/ISSUE_TEMPLATE/bug_report.md).
 
 !!! tip
     If you're unsure whether you have a real bug, post on the
     [community forum](https://github.com/MineralsCloud/ExpressBase.jl/discussions)
-    first. Someone will either help you fix the problem, or let you know the
+    first. Someone will either help you fix the problem or let you know the
     most appropriate place to open a bug report.
 
-## Contribute code to `ExpressBase`
+## Contribute code to ExpressBase
 
-Finally, you can also contribute code to `ExpressBase`!
+Finally, you can also contribute code to ExpressBase!
 
 !!! warning
     If you do not have experience with Git, GitHub, and Julia development, the
     first steps can be a little daunting. However, there are lots of tutorials
     available online, including:
-    * [GitHub](https://guides.github.com/activities/hello-world/)
-    * [Git and GitHub](https://try.github.io/)
-    * [Git](https://git-scm.com/book/en/v2)
-    * [Julia package development](https://docs.julialang.org/en/v1/stdlib/Pkg/#Developing-packages-1)
+    - [GitHub](https://guides.github.com/activities/hello-world/)
+    - [Git and GitHub](https://try.github.io/)
+    - [Git](https://git-scm.com/book/en/v2)
+    - [Julia package development](https://docs.julialang.org/en/v1/stdlib/Pkg/#Developing-packages-1)
 
 Once you are familiar with Git and GitHub, the workflow for contributing code to
-`ExpressBase` is similar to the following:
+ExpressBase is similar to the following:
 
 ### Step 1: decide what to work on
 
@@ -82,23 +83,23 @@ The first step is to find an [open issue](https://github.com/MineralsCloud/Expre
 (or open a new one) for the problem you want to solve. Then, _before_ spending
 too much time on it, discuss what you are planning to do in the issue to see if
 other contributors are fine with your proposed changes. Getting feedback early can
-improve code quality, and avoid time spent writing code that does not get merged into
-`ExpressBase`.
+improve code quality and avoid time spent writing code that does not get merged into
+ExpressBase.
 
 !!! tip
     At this point, remember to be patient and polite; you may get a _lot_ of
     comments on your issue! However, do not be afraid! Comments mean that people are
-    willing to help you improve the code that you are contributing to `ExpressBase`.
+    willing to help you improve the code that you are contributing to ExpressBase.
 
-### Step 2: fork `ExpressBase`
+### Step 2: fork ExpressBase
 
 Go to [https://github.com/MineralsCloud/ExpressBase.jl](https://github.com/MineralsCloud/ExpressBase.jl)
 and click the "Fork" button in the top-right corner. This will create a copy of
-`ExpressBase` under your GitHub account.
+ExpressBase under your GitHub account.
 
-### Step 3: install `ExpressBase` locally
+### Step 3: install ExpressBase locally
 
-Similar to [installation](@ref), open the Julia REPL and run:
+Similar to [Installation](@ref), open the Julia REPL and run:
 
 ```@repl
 using Pkg
@@ -113,7 +114,7 @@ environment variable. If you're on
 Windows, this will be `C:\\Users\\<my_name>\\.julia\\dev\\ExpressBase`.
 In the following text, we will call it `PKGROOT`.
 
-Go to `PKGROOT`, start a new Julia session and run
+Go to `PKGROOT`, start a new Julia session, and run
 
 ```@repl
 using Pkg
@@ -128,15 +129,15 @@ to instantiate the project.
     In the following, replace any instance of `GITHUB_ACCOUNT` with your GitHub
     username.
 
-The next step is to checkout a development branch. In a terminal (or command
+The next step is to check out a development branch. In a terminal (or command
 prompt on Windows), run:
 
-```shell
+```bash
 cd ~/.julia/dev/ExpressBase
 
 git remote add GITHUB_ACCOUNT https://github.com/GITHUB_ACCOUNT/ExpressBase.jl.git
 
-git checkout master  # or main
+git checkout main
 
 git pull
 
@@ -150,33 +151,37 @@ directory.
 
 Make sure you:
 
-* Follow the [Style guide](@ref style) and [run `JuliaFormatter.jl`](@ref formatter)
-* Add tests and documentation for any changes or new features
+- Follow our [Style Guide](@ref style) and [Run JuliaFormatter](@ref).
+- Add tests and documentation for any changes or new features.
 
 !!! tip
     When you change the source code, you'll need to restart Julia for the
     changes to take effect. This is a pain, so install
-    [`Revise.jl`](https://github.com/timholy/Revise.jl).
+    [Revise.jl](https://github.com/timholy/Revise.jl).
 
 ### Step 6a: test your code changes
 
-To test that your changes work, run the `ExpressBase` test-suite by opening Julia and
+To test that your changes work, run the ExpressBase test-suite by opening Julia and
 running:
 
-```@repl
-cd("~/.julia/dev/ExpressBase")
-using Pkg
-Pkg.activate(".")
-Pkg.test()
+```julia-repl
+julia> cd(joinpath(DEPOT_PATH[1], "dev", "ExpressBase"))
+
+julia> using Pkg
+
+julia> Pkg.activate(".")
+  Activating new project at `~/.julia/dev/ExpressBase`
+
+julia> Pkg.test()
 ```
 
 !!! warning
     Running the tests might take a long time.
 
 !!! tip
-    If you're using `Revise.jl`, you can also run the tests by calling `include`:
+    If you are using Revise.jl, you can also run the tests by calling `include`:
 
-    ```julia
+    ```julia-repl
     include("test/runtests.jl")
     ```
 
@@ -186,11 +191,15 @@ Pkg.test()
 
 Open Julia, then run:
 
-```@repl
-cd("~/.julia/dev/ExpressBase/docs")
-using Pkg
-Pkg.activate(".")
-include("src/make.jl")
+```julia-repl
+julia> cd(joinpath(DEPOT_PATH[1], "dev", "ExpressBase", "docs"))
+
+julia> using Pkg
+
+julia> Pkg.activate(".")
+  Activating new project at `~/.julia/dev/ExpressBase/docs`
+
+julia> include("src/make.jl")
 ```
 
 After a while, a folder `PKGROOT/docs/build` will appear. Open
@@ -201,14 +210,14 @@ After a while, a folder `PKGROOT/docs/build` will appear. Open
 
 !!! tip
     If there's a problem with the tests that you don't know how to fix, don't
-    worry. Continue to step 5, and one of the `ExpressBase` contributors will comment
-    on your pull request telling you how to fix things.
+    worry. Continue to step 5, and one of the ExpressBase contributors will comment
+    on your pull request, telling you how to fix things.
 
 ### Step 7: make a pull request
 
 Once you've made changes, you're ready to push the changes to GitHub. Run:
 
-```shell
+```bash
 cd ~/.julia/dev/ExpressBase
 
 git add .
@@ -226,7 +235,7 @@ and follow the instructions that pop up to open a pull request.
 At this point, remember to be patient and polite; you may get a _lot_ of
 comments on your pull request! However, do not be afraid! A lot of comments
 means that people are willing to help you improve the code that you are
-contributing to `ExpressBase`.
+contributing to ExpressBase.
 
 To respond to the comments, go back to step 5, make any changes, test the
 changes in step 6, and then make a new commit in step 7. Your PR will
@@ -234,13 +243,13 @@ automatically update.
 
 ### Step 9: cleaning up
 
-Once the PR is merged, clean-up your Git repository ready for the
+Once the PR is merged, clean-up your Git repository, ready for the
 next contribution!
 
-```shell
+```bash
 cd ~/.julia/dev/ExpressBase
 
-git checkout master
+git checkout main
 
 git pull
 ```
@@ -250,4 +259,4 @@ git pull
     It's particularly helpful if you do this after your first pull request
     because you'll know all the parts that could be explained better.
 
-Thanks for contributing to `ExpressBase`!
+Thanks for contributing to ExpressBase!
