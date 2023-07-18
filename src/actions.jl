@@ -8,7 +8,9 @@ using Thinkers: Thunk
 
 using ..Express: distribute_procs
 
-struct DownloadPotentials{T} <: Action{T} end
+struct DownloadPotentials{T} <: Action{T}
+    calculation::T
+end
 function (::DownloadPotentials)(template::Input)
     dir = getpseudodir(template)
     if !isdir(dir)
@@ -25,7 +27,9 @@ end
 think(x::DownloadPotentials, template::Input) = Thunk(x, template)
 think(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
 
-struct RunCmd{T} <: Action{T} end
+struct RunCmd{T} <: Action{T}
+    calculation::T
+end
 
 function think(f::RunCmd{T}, config::NamedTuple) where {T}
     return think(f, config.cli.mpi.np, config.files)
