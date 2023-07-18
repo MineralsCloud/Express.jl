@@ -14,17 +14,17 @@
 [appveyor-url]: https://ci.appveyor.com/project/singularitti/ExpressBase-jl
 [cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/ExpressBase.jl.svg
 [cirrus-url]: https://cirrus-ci.com/github/MineralsCloud/ExpressBase.jl
-[gitlab-img]: https://gitlab.com/singularitti/ExpressBase.jl/badges/master/pipeline.svg
+[gitlab-img]: https://gitlab.com/singularitti/ExpressBase.jl/badges/main/pipeline.svg
 [gitlab-url]: https://gitlab.com/singularitti/ExpressBase.jl/-/pipelines
-[codecov-img]: https://codecov.io/gh/MineralsCloud/ExpressBase.jl/branch/master/graph/badge.svg
+[codecov-img]: https://codecov.io/gh/MineralsCloud/ExpressBase.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/MineralsCloud/ExpressBase.jl
 [license-img]: https://img.shields.io/github/license/MineralsCloud/ExpressBase.jl
-[license-url]: https://github.com/MineralsCloud/ExpressBase.jl/blob/master/LICENSE
+[license-url]: https://github.com/MineralsCloud/ExpressBase.jl/blob/main/LICENSE
 [style-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
 [style-url]: https://github.com/invenia/BlueStyle
 
 This package defines some basic types and functions used by the
-[`Express.jl`](https://github.com/MineralsCloud/Express.jl) package.
+[Express.jl](https://github.com/MineralsCloud/Express.jl) package.
 
 The code is [hosted on GitHub](https://github.com/MineralsCloud/ExpressBase.jl),
 with some continuous integration services to test its validity.
@@ -59,12 +59,11 @@ macOS, and Windows.
 
 ## Questions and contributions
 
-Usage questions can be posted on [our discussion page][discussions-url].
+You are welcome to post usage questions on [our discussion page][discussions-url].
 
 Contributions are very welcome, as are feature requests and suggestions. Please open an
-[issue][issues-url] if you encounter any problems. The [contributing](@ref) page has
-a few guidelines that should be followed when opening pull requests and contributing code.
+[issue][issues-url] if you encounter any problems. The [Contributing](@ref) page has
+guidelines that should be followed when opening pull requests and contributing code.
 
 [discussions-url]: https://github.com/MineralsCloud/ExpressBase.jl/discussions
 [issues-url]: https://github.com/MineralsCloud/ExpressBase.jl/issues
-[contrib-url]: https://github.com/MineralsCloud/ExpressBase.jl/discussions
