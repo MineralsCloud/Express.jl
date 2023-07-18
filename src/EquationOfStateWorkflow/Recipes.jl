@@ -2,12 +2,11 @@ module Recipes
 
 using Configurations: from_dict
 using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, →
-using ExpressBase: SelfConsistentField, VariableCellOptimization
+using ExpressBase: SelfConsistentField, VariableCellOptimization, think
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, eachjob, run!
 
-using ...Express: think
 using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow:
     DownloadPotentials,

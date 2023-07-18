@@ -2,10 +2,9 @@ using Configurations: from_dict
 using Thinkers: Thunk
 using Unitful: dimension, @u_str
 
-using ..Express: DownloadPotentials
 using .Config: RuntimeConfig
 
-import ..Express: think
+import ExpressBase: think
 
 think(obj::CreateInput, template::Input, pressures, eos::PressureEquation) =
     collect(Thunk(obj, template, pressure, eos) for pressure in pressures)

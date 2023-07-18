@@ -13,10 +13,9 @@ using EquationsOfStateOfSolids:
     Vinet,
     PressureEquation
 using ExpressBase: Action, SCF, CommandConfig
+using ExpressBase.Config: SamplingPoints, IO, Subdirectory, list_io, _uparse
 using Unitful: Quantity, FreeUnits
 using UnitfulParsableString  # Override `string`
-
-using ...Config: SamplingPoints, Directory, getfiles, _uparse
 
 import Configurations: from_dict
 
