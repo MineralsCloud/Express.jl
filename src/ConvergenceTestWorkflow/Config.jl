@@ -2,10 +2,15 @@ module Config
 
 using Configurations: from_dict, @option
 using ExpressBase: Action, CommandConfig
+using Unitful: FreeUnits
 
-using ...Config: DirStructure, iofiles, @sp
+using ...Config: SamplingPoints, DirStructure, iofiles
 
-@sp CutoffEnergies "Ry" "ecutwfc"
+@option "ecutwfc" struct CutoffEnergies <: SamplingPoints
+    numbers::Vector{Float64}
+    unit::FreeUnits
+    CutoffEnergies(numbers, unit="Ry") = new(numbers, unit)
+end
 
 @option "k_mesh" struct MonkhorstPackGrids
     meshes::AbstractVector{<:AbstractVector{<:Integer}}

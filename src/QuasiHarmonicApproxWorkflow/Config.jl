@@ -2,24 +2,30 @@ module Config
 
 using Configurations: from_dict, @option
 using ExpressBase.Files: save, parentdir
-using Unitful: ustrip, @u_str
+using Unitful: FreeUnits, ustrip, @u_str
 
-using ...Config: @sp
+using ...Config: SamplingPoints
 
-@sp Pressures "GPa" "pressures" begin
-    function (numbers, unit)
+@option "pressures" struct Pressures <: SamplingPoints
+    numbers::Vector{Float64}
+    unit::FreeUnits
+    function Pressures(numbers, unit="GPa")
         if length(numbers) <= 5
             @info "less than 6 pressures may not fit accurately, consider adding more!"
         end
         if minimum(numbers * unit) >= 0 * unit  # `numbers` may have eltype `Any`
             @warn "for better fitting result, provide at least 1 negative pressure!"
         end
+        return new(numbers, unit)
     end
 end
 
-@sp Temperatures "K" "temperatures" begin
-    function (numbers, unit)
+@option "temperatures" struct Temperatures <: SamplingPoints
+    numbers::Vector{Float64}
+    unit::FreeUnits
+    function Volumes(numbers, unit="K")
         @assert minimum(numbers) * unit >= 0u"K" "the minimum temperature is less than 0K!"
+        return new(numbers, unit)
     end
 end
 
