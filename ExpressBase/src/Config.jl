@@ -6,7 +6,7 @@ using UnitfulAtomic
 
 import Configurations: from_dict
 
-export Directory, list_io_files
+export Subdirectory, list_io_files
 
 using Configurations: @option
 using Formatting: sprintf1
@@ -21,14 +21,12 @@ end
     extension::String = "out"
 end
 
-@option struct Directory
+@option struct Subdirectory
     root::String = pwd()
-    name::String = "%s"
-    input::InputFile = InputFile()
-    output::OutputFile = OutputFile()
+    pattern::String = "%s"
 end
 
-function list_io_files(dir::Directory, name, filename)
+function list_io_files(dir::Subdirectory, name, filename)
     path = joinpath(dir.root, sprintf1(dir.name, name))
     input, output = sprintf1(dir.input.name, filename), sprintf1(dir.output.name, filename)
     return joinpath(path, input) => joinpath(path, output)
