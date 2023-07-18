@@ -9,7 +9,9 @@ using .Config: ExpandConfig
 
 import ..Express: jobify
 
-struct MakeInput{T} <: Action{T} end
+struct MakeInput{T} <: Action{T}
+    calculation::T
+end
 function (x::MakeInput)(file, template::Input, args...)
     input = x(template, args...)
     mkpath(dirname(file))  # In case its parent directory is not created
@@ -34,7 +36,9 @@ end
 
 function parseoutput end
 
-struct GetData{T} <: Action{T} end
+struct GetData{T} <: Action{T}
+    calculation::T
+end
 function (x::GetData)(outputs)
     raw = (parseoutput(output) for output in outputs)  # `ntuple` cannot work with generators
     return collect(Iterators.filter(x -> x !== nothing, raw))  # A vector of pairs
@@ -51,7 +55,9 @@ function jobify(x::GetData{T}, cfgfile) where {T}
     end)
 end
 
-struct TestConvergence{T} <: Action{T} end
+struct TestConvergence{T} <: Action{T}
+    calculation::T
+end
 (x::TestConvergence)(data) = isconvergent(data)
 
 function jobify(x::TestConvergence{T}, cfgfile) where {T}
