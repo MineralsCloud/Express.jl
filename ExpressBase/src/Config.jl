@@ -6,7 +6,7 @@ using UnitfulAtomic
 
 import Configurations: from_dict
 
-export Subdirectory, InputFile, OutputFile, list_io_files
+export Subdirectory, InputFile, OutputFile, list_io
 
 using Configurations: @option
 using Formatting: sprintf1
@@ -32,10 +32,11 @@ end
     out::OutputFile = OutputFile()
 end
 
-function list_io_files(dir::Subdirectory, name, filename)
-    path = joinpath(dir.root, sprintf1(dir.name, name))
-    input, output = sprintf1(dir.input.name, filename), sprintf1(dir.output.name, filename)
-    return joinpath(path, input) => joinpath(path, output)
+function list_io(io::IO, name)
+    path = joinpath(io.subdir.root, sprintf1(io.subdir.pattern, name))
+    in, out = join((io.in.base, io.in.extension), '.'),
+    join((io.out.base, io.out.extension), '.')
+    return joinpath(path, in) => joinpath(path, out)
 end
 
 abstract type SamplingPoints end
