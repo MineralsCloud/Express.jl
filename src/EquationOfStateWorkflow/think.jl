@@ -28,7 +28,7 @@ function think(obj::CreateInput, config::NamedTuple)  # For optimizations
 end
 think(obj::ExtractData, files::AbstractVector) = collect(Thunk(obj, file) for file in files)
 think(obj::ExtractData, config::NamedTuple) = think(obj, last.(config.files))
-think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.raw_data), Set())
+think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.raw), Set())
 think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.parameters), Set())
 function think(obj::FitEquationOfState, config::NamedTuple)
     trial_eos =

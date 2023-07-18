@@ -49,8 +49,8 @@ end
     params::Vector{Quantity{Float64}}
 end
 
-@option struct Save
-    raw_data::String = "volumes_energies.json"
+@option struct Data
+    raw::String = "volumes_energies.json"
     parameters::String = "parameters.json"
 end
 
