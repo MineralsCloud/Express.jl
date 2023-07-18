@@ -14,7 +14,7 @@ using EquationsOfStateOfSolids:
     PressureEquation
 using ExpressBase: Action, SCF, CommandConfig
 using Unitful: Quantity, FreeUnits
-using UnitfulParsableString
+using UnitfulParsableString  # Override `string`
 
 using ...Config: SamplingPoints, Directory, getfiles, _uparse
 
@@ -72,7 +72,9 @@ end
     end
 end
 
-struct ExpandConfig{T} <: Action{T} end
+struct ExpandConfig{T} <: Action{T}
+    calculation::T
+end
 function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
@@ -99,9 +101,9 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(trial_eos.params...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-function (::ExpandConfig{T})(dir::Directory, fixed::Union{Pressures,Volumes}) where {T}
+function (obj::ExpandConfig)(dir::Directory, fixed::Union{Pressures,Volumes})
     return map(fixed.numbers) do number
-        getfiles(dir, number, string(nameof(T)))
+        getfiles(dir, number, string(obj.calculation))
     end
 end
 function (::ExpandConfig)(save::Save)
@@ -109,14 +111,14 @@ function (::ExpandConfig)(save::Save)
     values = (abspath(expanduser(getfield(save, key))) for key in keys)
     return (; zip(keys, values)...)
 end
-function (x::ExpandConfig)(config::RuntimeConfig)
+function (obj::ExpandConfig)(config::RuntimeConfig)
     return (
-        template=x(config.template),
-        trial_eos=PressureEquation(x(config.trial_eos)),
-        fixed=x(config.fixed),
-        files=x(config.dir, config.fixed),
-        scffiles=ExpandConfig{SCF}()(config.dir, config.fixed),
-        save=x(config.save),
+        template=obj(config.template),
+        trial_eos=PressureEquation(obj(config.trial_eos)),
+        fixed=obj(config.fixed),
+        files=obj(config.dir, config.fixed),
+        scffiles=ExpandConfig(SCF())(config.dir, config.fixed),
+        save=obj(config.save),
         cli=config.cli,
     )
 end
