@@ -2,7 +2,6 @@ using AbInitioSoftwareBase: Input, getpseudodir, listpotentials
 using Pseudopotentials: download_potential
 using Thinkers: Thunk
 
-using ..ExpressBase: distribute_procs
 using ..Files: load
 
 struct DownloadPotentials{T} <: Action{T}
@@ -54,7 +53,7 @@ function think(f::RunCmd{T}, config::NamedTuple) where {T}
 end
 function think(x::RunCmd, np::Integer, files, kwargs...)
     jobsize = length(files)
-    np = distribute_procs(np, jobsize)
+    np = procs_per_job(np, jobsize)
     return map(files) do (input, output)
         Thunk(x, input, output; np=np, kwargs...)
     end
