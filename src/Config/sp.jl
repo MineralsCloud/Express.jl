@@ -6,20 +6,6 @@ import Configurations: from_dict
 
 abstract type SamplingPoints end
 
-# See https://github.com/Roger-luo/Configurations.jl/blob/933fd46/src/codegen.jl#L82-L84
-macro sp(type, unit, alias, check=(_, _) -> nothing)
-    unit = _uparse(unit)
-    ex = :(struct $type <: $SamplingPoints
-        numbers::Vector{Float64}
-        unit::$FreeUnits
-        function $type(numbers, unit=$unit)
-            $check(numbers, unit)
-            return new(numbers, unit)
-        end
-    end)
-    return esc(option_m(__module__, ex, alias))
-end
-
 function _uparse(str::AbstractString)
     return lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
 end
