@@ -30,11 +30,13 @@ end
 @option "pressures" struct Pressures <: SamplingPoints
     numbers::Vector{Float64}
     unit::FreeUnits
+    Pressures(numbers, unit="GPa") = new(numbers, unit)
 end
 
 @option "volumes" struct Volumes <: SamplingPoints
     numbers::Vector{Float64}
     unit::FreeUnits
+    Volumes(numbers, unit="bohr^3") = new(numbers, unit)
 end
 
 @option struct Save
