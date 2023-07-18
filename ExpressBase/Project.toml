@@ -1,7 +1,7 @@
 name = "ExpressBase"
 uuid = "6bf22d12-b2e3-4e51-8f6d-9d050a32c5d5"
 authors = ["Reno <singularitti@outlook.com> and contributors"]
-version = "0.5.0"
+version = "0.6.0"
 
 [deps]
 AbInitioSoftwareBase = "df5135bc-470e-46c6-b451-292e27ca5b84"
