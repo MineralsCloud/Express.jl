@@ -12,11 +12,13 @@ using Configurations: @option
 using Formatting: sprintf1
 
 @option struct InputFile
-    name::String = "%s.in"
+    base::String = ""
+    extension::String = "in"
 end
 
 @option struct OutputFile
-    name::String = "%s.out"
+    base::String = ""
+    extension::String = "out"
 end
 
 @option struct Directory
