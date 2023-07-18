@@ -26,14 +26,18 @@ struct MakeInput{T} <: Action{T}
     calculation::T
 end
 (makeinput::MakeInput)(
-    path, template::Input, pressure::Pressure, parameters::Parameters, args...
-) = makeinput(path, makeinput(template, pressure, PressureEquation(parameters), args...))
+    template::Input, pressure::Pressure, parameters::Parameters, args...
+) = makeinput(template, pressure, PressureEquation(parameters), args...)
 (makeinput::MakeInput)(
-    path, template::Input, pressure::Pressure, eos::PressureEquation, args...
-) = makeinput(path, makeinput(template, pressure, eos, args...))
-(makeinput::MakeInput)(path, template::Input, volume::Volume, args...) =
-    makeinput(path, makeinput(template, volume, args...))
-function (makeinput::MakeInput)(path, input::Input)
+    template::Input, pressure::Pressure, eos::PressureEquation, args...
+) = makeinput(template, pressure, eos, args...)
+(makeinput::MakeInput)(template::Input, volume::Volume, args...) =
+    makeinput(template, volume, args...)
+
+struct WriteInput{T} <: Action{T}
+    calculation::T
+end
+function (writeinput::WriteInput)(path, input::Input)
     if isfile(path)
         @warn "File $path already exists! It will be overwritten!"
     end
