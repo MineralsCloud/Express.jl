@@ -12,7 +12,7 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet,
     PressureEquation
-using ExpressBase: Action, Scf, CommandConfig
+using ExpressBase: Action, SCF, CommandConfig
 using Unitful: Quantity
 using UnitfulParsableString
 
@@ -110,7 +110,7 @@ function (x::ExpandConfig)(config::RuntimeConfig)
         trial_eos=PressureEquation(x(config.trial_eos)),
         fixed=x(config.fixed),
         files=x(config.dir, config.fixed),
-        scffiles=ExpandConfig{Scf}()(config.dir, config.fixed),
+        scffiles=ExpandConfig{SCF}()(config.dir, config.fixed),
         save=x(config.save),
         cli=config.cli,
     )

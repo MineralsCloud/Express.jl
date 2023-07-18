@@ -11,7 +11,7 @@ think(obj::CreateInput, template::Input, pressures, eos::PressureEquation) =
     collect(Thunk(obj, template, pressure, eos) for pressure in pressures)
 think(obj::CreateInput, template::Input, volumes) =
     collect(Thunk(obj, template, volume) for volume in volumes)
-function think(obj::CreateInput{Scf}, config::NamedTuple)
+function think(obj::CreateInput{SCF}, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
         return think(obj, config.template, config.fixed)
     else  # Pressures
@@ -32,7 +32,7 @@ think(obj::ExtractData, config::NamedTuple) = think(obj, last.(config.files))
 think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.ev), Set())
 think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.eos), Set())
 function think(obj::FitEquationOfState, config::NamedTuple)
-    trial_eos = obj.calculation isa Scf ? config.trial_eos : loadparameters(config.save.eos)
+    trial_eos = obj.calculation isa SCF ? config.trial_eos : loadparameters(config.save.eos)
     return Thunk(obj(EnergyEquation(trial_eos)), Set())
 end
 function think(f::Action{T}, raw_config::RuntimeConfig) where {T}

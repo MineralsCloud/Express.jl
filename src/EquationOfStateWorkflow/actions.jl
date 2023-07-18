@@ -15,7 +15,7 @@ using EquationsOfStateOfSolids:
     Vinet,
     getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using ExpressBase: Calculation, Action, Scf, Optimization, calculation
+using ExpressBase: Calculation, Action, SCF, Optimization, calculation
 using ExpressBase.Files: save, load, extension
 using Unitful: Pressure, Volume, ustrip, unit
 using UnitfulParsableString: string

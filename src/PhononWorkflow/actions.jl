@@ -3,7 +3,7 @@ using EasyJobsBase: Job
 using ExpressBase:
     VariableCellOptimization,
     LatticeDynamics,
-    Scf,
+    SCF,
     Dfpt,
     RealSpaceForceConstants,
     PhononDispersion,
@@ -19,7 +19,7 @@ import ..Express: jobify
 struct MakeInput{T} <: Action{T} end
 function (x::MakeInput{T})(
     file, template::Input, args...
-) where {T<:Union{Scf,LatticeDynamics}}
+) where {T<:Union{SCF,LatticeDynamics}}
     input = x(template, args...)
     mkpath(dirname(file))  # In case its parent directory is not created
     writetxt(file, input)
@@ -32,7 +32,7 @@ function jobify(x::MakeInput{Dfpt}, cfgfile)
     return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
         Job(function ()
             str = read(previnput, String)
-            prev = parse(inputtype(Scf), str)
+            prev = parse(inputtype(SCF), str)
             return x(input, config.template.dfpt, prev)
         end)
     end
@@ -63,9 +63,9 @@ function jobify(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}
         end)
     end
 end
-function jobify(x::MakeInput{Scf}, cfgfile)
+function jobify(x::MakeInput{SCF}, cfgfile)
     dict = load(cfgfile)
-    config = ExpandConfig{Scf}()(dict)
+    config = ExpandConfig{SCF}()(dict)
     return map(config.files[1]) do (input, _)
         Job(
             function ()
@@ -89,9 +89,9 @@ function parsecell end
 
 function inputtype end
 
-function jobify(x::RunCmd{Scf}, cfgfile)
+function jobify(x::RunCmd{SCF}, cfgfile)
     dict = load(cfgfile)
-    config = ExpandConfig{Scf}()(dict)
+    config = ExpandConfig{SCF}()(dict)
     np = distribute_procs(config.cli.mpi.np, length(config.files[1]))
     return map(config.files[1]) do (input, output)
         Job(() -> x(input, output; np=np))

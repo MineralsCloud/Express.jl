@@ -1,6 +1,6 @@
 module Recipes
 
-using ExpressBase: Scf
+using ExpressBase: SCF
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
@@ -18,18 +18,18 @@ struct TestKPointsRecipe <: Recipe
 end
 
 function build(::Type{Workflow}, r::TestCutoffEnergyRecipe)
-    a = jobify(DownloadPotentials{Scf}(), r.config)
-    c = jobify(MakeInput{Scf}(), r.config)
-    d = jobify(RunCmd{Scf}(), r.config)
-    e = jobify(TestConvergence{Scf}(), r.config)
+    a = jobify(DownloadPotentials{SCF}(), r.config)
+    c = jobify(MakeInput{SCF}(), r.config)
+    d = jobify(RunCmd{SCF}(), r.config)
+    e = jobify(TestConvergence{SCF}(), r.config)
     a → b ⇉ c ⇶ d ⭃ e
     return Workflow(a)
 end
 function build(::Type{Workflow}, r::TestKPointsRecipe)
-    a = jobify(DownloadPotentials{Scf}(), r.config)
-    c = jobify(MakeInput{Scf}(), r.config)
-    d = jobify(RunCmd{Scf}(), r.config)
-    e = jobify(TestConvergence{Scf}(), r.config)
+    a = jobify(DownloadPotentials{SCF}(), r.config)
+    c = jobify(MakeInput{SCF}(), r.config)
+    d = jobify(RunCmd{SCF}(), r.config)
+    e = jobify(TestConvergence{SCF}(), r.config)
     a → b ⇉ c ⇶ d ⭃ e
     return Workflow(a)
 end

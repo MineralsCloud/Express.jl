@@ -1,5 +1,5 @@
 using AbInitioSoftwareBase: Input, writetxt
-using ExpressBase: Action, Scf
+using ExpressBase: Action, SCF
 using ExpressBase.Files: save, load
 using EasyJobsBase: Job
 using Unitful: ustrip
@@ -19,9 +19,9 @@ function (x::MakeInput)(file, template::Input, args...)
     return input
 end
 
-function jobify(x::MakeInput{Scf}, cfgfile)
+function jobify(x::MakeInput{SCF}, cfgfile)
     dict = load(cfgfile)
-    config = ExpandConfig{Scf}()(dict)
+    config = ExpandConfig{SCF}()(dict)
     inputs = first.(config.files)
     if config.parameters isa AbstractVector{<:Tuple}
         return map(inputs, config.parameters) do input, (mesh, shift)
