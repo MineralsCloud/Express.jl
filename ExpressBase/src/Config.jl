@@ -6,24 +6,25 @@ using UnitfulAtomic
 
 import Configurations: from_dict
 
-export Subdirectory, list_io_files
+export Subdirectory, InputFile, OutputFile, list_io_files
 
 using Configurations: @option
 using Formatting: sprintf1
 
-@option struct InputFile
+@option "in" struct InputFile
     base::String = ""
     extension::String = "in"
 end
 
-@option struct OutputFile
+@option "out" struct OutputFile
     base::String = ""
     extension::String = "out"
 end
 
-@option struct Subdirectory
+@option "subdir" struct Subdirectory
     root::String = pwd()
     pattern::String = "%s"
+end
 
 @option "io" struct IO
     subdir::Subdirectory = Subdirectory()
