@@ -1,6 +1,6 @@
 module Recipes
 
-using ExpressBase: SCF, Dfpt, RealSpaceForceConstants, PhononDispersion, VDos
+using ExpressBase: SCF, DFPT, RealSpaceForceConstants, PhononDispersion, VDos
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows.Jobs: Job
@@ -20,8 +20,8 @@ function build(::Type{Workflow}, r::PhononDispersionRecipe)
     a0 = jobify(DownloadPotentials{SCF}(), r.config)
     b = jobify(MakeInput{SCF}(), r.config)
     c = jobify(RunCmd{SCF}(), r.config)
-    f = jobify(MakeInput{Dfpt}(), r.config)
-    g = jobify(RunCmd{Dfpt}(), r.config)
+    f = jobify(MakeInput{DFPT}(), r.config)
+    g = jobify(RunCmd{DFPT}(), r.config)
     j = jobify(MakeInput{RealSpaceForceConstants}(), r.config)
     k = jobify(RunCmd{RealSpaceForceConstants}(), r.config)
     n = jobify(MakeInput{PhononDispersion}(), r.config)
@@ -33,8 +33,8 @@ function build(::Type{Workflow}, r::VDosRecipe)
     a0 = jobify(DownloadPotentials{SCF}(), r.config)
     b = jobify(MakeInput{SCF}(), r.config)
     c = jobify(RunCmd{SCF}(), r.config)
-    f = jobify(MakeInput{Dfpt}(), r.config)
-    g = jobify(RunCmd{Dfpt}(), r.config)
+    f = jobify(MakeInput{DFPT}(), r.config)
+    g = jobify(RunCmd{DFPT}(), r.config)
     j = jobify(MakeInput{RealSpaceForceConstants}(), r.config)
     k = jobify(RunCmd{RealSpaceForceConstants}(), r.config)
     n = jobify(MakeInput{VDos}(), r.config)

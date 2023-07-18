@@ -4,7 +4,7 @@ using ExpressBase:
     VariableCellOptimization,
     LatticeDynamics,
     SCF,
-    Dfpt,
+    DFPT,
     RealSpaceForceConstants,
     PhononDispersion,
     VDos,
@@ -26,9 +26,9 @@ function (x::MakeInput{T})(
     return input
 end
 
-function jobify(x::MakeInput{Dfpt}, cfgfile)
+function jobify(x::MakeInput{DFPT}, cfgfile)
     dict = load(cfgfile)
-    config = ExpandConfig{Dfpt}()(dict)
+    config = ExpandConfig{DFPT}()(dict)
     return map(config.files[2], config.files[1]) do (input, _), (previnput, _)
         Job(function ()
             str = read(previnput, String)
@@ -43,7 +43,7 @@ function jobify(x::MakeInput{RealSpaceForceConstants}, cfgfile)
     return map(config.files[3], config.files[2]) do (input, _), (previnput, _)
         Job(function ()
             str = read(previnput, String)
-            prev = parse(inputtype(Dfpt), str)
+            prev = parse(inputtype(DFPT), str)
             return x(input, config.template.q2r, prev)
         end)
     end
@@ -58,7 +58,7 @@ function jobify(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}
             str = read(previnput, String)
             q2r = parse(inputtype(RealSpaceForceConstants), str)
             str = read(pprevinput, String)
-            dfpt = parse(inputtype(Dfpt), str)
+            dfpt = parse(inputtype(DFPT), str)
             return x(input, config.template.disp, q2r, dfpt)
         end)
     end
@@ -97,9 +97,9 @@ function jobify(x::RunCmd{SCF}, cfgfile)
         Job(() -> x(input, output; np=np))
     end
 end
-function jobify(x::RunCmd{Dfpt}, cfgfile)
+function jobify(x::RunCmd{DFPT}, cfgfile)
     dict = load(cfgfile)
-    config = ExpandConfig{Dfpt}()(dict)
+    config = ExpandConfig{DFPT}()(dict)
     np = distribute_procs(config.cli.mpi.np, length(config.files[2]))
     return map(config.files[2]) do (input, output)
         Job(() -> x(input, output; np=np))
