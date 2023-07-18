@@ -22,22 +22,20 @@ using UnitfulParsableString: string
 
 using .Config: ExpandConfig, Pressures, Volumes, _uparse
 
-struct MakeInput{T} <: Action{T}
+struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(makeinput::MakeInput)(
-    template::Input, pressure::Pressure, parameters::Parameters, args...
-) = makeinput(template, pressure, PressureEquation(parameters), args...)
-(makeinput::MakeInput)(
-    template::Input, pressure::Pressure, eos::PressureEquation, args...
-) = makeinput(template, pressure, eos, args...)
-(makeinput::MakeInput)(template::Input, volume::Volume, args...) =
-    makeinput(template, volume, args...)
+(obj::CreateInput)(template::Input, pressure::Pressure, parameters::Parameters, args...) =
+    obj(template, pressure, PressureEquation(parameters), args...)
+(obj::CreateInput)(template::Input, pressure::Pressure, eos::PressureEquation, args...) =
+    obj(template, pressure, eos, args...)
+(obj::CreateInput)(template::Input, volume::Volume, args...) =
+    obj(template, volume, args...)
 
 struct WriteInput{T} <: Action{T}
     calculation::T
 end
-function (writeinput::WriteInput)(path, input::Input)
+function (obj::WriteInput)(path, input::Input)
     if isfile(path)
         @warn "File $path already exists! It will be overwritten!"
     end
@@ -109,7 +107,7 @@ function (::SaveParameters)(path, parameters::Parameters)
     )
     return save(path, dict)
 end
-(x::SaveParameters)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
+(obj::SaveParameters)(path, eos::EquationOfStateOfSolids) = obj(path, getparam(eos))
 
 struct LoadParameters{T} <: Action{T}
     calculation::T

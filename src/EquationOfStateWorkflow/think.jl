@@ -8,18 +8,18 @@ using .Config: RuntimeConfig
 import ..Express: think
 
 function think(
-    makeinput::MakeInput, files, template::Input, pressures, eos::PressureEquation
+    makeinput::CreateInput, files, template::Input, pressures, eos::PressureEquation
 )
     return map(files, pressures) do (input, _), pressure
         Thunk(makeinput, input, template, pressure, eos)
     end
 end
-function think(makeinput::MakeInput, files, template::Input, volumes)
+function think(makeinput::CreateInput, files, template::Input, volumes)
     return map(files, volumes) do (input, _), volume
         Thunk(makeinput, input, template, volume)
     end
 end
-function think(makeinput::MakeInput{Scf}, config::NamedTuple)
+function think(makeinput::CreateInput{Scf}, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
         return think(makeinput, config.files, config.template, config.fixed)
     else  # Pressures
@@ -28,7 +28,7 @@ function think(makeinput::MakeInput{Scf}, config::NamedTuple)
         )
     end
 end
-function think(makeinput::MakeInput{<:Optimization}, config::NamedTuple)
+function think(makeinput::CreateInput{<:Optimization}, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
         return think(makeinput, config.files, config.template, config.fixed)
     else  # Pressures
