@@ -95,10 +95,7 @@ function (::SaveParameters)(path, parameters::Parameters)
 end
 (obj::SaveParameters)(path, eos::EquationOfStateOfSolids) = obj(path, getparam(eos))
 
-struct LoadParameters{T} <: Action{T}
-    calculation::T
-end
-function (::LoadParameters)(path)
+function loadparameters(path)
     data = load(path)
     type, params = lowercase(data["type"]), data["params"]
     T = if type in ("m", "murnaghan")

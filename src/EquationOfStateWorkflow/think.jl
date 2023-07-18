@@ -37,7 +37,7 @@ function think(fit::FitEquationOfState, config::NamedTuple)
         trial_eos = if calculation(fit) isa Scf
             config.trial_eos
         else
-            LoadParameters{Scf}()(config.save.eos)
+            loadparameters(config.save.eos)
         end
         return fit(EnergyEquation(trial_eos))(data)
     end, Set())
