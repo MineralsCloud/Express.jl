@@ -18,6 +18,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 CompositionsBase = "0.1"
+Configurations = "0.17"
 JSON = "0.20, 0.21"
 SimpleWorkflows = "0.16, 0.23, 0.24, 0.25, 0.26, 0.27"
 ValSplit = "0.1"
