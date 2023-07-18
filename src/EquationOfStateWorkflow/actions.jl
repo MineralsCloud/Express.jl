@@ -32,20 +32,6 @@ end
 (obj::CreateInput)(template::Input, volume::Volume, args...) =
     obj(template, volume, args...)
 
-struct WriteInput{T} <: Action{T}
-    calculation::T
-end
-function (obj::WriteInput)(path, input::Input)
-    if isfile(path)
-        @warn "File $path already exists! It will be overwritten!"
-    end
-    mkpath(dirname(path))  # In case its parent directory is not created
-    open(path, "w") do io
-        print(io, input)
-    end
-    return input
-end
-
 struct ExtractData{T} <: Action{T}
     calculation::T
 end

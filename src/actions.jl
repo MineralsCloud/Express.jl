@@ -27,6 +27,20 @@ end
 think(x::DownloadPotentials, template::Input) = Thunk(x, template)
 think(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
 
+struct WriteInput{T} <: Action{T}
+    calculation::T
+end
+function (obj::WriteInput)(path, input::Input)
+    if isfile(path)
+        @warn "File $path already exists! It will be overwritten!"
+    end
+    mkpath(dirname(path))  # In case its parent directory is not created
+    open(path, "w") do io
+        print(io, input)
+    end
+    return input
+end
+
 struct RunCmd{T} <: Action{T}
     calculation::T
 end
