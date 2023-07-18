@@ -29,10 +29,11 @@ function think(obj::CreateInput, config::NamedTuple)  # For optimizations
 end
 think(obj::ExtractData, files::AbstractVector) = collect(Thunk(obj, file) for file in files)
 think(obj::ExtractData, config::NamedTuple) = think(obj, last.(config.files))
-think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.ev), Set())
-think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.eos), Set())
+think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.raw_data), Set())
+think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.parameters), Set())
 function think(obj::FitEquationOfState, config::NamedTuple)
-    trial_eos = obj.calculation isa SCF ? config.trial_eos : loadparameters(config.save.eos)
+    trial_eos =
+        obj.calculation isa SCF ? config.trial_eos : loadparameters(config.save.parameters)
     return Thunk(obj(EnergyEquation(trial_eos)), Set())
 end
 function think(f::Action{T}, raw_config::RuntimeConfig) where {T}

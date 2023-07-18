@@ -51,9 +51,8 @@ end
 end
 
 @option struct Save
-    ev::String = "ev.json"
-    eos::String = "eos.json"
-    wf::String = "wf.jls"
+    raw_data::String = "volumes_energies.json"
+    parameters::String = "parameters.json"
 end
 
 @option struct RuntimeConfig
