@@ -32,13 +32,16 @@ struct WriteInput{T} <: Action{T}
 end
 function (obj::WriteInput)(path, input::Input)
     if isfile(path)
-        @warn "File $path already exists! It will be overwritten!"
+        @warn "file `$path` already exists! It will be overwritten!"
     end
-    mkpath(dirname(path))  # In case its parent directory is not created
+    if !isdir(dirname(path))
+        @warn "parent directory of `$path` does not exist! It will be created!"
+        mkpath(dirname(path))
+    end
     open(path, "w") do io
-        print(io, input)
+        print(io, input)  # `print` is overridden by loading `*Format` packages.
     end
-    return input
+    return nothing
 end
 
 struct RunCmd{T} <: Action{T}
