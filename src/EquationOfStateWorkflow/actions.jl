@@ -20,6 +20,7 @@ using ExpressBase.Files: save, load, extension
 using Unitful: Pressure, Volume, ustrip, unit
 using UnitfulParsableString: string
 
+using ..Express: DownloadPotentials, RunCmd, WriteInput
 using .Config: ExpandConfig, Pressures, Volumes, _uparse
 
 struct CreateInput{T} <: Action{T}
