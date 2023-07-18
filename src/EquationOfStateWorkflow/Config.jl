@@ -52,7 +52,7 @@ end
 
 @option struct Data
     raw::String = "volumes_energies.json"
-    parameters::String = "parameters.json"
+    eos_params::String = "eos_params.json"
 end
 
 @option struct StaticConfig{T}
@@ -65,7 +65,7 @@ end
         in=InputFile(; base=string(T)),
         out=OutputFile(; base=string(T)),
     )
-    data::Data = OutputData()
+    data::Data = Data()
     cli::CommandConfig
     function StaticConfig{T}(recipe, template, trial_eos, fixed, io, save, cli) where {T}
         @assert recipe in ("eos",)
