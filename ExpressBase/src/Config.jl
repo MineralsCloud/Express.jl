@@ -1,5 +1,13 @@
 module Config
 
+using Configurations: OptionField
+using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension, lookup_units
+using UnitfulAtomic
+
+import Configurations: from_dict
+
+export Directory, list_io_files
+
 using Configurations: @option
 using Formatting: sprintf1
 
@@ -23,12 +31,6 @@ function list_io_files(dir::Directory, name, filename)
     input, output = sprintf1(dir.input.name, filename), sprintf1(dir.output.name, filename)
     return joinpath(path, input) => joinpath(path, output)
 end
-
-using Configurations: OptionField, option_m
-using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension, lookup_units
-using UnitfulAtomic: UnitfulAtomic
-
-import Configurations: from_dict
 
 abstract type SamplingPoints end
 
