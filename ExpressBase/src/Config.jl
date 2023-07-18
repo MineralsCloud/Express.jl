@@ -24,6 +24,11 @@ end
 @option struct Subdirectory
     root::String = pwd()
     pattern::String = "%s"
+
+@option "io" struct IO
+    subdir::Subdirectory = Subdirectory()
+    in::InputFile = InputFile()
+    out::OutputFile = OutputFile()
 end
 
 function list_io_files(dir::Subdirectory, name, filename)
