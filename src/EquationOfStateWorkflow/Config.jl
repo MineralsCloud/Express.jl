@@ -62,8 +62,8 @@ end
     fixed::Union{Pressures,Volumes}
     io::IO = IO(;
         subdir=Subdirectory(; pattern="p=%d"),
-        in=InputFile(; base=string(T)),
-        out=OutputFile(; base=string(T)),
+        in=InputFile(; base=string(nameof(T))),
+        out=OutputFile(; base=string(nameof(T))),
     )
     data::Data = Data()
     cli::CommandConfig
