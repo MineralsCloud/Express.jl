@@ -34,10 +34,6 @@ end
 
 abstract type SamplingPoints end
 
-function _uparse(str::AbstractString)
-    return lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
-end
-
 function from_dict(
     ::Type{<:SamplingPoints},
     ::OptionField{:numbers},
@@ -66,5 +62,8 @@ Base.eltype(iter::SamplingPoints) = Quantity{Float64,dimension(iter.unit),typeof
 Base.length(iter::SamplingPoints) = length(iter.numbers)
 
 Base.size(iter::SamplingPoints) = size(iter.numbers)
+
+_uparse(str::AbstractString) =
+    lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
 
 end
