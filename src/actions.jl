@@ -29,8 +29,10 @@ think(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
 
 struct WriteInput{T} <: Action{T}
     calculation::T
+    path::String
 end
-function (obj::WriteInput)(path, input::Input)
+function (obj::WriteInput)(input::Input)
+    path = obj.path
     if isfile(path)
         @warn "file `$path` already exists! It will be overwritten!"
     end
@@ -43,6 +45,8 @@ function (obj::WriteInput)(path, input::Input)
     end
     return nothing
 end
+
+think(x::WriteInput, input::Input) = Thunk(x, input)
 
 struct RunCmd{T} <: Action{T}
     calculation::T
