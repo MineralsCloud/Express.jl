@@ -27,20 +27,13 @@ function think(obj::CreateInput, config::NamedTuple)  # For optimizations
         end
     end
 end
-think(extract::ExtractData, files::AbstractVector) =
-    map(input -> Thunk(extract, input), files)
-think(extract::ExtractData, config::NamedTuple) = think(extract, last.(config.files))
-think(save::SaveData, config::NamedTuple) = Thunk(data -> save(config.save.ev, data))
-think(save::SaveParameters, config::NamedTuple) = Thunk(data -> save(config.save.eos, data))
-function think(fit::FitEquationOfState, config::NamedTuple)
-    return Thunk(function (data)
-        trial_eos = if calculation(fit) isa Scf
-            config.trial_eos
-        else
-            loadparameters(config.save.eos)
-        end
-        return fit(EnergyEquation(trial_eos))(data)
-    end, Set())
+think(obj::ExtractData, files::AbstractVector) = collect(Thunk(obj, file) for file in files)
+think(obj::ExtractData, config::NamedTuple) = think(obj, last.(config.files))
+think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.ev), Set())
+think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.eos), Set())
+function think(obj::FitEquationOfState, config::NamedTuple)
+    trial_eos = obj.calculation isa Scf ? config.trial_eos : loadparameters(config.save.eos)
+    return Thunk(obj(EnergyEquation(trial_eos)), Set())
 end
 function think(f::Action{T}, raw_config::RuntimeConfig) where {T}
     config = ExpandConfig{T}()(raw_config)
