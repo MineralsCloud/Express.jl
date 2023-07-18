@@ -56,6 +56,7 @@ abstract type Action{T<:Calculation} end
 abstract type CommandConfig end
 
 include("Files.jl")
+include("Config.jl")
 include("Recipes.jl")
 
 end
