@@ -52,7 +52,7 @@ end
 
 @option struct Save
     ev::String = "ev.json"
-    eos::String = "eos.jls"
+    eos::String = "eos.json"
     wf::String = "wf.jls"
 end
 
