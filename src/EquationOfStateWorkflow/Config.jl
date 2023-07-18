@@ -123,10 +123,7 @@ function (obj::ExpandConfig)(config::StaticConfig)
     )
 end
 
-function from_dict(
-    ::Type{TrialEquationOfState}, ::OptionField{:params}, ::Type{<:Quantity}, param
-)
-    return eval(_uparse(string(param)))
-end
+from_dict(::Type{TrialEquationOfState}, ::OptionField{:params}, ::Type{<:Quantity}, param) =
+    eval(_uparse(string(param)))
 
 end
