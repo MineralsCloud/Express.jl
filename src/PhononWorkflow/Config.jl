@@ -3,7 +3,7 @@ module Config
 using Configurations: from_dict, @option
 using ExpressBase: CommandConfig
 
-using ...Config: DirStructure, iofiles, @sp
+using ...Config: SamplingPoints, DirStructure, iofiles
 
 @option struct Template
     scf::String
@@ -27,9 +27,15 @@ using ...Config: DirStructure, iofiles, @sp
     end
 end
 
-@sp Pressures "GPa" "pressures"
+@option "pressures" struct Pressures <: SamplingPoints
+    numbers::Vector{Float64}
+    unit::FreeUnits
+end
 
-@sp Volumes "bohr^3" "volumes"
+@option "volumes" struct Volumes <: SamplingPoints
+    numbers::Vector{Float64}
+    unit::FreeUnits
+end
 
 @option struct Save
     raw::String = "raw.json"
