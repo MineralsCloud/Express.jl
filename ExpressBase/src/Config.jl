@@ -18,7 +18,7 @@ end
     output::OutputFile = OutputFile()
 end
 
-function getfiles(dir::Directory, name, filename)
+function list_io_files(dir::Directory, name, filename)
     path = joinpath(dir.root, sprintf1(dir.name, name))
     input, output = sprintf1(dir.input.name, filename), sprintf1(dir.output.name, filename)
     return joinpath(path, input) => joinpath(path, output)
