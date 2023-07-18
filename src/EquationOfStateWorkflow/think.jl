@@ -7,33 +7,23 @@ using .Config: RuntimeConfig
 
 import ..Express: think
 
-function think(
-    makeinput::CreateInput, files, template::Input, pressures, eos::PressureEquation
-)
-    return map(files, pressures) do (input, _), pressure
-        Thunk(makeinput, input, template, pressure, eos)
-    end
-end
-function think(makeinput::CreateInput, files, template::Input, volumes)
-    return map(files, volumes) do (input, _), volume
-        Thunk(makeinput, input, template, volume)
-    end
-end
-function think(makeinput::CreateInput{Scf}, config::NamedTuple)
+think(obj::CreateInput, template::Input, pressures, eos::PressureEquation) =
+    collect(Thunk(obj, template, pressure, eos) for pressure in pressures)
+think(obj::CreateInput, template::Input, volumes) =
+    collect(Thunk(obj, template, volume) for volume in volumes)
+function think(obj::CreateInput{Scf}, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        return think(makeinput, config.files, config.template, config.fixed)
+        return think(obj, config.template, config.fixed)
     else  # Pressures
-        return think(
-            makeinput, config.files, config.template, config.fixed, config.trial_eos
-        )
+        return think(obj, config.template, config.fixed, config.trial_eos)
     end
 end
-function think(makeinput::CreateInput{<:Optimization}, config::NamedTuple)
+function think(obj::CreateInput, config::NamedTuple)  # For optimizations
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        return think(makeinput, config.files, config.template, config.fixed)
+        return think(obj, config.template, config.fixed)
     else  # Pressures
-        return map(config.files, config.fixed) do (input, _), pressure
-            Thunk(trial_eos -> makeinput(input, config.template, pressure, trial_eos))
+        return map(config.fixed) do pressure
+            Thunk(trial_eos -> obj(config.template, pressure, trial_eos))
         end
     end
 end
