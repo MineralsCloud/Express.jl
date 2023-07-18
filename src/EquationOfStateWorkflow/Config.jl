@@ -105,24 +105,20 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(trial_eos.params...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-function (obj::ExpandConfig)(dir::Directory, fixed::Union{Pressures,Volumes})
-    return map(fixed.numbers) do number
-        getfiles(dir, number, string(obj.calculation))
-    end
-end
-function (::ExpandConfig)(save::Save)
-    keys = fieldnames(Save)
+(obj::ExpandConfig)(io::IO, fixed::Union{Pressures,Volumes}) =
+    collect(list_io(io, number) for number in fixed.numbers)
+function (::ExpandConfig)(save::Data)
+    keys = fieldnames(Data)
     values = (abspath(expanduser(getfield(save, key))) for key in keys)
     return (; zip(keys, values)...)
 end
-function (obj::ExpandConfig)(config::RuntimeConfig)
+function (obj::ExpandConfig)(config::StaticConfig)
     return (
         template=obj(config.template),
         trial_eos=PressureEquation(obj(config.trial_eos)),
         fixed=obj(config.fixed),
-        files=obj(config.dir, config.fixed),
-        scffiles=ExpandConfig(SCF())(config.dir, config.fixed),
-        save=obj(config.save),
+        io=obj(config.io, config.fixed),
+        data=obj(config.data),
         cli=config.cli,
     )
 end
