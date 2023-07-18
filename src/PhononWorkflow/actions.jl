@@ -7,7 +7,7 @@ using ExpressBase:
     DFPT,
     RealSpaceForceConstants,
     PhononDispersion,
-    VDos,
+    VDOS,
     Action
 using ExpressBase.Files: load
 
@@ -48,7 +48,7 @@ function jobify(x::MakeInput{RealSpaceForceConstants}, cfgfile)
         end)
     end
 end
-function jobify(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDos}}
+function jobify(x::MakeInput{T}, cfgfile) where {T<:Union{PhononDispersion,VDOS}}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return map(
