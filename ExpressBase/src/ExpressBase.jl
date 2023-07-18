@@ -55,6 +55,7 @@ abstract type Action{T<:Calculation} end
 "Represent the configurations of a command."
 abstract type CommandConfig end
 
+include("procs_per_job.jl")
 include("Files.jl")
 include("Config.jl")
 include("Recipes.jl")
