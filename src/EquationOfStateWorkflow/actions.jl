@@ -22,7 +22,9 @@ using UnitfulParsableString: string
 
 using .Config: ExpandConfig, Pressures, Volumes, _uparse
 
-struct MakeInput{T} <: Action{T} end
+struct MakeInput{T} <: Action{T}
+    calculation::T
+end
 (makeinput::MakeInput)(
     path, template::Input, pressure::Pressure, parameters::Parameters, args...
 ) = makeinput(path, makeinput(template, pressure, PressureEquation(parameters), args...))
@@ -42,17 +44,23 @@ function (makeinput::MakeInput)(path, input::Input)
     return input
 end
 
-struct ExtractData{T} <: Action{T} end
+struct ExtractData{T} <: Action{T}
+    calculation::T
+end
 
-struct SaveData{T} <: Action{T} end
-function (::SaveData{T})(path, data) where {T}
+struct SaveData{T} <: Action{T}
+    calculation::T
+end
+function (::SaveData)(path, data)
     data = sort(collect(data))  # In case the data is not sorted
     dict = Dict("volume" => (string ∘ first).(data), "energy" => (string ∘ last).(data))
     return save(path, dict)
 end
 
-struct FitEquationOfState{T} <: Action{T} end
-function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
+struct FitEquationOfState{T} <: Action{T}
+    calculation::T
+end
+function (fit::FitEquationOfState)(trial_eos::EnergyEquation)
     return function (data)
         data = sort(collect(data))  # In case the data is not sorted
         if length(data) < length(fieldnames(typeof(trial_eos.param)))
@@ -65,7 +73,9 @@ function (fit::FitEquationOfState{T})(trial_eos::EnergyEquation) where {T}
     end
 end
 
-struct SaveParameters{T} <: Action{T} end
+struct SaveParameters{T} <: Action{T}
+    calculation::T
+end
 function (::SaveParameters)(path, parameters::Parameters)
     dict = Dict(
         "type" => if parameters isa Murnaghan1st
@@ -97,7 +107,9 @@ function (::SaveParameters)(path, parameters::Parameters)
 end
 (x::SaveParameters)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
 
-struct LoadParameters{T} <: Action{T} end
+struct LoadParameters{T} <: Action{T}
+    calculation::T
+end
 function (::LoadParameters)(path)
     data = load(path)
     type, params = lowercase(data["type"]), data["params"]
