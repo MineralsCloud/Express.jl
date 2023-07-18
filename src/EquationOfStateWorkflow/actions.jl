@@ -20,29 +20,18 @@ using ExpressBase.Files: save, load, extension
 using Unitful: Pressure, Volume, ustrip, unit
 using UnitfulParsableString: string
 
+using ..Express: DownloadPotentials, RunCmd, WriteInput
 using .Config: ExpandConfig, Pressures, Volumes, _uparse
 
-struct MakeInput{T} <: Action{T}
+struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(makeinput::MakeInput)(
-    path, template::Input, pressure::Pressure, parameters::Parameters, args...
-) = makeinput(path, makeinput(template, pressure, PressureEquation(parameters), args...))
-(makeinput::MakeInput)(
-    path, template::Input, pressure::Pressure, eos::PressureEquation, args...
-) = makeinput(path, makeinput(template, pressure, eos, args...))
-(makeinput::MakeInput)(path, template::Input, volume::Volume, args...) =
-    makeinput(path, makeinput(template, volume, args...))
-function (makeinput::MakeInput)(path, input::Input)
-    if isfile(path)
-        @warn "File $path already exists! It will be overwritten!"
-    end
-    mkpath(dirname(path))  # In case its parent directory is not created
-    open(path, "w") do io
-        print(io, input)
-    end
-    return input
-end
+(obj::CreateInput)(template::Input, pressure::Pressure, parameters::Parameters, args...) =
+    obj(template, pressure, PressureEquation(parameters), args...)
+(obj::CreateInput)(template::Input, pressure::Pressure, eos::PressureEquation, args...) =
+    obj(template, pressure, eos, args...)
+(obj::CreateInput)(template::Input, volume::Volume, args...) =
+    obj(template, volume, args...)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
@@ -50,11 +39,12 @@ end
 
 struct SaveData{T} <: Action{T}
     calculation::T
+    path::String
 end
-function (::SaveData)(path, data)
+function (obj::SaveData)(data)
     data = sort(collect(data))  # In case the data is not sorted
     dict = Dict("volume" => (string ∘ first).(data), "energy" => (string ∘ last).(data))
-    return save(path, dict)
+    return save(obj.path, dict)
 end
 
 struct FitEquationOfState{T} <: Action{T}
@@ -75,8 +65,9 @@ end
 
 struct SaveParameters{T} <: Action{T}
     calculation::T
+    path::String
 end
-function (::SaveParameters)(path, parameters::Parameters)
+function (obj::SaveParameters)(parameters::Parameters)
     dict = Dict(
         "type" => if parameters isa Murnaghan1st
             "murnaghan"
@@ -103,14 +94,11 @@ function (::SaveParameters)(path, parameters::Parameters)
             string(getproperty(parameters, name)) for name in propertynames(parameters)
         ),
     )
-    return save(path, dict)
+    return save(obj.path, dict)
 end
-(x::SaveParameters)(path, eos::EquationOfStateOfSolids) = x(path, getparam(eos))
+(obj::SaveParameters)(eos::EquationOfStateOfSolids) = obj(getparam(eos))
 
-struct LoadParameters{T} <: Action{T}
-    calculation::T
-end
-function (::LoadParameters)(path)
+function loadparameters(path)
     data = load(path)
     type, params = lowercase(data["type"]), data["params"]
     T = if type in ("m", "murnaghan")

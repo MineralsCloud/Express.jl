@@ -2,15 +2,22 @@ module Recipes
 
 using Configurations: from_dict
 using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, →
-using ExpressBase: Scf, VariableCellOptimization
+using ExpressBase: SelfConsistentField, VariableCellOptimization
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, eachjob, run!
 
-using ...Express: DownloadPotentials, RunCmd, think
+using ...Express: think
 using ..Config: RuntimeConfig
 using ..EquationOfStateWorkflow:
-    MakeInput, ExtractData, SaveData, FitEquationOfState, SaveParameters
+    DownloadPotentials,
+    CreateInput,
+    WriteInput,
+    RunCmd,
+    ExtractData,
+    SaveData,
+    FitEquationOfState,
+    SaveParameters
 
 export build, run!
 
@@ -18,20 +25,22 @@ struct ParallelEosFittingRecipe <: Recipe
     config
 end
 
-function stage(::Scf, r::ParallelEosFittingRecipe)
+function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     steps = map((
-        DownloadPotentials{Scf}(),
-        MakeInput{Scf}(),
-        RunCmd{Scf}(),
-        ExtractData{Scf}(),
-        SaveData{Scf}(),
-        FitEquationOfState{Scf}(),
-        SaveParameters{Scf}(),
+        DownloadPotentials(SelfConsistentField()),
+        CreateInput(SelfConsistentField()),
+        WriteInput(SelfConsistentField()),
+        RunCmd(SelfConsistentField()),
+        ExtractData(SelfConsistentField()),
+        SaveData(SelfConsistentField()),
+        FitEquationOfState(SelfConsistentField()),
+        SaveParameters(SelfConsistentField()),
     )) do action
         think(action, r.config)
     end
     download = Job(steps[1]; name="download potentials")
     makeinputs = map(thunk -> Job(thunk; name="make input in SCF"), steps[2])
+    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[3])
     runcmds = map(
         thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[3]
     )
@@ -41,11 +50,12 @@ function stage(::Scf, r::ParallelEosFittingRecipe)
     savedata = ArgDependentJob(steps[5]; name="save E(V) data in SCF")
     fiteos = ArgDependentJob(steps[6]; name="fit E(V) data in SCF")
     saveparams = ArgDependentJob(steps[7]; name="save EOS parameters in SCF")
-    download .→ makeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
+    download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
     extractdata .→ savedata
     return steps = (;
         download=download,
         makeinputs=makeinputs,
+        writeinputs=writeinputs,
         runcmds=runcmds,
         extractdata=extractdata,
         savedata=savedata,
@@ -55,12 +65,13 @@ function stage(::Scf, r::ParallelEosFittingRecipe)
 end
 function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     steps = map((
-        MakeInput{VariableCellOptimization}(),
-        RunCmd{VariableCellOptimization}(),
-        ExtractData{VariableCellOptimization}(),
-        SaveData{VariableCellOptimization}(),
-        FitEquationOfState{VariableCellOptimization}(),
-        SaveParameters{VariableCellOptimization}(),
+        CreateInput(VariableCellOptimization()),
+        WriteInput(VariableCellOptimization()),
+        RunCmd(VariableCellOptimization()),
+        ExtractData(VariableCellOptimization()),
+        SaveData(VariableCellOptimization()),
+        FitEquationOfState(VariableCellOptimization()),
+        SaveParameters(VariableCellOptimization()),
     )) do action
         think(action, r.config)
     end
@@ -89,7 +100,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
 end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
-    stage₁, stage₂ = stage(Scf(), r), stage(VariableCellOptimization(), r)
+    stage₁, stage₂ = stage(SelfConsistentField(), r), stage(VariableCellOptimization(), r)
     stage₁.fiteos .→ stage₂.makeinputs
     return Workflow(stage₁.download)
 end

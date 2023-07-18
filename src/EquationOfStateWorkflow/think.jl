@@ -7,50 +7,33 @@ using .Config: RuntimeConfig
 
 import ..Express: think
 
-function think(
-    makeinput::MakeInput, files, template::Input, pressures, eos::PressureEquation
-)
-    return map(files, pressures) do (input, _), pressure
-        Thunk(makeinput, input, template, pressure, eos)
-    end
-end
-function think(makeinput::MakeInput, files, template::Input, volumes)
-    return map(files, volumes) do (input, _), volume
-        Thunk(makeinput, input, template, volume)
-    end
-end
-function think(makeinput::MakeInput{Scf}, config::NamedTuple)
+think(obj::CreateInput, template::Input, pressures, eos::PressureEquation) =
+    collect(Thunk(obj, template, pressure, eos) for pressure in pressures)
+think(obj::CreateInput, template::Input, volumes) =
+    collect(Thunk(obj, template, volume) for volume in volumes)
+function think(obj::CreateInput{Scf}, config::NamedTuple)
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        return think(makeinput, config.files, config.template, config.fixed)
+        return think(obj, config.template, config.fixed)
     else  # Pressures
-        return think(
-            makeinput, config.files, config.template, config.fixed, config.trial_eos
-        )
+        return think(obj, config.template, config.fixed, config.trial_eos)
     end
 end
-function think(makeinput::MakeInput{<:Optimization}, config::NamedTuple)
+function think(obj::CreateInput, config::NamedTuple)  # For optimizations
     if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        return think(makeinput, config.files, config.template, config.fixed)
+        return think(obj, config.template, config.fixed)
     else  # Pressures
-        return map(config.files, config.fixed) do (input, _), pressure
-            Thunk(trial_eos -> makeinput(input, config.template, pressure, trial_eos))
+        return map(config.fixed) do pressure
+            Thunk(trial_eos -> obj(config.template, pressure, trial_eos))
         end
     end
 end
-think(extract::ExtractData, files::AbstractVector) =
-    map(input -> Thunk(extract, input), files)
-think(extract::ExtractData, config::NamedTuple) = think(extract, last.(config.files))
-think(save::SaveData, config::NamedTuple) = Thunk(data -> save(config.save.ev, data))
-think(save::SaveParameters, config::NamedTuple) = Thunk(data -> save(config.save.eos, data))
-function think(fit::FitEquationOfState, config::NamedTuple)
-    return Thunk(function (data)
-        trial_eos = if calculation(fit) isa Scf
-            config.trial_eos
-        else
-            LoadParameters{Scf}()(config.save.eos)
-        end
-        return fit(EnergyEquation(trial_eos))(data)
-    end, Set())
+think(obj::ExtractData, files::AbstractVector) = collect(Thunk(obj, file) for file in files)
+think(obj::ExtractData, config::NamedTuple) = think(obj, last.(config.files))
+think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.ev), Set())
+think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.eos), Set())
+function think(obj::FitEquationOfState, config::NamedTuple)
+    trial_eos = obj.calculation isa Scf ? config.trial_eos : loadparameters(config.save.eos)
+    return Thunk(obj(EnergyEquation(trial_eos)), Set())
 end
 function think(f::Action{T}, raw_config::RuntimeConfig) where {T}
     config = ExpandConfig{T}()(raw_config)
