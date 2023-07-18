@@ -1,8 +1,7 @@
-using Configurations: from_dict
 using Thinkers: Thunk
 using Unitful: dimension, @u_str
 
-using .Config: RuntimeConfig
+using .Config: StaticConfig, ExpandConfig
 
 import ExpressBase: think
 
@@ -35,7 +34,7 @@ function think(obj::FitEquationOfState, config::NamedTuple)
         obj.calculation isa SCF ? config.trial_eos : loadparameters(config.save.parameters)
     return Thunk(obj(EnergyEquation(trial_eos)), Set())
 end
-function think(f::Action{T}, raw_config::RuntimeConfig) where {T}
-    config = ExpandConfig{T}()(raw_config)
+function think(f::Action{T}, config::StaticConfig{T}) where {T}
+    config = ExpandConfig(T())(config)
     return think(f, config)
 end

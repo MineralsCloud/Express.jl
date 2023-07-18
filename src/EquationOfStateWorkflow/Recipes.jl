@@ -7,7 +7,7 @@ using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, eachjob, run!
 
-using ..Config: RuntimeConfig
+using ..Config: StaticConfig
 using ..EquationOfStateWorkflow:
     DownloadPotentials,
     CreateInput,
@@ -106,7 +106,7 @@ end
 function build(::Type{Workflow}, file)
     dict = load(file)
     recipe = dict["recipe"]
-    config = from_dict(RuntimeConfig, dict)
+    config = from_dict(StaticConfig, dict)
     if recipe == "eos"
         return build(Workflow, ParallelEosFittingRecipe(config))
     else
