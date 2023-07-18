@@ -12,8 +12,9 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet,
     PressureEquation
-using ExpressBase: Action, SCF, CommandConfig
-using ExpressBase.Config: SamplingPoints, IO, Subdirectory, list_io, _uparse
+using ExpressBase: Action, SelfConsistentField, CommandConfig
+using ExpressBase.Config:
+    SamplingPoints, IO, Subdirectory, InputFile, OutputFile, list_io, _uparse
 using Unitful: Quantity, FreeUnits
 using UnitfulParsableString  # Override `string`
 
@@ -54,20 +55,24 @@ end
     parameters::String = "parameters.json"
 end
 
-@option struct RuntimeConfig
+@option struct StaticConfig{T}
     recipe::String
     template::String
     trial_eos::TrialEquationOfState
     fixed::Union{Pressures,Volumes}
-    dir::Directory = Directory()
-    save::Save = Save()
+    io::IO = IO(;
+        subdir=Subdirectory(; pattern="p=%d"),
+        in=InputFile(; base=string(T)),
+        out=OutputFile(; base=string(T)),
+    )
+    data::Data = OutputData()
     cli::CommandConfig
-    function RuntimeConfig(recipe, template, trial_eos, fixed, dir, save, cli)
+    function StaticConfig{T}(recipe, template, trial_eos, fixed, io, save, cli) where {T}
         @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, trial_eos, fixed, dir, save, cli)
+        return new(recipe, template, trial_eos, fixed, io, save, cli)
     end
 end
 
