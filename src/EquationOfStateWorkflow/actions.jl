@@ -15,13 +15,13 @@ using EquationsOfStateOfSolids:
     Vinet,
     getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using ExpressBase: Calculation, Action, SCF, Optimization, calculation
+using ExpressBase: Calculation, Action, SCF, Optimization
 using ExpressBase.Files: save, load, extension
-using Unitful: Pressure, Volume, ustrip, unit
+using Unitful: Pressure, Volume
 using UnitfulParsableString: string
 
 using ..Express: DownloadPotentials, RunCmd, WriteInput
-using .Config: ExpandConfig, Pressures, Volumes, _uparse
+using .Config: Pressures, Volumes, _uparse
 
 struct CreateInput{T} <: Action{T}
     calculation::T
