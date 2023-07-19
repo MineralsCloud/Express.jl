@@ -47,9 +47,7 @@ struct RunCmd{T} <: Action{T}
     calculation::T
 end
 
-function think(f::RunCmd{T}, config::NamedTuple) where {T}
-    return think(f, config.cli.mpi.np, config.files)
-end
+think(f::RunCmd, config::NamedTuple) = think(f, config.cli.mpi.np, config.files)
 function think(x::RunCmd, np::Integer, files, kwargs...)
     jobsize = length(files)
     np = procs_per_job(np, jobsize)
