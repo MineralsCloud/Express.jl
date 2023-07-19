@@ -41,7 +41,7 @@ function (obj::WriteInput)(path, input::Input)
 end
 (obj::WriteInput)(path) = Base.Fix1(obj, path)
 
-think(x::WriteInput, input::Input) = Thunk(x, input)
+think(x::WriteInput, path) = Thunk(x, path)
 
 struct RunCmd{T} <: Action{T}
     calculation::T
