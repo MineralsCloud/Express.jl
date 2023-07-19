@@ -42,10 +42,6 @@ end
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(obj::CreateInput)(template::Input, pressure::Pressure, parameters::Parameters, args...) =
-    obj(template, pressure, PressureEquation(parameters), args...)
-(obj::CreateInput)(template::Input, pressure::Pressure, eos::PressureEquation, args...) =
-    obj(template, pressure, eos, args...)
 (obj::CreateInput)(template::Input, volume::Volume, args...) =
     obj(template, volume, args...)
 
