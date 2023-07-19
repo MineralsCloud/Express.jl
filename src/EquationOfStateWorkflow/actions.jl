@@ -41,8 +41,9 @@ end
 
 struct CreateInput{T} <: Action{T}
     calculation::T
-    template::Input
 end
+(obj::CreateInput)(template::Input, volume::Volume) = obj(template, volume)
+(obj::CreateInput)(template::Input) = Base.Fix1(obj, template)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
