@@ -41,9 +41,8 @@ end
 
 struct CreateInput{T} <: Action{T}
     calculation::T
+    template::Input
 end
-(obj::CreateInput)(template::Input, volume::Volume, args...) =
-    obj(template, volume, args...)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
