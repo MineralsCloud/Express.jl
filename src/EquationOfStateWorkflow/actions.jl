@@ -13,7 +13,8 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet,
-    getparam
+    getparam,
+    vsolve
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase:
     Calculation, Action, SCF, Optimization, DownloadPotentials, RunCmd, WriteInput
@@ -23,6 +24,20 @@ using Unitful: Pressure, Volume
 using UnitfulParsableString: string
 
 using .Config: Pressures, Volumes
+
+struct ComputeVolume{T} <: Action{T}
+    calculation::T
+end
+(obj::ComputeVolume)(pressure::Pressure, parameters::Parameters) =
+    obj(pressure, PressureEquation(parameters))
+function (obj::ComputeVolume)(pressure::Pressure, eos::PressureEquation)
+    possible_volumes = vsolve(eos, pressure)
+    return if length(possible_volumes) > 1
+        _choose(possible_volumes, pressure, eos)
+    else
+        only(possible_volumes)
+    end
+end
 
 struct CreateInput{T} <: Action{T}
     calculation::T
@@ -124,4 +139,14 @@ function loadparameters(path)
         error("unsupported EOS type `\"$type\"`!")
     end
     return T(map(eval ∘ _uparse, params)...)
+end
+
+function _choose(possible_volumes, pressure, eos)
+    v0 = getparam(eos).v0
+    filtered = if pressure >= zero(pressure)  # If pressure is greater than zero,
+        filter(<=(v0), possible_volumes)  # the volume could only be smaller than `v0`.
+    else
+        filter(v -> 1 < v / v0 <= 3, possible_volumes)
+    end
+    return only(filtered)
 end
