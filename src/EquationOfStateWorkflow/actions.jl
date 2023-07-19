@@ -61,18 +61,17 @@ end
 struct FitEquationOfState{T} <: Action{T}
     calculation::T
 end
-function (fit::FitEquationOfState)(trial_eos::EnergyEquation)
-    return function (data)
-        data = sort(collect(data))  # In case the data is not sorted
-        if length(data) < length(fieldnames(typeof(trial_eos.param)))
-            error("not enough data points to fit an EOS!")
-        end
-        if length(data) <= 5
-            @info "pressures <= 5 may give unreliable results, run more if possible!"
-        end
-        return eosfit(trial_eos, first.(data), last.(data))
+function (obj::FitEquationOfState)(trial_eos::EnergyEquation, data)
+    data = sort(collect(data))  # In case the data is not sorted
+    if length(data) < length(fieldnames(typeof(trial_eos.param)))
+        error("not enough data points to fit an EOS!")
     end
+    if length(data) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
+    end
+    return eosfit(trial_eos, first.(data), last.(data))
 end
+(obj::FitEquationOfState)(trial_eos::EnergyEquation) = Base.Fix1(obj, trial_eos)  # Better performance
 
 struct SaveParameters{T} <: Action{T}
     calculation::T
