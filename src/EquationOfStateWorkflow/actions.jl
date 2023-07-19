@@ -125,5 +125,3 @@ function loadparameters(path)
     end
     return T(map(eval ∘ _uparse, params)...)
 end
-
-include("think.jl")
