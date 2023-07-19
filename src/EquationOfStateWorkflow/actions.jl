@@ -50,13 +50,15 @@ end
 
 struct SaveData{T} <: Action{T}
     calculation::T
-    path::String
 end
-function (obj::SaveData)(data)
-    data = sort(collect(data))  # In case the data is not sorted
-    dict = Dict("volume" => (string ∘ first).(data), "energy" => (string ∘ last).(data))
-    return save(obj.path, dict)
+function (obj::SaveData)(path, raw_data)
+    raw_data = sort(collect(raw_data))  # In case the data is not sorted
+    data = Dict(
+        "volume" => (string ∘ first).(raw_data), "energy" => (string ∘ last).(raw_data)
+    )
+    return save(path, data)
 end
+(obj::SaveData)(path) = Base.Fix1(obj, path)
 
 struct FitEquationOfState{T} <: Action{T}
     calculation::T
@@ -75,9 +77,8 @@ end
 
 struct SaveParameters{T} <: Action{T}
     calculation::T
-    path::String
 end
-function (obj::SaveParameters)(parameters::Parameters)
+function (obj::SaveParameters)(path, parameters::Parameters)
     dict = Dict(
         "type" => if parameters isa Murnaghan1st
             "murnaghan"
@@ -104,9 +105,9 @@ function (obj::SaveParameters)(parameters::Parameters)
             string(getproperty(parameters, name)) for name in propertynames(parameters)
         ),
     )
-    return save(obj.path, dict)
+    return save(path, dict)
 end
-(obj::SaveParameters)(eos::EquationOfStateOfSolids) = obj(getparam(eos))
+(obj::SaveParameters)(path) = Base.Fix1(obj, path)
 
 function loadparameters(path)
     data = load(path)
