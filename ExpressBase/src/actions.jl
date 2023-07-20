@@ -20,7 +20,6 @@ function (::DownloadPotentials)(template::Input)
     end
 end
 
-think(x::DownloadPotentials, template::Input) = Thunk(x, template)
 think(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
 
 struct WriteInput{T} <: Action{T}
