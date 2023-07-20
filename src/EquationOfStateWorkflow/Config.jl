@@ -14,7 +14,14 @@ using EquationsOfStateOfSolids:
     PressureEquation
 using ExpressBase: Action, SelfConsistentField, CommandConfig
 using ExpressBase.Config:
-    SamplingPoints, IO, Subdirectory, InputFile, OutputFile, list_io, _uparse
+    AbstractConfig,
+    SamplingPoints,
+    IO,
+    Subdirectory,
+    InputFile,
+    OutputFile,
+    list_io,
+    _uparse
 using Unitful: Quantity, FreeUnits
 using UnitfulParsableString  # Override `string`
 
@@ -55,7 +62,7 @@ end
     eos_params::String = "eos_params.json"
 end
 
-@option struct StaticConfig{T}
+@option struct StaticConfig <: AbstractConfig
     recipe::String
     template::String
     trial_eos::TrialEquationOfState
@@ -67,7 +74,7 @@ end
     )
     data::Data = Data()
     cli::CommandConfig
-    function StaticConfig{T}(recipe, template, trial_eos, fixed, io, save, cli) where {T}
+    function StaticConfig(recipe, template, trial_eos, at, io, save, cli)
         @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
