@@ -13,22 +13,22 @@ using Formatting: sprintf1
 
 abstract type AbstractConfig end
 
-@option "in" struct InputFile
     base::String = ""
+@option struct InputFile
     extension::String = "in"
 end
 
-@option "out" struct OutputFile
     base::String = ""
+@option struct OutputFile
     extension::String = "out"
 end
 
-@option "subdir" struct Subdirectory
+@option struct Subdirectory
     root::String = pwd()
     pattern::String = "%s"
 end
 
-@option "io" struct IO
+@option struct IO
     subdir::Subdirectory = Subdirectory()
     in::InputFile = InputFile()
     out::OutputFile = OutputFile()
