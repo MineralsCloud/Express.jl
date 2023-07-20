@@ -81,7 +81,7 @@ end
     end
 end
 
-function expand!(conf::Conf, trial_eos::TrialEquationOfState, ::Calculation)
+function expand!(conf::Conf, trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
         Murnaghan1st
@@ -107,14 +107,14 @@ function expand!(conf::Conf, trial_eos::TrialEquationOfState, ::Calculation)
     conf.trial_eos = T(trial_eos.params...)
     return conf
 end
-function expand!(conf::Conf, io::IO, at::Union{Pressures,Volumes}, ::Calculation)
+function expand!(conf::Conf, io::IO, at::Union{Pressures,Volumes})
     conf.io = collect(
         list_io(io, number, string(nameof(typeof(conf.calculation)))) for
         number in at.numbers
     )
     return conf
 end
-function expand!(conf::Conf, data::Data, ::Calculation)
+function expand!(conf::Conf, data::Data)
     conf.data.raw = abspath(expanduser(data.raw))
     conf.data.eos_params = abspath(expanduser(data.eos_params))
     return conf
@@ -123,10 +123,11 @@ end
 function expand(config::StaticConfig, calculation::Calculation)
     conf = Conf()
     conf.cli = config.cli
-    expand!(conf, config.template, calculation)
-    expand!(conf, config.trial_eos, calculation)
-    expand!(conf, config.io, config.at, calculation)
-    expand!(conf, config.data, calculation)
+    conf.calculation = calculation
+    expand!(conf, config.template)
+    expand!(conf, config.trial_eos)
+    expand!(conf, config.io, config.at)
+    expand!(conf, config.data)
     return conf
 end
 
