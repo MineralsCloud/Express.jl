@@ -17,7 +17,13 @@ using EquationsOfStateOfSolids:
     vsolve
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase:
-    Calculation, Action, SCF, Optimization, DownloadPotentials, RunCmd, WriteInput
+    Calculation,
+    Action,
+    SelfConsistentField,
+    Optimization,
+    DownloadPotentials,
+    RunCmd,
+    WriteInput
 using ExpressBase.Config: _uparse
 using ExpressBase.Files: save, load, extension
 using Unitful: Pressure, Volume
