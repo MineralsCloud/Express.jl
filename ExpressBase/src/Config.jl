@@ -13,12 +13,10 @@ using Formatting: sprintf1
 
 abstract type AbstractConfig end
 
-    base::String = ""
 @option struct InputFile
     extension::String = "in"
 end
 
-    base::String = ""
 @option struct OutputFile
     extension::String = "out"
 end
