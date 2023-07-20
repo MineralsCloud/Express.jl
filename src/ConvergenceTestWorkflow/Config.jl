@@ -1,7 +1,7 @@
 module Config
 
 using Configurations: from_dict, @option
-using ExpressBase: Action, CommandConfig
+using ExpressBase: Action, SoftwareConfig
 using Unitful: FreeUnits
 
 using ...Config: SamplingPoints, DirStructure, iofiles
@@ -38,7 +38,7 @@ end
     parameters::Union{CutoffEnergies,MonkhorstPackGrids}
     dirstructure::DirStructure = DirStructure()
     save::Save = Save()
-    cli::CommandConfig
+    cli::SoftwareConfig
     function RuntimeConfig(recipe, template, parameters, dirstructure, save, cli)
         @assert recipe in ("ecut", "k_mesh")
         if !isfile(template)

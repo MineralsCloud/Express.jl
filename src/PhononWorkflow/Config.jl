@@ -1,7 +1,7 @@
 module Config
 
 using Configurations: from_dict, @option
-using ExpressBase: CommandConfig
+using ExpressBase: SoftwareConfig
 
 using ...Config: SamplingPoints, DirStructure, iofiles
 
@@ -50,7 +50,7 @@ end
     fixed::Union{Pressures,Volumes}
     dirstructure::DirStructure = DirStructure()
     save::Save = Save()
-    cli::CommandConfig
+    cli::SoftwareConfig
     function RuntimeConfig(recipe, template, fixed, dirstructure, save, cli)
         @assert recipe in ("phonon dispersion", "vdos")
         for i in 1:nfields(template)

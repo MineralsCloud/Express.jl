@@ -37,7 +37,7 @@ end
     fixed::Union{Pressures,Volumes}
     dir::Directory = Directory()
     save::Save = Save()
-    cli::CommandConfig
+    cli::SoftwareConfig
     function RuntimeConfig(recipe, template, fixed, dir, save, cli)
         @assert recipe in ("static elasticity",)
         if !isfile(template)

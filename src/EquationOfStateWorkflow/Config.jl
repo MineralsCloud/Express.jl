@@ -71,7 +71,7 @@ end
     at::Union{Pressures,Volumes}
     io::IO = IO()
     data::Data = Data()
-    cli::CommandConfig
+    cli::SoftwareConfig
     function StaticConfig(recipe, template, trial_eos, at, io, save, cli)
         @assert recipe in ("eos",)
         if !isfile(template)

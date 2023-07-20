@@ -256,7 +256,7 @@ than one [C-style format specifiers](https://www.tutorialspoint.com/format-speci
 
    ```julia-repl
    julia> w = buildworkflow("eos.toml");
-   ERROR: MethodError: Cannot `convert` an object of type Dict{String, Any} to an object of type AbInitioSoftwareBase.Commands.CommandConfig
+   ERROR: MethodError: Cannot `convert` an object of type Dict{String, Any} to an object of type AbInitioSoftwareBase.Commands.SoftwareConfig
    Closest candidates are:
      convert(::Type{T}, ::Intervals.AnchoredInterval{P, T}) where {P, T} at ~/.julia/packages/Intervals/ua9cq/src/anchoredinterval.jl:181
      convert(::Type{T}, ::Intervals.Interval{T}) where T at ~/.julia/packages/Intervals/ua9cq/src/interval.jl:253
