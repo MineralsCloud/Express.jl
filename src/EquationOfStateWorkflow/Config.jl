@@ -66,7 +66,7 @@ end
     recipe::String
     template::String
     trial_eos::TrialEquationOfState
-    fixed::Union{Pressures,Volumes}
+    at::Union{Pressures,Volumes}
     io::IO = IO(;
         subdir=Subdirectory(; pattern="p=%d"),
         in=InputFile(; base=string(nameof(T))),
@@ -79,7 +79,7 @@ end
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, trial_eos, fixed, io, save, cli)
+        return new(recipe, template, trial_eos, at, io, save, cli)
     end
 end
 
@@ -112,8 +112,8 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(trial_eos.params...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-(obj::ExpandConfig)(io::IO, fixed::Union{Pressures,Volumes}) =
-    collect(list_io(io, number) for number in fixed.numbers)
+(obj::ExpandConfig)(io::IO, at::Union{Pressures,Volumes}) =
+    collect(list_io(io, number) for number in at.numbers)
 function (::ExpandConfig)(save::Data)
     keys = fieldnames(Data)
     values = (abspath(expanduser(getfield(save, key))) for key in keys)
@@ -123,8 +123,8 @@ function (obj::ExpandConfig)(config::StaticConfig)
     return (
         template=obj(config.template),
         trial_eos=PressureEquation(obj(config.trial_eos)),
-        fixed=obj(config.fixed),
-        io=obj(config.io, config.fixed),
+        at=obj(config.at),
+        io=obj(config.io, config.at),
         data=obj(config.data),
         cli=config.cli,
     )
