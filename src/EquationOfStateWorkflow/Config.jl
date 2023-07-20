@@ -12,9 +12,10 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet,
     PressureEquation
-using ExpressBase: Action, SelfConsistentField, CommandConfig
+using ExpressBase: Action, Calculation, SelfConsistentField
 using ExpressBase.Config:
     AbstractConfig,
+    SoftwareConfig,
     SamplingPoints,
     IO,
     Subdirectory,
