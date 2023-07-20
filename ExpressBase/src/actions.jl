@@ -40,6 +40,8 @@ function (obj::WriteInput)(path, input::Input)
 end
 (obj::WriteInput)(path) = Base.Fix1(obj, path)
 
+think(action::WriteInput, file) = Thunk(action, file)
+
 struct RunCmd{T} <: Action{T}
     calculation::T
 end
