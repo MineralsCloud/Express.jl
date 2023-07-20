@@ -11,20 +11,20 @@ export Subdirectory, InputFile, OutputFile, list_io
 
 abstract type AbstractConfig end
 
-@option struct InputFile
+@option struct InputFile <: AbstractConfig
     extension::String = "in"
 end
 
-@option struct OutputFile
+@option struct OutputFile <: AbstractConfig
     extension::String = "out"
 end
 
-@option struct Subdirectory
+@option struct Subdirectory <: AbstractConfig
     root::String = pwd()
     pattern::String = "%s"
 end
 
-@option struct IO
+@option struct IO <: AbstractConfig
     subdir::Subdirectory = Subdirectory()
     in::InputFile = InputFile()
     out::OutputFile = OutputFile()
@@ -36,7 +36,7 @@ function list_io(io::IO, dir, file)
     return joinpath(path, in) => joinpath(path, out)
 end
 
-abstract type SamplingPoints end
+abstract type SamplingPoints <: AbstractConfig end
 
 from_dict(
     ::Type{<:SamplingPoints},
