@@ -9,6 +9,9 @@ import Configurations: from_dict
 
 abstract type AbstractConfig end
 
+"Represent the configurations of a command."
+abstract type CommandConfig <: AbstractConfig end
+
 @option struct InputFile <: AbstractConfig
     extension::String = "in"
 end
