@@ -15,7 +15,7 @@ function think(action::ComputeVolume, conf::Conf)
     return collect(Thunk(action, pressure, trial_eos) for pressure in conf.at)
 end
 think(action::CreateInput, conf::Conf) =
-    collect(Thunk(action, conf.template) for _ in Base.OneTo(length(conf.fixed)))
+    collect(Thunk(action, conf.template) for _ in Base.OneTo(length(conf.at)))
 think(action::WriteInput, conf::Conf) =
     collect(think(action, file) for file in first.(conf.io))
 think(action::ExtractData, conf::Conf) =
