@@ -11,6 +11,8 @@ export Subdirectory, InputFile, OutputFile, list_io
 using Configurations: @option
 using Formatting: sprintf1
 
+abstract type AbstractConfig end
+
 @option "in" struct InputFile
     base::String = ""
     extension::String = "in"
