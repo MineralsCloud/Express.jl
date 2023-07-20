@@ -5,17 +5,20 @@ using .Config: StaticConfig, expand
 
 import ExpressBase: think
 
-think(obj::CreateInput, config::NamedTuple) =
-    collect(Thunk(obj, config.template) for _ in Base.OneTo(length(config.fixed)))
-think(obj::WriteInput, config::NamedTuple) = think.(obj, first.(config.io))
-think(obj::ExtractData, config::NamedTuple) =
-    collect(Thunk(obj, file) for file in last.(config.io))
-think(obj::SaveData, config::NamedTuple) = Thunk(obj, config.data.raw)
-think(obj::SaveParameters, config::NamedTuple) = Thunk(obj, config.save.parameters)
-function think(obj::FitEquationOfState, config::NamedTuple)
-    trial_eos =
-        obj.calculation isa SCF ? config.trial_eos : loadparameters(config.save.parameters)
-    return Thunk(obj(EnergyEquation(trial_eos)), Set())
+think(action::CreateInput, config::NamedTuple) =
+    collect(Thunk(action, config.template) for _ in Base.OneTo(length(config.fixed)))
+think(action::WriteInput, config::NamedTuple) = think.(action, first.(config.io))
+think(action::ExtractData, config::NamedTuple) =
+    collect(Thunk(action, file) for file in last.(config.io))
+think(action::SaveData, config::NamedTuple) = Thunk(action, config.data.raw)
+think(action::SaveParameters, config::NamedTuple) = Thunk(action, config.save.parameters)
+function think(action::FitEquationOfState, config::NamedTuple)
+    trial_eos = if action.calculation isa SCF
+        config.trial_eos
+    else
+        loadparameters(config.save.parameters)
+    end
+    return Thunk(action(EnergyEquation(trial_eos)), Set())
 end
 function think(action::Action, config::StaticConfig)
     config = expand(config, action.calculation)

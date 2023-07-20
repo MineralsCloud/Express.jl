@@ -28,9 +28,9 @@ using .Config: Pressures, Volumes
 struct ComputeVolume{T} <: Action{T}
     calculation::T
 end
-(obj::ComputeVolume)(pressure::Pressure, parameters::Parameters) =
-    obj(pressure, PressureEquation(parameters))
-function (obj::ComputeVolume)(pressure::Pressure, eos::PressureEquation)
+(action::ComputeVolume)(pressure::Pressure, parameters::Parameters) =
+    action(pressure, PressureEquation(parameters))
+function (action::ComputeVolume)(pressure::Pressure, eos::PressureEquation)
     possible_volumes = vsolve(eos, pressure)
     return if length(possible_volumes) > 1
         _choose(possible_volumes, pressure, eos)
@@ -42,8 +42,8 @@ end
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(obj::CreateInput)(template::Input, volume::Volume) = obj(template, volume)
-(obj::CreateInput)(template::Input) = Base.Fix1(obj, template)
+(action::CreateInput)(template::Input, volume::Volume) = action(template, volume)
+(action::CreateInput)(template::Input) = Base.Fix1(action, template)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
@@ -52,19 +52,19 @@ end
 struct SaveData{T} <: Action{T}
     calculation::T
 end
-function (obj::SaveData)(path, raw_data)
+function (action::SaveData)(path, raw_data)
     raw_data = sort(collect(raw_data))  # In case the data is not sorted
     data = Dict(
         "volume" => (string ∘ first).(raw_data), "energy" => (string ∘ last).(raw_data)
     )
     return save(path, data)
 end
-(obj::SaveData)(path) = Base.Fix1(obj, path)
+(action::SaveData)(path) = Base.Fix1(action, path)
 
 struct FitEquationOfState{T} <: Action{T}
     calculation::T
 end
-function (obj::FitEquationOfState)(trial_eos::EnergyEquation, data)
+function (action::FitEquationOfState)(trial_eos::EnergyEquation, data)
     data = sort(collect(data))  # In case the data is not sorted
     if length(data) < length(fieldnames(typeof(trial_eos.param)))
         error("not enough data points to fit an EOS!")
@@ -74,12 +74,12 @@ function (obj::FitEquationOfState)(trial_eos::EnergyEquation, data)
     end
     return eosfit(trial_eos, first.(data), last.(data))
 end
-(obj::FitEquationOfState)(trial_eos::EnergyEquation) = Base.Fix1(obj, trial_eos)  # Better performance
+(action::FitEquationOfState)(trial_eos::EnergyEquation) = Base.Fix1(action, trial_eos)  # Better performance
 
 struct SaveParameters{T} <: Action{T}
     calculation::T
 end
-function (obj::SaveParameters)(path, parameters::Parameters)
+function (action::SaveParameters)(path, parameters::Parameters)
     dict = Dict(
         "type" => if parameters isa Murnaghan1st
             "murnaghan"
@@ -108,7 +108,7 @@ function (obj::SaveParameters)(path, parameters::Parameters)
     )
     return save(path, dict)
 end
-(obj::SaveParameters)(path) = Base.Fix1(obj, path)
+(action::SaveParameters)(path) = Base.Fix1(action, path)
 
 function loadparameters(path)
     data = load(path)
