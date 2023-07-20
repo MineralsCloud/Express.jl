@@ -1,15 +1,13 @@
 module Config
 
-using Configurations: OptionField
+using Configurations: OptionField, @option
+using Formatting: sprintf1
 using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension, lookup_units
 using UnitfulAtomic
 
 import Configurations: from_dict
 
 export Subdirectory, InputFile, OutputFile, list_io
-
-using Configurations: @option
-using Formatting: sprintf1
 
 abstract type AbstractConfig end
 
@@ -40,19 +38,15 @@ end
 
 abstract type SamplingPoints end
 
-function from_dict(
+from_dict(
     ::Type{<:SamplingPoints},
     ::OptionField{:numbers},
     ::Type{Vector{Float64}},
     str::AbstractString,
-)
-    return eval(Meta.parse(str))
-end
-function from_dict(
+) = eval(Meta.parse(str))
+from_dict(
     ::Type{<:SamplingPoints}, ::OptionField{:unit}, ::Type{<:FreeUnits}, str::AbstractString
-)
-    return _uparse(str)
-end
+) = _uparse(str)
 
 # Similar to https://github.com/JuliaCollections/IterTools.jl/blob/0ecaa88/src/IterTools.jl#L1028-L1032
 function Base.iterate(iter::SamplingPoints, state=1)
