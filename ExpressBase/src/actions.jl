@@ -40,17 +40,14 @@ function (obj::WriteInput)(path, input::Input)
 end
 (obj::WriteInput)(path) = Base.Fix1(obj, path)
 
-think(x::WriteInput, path) = Thunk(x, path)
-
 struct RunCmd{T} <: Action{T}
     calculation::T
 end
 
-think(f::RunCmd, config::NamedTuple) = think(f, config.cli.mpi.np, config.files)
-function think(x::RunCmd, np::Integer, files, kwargs...)
-    jobsize = length(files)
-    np = procs_per_job(np, jobsize)
-    return map(files) do (input, output)
-        Thunk(x, input, output; np=np, kwargs...)
+function think(x::RunCmd, config::NamedTuple)
+    njobs = length(config.files)
+    np = procs_per_job(config.cli.mpi.np, njobs)
+    return map(config.files) do (input, output)
+        Thunk(x, input, output; np=np)
     end
 end
