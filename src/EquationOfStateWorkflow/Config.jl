@@ -1,6 +1,7 @@
 module Config
 
 using Configurations: OptionField, @option
+using EasyConfig: Config as Conf
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -80,10 +81,7 @@ end
     end
 end
 
-struct ExpandConfig{T} <: Action{T}
-    calculation::T
-end
-function (::ExpandConfig)(trial_eos::TrialEquationOfState)
+function expand!(conf::Conf, trial_eos::TrialEquationOfState, ::Calculation)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
         Murnaghan1st
@@ -106,26 +104,29 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(trial_eos.params...)
+    conf.trial_eos = T(trial_eos.params...)
+    return conf
 end
-(::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-(obj::ExpandConfig)(io::IO, at::Union{Pressures,Volumes}) = collect(
-    list_io(io, number, string(nameof(typeof(obj.calculation)))) for number in at.numbers
-)
-function (::ExpandConfig)(save::Data)
+function expand!(conf::Conf, io::IO, at::Union{Pressures,Volumes}, ::Calculation)
+    conf.io = collect(
+        list_io(io, number, string(nameof(typeof(conf.calculation)))) for
+        number in at.numbers
+    )
+    return conf
+end
+function expand!(save::Data, ::Calculation)
     keys = fieldnames(Data)
     values = (abspath(expanduser(getfield(save, key))) for key in keys)
     return (; zip(keys, values)...)
 end
-function (obj::ExpandConfig)(config::StaticConfig)
-    return (
-        template=obj(config.template),
-        trial_eos=PressureEquation(obj(config.trial_eos)),
-        at=obj(config.at),
-        io=obj(config.io, config.at),
-        data=obj(config.data),
-        cli=config.cli,
-    )
+
+function expand(config::StaticConfig, calculation::Calculation)
+    conf = Conf()
+    conf.cli = config.cli
+    expand!(conf, config.template, calculation)
+    expand!(conf, config.trial_eos, calculation)
+    expand!(conf, config.io, config.at, calculation)
+    return conf
 end
 
 from_dict(::Type{TrialEquationOfState}, ::OptionField{:params}, ::Type{<:Quantity}, param) =
