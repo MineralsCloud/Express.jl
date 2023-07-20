@@ -1,6 +1,7 @@
 module Config
 
 using Configurations: OptionField, @option
+using EasyConfig: Config as Conf
 using EquationsOfStateOfSolids:
     Murnaghan1st,
     Murnaghan2nd,
@@ -12,9 +13,17 @@ using EquationsOfStateOfSolids:
     PoirierTarantola4th,
     Vinet,
     PressureEquation
-using ExpressBase: Action, SelfConsistentField, CommandConfig
+using ExpressBase: Action, Calculation, SelfConsistentField
 using ExpressBase.Config:
-    SamplingPoints, IO, Subdirectory, InputFile, OutputFile, list_io, _uparse
+    AbstractConfig,
+    SoftwareConfig,
+    SamplingPoints,
+    IO,
+    Subdirectory,
+    InputFile,
+    OutputFile,
+    list_io,
+    _uparse
 using Unitful: Quantity, FreeUnits
 using UnitfulParsableString  # Override `string`
 
@@ -45,41 +54,34 @@ end
     end
 end
 
-@option struct TrialEquationOfState
+@option struct TrialEquationOfState <: AbstractConfig
     type::String
     params::Vector{Quantity{Float64}}
 end
 
-@option struct Data
+@option struct Data <: AbstractConfig
     raw::String = "volumes_energies.json"
     eos_params::String = "eos_params.json"
 end
 
-@option struct StaticConfig{T}
+@option struct StaticConfig <: AbstractConfig
     recipe::String
     template::String
     trial_eos::TrialEquationOfState
-    fixed::Union{Pressures,Volumes}
-    io::IO = IO(;
-        subdir=Subdirectory(; pattern="p=%d"),
-        in=InputFile(; base=string(nameof(T))),
-        out=OutputFile(; base=string(nameof(T))),
-    )
+    at::Union{Pressures,Volumes}
+    io::IO = IO()
     data::Data = Data()
     cli::CommandConfig
-    function StaticConfig{T}(recipe, template, trial_eos, fixed, io, save, cli) where {T}
+    function StaticConfig(recipe, template, trial_eos, at, io, save, cli)
         @assert recipe in ("eos",)
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, trial_eos, fixed, io, save, cli)
+        return new(recipe, template, trial_eos, at, io, save, cli)
     end
 end
 
-struct ExpandConfig{T} <: Action{T}
-    calculation::T
-end
-function (::ExpandConfig)(trial_eos::TrialEquationOfState)
+function _update!(conf::Conf, trial_eos::TrialEquationOfState)
     type = filter(c -> isletter(c) || isdigit(c), lowercase(trial_eos.type))
     T = if type in ("m", "murnaghan")
         Murnaghan1st
@@ -102,25 +104,31 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     else
         error("unsupported eos name `\"$type\"`!")
     end
-    return T(trial_eos.params...)
+    conf.trial_eos = T(trial_eos.params...)
+    return conf
 end
-(::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-(obj::ExpandConfig)(io::IO, fixed::Union{Pressures,Volumes}) =
-    collect(list_io(io, number) for number in fixed.numbers)
-function (::ExpandConfig)(save::Data)
-    keys = fieldnames(Data)
-    values = (abspath(expanduser(getfield(save, key))) for key in keys)
-    return (; zip(keys, values)...)
-end
-function (obj::ExpandConfig)(config::StaticConfig)
-    return (
-        template=obj(config.template),
-        trial_eos=PressureEquation(obj(config.trial_eos)),
-        fixed=obj(config.fixed),
-        io=obj(config.io, config.fixed),
-        data=obj(config.data),
-        cli=config.cli,
+function _update!(conf::Conf, io::IO, at::Union{Pressures,Volumes})
+    conf.io = collect(
+        list_io(io, number, string(nameof(typeof(conf.calculation)))) for
+        number in at.numbers
     )
+    return conf
+end
+function _update!(conf::Conf, data::Data)
+    conf.data.raw = abspath(expanduser(data.raw))
+    conf.data.eos_params = abspath(expanduser(data.eos_params))
+    return conf
+end
+
+function expand(config::StaticConfig, calculation::Calculation)
+    conf = Conf()
+    conf.cli = config.cli
+    conf.calculation = calculation
+    _update!(conf, config.template)
+    _update!(conf, config.trial_eos)
+    _update!(conf, config.io, config.at)
+    _update!(conf, config.data)
+    return conf
 end
 
 from_dict(::Type{TrialEquationOfState}, ::OptionField{:params}, ::Type{<:Quantity}, param) =

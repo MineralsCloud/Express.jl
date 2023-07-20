@@ -13,7 +13,8 @@ using EquationsOfStateOfSolids:
     PoirierTarantola3rd,
     PoirierTarantola4th,
     Vinet,
-    getparam
+    getparam,
+    vsolve
 using EquationsOfStateOfSolids.Fitting: eosfit
 using ExpressBase:
     Calculation, Action, SCF, Optimization, DownloadPotentials, RunCmd, WriteInput
@@ -24,15 +25,25 @@ using UnitfulParsableString: string
 
 using .Config: Pressures, Volumes
 
+struct ComputeVolume{T} <: Action{T}
+    calculation::T
+end
+(action::ComputeVolume)(pressure::Pressure, parameters::Parameters) =
+    action(pressure, PressureEquation(parameters))
+function (action::ComputeVolume)(pressure::Pressure, eos::PressureEquation)
+    possible_volumes = vsolve(eos, pressure)
+    return if length(possible_volumes) > 1
+        _choose(possible_volumes, pressure, eos)
+    else
+        only(possible_volumes)
+    end
+end
+
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(obj::CreateInput)(template::Input, pressure::Pressure, parameters::Parameters, args...) =
-    obj(template, pressure, PressureEquation(parameters), args...)
-(obj::CreateInput)(template::Input, pressure::Pressure, eos::PressureEquation, args...) =
-    obj(template, pressure, eos, args...)
-(obj::CreateInput)(template::Input, volume::Volume, args...) =
-    obj(template, volume, args...)
+(action::CreateInput)(template::Input, volume::Volume) = action(template, volume)
+(action::CreateInput)(template::Input) = Base.Fix1(action, template)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
@@ -40,35 +51,35 @@ end
 
 struct SaveData{T} <: Action{T}
     calculation::T
-    path::String
 end
-function (obj::SaveData)(data)
-    data = sort(collect(data))  # In case the data is not sorted
-    dict = Dict("volume" => (string ∘ first).(data), "energy" => (string ∘ last).(data))
-    return save(obj.path, dict)
+function (action::SaveData)(path, raw_data)
+    raw_data = sort(collect(raw_data))  # In case the data is not sorted
+    data = Dict(
+        "volume" => (string ∘ first).(raw_data), "energy" => (string ∘ last).(raw_data)
+    )
+    return save(path, data)
 end
+(action::SaveData)(path) = Base.Fix1(action, path)
 
 struct FitEquationOfState{T} <: Action{T}
     calculation::T
 end
-function (fit::FitEquationOfState)(trial_eos::EnergyEquation)
-    return function (data)
-        data = sort(collect(data))  # In case the data is not sorted
-        if length(data) < length(fieldnames(typeof(trial_eos.param)))
-            error("not enough data points to fit an EOS!")
-        end
-        if length(data) <= 5
-            @info "pressures <= 5 may give unreliable results, run more if possible!"
-        end
-        return eosfit(trial_eos, first.(data), last.(data))
+function (action::FitEquationOfState)(trial_eos::EnergyEquation, data)
+    data = sort(collect(data))  # In case the data is not sorted
+    if length(data) < length(fieldnames(typeof(trial_eos.param)))
+        error("not enough data points to fit an EOS!")
     end
+    if length(data) <= 5
+        @info "pressures <= 5 may give unreliable results, run more if possible!"
+    end
+    return eosfit(trial_eos, first.(data), last.(data))
 end
+(action::FitEquationOfState)(trial_eos::EnergyEquation) = Base.Fix1(action, trial_eos)  # Better performance
 
 struct SaveParameters{T} <: Action{T}
     calculation::T
-    path::String
 end
-function (obj::SaveParameters)(parameters::Parameters)
+function (action::SaveParameters)(path, parameters::Parameters)
     dict = Dict(
         "type" => if parameters isa Murnaghan1st
             "murnaghan"
@@ -95,9 +106,9 @@ function (obj::SaveParameters)(parameters::Parameters)
             string(getproperty(parameters, name)) for name in propertynames(parameters)
         ),
     )
-    return save(obj.path, dict)
+    return save(path, dict)
 end
-(obj::SaveParameters)(eos::EquationOfStateOfSolids) = obj(getparam(eos))
+(action::SaveParameters)(path) = Base.Fix1(action, path)
 
 function loadparameters(path)
     data = load(path)
@@ -124,4 +135,14 @@ function loadparameters(path)
         error("unsupported EOS type `\"$type\"`!")
     end
     return T(map(eval ∘ _uparse, params)...)
+end
+
+function _choose(possible_volumes, pressure, eos)
+    v0 = getparam(eos).v0
+    filtered = if pressure >= zero(pressure)  # If pressure is greater than zero,
+        filter(<=(v0), possible_volumes)  # the volume could only be smaller than `v0`.
+    else
+        filter(v -> 1 < v / v0 <= 3, possible_volumes)
+    end
+    return only(filtered)
 end

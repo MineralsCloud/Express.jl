@@ -1,41 +1,26 @@
 using Thinkers: Thunk
 using Unitful: dimension, @u_str
 
-using .Config: StaticConfig, ExpandConfig
+using .Config: StaticConfig, expand
 
 import ExpressBase: think
 
-think(obj::CreateInput, template::Input, pressures, eos::PressureEquation) =
-    collect(Thunk(obj, template, pressure, eos) for pressure in pressures)
-think(obj::CreateInput, template::Input, volumes) =
-    collect(Thunk(obj, template, volume) for volume in volumes)
-function think(obj::CreateInput{SCF}, config::NamedTuple)
-    if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        return think(obj, config.template, config.fixed)
-    else  # Pressures
-        return think(obj, config.template, config.fixed, config.trial_eos)
+think(action::CreateInput, config::NamedTuple) =
+    collect(Thunk(action, config.template) for _ in Base.OneTo(length(config.fixed)))
+think(action::WriteInput, config::NamedTuple) = think.(action, first.(config.io))
+think(action::ExtractData, config::NamedTuple) =
+    collect(Thunk(action, file) for file in last.(config.io))
+think(action::SaveData, config::NamedTuple) = Thunk(action, config.data.raw)
+think(action::SaveParameters, config::NamedTuple) = Thunk(action, config.save.parameters)
+function think(action::FitEquationOfState, config::NamedTuple)
+    trial_eos = if action.calculation isa SCF
+        config.trial_eos
+    else
+        loadparameters(config.save.parameters)
     end
+    return Thunk(action(EnergyEquation(trial_eos)), Set())
 end
-function think(obj::CreateInput, config::NamedTuple)  # For optimizations
-    if dimension(first(config.fixed)) == dimension(u"m^3")  # Volumes
-        return think(obj, config.template, config.fixed)
-    else  # Pressures
-        return map(config.fixed) do pressure
-            Thunk(trial_eos -> obj(config.template, pressure, trial_eos))
-        end
-    end
-end
-think(obj::WriteInput, config::NamedTuple) = think.(obj, first.(config.io))
-think(obj::ExtractData, files::AbstractVector) = collect(Thunk(obj, file) for file in files)
-think(obj::ExtractData, config::NamedTuple) = think(obj, last.(config.io))
-think(obj::SaveData, config::NamedTuple) = Thunk(obj(config.save.raw), Set())
-think(obj::SaveParameters, config::NamedTuple) = Thunk(obj(config.save.parameters), Set())
-function think(obj::FitEquationOfState, config::NamedTuple)
-    trial_eos =
-        obj.calculation isa SCF ? config.trial_eos : loadparameters(config.save.parameters)
-    return Thunk(obj(EnergyEquation(trial_eos)), Set())
-end
-function think(f::Action{T}, config::StaticConfig{T}) where {T}
-    config = ExpandConfig(T())(config)
-    return think(f, config)
+function think(action::Action, config::StaticConfig)
+    config = expand(config, action.calculation)
+    return think(action, config)
 end
