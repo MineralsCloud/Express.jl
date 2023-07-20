@@ -47,9 +47,9 @@ struct RunCmd{T} <: Action{T}
 end
 
 function think(x::RunCmd, config)
-    njobs = length(config.files)
+    njobs = length(config.io)
     np = procs_per_job(config.cli.mpi.np, njobs)
-    return map(config.files) do (input, output)
+    return map(config.io) do (input, output)
         Thunk(x, input, output; np=np)
     end
 end
