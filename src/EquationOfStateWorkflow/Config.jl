@@ -108,8 +108,9 @@ function (::ExpandConfig)(trial_eos::TrialEquationOfState)
     return T(trial_eos.params...)
 end
 (::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-(obj::ExpandConfig)(io::IO, at::Union{Pressures,Volumes}) =
-    collect(list_io(io, number) for number in at.numbers)
+(obj::ExpandConfig)(io::IO, at::Union{Pressures,Volumes}) = collect(
+    list_io(io, number, string(nameof(typeof(obj.calculation)))) for number in at.numbers
+)
 function (::ExpandConfig)(save::Data)
     keys = fieldnames(Data)
     values = (abspath(expanduser(getfield(save, key))) for key in keys)
