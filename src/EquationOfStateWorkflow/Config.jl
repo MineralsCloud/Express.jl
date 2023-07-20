@@ -67,11 +67,7 @@ end
     template::String
     trial_eos::TrialEquationOfState
     at::Union{Pressures,Volumes}
-    io::IO = IO(;
-        subdir=Subdirectory(; pattern="p=%d"),
-        in=InputFile(; base=string(nameof(T))),
-        out=OutputFile(; base=string(nameof(T))),
-    )
+    io::IO = IO()
     data::Data = Data()
     cli::CommandConfig
     function StaticConfig(recipe, template, trial_eos, at, io, save, cli)
