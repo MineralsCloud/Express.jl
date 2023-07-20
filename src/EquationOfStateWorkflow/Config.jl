@@ -52,12 +52,12 @@ end
     end
 end
 
-@option struct TrialEquationOfState
+@option struct TrialEquationOfState <: AbstractConfig
     type::String
     params::Vector{Quantity{Float64}}
 end
 
-@option struct Data
+@option struct Data <: AbstractConfig
     raw::String = "volumes_energies.json"
     eos_params::String = "eos_params.json"
 end
