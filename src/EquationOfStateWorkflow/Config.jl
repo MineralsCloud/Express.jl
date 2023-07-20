@@ -114,10 +114,10 @@ function expand!(conf::Conf, io::IO, at::Union{Pressures,Volumes}, ::Calculation
     )
     return conf
 end
-function expand!(save::Data, ::Calculation)
-    keys = fieldnames(Data)
-    values = (abspath(expanduser(getfield(save, key))) for key in keys)
-    return (; zip(keys, values)...)
+function expand!(conf::Conf, data::Data, ::Calculation)
+    conf.data.raw = abspath(expanduser(data.raw))
+    conf.data.eos_params = abspath(expanduser(data.eos_params))
+    return conf
 end
 
 function expand(config::StaticConfig, calculation::Calculation)
@@ -126,6 +126,7 @@ function expand(config::StaticConfig, calculation::Calculation)
     expand!(conf, config.template, calculation)
     expand!(conf, config.trial_eos, calculation)
     expand!(conf, config.io, config.at, calculation)
+    expand!(conf, config.data, calculation)
     return conf
 end
 
