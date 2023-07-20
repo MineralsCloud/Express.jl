@@ -32,10 +32,9 @@ end
     out::OutputFile = OutputFile()
 end
 
-function list_io(io::IO, name)
-    path = joinpath(io.subdir.root, sprintf1(io.subdir.pattern, name))
-    in, out = join((io.in.base, io.in.extension), '.'),
-    join((io.out.base, io.out.extension), '.')
+function list_io(io::IO, dir, file)
+    path = joinpath(io.subdir.root, sprintf1(io.subdir.pattern, dir))
+    in, out = join((file, io.in.extension), '.'), join((file, io.out.extension), '.')
     return joinpath(path, in) => joinpath(path, out)
 end
 
