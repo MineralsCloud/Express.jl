@@ -107,6 +107,10 @@ function _update!(conf::Conf, trial_eos::TrialEquationOfState)
     conf.trial_eos = T(trial_eos.params...)
     return conf
 end
+function _update!(conf::Conf, at::Union{Pressures,Volumes})
+    conf.at = collect(number for number in at.numbers)
+    return conf
+end
 function _update!(conf::Conf, io::IO, at::Union{Pressures,Volumes})
     conf.io = collect(
         list_io(io, number, string(nameof(typeof(conf.calculation)))) for
@@ -126,6 +130,7 @@ function expand(config::StaticConfig, calculation::Calculation)
     conf.calculation = calculation
     _update!(conf, config.template)
     _update!(conf, config.trial_eos)
+    _update!(conf, config.at)
     _update!(conf, config.io, config.at)
     _update!(conf, config.data)
     return conf
