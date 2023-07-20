@@ -20,7 +20,7 @@ function (::DownloadPotentials)(template::Input)
     end
 end
 
-think(x::DownloadPotentials, config::NamedTuple) = Thunk(x, config.template)
+think(x::DownloadPotentials, config) = Thunk(x, config.template)
 
 struct WriteInput{T} <: Action{T}
     calculation::T
@@ -44,7 +44,7 @@ struct RunCmd{T} <: Action{T}
     calculation::T
 end
 
-function think(x::RunCmd, config::NamedTuple)
+function think(x::RunCmd, config)
     njobs = length(config.files)
     np = procs_per_job(config.cli.mpi.np, njobs)
     return map(config.files) do (input, output)
