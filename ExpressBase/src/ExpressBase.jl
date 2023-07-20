@@ -52,9 +52,6 @@ const QHA = QuasiHarmonicApproximation
 "Represent an atomic action for a specific `Calculation` type."
 abstract type Action{T<:Calculation} end
 
-"Represent the configurations of a command."
-abstract type CommandConfig end
-
 include("procs_per_job.jl")
 include("Files.jl")
 include("actions.jl")

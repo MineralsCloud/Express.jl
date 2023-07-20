@@ -9,6 +9,8 @@ import Configurations: from_dict
 
 abstract type AbstractConfig end
 
+abstract type SoftwareConfig <: AbstractConfig end
+
 @option struct InputFile <: AbstractConfig
     extension::String = "in"
 end
