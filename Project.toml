@@ -24,6 +24,7 @@ UnitfulParsableString = "06c00241-927a-4d5b-bb5e-6b5a2ada3567"
 [compat]
 AbInitioSoftwareBase = "0.10"
 Configurations = "0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17"
+EasyConfig = "0.1"
 EasyJobsBase = "0.9, 0.10, 0.11, 0.12, 0.13"
 EquationsOfStateOfSolids = "0.2, 0.3, 0.4"
 ExpressBase = "0.4, 0.5, 0.6"
