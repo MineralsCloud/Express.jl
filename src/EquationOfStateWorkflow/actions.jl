@@ -48,7 +48,6 @@ end
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(action::CreateInput)(template::Input, volume::Volume) = action(template, volume)
 (action::CreateInput)(template::Input) = Base.Fix1(action, template)
 
 struct ExtractData{T} <: Action{T}
