@@ -108,7 +108,7 @@ function _update!(conf::Conf, trial_eos::TrialEquationOfState)
     return conf
 end
 function _update!(conf::Conf, at::Union{Pressures,Volumes})
-    conf.at = collect(number for number in at.numbers)
+    conf.at = collect(number for number in at)
     return conf
 end
 function _update!(conf::Conf, io::IO, at::Union{Pressures,Volumes})
