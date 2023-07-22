@@ -23,12 +23,16 @@ think(action::ExtractData, conf::Conf) =
 think(action::SaveData, conf::Conf) = Thunk(action, conf.data.raw)
 think(action::SaveParameters, conf::Conf) = Thunk(action, conf.data.eos_params)
 function think(action::FitEquationOfState, conf::Conf)
-    trial_eos = if action.calculation isa SelfConsistentField
-        conf.trial_eos
-    else
-        loadparameters(conf.data.eos_params)
+    function fit(data)
+        trial_eos = if action.calculation isa SelfConsistentField
+            conf.trial_eos
+        else
+            loadparameters(conf.data.eos_params)
+        end
+        eos = EnergyEquation(trial_eos)
+        return action(eos, data)
     end
-    return Thunk(action(EnergyEquation(trial_eos)), Set())
+    return Thunk(fit, Set())
 end
 function think(action::Action{T}, config::StaticConfig) where {T}
     config = expand(config, T())
