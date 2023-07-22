@@ -7,9 +7,10 @@ using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, eachjob, run!
 
-using ..Config: StaticConfig
+using ..Config: StaticConfig, expand
 using ..EquationOfStateWorkflow:
     DownloadPotentials,
+    ComputeVolume,
     CreateInput,
     WriteInput,
     RunCmd,
@@ -25,8 +26,10 @@ struct ParallelEosFittingRecipe <: Recipe
 end
 
 function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
+    conf = expand(r.config, SelfConsistentField())
     steps = map((
         DownloadPotentials(SelfConsistentField()),
+        ComputeVolume(SelfConsistentField()),
         CreateInput(SelfConsistentField()),
         WriteInput(SelfConsistentField()),
         RunCmd(SelfConsistentField()),
@@ -35,24 +38,27 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
         FitEquationOfState(SelfConsistentField()),
         SaveParameters(SelfConsistentField()),
     )) do action
-        think(action, r.config)
+        think(action, conf)
     end
     download = Job(steps[1]; name="download potentials")
-    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), steps[2])
-    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[3])
+    compute = map(thunk -> Job(thunk; name="compute volume in SCF"), steps[2])
+    makeinputs = map(thunk -> ArgDependentJob(thunk; name="update input in SCF"), steps[3])
+    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[4])
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[4]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[5]
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), steps[5]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), steps[6]
     )
-    savedata = ArgDependentJob(steps[6]; name="save E(V) data in SCF")
-    fiteos = ArgDependentJob(steps[7]; name="fit E(V) data in SCF")
-    saveparams = ArgDependentJob(steps[8]; name="save EOS parameters in SCF")
-    download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
+    savedata = ArgDependentJob(steps[7]; name="save E(V) data in SCF")
+    fiteos = ArgDependentJob(steps[8]; name="fit E(V) data in SCF")
+    saveparams = ArgDependentJob(steps[9]; name="save EOS parameters in SCF")
+    download .→
+    compute .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
     extractdata .→ savedata
     return steps = (;
         download=download,
+        compute=compute,
         makeinputs=makeinputs,
         writeinputs=writeinputs,
         runcmds=runcmds,
@@ -63,7 +69,9 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     )
 end
 function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
+    conf = expand(r.config, VariableCellOptimization())
     steps = map((
+        ComputeVolume(VariableCellOptimization()),
         CreateInput(VariableCellOptimization()),
         WriteInput(VariableCellOptimization()),
         RunCmd(VariableCellOptimization()),
@@ -72,26 +80,28 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         FitEquationOfState(VariableCellOptimization()),
         SaveParameters(VariableCellOptimization()),
     )) do action
-        think(action, r.config)
+        think(action, conf)
     end
+    compute = map(thunk -> Job(thunk; name="compute volume in vc-relax"), steps[1])
     makeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="make input in vc-relax"), steps[1]
+        thunk -> ArgDependentJob(thunk; name="make input in vc-relax"), steps[2]
     )
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in vc-relax"), steps[2]
+        thunk -> ArgDependentJob(thunk; name="write input in vc-relax"), steps[3]
     )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in vc-relax"), steps[3]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in vc-relax"), steps[4]
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"), steps[4]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"), steps[5]
     )
-    savedata = ArgDependentJob(steps[5]; name="save E(V) data in vc-relax")
-    fiteos = ArgDependentJob(steps[6]; name="fit E(V) data in vc-relax")
-    saveparams = ArgDependentJob(steps[7]; name="save EOS parameters in vc-relax")
-    makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
+    savedata = ArgDependentJob(steps[6]; name="save E(V) data in vc-relax")
+    fiteos = ArgDependentJob(steps[7]; name="fit E(V) data in vc-relax")
+    saveparams = ArgDependentJob(steps[8]; name="save EOS parameters in vc-relax")
+    compute .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
     extractdata .→ savedata
     return steps = (;
+        compute=compute,
         makeinputs=makeinputs,
         writeinputs=writeinputs,
         runcmds=runcmds,
@@ -104,7 +114,7 @@ end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
     stage₁, stage₂ = stage(SelfConsistentField(), r), stage(VariableCellOptimization(), r)
-    stage₁.fiteos .→ stage₂.makeinputs
+    stage₁.fiteos .→ stage₂.compute
     return Workflow(stage₁.download)
 end
 function build(::Type{Workflow}, file)
