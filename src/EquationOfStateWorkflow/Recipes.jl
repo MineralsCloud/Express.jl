@@ -114,7 +114,7 @@ end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
     stage₁, stage₂ = stage(SelfConsistentField(), r), stage(VariableCellOptimization(), r)
-    stage₁.fiteos .→ stage₂.compute
+    stage₁.saveparams .→ stage₂.compute
     return Workflow(stage₁.download)
 end
 function build(::Type{Workflow}, file)
