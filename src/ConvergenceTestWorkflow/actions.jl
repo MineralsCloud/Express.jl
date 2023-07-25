@@ -1,26 +1,22 @@
-using AbInitioSoftwareBase: Input, writetxt
-using ExpressBase: Action, SCF
+using AbInitioSoftwareBase: Input
+using ExpressBase: Action
 using ExpressBase.Files: save, load
 using EasyJobsBase: Job
 using Unitful: ustrip
 
-using ..Express: distribute_procs
-using .Config: ExpandConfig
-
-import ..Express: jobify
-
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
-
-
-function parseoutput end
+(action::CreateInput)(template::Input) = Base.Fix1(action, template)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
 end
 
+struct SaveData{T} <: Action{T}
+    calculation::T
 end
+(action::SaveData)(path) = Base.Fix1(action, path)
 
 struct TestConvergence{T} <: Action{T}
     calculation::T
