@@ -9,17 +9,11 @@ using .Config: ExpandConfig
 
 import ..Express: jobify
 
-struct MakeInput{T} <: Action{T}
+struct CreateInput{T} <: Action{T}
     calculation::T
 end
-function (x::MakeInput)(file, template::Input, args...)
-    input = x(template, args...)
-    mkpath(dirname(file))  # In case its parent directory is not created
-    writetxt(file, input)
-    return input
-end
 
-function jobify(x::MakeInput{SCF}, cfgfile)
+function jobify(x::CreateInput{SCF}, cfgfile)
     dict = load(cfgfile)
     config = ExpandConfig{SCF}()(dict)
     inputs = first.(config.files)
@@ -36,15 +30,11 @@ end
 
 function parseoutput end
 
-struct GetData{T} <: Action{T}
+struct ExtractData{T} <: Action{T}
     calculation::T
 end
-function (x::GetData)(outputs)
-    raw = (parseoutput(output) for output in outputs)  # `ntuple` cannot work with generators
-    return collect(Iterators.filter(x -> x !== nothing, raw))  # A vector of pairs
-end
 
-function jobify(x::GetData{T}, cfgfile) where {T}
+function jobify(x::ExtractData{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return Job(function ()
@@ -64,7 +54,7 @@ function jobify(x::TestConvergence{T}, cfgfile) where {T}
     dict = load(cfgfile)
     config = ExpandConfig{T}()(dict)
     return Job(function ()
-        data = GetData{T}()(last.(config.files))
+        data = ExtractData{T}()(last.(config.files))
         saved = Dict("results" => (ustrip ∘ last).(data))
         save(config.save_raw, saved)
         return x(data)
