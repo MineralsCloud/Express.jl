@@ -16,6 +16,13 @@ end
 struct SaveData{T} <: Action{T}
     calculation::T
 end
+function (action::SaveData)(path, raw_data)
+    raw_data = sort(collect(raw_data))  # In case the data is not sorted
+    data = Dict(
+        "ecut_kmesh" => (string ∘ first).(raw_data), "energy" => (string ∘ last).(raw_data)
+    )
+    return save(path, data)
+end
 (action::SaveData)(path) = Base.Fix1(action, path)
 
 struct TestConvergence{T} <: Action{T}
