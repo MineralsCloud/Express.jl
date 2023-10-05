@@ -11,7 +11,7 @@ using Unitful: FreeUnits
     CutoffEnergies(numbers, unit="Ry") = new(numbers, unit)
 end
 
-@option "k_mesh" struct MonkhorstPackGrids <: AbstractConfig
+@option "kmesh" struct MonkhorstPackGrids <: AbstractConfig
     meshes::AbstractVector{<:AbstractVector{<:Integer}}
     shifts::AbstractVector{<:AbstractVector{Bool}} = fill(falses(3), length(meshes))
     function MonkhorstPackGrids(meshes, shifts)
@@ -38,7 +38,7 @@ end
     data::Data = Data()
     cli::SoftwareConfig
     function StaticConfig(recipe, template, with, io, data, cli)
-        @assert recipe in ("ecut", "k_mesh")
+        @assert recipe in ("ecut", "kmesh")
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
