@@ -1,37 +1,71 @@
 module Recipes
 
-using ExpressBase: SCF
+using Configurations: from_dict
+using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, →
+using ExpressBase: SelfConsistentField, think
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows.Workflows: Workflow, run!, →, ⇉, ⇶, ⭃
+using SimpleWorkflows: Workflow, eachjob, run!
 
-using ...Express: DownloadPotentials, RunCmd, jobify
-using ..ConvergenceTestWorkflow: MakeInput, TestConvergence
+using ..Config: StaticConfig, expand
+using ..ConvergenceTestWorkflow:
+    DownloadPotentials,
+    CreateInput,
+    WriteInput,
+    RunCmd,
+    ExtractData,
+    SaveData,
+    TestConvergence
 
 export build, run!
 
 struct TestCutoffEnergyRecipe <: Recipe
     config
 end
-struct TestKPointsRecipe <: Recipe
+struct TestKMeshRecipe <: Recipe
     config
 end
 
-function build(::Type{Workflow}, r::TestCutoffEnergyRecipe)
-    a = jobify(DownloadPotentials{SCF}(), r.config)
-    c = jobify(MakeInput{SCF}(), r.config)
-    d = jobify(RunCmd{SCF}(), r.config)
-    e = jobify(TestConvergence{SCF}(), r.config)
-    a → b ⇉ c ⇶ d ⭃ e
-    return Workflow(a)
+function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
+    conf = expand(r.config, SelfConsistentField())
+    steps = map((
+        DownloadPotentials(SelfConsistentField()),
+        CreateInput(SelfConsistentField()),
+        WriteInput(SelfConsistentField()),
+        RunCmd(SelfConsistentField()),
+        ExtractData(SelfConsistentField()),
+        SaveData(SelfConsistentField()),
+        TestConvergence(SelfConsistentField()),
+    )) do action
+        think(action, conf)
+    end
+    download = Job(steps[1]; name="download potentials")
+    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), steps[2])
+    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[3])
+    runcmds = map(
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[4]
+    )
+    extractdata = map(
+        thunk -> ConditionalJob(thunk; name="extract energies in SCF"), steps[5]
+    )
+    savedata = ArgDependentJob(steps[6]; name="save energies in SCF")
+    testconv = ArgDependentJob(steps[9]; name="test convergence in SCF")
+    download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ testconv
+    extractdata .→ savedata
+    return steps = (;
+        download=download,
+        makeinputs=makeinputs,
+        writeinputs=writeinputs,
+        runcmds=runcmds,
+        extractdata=extractdata,
+        savedata=savedata,
+        testconv=testconv,
+    )
 end
-function build(::Type{Workflow}, r::TestKPointsRecipe)
-    a = jobify(DownloadPotentials{SCF}(), r.config)
-    c = jobify(MakeInput{SCF}(), r.config)
-    d = jobify(RunCmd{SCF}(), r.config)
-    e = jobify(TestConvergence{SCF}(), r.config)
-    a → b ⇉ c ⇶ d ⭃ e
-    return Workflow(a)
+
+function build(::Type{Workflow}, r::Union{TestCutoffEnergyRecipe,TestKMeshRecipe})
+    stage = stage(SelfConsistentField(), r)
+    return Workflow(stage.download)
 end
 function build(::Type{Workflow}, file)
     dict = load(file)
@@ -39,7 +73,7 @@ function build(::Type{Workflow}, file)
     if recipe == "ecut"
         return build(Workflow, TestCutoffEnergyRecipe(dict))
     elseif recipe == "k_mesh"
-        return build(Workflow, TestKPointsRecipe(dict))
+        return build(Workflow, TestKMeshRecipe(dict))
     else
         error("unsupported recipe $recipe.")
     end
