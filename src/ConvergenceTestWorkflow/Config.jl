@@ -1,20 +1,19 @@
 module Config
 
 using Configurations: from_dict, @option
-using ExpressBase: Action, SoftwareConfig
+using EasyConfig: Config as Conf
+using ExpressBase.Config: AbstractConfig, SoftwareConfig, SamplingPoints, IO, list_io
 using Unitful: FreeUnits
 
-using ...Config: SamplingPoints, DirStructure, iofiles
-
-@option "ecutwfc" struct CutoffEnergies <: SamplingPoints
+@option "ecut" struct CutoffEnergies <: SamplingPoints
     numbers::Vector{Float64}
     unit::FreeUnits
     CutoffEnergies(numbers, unit="Ry") = new(numbers, unit)
 end
 
-@option "k_mesh" struct MonkhorstPackGrids
+@option "k_mesh" struct MonkhorstPackGrids <: AbstractConfig
     meshes::AbstractVector{<:AbstractVector{<:Integer}}
-    shifts::AbstractVector{<:AbstractVector{<:Integer}} = fill([0, 0, 0], length(meshes))
+    shifts::AbstractVector{<:AbstractVector{Bool}} = fill(falses(3), length(meshes))
     function MonkhorstPackGrids(meshes, shifts)
         if length(meshes) != length(shifts)
             throw(DimensionMismatch("`meshes` and `shifts` should have the same length!"))
@@ -27,58 +26,57 @@ end
     end
 end
 
-@option struct Save
-    raw::String = "raw.json"
-    status::String = ""
+@option struct Data <: AbstractConfig
+    raw::String = "energies.json"
 end
 
-@option struct RuntimeConfig
+@option struct StaticConfig <: AbstractConfig
     recipe::String
     template::String
-    parameters::Union{CutoffEnergies,MonkhorstPackGrids}
-    dirstructure::DirStructure = DirStructure()
-    save::Save = Save()
+    with::Union{CutoffEnergies,MonkhorstPackGrids}
+    io::IO = IO()
+    data::Data = Data()
     cli::SoftwareConfig
-    function RuntimeConfig(recipe, template, parameters, dirstructure, save, cli)
+    function StaticConfig(recipe, template, with, io, data, cli)
         @assert recipe in ("ecut", "k_mesh")
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, parameters, dirstructure, save, cli)
+        return new(recipe, template, with, io, data, cli)
     end
 end
 
-struct ExpandConfig{T} <: Action{T} end
-(::ExpandConfig)(energies::CutoffEnergies) = energies.numbers .* energies.unit
-function (::ExpandConfig)(x::MonkhorstPackGrids)
-    return map(x.meshes, x.shifts) do mesh, shift
-        (mesh, shift)
-    end
-end
-function (::ExpandConfig{T})(ds::DirStructure, energies::CutoffEnergies) where {T}
-    return iofiles(ds, energies.numbers, string(nameof(T)))
-end
-function (::ExpandConfig{T})(ds::DirStructure, grids::MonkhorstPackGrids) where {T}
-    return iofiles(ds, zip(grids.meshes, grids.shifts), string(nameof(T)))
-end
-function (::ExpandConfig)(save::Save)
-    return map((:raw, :status)) do f
-        v = getfield(save, f)
-        isempty(v) ? abspath(mktemp(; cleanup=false)[1]) : abspath(expanduser(v))
-    end
-end
-function (x::ExpandConfig)(config::AbstractDict)
-    config = from_dict(RuntimeConfig, config)
-    save_raw, save_status = x(config.save)
-    return (
-        template=x(config.template),
-        parameters=x(config.parameters),
-        root=config.files.dirs.root,
-        files=x(config.files, config.parameters),
-        save_raw=save_raw,
-        save_status=save_status,
-        cli=config.cli,
+function _update!(conf::Conf, io::IO, energies::CutoffEnergies)
+    conf.io = collect(
+        list_io(io, number, string(nameof(typeof(conf.calculation)))) for
+        number in energies.numbers
     )
+    return conf
+end
+function _update!(conf::Conf, io::IO, grids::MonkhorstPackGrids)
+    conf.io = collect(
+        list_io(
+            io,
+            join(mesh, '×') * '_' * join(shift, '+'),
+            string(nameof(typeof(conf.calculation))),
+        ) for (mesh, shift) in zip(grids.meshes, grids.shifts)
+    )
+    return conf
+end
+function _update!(conf::Conf, data::Data)
+    conf.data.raw = abspath(expanduser(data.raw))
+    return conf
+end
+
+function expand(config::StaticConfig, calculation::Calculation)
+    conf = Conf()
+    conf.cli = config.cli
+    conf.calculation = calculation
+    _update!(conf, config.template)
+    _update!(conf, config.with)
+    _update!(conf, config.io, config.with)
+    _update!(conf, config.data)
+    return conf
 end
 
 end
