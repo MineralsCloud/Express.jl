@@ -2,8 +2,8 @@ module Config
 
 using Configurations: OptionField, @option
 using Formatting: sprintf1
-using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension, lookup_units
-using UnitfulAtomic
+using Unitful: Unitful, FreeUnits, Quantity, uparse, dimension
+using UnitfulAtomic: UnitfulAtomic
 
 import Configurations: from_dict
 
@@ -64,6 +64,6 @@ Base.length(iter::SamplingPoints) = length(iter.numbers)
 Base.size(iter::SamplingPoints) = size(iter.numbers)
 
 _uparse(str::AbstractString) =
-    lookup_units([Unitful, UnitfulAtomic], Meta.parse(filter(!isspace, str)))
+    uparse(filter(!isspace, str); unit_context=[Unitful, UnitfulAtomic])
 
 end
