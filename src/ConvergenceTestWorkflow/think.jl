@@ -1,6 +1,5 @@
 using Thinkers: Thunk
 using EasyConfig: Config as Conf
-using ExpressBase: WriteInput
 
 using .Config: StaticConfig, expand
 

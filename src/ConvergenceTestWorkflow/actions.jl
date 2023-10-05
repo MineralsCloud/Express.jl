@@ -1,5 +1,6 @@
 using AbInitioSoftwareBase: Input
-using ExpressBase: Action
+using ExpressBase:
+    Calculation, Action, SelfConsistentField, DownloadPotentials, RunCmd, WriteInput
 using ExpressBase.Files: save, load
 using EasyJobsBase: Job
 using Unitful: ustrip
