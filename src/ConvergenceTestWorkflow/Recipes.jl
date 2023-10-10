@@ -49,7 +49,7 @@ function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
         thunk -> ConditionalJob(thunk; name="extract energies in SCF"), steps[5]
     )
     savedata = ArgDependentJob(steps[6]; name="save energies in SCF")
-    testconv = ArgDependentJob(steps[9]; name="test convergence in SCF")
+    testconv = ArgDependentJob(steps[7]; name="test convergence in SCF")
     download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ testconv
     extractdata .→ savedata
     return steps = (;
@@ -58,22 +58,23 @@ function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
         writeinputs=writeinputs,
         runcmds=runcmds,
         extractdata=extractdata,
-        savedata=savedata,
         testconv=testconv,
+        savedata=savedata
     )
 end
 
 function build(::Type{Workflow}, r::Union{TestCutoffEnergyRecipe,TestKMeshRecipe})
-    stage = stage(SelfConsistentField(), r)
-    return Workflow(stage.download)
+    s = stage(SelfConsistentField(), r)
+    return Workflow(s.download)
 end
 function build(::Type{Workflow}, file)
     dict = load(file)
     recipe = dict["recipe"]
+    config = from_dict(StaticConfig, dict)
     if recipe == "ecut"
-        return build(Workflow, TestCutoffEnergyRecipe(dict))
+        return build(Workflow, TestCutoffEnergyRecipe(config))
     elseif recipe == "k_mesh"
-        return build(Workflow, TestKMeshRecipe(dict))
+        return build(Workflow, TestKMeshRecipe(config))
     else
         error("unsupported recipe $recipe.")
     end

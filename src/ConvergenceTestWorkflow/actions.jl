@@ -8,7 +8,6 @@ using Unitful: ustrip
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
-(action::CreateInput)(template::Input) = Base.Fix1(action, template)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
@@ -29,7 +28,7 @@ end
 struct TestConvergence{T} <: Action{T}
     calculation::T
 end
-(x::TestConvergence)(data) = isconvergent(data)
+(::TestConvergence)(data) = isconvergent(data)
 
 function isconvergent(a::AbstractVector)
     terms = abs.(diff(a))

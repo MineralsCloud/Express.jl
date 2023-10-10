@@ -1,9 +1,13 @@
 module Config
 
-using Configurations: from_dict, @option
+using Configurations: OptionField, @option
 using EasyConfig: Config as Conf
-using ExpressBase.Config: AbstractConfig, SoftwareConfig, SamplingPoints, IO, list_io
-using Unitful: FreeUnits
+using ExpressBase: Calculation
+using ExpressBase.Config:
+    AbstractConfig, SoftwareConfig, SamplingPoints, IO, list_io, _uparse
+using Unitful: FreeUnits, Quantity
+
+import Configurations: from_dict
 
 @option "ecut" struct CutoffEnergies <: SamplingPoints
     numbers::Vector{Float64}
@@ -34,18 +38,27 @@ end
     recipe::String
     template::String
     with::Union{CutoffEnergies,MonkhorstPackGrids}
+    criteria::Quantity
     io::IO = IO()
     data::Data = Data()
     cli::SoftwareConfig
-    function StaticConfig(recipe, template, with, io, data, cli)
+    function StaticConfig(recipe, template, with, criteria, io, data, cli)
         @assert recipe in ("ecut", "kmesh")
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, with, io, data, cli)
+        return new(recipe, template, with, criteria, io, data, cli)
     end
 end
 
+function _update!(conf::Conf, with::CutoffEnergies)
+    conf.with = collect(number for number in with)
+    return conf
+end
+function _update!(conf::Conf, with::MonkhorstPackGrids)
+    conf.with = collect((mesh, shift) for (mesh, shift) in zip(with.meshes, with.shifts))
+    return conf
+end
 function _update!(conf::Conf, io::IO, energies::CutoffEnergies)
     conf.io = collect(
         list_io(io, number, string(nameof(typeof(conf.calculation)))) for
@@ -78,5 +91,9 @@ function expand(config::StaticConfig, calculation::Calculation)
     _update!(conf, config.data)
     return conf
 end
+
+from_dict(
+    ::Type{StaticConfig}, ::OptionField{:criteria}, ::Type{Quantity}, str::AbstractString
+) = eval(_uparse(str))
 
 end
