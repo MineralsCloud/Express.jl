@@ -46,6 +46,14 @@ end
     end
 end
 
+function _update!(conf::Conf, with::CutoffEnergies)
+    conf.with = collect(number for number in with)
+    return conf
+end
+function _update!(conf::Conf, with::MonkhorstPackGrids)
+    conf.with = collect((mesh, shift) for (mesh, shift) in zip(with.meshes, with.shifts))
+    return conf
+end
 function _update!(conf::Conf, io::IO, energies::CutoffEnergies)
     conf.io = collect(
         list_io(io, number, string(nameof(typeof(conf.calculation)))) for
