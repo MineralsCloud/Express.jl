@@ -1,4 +1,4 @@
-using AbInitioSoftwareBase: Input, getpseudodir, listpotentials
+using AbInitioSoftwareBase: Input, getpseudodir, eachpotential
 using Pseudopotentials: download_potential
 using Thinkers: Thunk
 
@@ -12,7 +12,7 @@ function (::DownloadPotentials)(template::Input)
     if !isdir(dir)
         mkpath(dir)
     end
-    return map(listpotentials(template)) do potential
+    return map(eachpotential(template)) do potential
         path = joinpath(dir, potential)
         if !isfile(path)
             download_potential(potential, path)
