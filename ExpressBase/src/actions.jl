@@ -12,7 +12,7 @@ function (::DownloadPotentials)(template::Input)
     if !isdir(dir)
         mkpath(dir)
     end
-    return map(eachpotential(template)) do potential
+    return map(eachpotential(template)) do (_, potential)
         path = joinpath(dir, potential)
         if !isfile(path)
             download_potential(potential, path)
