@@ -30,8 +30,8 @@ struct TestConvergence{T} <: Action{T}
 end
 (::TestConvergence)(data) = isconvergent(data)
 
-function isconvergent(a::AbstractVector)
-    terms = abs.(diff(a))
+function isconvergent(a)
+    terms = abs.(diff(collect(a)))
     x, y, z = last(terms, 3)
     return all(0 <= r < 1 for r in (y / x, z / y))
 end
