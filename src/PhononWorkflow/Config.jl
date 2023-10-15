@@ -1,31 +1,10 @@
 module Config
 
 using Configurations: from_dict, @option
-using ExpressBase: SoftwareConfig
-
-using ...Config: SamplingPoints, DirStructure, iofiles
-
-@option struct Template
-    scf::String
-    dfpt::String
-    q2r::String
-    disp::String
-    function Template(scf, dfpt, q2r, disp)
-        if !isfile(scf)
-            @warn "file \"$scf\" is not reachable, be careful!"
-        end
-        if !isfile(dfpt)
-            @warn "file \"$dfpt\" is not reachable, be careful!"
-        end
-        if !isfile(q2r)
-            @warn "file \"$q2r\" is not reachable, be careful!"
-        end
-        if !isfile(disp)
-            @warn "file \"$disp\" is not reachable, be careful!"
-        end
-        return new(scf, dfpt, q2r, disp)
-    end
-end
+using EasyConfig: Config as Conf
+using ExpressBase: Calculation
+using ExpressBase.Config: AbstractConfig, SoftwareConfig, SamplingPoints, IO, list_io
+using Unitful: FreeUnits
 
 @option "pressures" struct Pressures <: SamplingPoints
     numbers::Vector{Float64}
@@ -39,51 +18,53 @@ end
     Volumes(numbers, unit="bohr^3") = new(numbers, unit)
 end
 
-@option struct Save
-    raw::String = "raw.json"
-    status::String = ""
+@option struct Data <: AbstractConfig
+    static::String = "energies.json"
 end
 
-@option struct RuntimeConfig
+@option struct StaticConfig <: AbstractConfig
     recipe::String
-    template::Template
-    fixed::Union{Pressures,Volumes}
-    dirstructure::DirStructure = DirStructure()
-    save::Save = Save()
+    templates::Vector{String}
+    at::Union{Pressures,Volumes}
+    io::IO = IO()
+    data::Data = Data()
     cli::SoftwareConfig
-    function RuntimeConfig(recipe, template, fixed, dirstructure, save, cli)
+    function StaticConfig(recipe, templates, at, io, data, cli)
         @assert recipe in ("phonon dispersion", "vdos")
-        for i in 1:nfields(template)
-            if !isfile(getfield(template, i))
+        for template in templates
+            if !isfile(template)
                 @warn "I cannot find template file `$template`!"
             end
         end
-        return new(recipe, template, fixed, dirstructure, save, cli)
+        return new(recipe, templates, at, io, data, cli)
     end
 end
 
-struct ExpandConfig{T} end
-(::ExpandConfig)(data::Union{Pressures,Volumes}) = collect(datum for datum in data)
-(::ExpandConfig{T})(ds::DirStructure, fixed::Union{Pressures,Volumes}) where {T} =
-    iofiles(ds, fixed.numbers, string(nameof(T)))
-function (::ExpandConfig)(save::Save)
-    return map((:raw, :status)) do f
-        v = getfield(save, f)
-        isempty(v) ? abspath(mktemp(; cleanup=false)[1]) : abspath(expanduser(v))
-    end
+function _update!(conf::Conf, at::Union{Pressures,Volumes})
+    conf.at = collect(number for number in at)
+    return conf
 end
-function (x::ExpandConfig)(config::AbstractDict)
-    config = from_dict(RuntimeConfig, config)
-    save_raw, save_status = x(config.save)
-    return (
-        template=x(config.template),
-        fixed=x(config.fixed),
-        root=config.files.dirs.root,
-        files=x(config.files, config.fixed),
-        save_raw=save_raw,
-        save_status=save_status,
-        cli=config.cli,
+function _update!(conf::Conf, io::IO, at::Union{Pressures,Volumes})
+    conf.io = collect(
+        list_io(io, number, string(nameof(typeof(conf.calculation)))) for
+        number in at.numbers
     )
+    return conf
+end
+function _update!(conf::Conf, data::Data)
+    conf.data.static = abspath(expanduser(data.static))
+    return conf
+end
+
+function expand(config::StaticConfig, calculation::Calculation)
+    conf = Conf()
+    conf.cli = config.cli
+    conf.calculation = calculation
+    _update!(conf, config.templates)
+    _update!(conf, config.at)
+    _update!(conf, config.io, config.at)
+    _update!(conf, config.data)
+    return conf
 end
 
 end
