@@ -17,6 +17,7 @@ using ExpressBase.Files: save
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
+(action::CreateInput)(template::Input) = Base.Fix1(action, template)
 
 struct ExtractData{T} <: Action{T}
     calculation::T
