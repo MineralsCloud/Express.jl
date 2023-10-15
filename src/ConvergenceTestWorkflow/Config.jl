@@ -98,7 +98,7 @@ function expand(config::StaticConfig, calculation::Calculation)
 end
 
 from_dict(
-    ::Type{StaticConfig}, ::OptionField{:criteria}, ::Type{Quantity}, str::AbstractString
+    ::Type{StaticConfig}, ::OptionField{:threshold}, ::Type{Quantity}, str::AbstractString
 ) = eval(_uparse(str))
 
 end
