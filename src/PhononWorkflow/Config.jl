@@ -6,28 +6,6 @@ using ExpressBase: Calculation
 using ExpressBase.Config: AbstractConfig, SoftwareConfig, SamplingPoints, IO, list_io
 using Unitful: FreeUnits
 
-@option struct Template <: AbstractConfig
-    scf::String
-    dfpt::String
-    q2r::String
-    disp::String
-    function Template(scf, dfpt, q2r, disp)
-        if !isfile(scf)
-            @warn "file \"$scf\" is not reachable, be careful!"
-        end
-        if !isfile(dfpt)
-            @warn "file \"$dfpt\" is not reachable, be careful!"
-        end
-        if !isfile(q2r)
-            @warn "file \"$q2r\" is not reachable, be careful!"
-        end
-        if !isfile(disp)
-            @warn "file \"$disp\" is not reachable, be careful!"
-        end
-        return new(scf, dfpt, q2r, disp)
-    end
-end
-
 @option "pressures" struct Pressures <: SamplingPoints
     numbers::Vector{Float64}
     unit::FreeUnits
@@ -46,19 +24,19 @@ end
 
 @option struct StaticConfig <: AbstractConfig
     recipe::String
-    template::Template
+    templates::Vector{String}
     at::Union{Pressures,Volumes}
     io::IO = IO()
     data::Data = Data()
     cli::SoftwareConfig
-    function StaticConfig(recipe, template, at, io, data, cli)
+    function StaticConfig(recipe, templates, at, io, data, cli)
         @assert recipe in ("phonon dispersion", "vdos")
-        for i in 1:nfields(template)
-            if !isfile(getfield(template, i))
+        for template in templates
+            if !isfile(template)
                 @warn "I cannot find template file `$template`!"
             end
         end
-        return new(recipe, template, at, io, data, cli)
+        return new(recipe, templates, at, io, data, cli)
     end
 end
 
@@ -82,7 +60,7 @@ function expand(config::StaticConfig, calculation::Calculation)
     conf = Conf()
     conf.cli = config.cli
     conf.calculation = calculation
-    _update!(conf, config.template)
+    _update!(conf, config.templates)
     _update!(conf, config.at)
     _update!(conf, config.io, config.at)
     _update!(conf, config.data)
