@@ -38,16 +38,16 @@ end
     recipe::String
     template::String
     with::Union{CutoffEnergies,MonkhorstPackGrids}
-    criteria::Quantity
+    threshold::Quantity
     io::IO = IO()
     data::Data = Data()
     cli::SoftwareConfig
-    function StaticConfig(recipe, template, with, criteria, io, data, cli)
+    function StaticConfig(recipe, template, with, threshold, io, data, cli)
         @assert recipe in ("ecut", "kmesh")
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, with, criteria, io, data, cli)
+        return new(recipe, template, with, threshold, io, data, cli)
     end
 end
 
@@ -80,6 +80,10 @@ function _update!(conf::Conf, data::Data)
     conf.data.raw = abspath(expanduser(data.raw))
     return conf
 end
+function _update!(conf::Conf, threshold::Quantity)
+    conf.threshold = threshold
+    return conf
+end
 
 function expand(config::StaticConfig, calculation::Calculation)
     conf = Conf()
@@ -89,6 +93,7 @@ function expand(config::StaticConfig, calculation::Calculation)
     _update!(conf, config.with)
     _update!(conf, config.io, config.with)
     _update!(conf, config.data)
+    _update!(conf, config.threshold)
     return conf
 end
 
