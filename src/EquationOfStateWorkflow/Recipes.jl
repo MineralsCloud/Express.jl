@@ -15,6 +15,7 @@ using ..EquationOfStateWorkflow:
     WriteInput,
     RunCmd,
     ExtractData,
+    GatherData,
     SaveData,
     FitEquationOfState,
     SaveParameters
@@ -34,6 +35,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
         WriteInput(SelfConsistentField()),
         RunCmd(SelfConsistentField()),
         ExtractData(SelfConsistentField()),
+        GatherData(SelfConsistentField()),
         SaveData(SelfConsistentField()),
         FitEquationOfState(SelfConsistentField()),
         SaveParameters(SelfConsistentField()),
@@ -50,12 +52,14 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), steps[6]
     )
-    savedata = ArgDependentJob(steps[7]; name="save E(V) data in SCF")
-    fiteos = ArgDependentJob(steps[8]; name="fit E(V) data in SCF")
-    saveparams = ArgDependentJob(steps[9]; name="save EOS parameters in SCF")
+    gatherdata = ArgDependentJob(steps[7]; name="gather E(V) data in SCF")
+    savedata = ArgDependentJob(steps[8]; name="save E(V) data in SCF")
+    fiteos = ArgDependentJob(steps[9]; name="fit E(V) data in SCF")
+    saveparams = ArgDependentJob(steps[10]; name="save EOS parameters in SCF")
     download .→
-    compute .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
-    extractdata .→ savedata
+    compute .→
+    makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
+    gatherdata → savedata
     return steps = (;
         download=download,
         compute=compute,
@@ -63,6 +67,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
         writeinputs=writeinputs,
         runcmds=runcmds,
         extractdata=extractdata,
+        gatherdata=gatherdata,
         savedata=savedata,
         fiteos=fiteos,
         saveparams=saveparams,
@@ -76,6 +81,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         WriteInput(VariableCellOptimization()),
         RunCmd(VariableCellOptimization()),
         ExtractData(VariableCellOptimization()),
+        GatherData(VariableCellOptimization()),
         SaveData(VariableCellOptimization()),
         FitEquationOfState(VariableCellOptimization()),
         SaveParameters(VariableCellOptimization()),
@@ -95,17 +101,20 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"), steps[5]
     )
-    savedata = ArgDependentJob(steps[6]; name="save E(V) data in vc-relax")
-    fiteos = ArgDependentJob(steps[7]; name="fit E(V) data in vc-relax")
-    saveparams = ArgDependentJob(steps[8]; name="save EOS parameters in vc-relax")
-    compute .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ fiteos → saveparams
-    extractdata .→ savedata
+    gatherdata = ArgDependentJob(steps[6]; name="gather E(V) data in vc-relax")
+    savedata = ArgDependentJob(steps[7]; name="save E(V) data in vc-relax")
+    fiteos = ArgDependentJob(steps[8]; name="fit E(V) data in vc-relax")
+    saveparams = ArgDependentJob(steps[9]; name="save EOS parameters in vc-relax")
+    compute .→
+    makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
+    gatherdata → savedata
     return steps = (;
         compute=compute,
         makeinputs=makeinputs,
         writeinputs=writeinputs,
         runcmds=runcmds,
         extractdata=extractdata,
+        gatherdata=gatherdata,
         savedata=savedata,
         fiteos=fiteos,
         saveparams=saveparams,
