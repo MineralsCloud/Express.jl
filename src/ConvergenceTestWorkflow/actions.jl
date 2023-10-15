@@ -28,7 +28,7 @@ end
 struct TestConvergence{T} <: Action{T}
     calculation::T
 end
-(::TestConvergence)(data) = isconvergent(data)
+(::TestConvergence)(threshold) = Base.Fix2(isconvergent, threshold)
 
 function isconvergent(iter, threshold)
     last3 = last(sort(iter; by=first), 3)  # Sort a `Set` of `Pair`s by the keys, i.e., increasing cutoff energies
