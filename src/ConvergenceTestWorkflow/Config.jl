@@ -38,16 +38,16 @@ end
     recipe::String
     template::String
     with::Union{CutoffEnergies,MonkhorstPackGrids}
-    criteria::Quantity
+    threshold::Quantity
     io::IO = IO()
     data::Data = Data()
     cli::SoftwareConfig
-    function StaticConfig(recipe, template, with, criteria, io, data, cli)
+    function StaticConfig(recipe, template, with, threshold, io, data, cli)
         @assert recipe in ("ecut", "kmesh")
         if !isfile(template)
             @warn "I cannot find template file `$template`!"
         end
-        return new(recipe, template, with, criteria, io, data, cli)
+        return new(recipe, template, with, threshold, io, data, cli)
     end
 end
 
