@@ -30,8 +30,9 @@ struct TestConvergence{T} <: Action{T}
 end
 (::TestConvergence)(data) = isconvergent(data)
 
-function isconvergent(a)
-    terms = abs.(diff(collect(a)))
-    x, y, z = last(terms, 3)
-    return all(0 <= r < 1 for r in (y / x, z / y))
+function isconvergent(iter, threshold)
+    last3 = last(sort(iter; by=first), 3)  # Sort a `Set` of `Pair`s by the keys, i.e., increasing cutoff energies
+    min, max = extrema(last3)
+    range = abs(max - min)
+    return zero(range) <= range <= threshold
 end
