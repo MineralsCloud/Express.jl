@@ -13,6 +13,11 @@ struct ExtractData{T} <: Action{T}
     calculation::T
 end
 
+struct GatherData{T} <: Action{T}
+    calculation::T
+end
+(::GatherData)(iter) = collect(iter)
+
 struct SaveData{T} <: Action{T}
     calculation::T
 end
