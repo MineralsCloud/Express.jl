@@ -40,5 +40,3 @@ end
 (action::SaveData)(path) = Base.Fix1(action, path)
 
 function parsecell end
-
-function inputtype end
