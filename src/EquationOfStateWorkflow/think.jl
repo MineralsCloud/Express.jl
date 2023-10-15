@@ -23,6 +23,7 @@ think(action::WriteInput, conf::Conf) =
     collect(Thunk(action(file)) for file in first.(conf.io))
 think(action::ExtractData, conf::Conf) =
     collect(Thunk(action, file) for file in last.(conf.io))
+think(action::GatherData, ::Conf) = Thunk(action)
 think(action::SaveData, conf::Conf) = Thunk(action(conf.data.raw))
 think(action::SaveParameters, conf::Conf) = Thunk(action(conf.data.eos_params))
 function think(action::FitEquationOfState, conf::Conf)
