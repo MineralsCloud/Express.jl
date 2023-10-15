@@ -9,6 +9,7 @@ think(action::CreateInput, conf::Conf) =
     collect(Thunk(action, conf.template, datum) for datum in conf.with)
 think(action::ExtractData, conf::Conf) =
     collect(Thunk(action, file) for file in last.(conf.io))
+think(action::GatherData, ::Conf) = Thunk(action)
 think(action::SaveData, conf::Conf) = Thunk(action(conf.data.raw))
 think(action::TestConvergence, conf::Conf) = Thunk(action(conf.threshold))
 function think(action::Action{T}, config::StaticConfig) where {T}

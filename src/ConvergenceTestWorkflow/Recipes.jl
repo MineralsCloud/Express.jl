@@ -14,6 +14,7 @@ using ..ConvergenceTestWorkflow:
     WriteInput,
     RunCmd,
     ExtractData,
+    GatherData,
     SaveData,
     TestConvergence
 
@@ -34,6 +35,7 @@ function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
         WriteInput(SelfConsistentField()),
         RunCmd(SelfConsistentField()),
         ExtractData(SelfConsistentField()),
+        GatherData(SelfConsistentField()),
         SaveData(SelfConsistentField()),
         TestConvergence(SelfConsistentField()),
     )) do action
@@ -48,18 +50,20 @@ function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract energies in SCF"), steps[5]
     )
-    savedata = ArgDependentJob(steps[6]; name="save energies in SCF")
-    testconv = ArgDependentJob(steps[7]; name="test convergence in SCF")
-    download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ testconv
-    extractdata .→ savedata
+    gatherdata = ArgDependentJob(steps[6]; name="gather energies in SCF")
+    savedata = ArgDependentJob(steps[7]; name="save energies in SCF")
+    testconv = ArgDependentJob(steps[8]; name="test convergence in SCF")
+    download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → testconv
+    gatherdata → savedata
     return steps = (;
         download=download,
         makeinputs=makeinputs,
         writeinputs=writeinputs,
         runcmds=runcmds,
         extractdata=extractdata,
+        gatherdata=gatherdata,
         testconv=testconv,
-        savedata=savedata
+        savedata=savedata,
     )
 end
 
