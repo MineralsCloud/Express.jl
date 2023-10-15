@@ -45,10 +45,11 @@ end
 function build(::Type{Workflow}, file)
     dict = load(file)
     recipe = dict["recipe"]
+    config = from_dict(StaticConfig, dict)
     if recipe == "phonon dispersion"
-        return build(Workflow, PhononDispersionRecipe(dict))
+        return build(Workflow, PhononDispersionRecipe(config))
     elseif dict["recipe"] == "vdos"
-        return build(Workflow, VDOSRecipe(dict))
+        return build(Workflow, VDOSRecipe(config))
     else
         error("unsupported recipe $recipe.")
     end
