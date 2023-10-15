@@ -8,8 +8,6 @@ import ExpressBase: think
 
 think(action::CreateInput, conf::Conf) =
     collect(Thunk(action(conf.template)) for _ in Base.OneTo(length(conf.at)))
-think(action::WriteInput, conf::Conf) =
-    collect(Thunk(action(file)) for file in first.(conf.io))
 think(action::ExtractData, conf::Conf) =
     collect(Thunk(action, file) for file in last.(conf.io))
 think(action::GatherData, ::Conf) = Thunk(action)
