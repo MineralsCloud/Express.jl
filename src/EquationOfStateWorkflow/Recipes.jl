@@ -127,10 +127,11 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         first(iterate(steps)),
     )
     extractcells = map(
-        thunk -> ConditionalJob(thunk; name="extract cell in SCF"), first(iterate(steps))
+        thunk -> ConditionalJob(thunk; name="extract cell in vc-relax"),
+        first(iterate(steps)),
     )
     savecells = map(
-        thunk -> ArgDependentJob(thunk; name="save cell in SCF"), first(iterate(steps))
+        thunk -> ArgDependentJob(thunk; name="save cell in vc-relax"), first(iterate(steps))
     )
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"),
