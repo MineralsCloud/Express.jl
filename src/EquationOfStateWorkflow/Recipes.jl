@@ -36,8 +36,8 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
         CreateInput(SelfConsistentField()),
         WriteInput(SelfConsistentField()),
         RunCmd(SelfConsistentField()),
-        ExtractCell(SelfConsistentField()),
-        SaveCell(SelfConsistentField()),
+        # ExtractCell(SelfConsistentField()),
+        # SaveCell(SelfConsistentField()),
         ExtractData(SelfConsistentField()),
         GatherData(SelfConsistentField()),
         SaveData(SelfConsistentField()),
@@ -59,12 +59,12 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
         thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"),
         first(iterate(steps)),
     )
-    extractcells = map(
-        thunk -> ConditionalJob(thunk; name="extract cell in SCF"), first(iterate(steps))
-    )
-    savecells = map(
-        thunk -> ConditionalJob(thunk; name="save cell in SCF"), first(iterate(steps))
-    )
+    # extractcells = map(
+    #     thunk -> ConditionalJob(thunk; name="extract cell in SCF"), first(iterate(steps))
+    # )
+    # savecells = map(
+    #     thunk -> ConditionalJob(thunk; name="save cell in SCF"), first(iterate(steps))
+    # )
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"),
         first(iterate(steps)),
@@ -77,20 +77,20 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     compute .→
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
     gatherdata → savedata
-    runcmds .→ extractcells .→ savecells
+    # runcmds .→ extractcells .→ savecells
     return steps = (;
         download=download,
         compute=compute,
         makeinputs=makeinputs,
         writeinputs=writeinputs,
         runcmds=runcmds,
-        extractcells=extractcells,
-        savecells=savecells,
+        # extractcells=extractcells,
+        # savecells=savecells,
         extractdata=extractdata,
         gatherdata=gatherdata,
         savedata=savedata,
         fiteos=fiteos,
-        saveparams=saveparams
+        saveparams=saveparams,
     )
 end
 function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
@@ -157,7 +157,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         gatherdata=gatherdata,
         savedata=savedata,
         fiteos=fiteos,
-        saveparams=saveparams
+        saveparams=saveparams,
     )
 end
 
