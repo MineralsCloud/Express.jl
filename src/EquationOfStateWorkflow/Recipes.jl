@@ -63,7 +63,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     #     thunk -> ConditionalJob(thunk; name="extract cell in SCF"), first(iterate(steps))
     # )
     # savecells = map(
-    #     thunk -> ConditionalJob(thunk; name="save cell in SCF"), first(iterate(steps))
+    #     thunk -> ArgDependentJob(thunk; name="save cell in SCF"), first(iterate(steps))
     # )
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"),
@@ -130,7 +130,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         thunk -> ConditionalJob(thunk; name="extract cell in SCF"), first(iterate(steps))
     )
     savecells = map(
-        thunk -> ConditionalJob(thunk; name="save cell in SCF"), first(iterate(steps))
+        thunk -> ArgDependentJob(thunk; name="save cell in SCF"), first(iterate(steps))
     )
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"),

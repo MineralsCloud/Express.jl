@@ -25,8 +25,13 @@ think(action::ExtractData, conf::Conf) =
     collect(Thunk(action, file) for file in last.(conf.io))
 think(action::ExtractCell, conf::Conf) =
     collect(Thunk(action, file) for file in last.(conf.io))
-think(action::SaveCell, conf::Conf) =
-    collect(Thunk(action, file) for file in last.(conf.io))
+think(action::SaveCell, conf::Conf) = collect(
+    Thunk(
+        action(
+            joinpath(dirname(file), string(nameof(typeof(Calculation(action))))) * ".cif",
+        ),
+    ) for file in last.(conf.io)
+)
 think(action::GatherData, ::Conf) = Thunk(action)
 think(action::SaveData, conf::Conf) = Thunk(action(conf.data.raw))
 think(action::SaveParameters, conf::Conf) = Thunk(action(conf.data.eos_params))

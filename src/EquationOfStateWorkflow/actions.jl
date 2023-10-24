@@ -78,6 +78,7 @@ end
 struct SaveCell{T} <: Action{T}
     calculation::T
 end
+(action::SaveCell)(path) = Base.Fix1(action, path)
 
 struct FitEquationOfState{T} <: Action{T}
     calculation::T
