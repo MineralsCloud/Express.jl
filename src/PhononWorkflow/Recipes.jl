@@ -39,19 +39,21 @@ function stage(::SelfConsistentField, r::Recipe)
     ) do action
         think(action, conf)
     end
-    download = Job(iterate(steps); name="download potentials")
-    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), iterate(steps))
+    download = Job(first(iterate(steps)); name="download potentials")
+    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), first(iterate(steps)))
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in SCF"), iterate(steps)
+        thunk -> ArgDependentJob(thunk; name="write input in SCF"), first(iterate(steps))
     )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), iterate(steps)
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"),
+        first(iterate(steps)),
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), iterate(steps)
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"),
+        first(iterate(steps)),
     )
-    gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in SCF")
-    savedata = ArgDependentJob(iterate(steps); name="save E(V) data in SCF")
+    gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in SCF")
+    savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in SCF")
     download .→ makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         download=download,
@@ -78,20 +80,20 @@ function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
         think(action, conf)
     end
     makeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="update input in DFPT"), iterate(steps)
+        thunk -> ArgDependentJob(thunk; name="update input in DFPT"), first(iterate(steps))
     )
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in DFPT"), iterate(steps)
+        thunk -> ArgDependentJob(thunk; name="write input in DFPT"), first(iterate(steps))
     )
     runcmds = map(
         thunk -> ConditionalJob(thunk; name="run ab initio software in DFPT"),
-        iterate(steps),
+        first(iterate(steps)),
     )
     # extractdata = map(
-    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in DFPT"), iterate(steps)
+    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in DFPT"), first(iterate(steps))
     # )
-    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in DFPT")
-    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in DFPT")
+    # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in DFPT")
+    # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in DFPT")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
@@ -117,19 +119,20 @@ function stage(::RealSpaceForceConstants, r::Recipe)
         think(action, conf)
     end
     makeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="update input in IFC"), iterate(steps)
+        thunk -> ArgDependentJob(thunk; name="update input in IFC"), first(iterate(steps))
     )
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in IFC"), iterate(steps)
+        thunk -> ArgDependentJob(thunk; name="write input in IFC"), first(iterate(steps))
     )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in IFC"), iterate(steps)
+        thunk -> ConditionalJob(thunk; name="run ab initio software in IFC"),
+        first(iterate(steps)),
     )
     # extractdata = map(
-    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in IFC"), iterate(steps)
+    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in IFC"), first(iterate(steps))
     # )
-    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in IFC")
-    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in IFC")
+    # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in IFC")
+    # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in IFC")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
@@ -169,18 +172,18 @@ function stage(::PhononDispersion, r::PhononDispersionRecipe)
     end
     writeinputs = map(
         thunk -> ArgDependentJob(thunk; name="write input in phonon dispersion"),
-        iterate(steps),
+        first(iterate(steps)),
     )
     runcmds = map(
         thunk -> ConditionalJob(thunk; name="run ab initio software in phonon dispersion"),
-        iterate(steps),
+        first(iterate(steps)),
     )
     # extractdata = map(
     #     thunk -> ConditionalJob(thunk; name="extract E(V) data in phonon dispersion"),
-    #     iterate(steps),
+    #     first(iterate(steps)),
     # )
-    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in phonon dispersion")
-    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in phonon dispersion")
+    # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in phonon dispersion")
+    # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in phonon dispersion")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
@@ -207,22 +210,22 @@ function stage(::PhononDensityOfStates, r::PhononDispersionRecipe)
     end
     makeinputs = map(
         thunk -> ArgDependentJob(thunk; name="update input in phonon dispersion"),
-        iterate(steps),
+        first(iterate(steps)),
     )
     writeinputs = map(
         thunk -> ArgDependentJob(thunk; name="write input in phonon dispersion"),
-        iterate(steps),
+        first(iterate(steps)),
     )
     runcmds = map(
         thunk -> ConditionalJob(thunk; name="run ab initio software in phonon dispersion"),
-        iterate(steps),
+        first(iterate(steps)),
     )
     # extractdata = map(
     #     thunk -> ConditionalJob(thunk; name="extract E(V) data in phonon dispersion"),
-    #     iterate(steps),
+    #     first(iterate(steps)),
     # )
-    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in phonon dispersion")
-    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in phonon dispersion")
+    # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in phonon dispersion")
+    # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in phonon dispersion")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
