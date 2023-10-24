@@ -107,6 +107,8 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         SaveData(VariableCellOptimization()),
         FitEquationOfState(VariableCellOptimization()),
         SaveParameters(VariableCellOptimization()),
+        CreateInput(SelfConsistentField()),
+        WriteInput(SelfConsistentField()),
     )) do action
         think(action, conf)
     end
@@ -143,10 +145,17 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     saveparams = ArgDependentJob(
         first(iterate(steps)); name="save EOS parameters in vc-relax"
     )
+    makeinputs2 = map(
+        thunk -> ArgDependentJob(thunk; name="make input in SCF"), first(iterate(steps))
+    )
+    writeinputs2 = map(
+        thunk -> ArgDependentJob(thunk; name="write input in SCF"), first(iterate(steps))
+    )
     compute .→
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
     gatherdata → savedata
     runcmds .→ extractcells .→ savecells
+    extractcells .→ makeinputs2 .→ writeinputs2
     return steps = (;
         compute=compute,
         makeinputs=makeinputs,
