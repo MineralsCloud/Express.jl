@@ -29,16 +29,18 @@ end
 
 function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
     conf = expand(r.config, SelfConsistentField())
-    steps = Iterators.Stateful((
-        DownloadPotentials(SelfConsistentField()),
-        CreateInput(SelfConsistentField()),
-        WriteInput(SelfConsistentField()),
-        RunCmd(SelfConsistentField()),
-        ExtractData(SelfConsistentField()),
-        GatherData(SelfConsistentField()),
-        SaveData(SelfConsistentField()),
-        TestConvergence(SelfConsistentField()),
-    )) do action
+    steps = map(
+        Iterators.Stateful((
+            DownloadPotentials(SelfConsistentField()),
+            CreateInput(SelfConsistentField()),
+            WriteInput(SelfConsistentField()),
+            RunCmd(SelfConsistentField()),
+            ExtractData(SelfConsistentField()),
+            GatherData(SelfConsistentField()),
+            SaveData(SelfConsistentField()),
+            TestConvergence(SelfConsistentField()),
+        )),
+    ) do action
         think(action, conf)
     end
     download = Job(iterate(steps); name="download potentials")

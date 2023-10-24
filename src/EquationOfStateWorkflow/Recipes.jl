@@ -30,20 +30,22 @@ end
 
 function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     conf = expand(r.config, SelfConsistentField())
-    steps = Iterators.Stateful((
-        DownloadPotentials(SelfConsistentField()),
-        ComputeVolume(SelfConsistentField()),
-        CreateInput(SelfConsistentField()),
-        WriteInput(SelfConsistentField()),
-        RunCmd(SelfConsistentField()),
-        ExtractCell(SelfConsistentField()),
-        SaveCell(SelfConsistentField()),
-        ExtractData(SelfConsistentField()),
-        GatherData(SelfConsistentField()),
-        SaveData(SelfConsistentField()),
-        FitEquationOfState(SelfConsistentField()),
-        SaveParameters(SelfConsistentField()),
-    )) do action
+    steps = map(
+        Iterators.Stateful((
+            DownloadPotentials(SelfConsistentField()),
+            ComputeVolume(SelfConsistentField()),
+            CreateInput(SelfConsistentField()),
+            WriteInput(SelfConsistentField()),
+            RunCmd(SelfConsistentField()),
+            ExtractCell(SelfConsistentField()),
+            SaveCell(SelfConsistentField()),
+            ExtractData(SelfConsistentField()),
+            GatherData(SelfConsistentField()),
+            SaveData(SelfConsistentField()),
+            FitEquationOfState(SelfConsistentField()),
+            SaveParameters(SelfConsistentField()),
+        )),
+    ) do action
         think(action, conf)
     end
     download = Job(iterate(steps); name="download potentials")
@@ -90,19 +92,21 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
 end
 function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     conf = expand(r.config, VariableCellOptimization())
-    steps = Iterators.Stateful((
-        ComputeVolume(VariableCellOptimization()),
-        CreateInput(VariableCellOptimization()),
-        WriteInput(VariableCellOptimization()),
-        RunCmd(VariableCellOptimization()),
-        ExtractCell(VariableCellOptimization()),
-        SaveCell(VariableCellOptimization()),
-        ExtractData(VariableCellOptimization()),
-        GatherData(VariableCellOptimization()),
-        SaveData(VariableCellOptimization()),
-        FitEquationOfState(VariableCellOptimization()),
-        SaveParameters(VariableCellOptimization()),
-    )) do action
+    steps = map(
+        Iterators.Stateful((
+            ComputeVolume(VariableCellOptimization()),
+            CreateInput(VariableCellOptimization()),
+            WriteInput(VariableCellOptimization()),
+            RunCmd(VariableCellOptimization()),
+            ExtractCell(VariableCellOptimization()),
+            SaveCell(VariableCellOptimization()),
+            ExtractData(VariableCellOptimization()),
+            GatherData(VariableCellOptimization()),
+            SaveData(VariableCellOptimization()),
+            FitEquationOfState(VariableCellOptimization()),
+            SaveParameters(VariableCellOptimization()),
+        )),
+    ) do action
         think(action, conf)
     end
     compute = map(thunk -> Job(thunk; name="compute volume in vc-relax"), iterate(steps))
