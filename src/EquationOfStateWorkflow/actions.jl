@@ -54,6 +54,10 @@ struct ExtractData{T} <: Action{T}
     calculation::T
 end
 
+struct ExtractCell{T} <: Action{T}
+    calculation::T
+end
+
 struct GatherData{T} <: Action{T}
     calculation::T
 end
@@ -70,6 +74,10 @@ function (action::SaveData)(path, raw_data)
     return save(path, data)
 end
 (action::SaveData)(path) = Base.Fix1(action, path)
+
+struct SaveCell{T} <: Action{T}
+    calculation::T
+end
 
 struct FitEquationOfState{T} <: Action{T}
     calculation::T
