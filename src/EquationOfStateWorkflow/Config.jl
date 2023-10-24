@@ -59,9 +59,14 @@ end
     params::Vector{Quantity{Float64}}
 end
 
+@option struct Cell <: AbstractConfig
+    extension::String = "cif"
+end
+
 @option struct Data <: AbstractConfig
     raw::String = "volumes_energies.json"
     eos_params::String = "eos_params.json"
+    cell::Cell = Cell()
 end
 
 @option struct StaticConfig <: AbstractConfig
@@ -121,6 +126,7 @@ end
 function _update!(conf::Conf, data::Data)
     conf.data.raw = abspath(expanduser(data.raw))
     conf.data.eos_params = abspath(expanduser(data.eos_params))
+    conf.data.cell.extension = string(data.cell.extension)
     return conf
 end
 
