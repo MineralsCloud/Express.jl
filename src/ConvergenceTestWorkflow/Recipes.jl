@@ -29,7 +29,7 @@ end
 
 function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
     conf = expand(r.config, SelfConsistentField())
-    steps = map((
+    steps = Iterators.Stateful((
         DownloadPotentials(SelfConsistentField()),
         CreateInput(SelfConsistentField()),
         WriteInput(SelfConsistentField()),
@@ -41,18 +41,20 @@ function stage(::SelfConsistentField, r::TestCutoffEnergyRecipe)
     )) do action
         think(action, conf)
     end
-    download = Job(steps[1]; name="download potentials")
-    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), steps[2])
-    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[3])
+    download = Job(iterate(steps); name="download potentials")
+    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), iterate(steps))
+    writeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="write input in SCF"), iterate(steps)
+    )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[4]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), iterate(steps)
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract energies in SCF"), steps[5]
+        thunk -> ConditionalJob(thunk; name="extract energies in SCF"), iterate(steps)
     )
-    gatherdata = ArgDependentJob(steps[6]; name="gather energies in SCF")
-    savedata = ArgDependentJob(steps[7]; name="save energies in SCF")
-    testconv = ArgDependentJob(steps[8]; name="test convergence in SCF")
+    gatherdata = ArgDependentJob(iterate(steps); name="gather energies in SCF")
+    savedata = ArgDependentJob(iterate(steps); name="save energies in SCF")
+    testconv = ArgDependentJob(iterate(steps); name="test convergence in SCF")
     download .→ makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → testconv
     gatherdata → savedata
     return steps = (;

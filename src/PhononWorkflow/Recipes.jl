@@ -26,7 +26,7 @@ end
 
 function stage(::SelfConsistentField, r::Recipe)
     conf = expand(r.config, SelfConsistentField())
-    steps = map((
+    steps = Iterators.Stateful((
         DownloadPotentials(SelfConsistentField()),
         CreateInput(SelfConsistentField()),
         WriteInput(SelfConsistentField()),
@@ -37,17 +37,19 @@ function stage(::SelfConsistentField, r::Recipe)
     )) do action
         think(action, conf)
     end
-    download = Job(steps[1]; name="download potentials")
-    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), steps[2])
-    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[3])
+    download = Job(iterate(steps); name="download potentials")
+    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), iterate(steps))
+    writeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="write input in SCF"), iterate(steps)
+    )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[4]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), iterate(steps)
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), steps[5]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), iterate(steps)
     )
-    gatherdata = ArgDependentJob(steps[6]; name="gather E(V) data in SCF")
-    savedata = ArgDependentJob(steps[7]; name="save E(V) data in SCF")
+    gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in SCF")
+    savedata = ArgDependentJob(iterate(steps); name="save E(V) data in SCF")
     download .→ makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         download=download,
@@ -61,7 +63,7 @@ function stage(::SelfConsistentField, r::Recipe)
 end
 function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
     conf = expand(r.config, DensityFunctionalPerturbationTheory())
-    steps = map((
+    steps = Iterators.Stateful((
         CreateInput(DensityFunctionalPerturbationTheory()),
         WriteInput(DensityFunctionalPerturbationTheory()),
         RunCmd(DensityFunctionalPerturbationTheory()),
@@ -71,16 +73,21 @@ function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
     )) do action
         think(action, conf)
     end
-    makeinputs = map(thunk -> ArgDependentJob(thunk; name="update input in DFPT"), steps[1])
-    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in DFPT"), steps[2])
+    makeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="update input in DFPT"), iterate(steps)
+    )
+    writeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="write input in DFPT"), iterate(steps)
+    )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in DFPT"), steps[3]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in DFPT"),
+        iterate(steps),
     )
     # extractdata = map(
-    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in DFPT"), steps[4]
+    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in DFPT"), iterate(steps)
     # )
-    # gatherdata = ArgDependentJob(steps[5]; name="gather E(V) data in DFPT")
-    # savedata = ArgDependentJob(steps[6]; name="save E(V) data in DFPT")
+    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in DFPT")
+    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in DFPT")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
@@ -93,7 +100,7 @@ function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
 end
 function stage(::RealSpaceForceConstants, r::Recipe)
     conf = expand(r.config, RealSpaceForceConstants())
-    steps = map((
+    steps = Iterators.Stateful((
         CreateInput(RealSpaceForceConstants()),
         WriteInput(RealSpaceForceConstants()),
         RunCmd(RealSpaceForceConstants()),
@@ -103,16 +110,20 @@ function stage(::RealSpaceForceConstants, r::Recipe)
     )) do action
         think(action, conf)
     end
-    makeinputs = map(thunk -> ArgDependentJob(thunk; name="update input in IFC"), steps[1])
-    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in IFC"), steps[2])
+    makeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="update input in IFC"), iterate(steps)
+    )
+    writeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="write input in IFC"), iterate(steps)
+    )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in IFC"), steps[3]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in IFC"), iterate(steps)
     )
     # extractdata = map(
-    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in IFC"), steps[4]
+    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in IFC"), iterate(steps)
     # )
-    # gatherdata = ArgDependentJob(steps[5]; name="gather E(V) data in IFC")
-    # savedata = ArgDependentJob(steps[6]; name="save E(V) data in IFC")
+    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in IFC")
+    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in IFC")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
@@ -125,7 +136,7 @@ function stage(::RealSpaceForceConstants, r::Recipe)
 end
 function stage(::PhononDispersion, r::PhononDispersionRecipe)
     conf = expand(r.config, PhononDispersion())
-    steps = map((
+    steps = Iterators.Stateful((
         WriteInput(PhononDispersion()),
         RunCmd(PhononDispersion()),
         # ExtractData(PhononDispersion()),
@@ -149,18 +160,19 @@ function stage(::PhononDispersion, r::PhononDispersionRecipe)
         )
     end
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in phonon dispersion"), steps[1]
+        thunk -> ArgDependentJob(thunk; name="write input in phonon dispersion"),
+        iterate(steps),
     )
     runcmds = map(
         thunk -> ConditionalJob(thunk; name="run ab initio software in phonon dispersion"),
-        steps[2],
+        iterate(steps),
     )
     # extractdata = map(
     #     thunk -> ConditionalJob(thunk; name="extract E(V) data in phonon dispersion"),
-    #     steps[3],
+    #     iterate(steps),
     # )
-    # gatherdata = ArgDependentJob(steps[4]; name="gather E(V) data in phonon dispersion")
-    # savedata = ArgDependentJob(steps[5]; name="save E(V) data in phonon dispersion")
+    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in phonon dispersion")
+    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in phonon dispersion")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
@@ -184,21 +196,23 @@ function stage(::PhononDensityOfStates, r::PhononDispersionRecipe)
         think(action, conf)
     end
     makeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="update input in phonon dispersion"), steps[1]
+        thunk -> ArgDependentJob(thunk; name="update input in phonon dispersion"),
+        iterate(steps),
     )
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in phonon dispersion"), steps[2]
+        thunk -> ArgDependentJob(thunk; name="write input in phonon dispersion"),
+        iterate(steps),
     )
     runcmds = map(
         thunk -> ConditionalJob(thunk; name="run ab initio software in phonon dispersion"),
-        steps[3],
+        iterate(steps),
     )
     # extractdata = map(
     #     thunk -> ConditionalJob(thunk; name="extract E(V) data in phonon dispersion"),
-    #     steps[4],
+    #     iterate(steps),
     # )
-    # gatherdata = ArgDependentJob(steps[5]; name="gather E(V) data in phonon dispersion")
-    # savedata = ArgDependentJob(steps[6]; name="save E(V) data in phonon dispersion")
+    # gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in phonon dispersion")
+    # savedata = ArgDependentJob(iterate(steps); name="save E(V) data in phonon dispersion")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
         makeinputs=makeinputs,
