@@ -28,7 +28,7 @@ end
 
 function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     conf = expand(r.config, SelfConsistentField())
-    steps = map((
+    steps = Iterators.Stateful((
         DownloadPotentials(SelfConsistentField()),
         ComputeVolume(SelfConsistentField()),
         CreateInput(SelfConsistentField()),
@@ -42,20 +42,24 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     )) do action
         think(action, conf)
     end
-    download = Job(steps[1]; name="download potentials")
-    compute = map(thunk -> Job(thunk; name="compute volume in SCF"), steps[2])
-    makeinputs = map(thunk -> ArgDependentJob(thunk; name="update input in SCF"), steps[3])
-    writeinputs = map(thunk -> ArgDependentJob(thunk; name="write input in SCF"), steps[4])
+    download = Job(iterate(steps); name="download potentials")
+    compute = map(thunk -> Job(thunk; name="compute volume in SCF"), iterate(steps))
+    makeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="update input in SCF"), iterate(steps)
+    )
+    writeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="write input in SCF"), iterate(steps)
+    )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), steps[5]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"), iterate(steps)
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), steps[6]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"), iterate(steps)
     )
-    gatherdata = ArgDependentJob(steps[7]; name="gather E(V) data in SCF")
-    savedata = ArgDependentJob(steps[8]; name="save E(V) data in SCF")
-    fiteos = ArgDependentJob(steps[9]; name="fit E(V) data in SCF")
-    saveparams = ArgDependentJob(steps[10]; name="save EOS parameters in SCF")
+    gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in SCF")
+    savedata = ArgDependentJob(iterate(steps); name="save E(V) data in SCF")
+    fiteos = ArgDependentJob(iterate(steps); name="fit E(V) data in SCF")
+    saveparams = ArgDependentJob(iterate(steps); name="save EOS parameters in SCF")
     download .→
     compute .→
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
@@ -75,7 +79,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
 end
 function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     conf = expand(r.config, VariableCellOptimization())
-    steps = map((
+    steps = Iterators.Stateful((
         ComputeVolume(VariableCellOptimization()),
         CreateInput(VariableCellOptimization()),
         WriteInput(VariableCellOptimization()),
@@ -88,23 +92,24 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     )) do action
         think(action, conf)
     end
-    compute = map(thunk -> Job(thunk; name="compute volume in vc-relax"), steps[1])
+    compute = map(thunk -> Job(thunk; name="compute volume in vc-relax"), iterate(steps))
     makeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="make input in vc-relax"), steps[2]
+        thunk -> ArgDependentJob(thunk; name="make input in vc-relax"), iterate(steps)
     )
     writeinputs = map(
-        thunk -> ArgDependentJob(thunk; name="write input in vc-relax"), steps[3]
+        thunk -> ArgDependentJob(thunk; name="write input in vc-relax"), iterate(steps)
     )
     runcmds = map(
-        thunk -> ConditionalJob(thunk; name="run ab initio software in vc-relax"), steps[4]
+        thunk -> ConditionalJob(thunk; name="run ab initio software in vc-relax"),
+        iterate(steps),
     )
     extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"), steps[5]
+        thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"), iterate(steps)
     )
-    gatherdata = ArgDependentJob(steps[6]; name="gather E(V) data in vc-relax")
-    savedata = ArgDependentJob(steps[7]; name="save E(V) data in vc-relax")
-    fiteos = ArgDependentJob(steps[8]; name="fit E(V) data in vc-relax")
-    saveparams = ArgDependentJob(steps[9]; name="save EOS parameters in vc-relax")
+    gatherdata = ArgDependentJob(iterate(steps); name="gather E(V) data in vc-relax")
+    savedata = ArgDependentJob(iterate(steps); name="save E(V) data in vc-relax")
+    fiteos = ArgDependentJob(iterate(steps); name="fit E(V) data in vc-relax")
+    saveparams = ArgDependentJob(iterate(steps); name="save EOS parameters in vc-relax")
     compute .→
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
     gatherdata → savedata
