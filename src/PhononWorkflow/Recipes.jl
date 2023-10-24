@@ -26,19 +26,18 @@ end
 
 function stage(::SelfConsistentField, r::Recipe)
     conf = expand(r.config, SelfConsistentField())
-    steps = map(
-        Iterators.Stateful((
-            DownloadPotentials(SelfConsistentField()),
-            CreateInput(SelfConsistentField()),
-            WriteInput(SelfConsistentField()),
-            RunCmd(SelfConsistentField()),
-            # ExtractData(SelfConsistentField()),
-            # GatherData(SelfConsistentField()),
-            # SaveData(SelfConsistentField()),
-        )),
-    ) do action
+    steps = map((
+        DownloadPotentials(SelfConsistentField()),
+        CreateInput(SelfConsistentField()),
+        WriteInput(SelfConsistentField()),
+        RunCmd(SelfConsistentField()),
+        # ExtractData(SelfConsistentField()),
+        # GatherData(SelfConsistentField()),
+        # SaveData(SelfConsistentField()),
+    )) do action
         think(action, conf)
     end
+    steps = Iterators.Stateful(steps)
     download = Job(first(iterate(steps)); name="download potentials")
     makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), first(iterate(steps)))
     writeinputs = map(
@@ -67,18 +66,17 @@ function stage(::SelfConsistentField, r::Recipe)
 end
 function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
     conf = expand(r.config, DensityFunctionalPerturbationTheory())
-    steps = map(
-        Iterators.Stateful((
-            CreateInput(DensityFunctionalPerturbationTheory()),
-            WriteInput(DensityFunctionalPerturbationTheory()),
-            RunCmd(DensityFunctionalPerturbationTheory()),
-            # ExtractData(DensityFunctionalPerturbationTheory()),
-            # GatherData(DensityFunctionalPerturbationTheory()),
-            # SaveData(DensityFunctionalPerturbationTheory()),
-        )),
-    ) do action
+    steps = map((
+        CreateInput(DensityFunctionalPerturbationTheory()),
+        WriteInput(DensityFunctionalPerturbationTheory()),
+        RunCmd(DensityFunctionalPerturbationTheory()),
+        # ExtractData(DensityFunctionalPerturbationTheory()),
+        # GatherData(DensityFunctionalPerturbationTheory()),
+        # SaveData(DensityFunctionalPerturbationTheory()),
+    )) do action
         think(action, conf)
     end
+    steps = Iterators.Stateful(steps)
     makeinputs = map(
         thunk -> ArgDependentJob(thunk; name="update input in DFPT"), first(iterate(steps))
     )
@@ -106,18 +104,17 @@ function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
 end
 function stage(::RealSpaceForceConstants, r::Recipe)
     conf = expand(r.config, RealSpaceForceConstants())
-    steps = map(
-        Iterators.Stateful((
-            CreateInput(RealSpaceForceConstants()),
-            WriteInput(RealSpaceForceConstants()),
-            RunCmd(RealSpaceForceConstants()),
-            # ExtractData(RealSpaceForceConstants()),
-            # GatherData(RealSpaceForceConstants()),
-            # SaveData(RealSpaceForceConstants()),
-        )),
-    ) do action
+    steps = map((
+        CreateInput(RealSpaceForceConstants()),
+        WriteInput(RealSpaceForceConstants()),
+        RunCmd(RealSpaceForceConstants()),
+        # ExtractData(RealSpaceForceConstants()),
+        # GatherData(RealSpaceForceConstants()),
+        # SaveData(RealSpaceForceConstants()),
+    )) do action
         think(action, conf)
     end
+    steps = Iterators.Stateful(steps)
     makeinputs = map(
         thunk -> ArgDependentJob(thunk; name="update input in IFC"), first(iterate(steps))
     )
@@ -145,17 +142,16 @@ function stage(::RealSpaceForceConstants, r::Recipe)
 end
 function stage(::PhononDispersion, r::PhononDispersionRecipe)
     conf = expand(r.config, PhononDispersion())
-    steps = map(
-        Iterators.Stateful((
-            WriteInput(PhononDispersion()),
-            RunCmd(PhononDispersion()),
-            # ExtractData(PhononDispersion()),
-            # GatherData(PhononDispersion()),
-            # SaveData(PhononDispersion()),
-        ))
-    ) do action
+    steps = map((
+        WriteInput(PhononDispersion()),
+        RunCmd(PhononDispersion()),
+        # ExtractData(PhononDispersion()),
+        # GatherData(PhononDispersion()),
+        # SaveData(PhononDispersion()),
+    )) do action
         think(action, conf)
     end
+    steps = Iterators.Stateful(steps)
     makeinputs = map(
         ArgDependentJob(
             Thunk(CreateInput(PhononDispersion())(conf.template));
@@ -196,18 +192,17 @@ function stage(::PhononDispersion, r::PhononDispersionRecipe)
 end
 function stage(::PhononDensityOfStates, r::PhononDispersionRecipe)
     conf = expand(r.config, PhononDensityOfStates())
-    steps = map(
-        Iterators.Stateful(
-            CreateInput(PhononDensityOfStates()),
-            WriteInput(PhononDensityOfStates()),
-            RunCmd(PhononDensityOfStates()),
-            # ExtractData(PhononDensityOfStates()),
-            # GatherData(PhononDensityOfStates()),
-            # SaveData(PhononDensityOfStates()),
-        ),
-    ) do action
+    steps = map((
+        CreateInput(PhononDensityOfStates()),
+        WriteInput(PhononDensityOfStates()),
+        RunCmd(PhononDensityOfStates()),
+        # ExtractData(PhononDensityOfStates()),
+        # GatherData(PhononDensityOfStates()),
+        # SaveData(PhononDensityOfStates()),
+    )) do action
         think(action, conf)
     end
+    steps = Iterators.Stateful(steps)
     makeinputs = map(
         thunk -> ArgDependentJob(thunk; name="update input in phonon dispersion"),
         first(iterate(steps)),
