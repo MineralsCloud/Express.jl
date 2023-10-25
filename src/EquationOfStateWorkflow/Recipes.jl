@@ -28,7 +28,7 @@ struct ParallelEosFittingRecipe <: Recipe
     config
 end
 
-function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
+function stage(::SelfConsistentField, r::ParallelEosFittingRecipe, ::Val{1})
     conf = expand(r.config, SelfConsistentField())
     steps = map((
         DownloadPotentials(SelfConsistentField()),
@@ -78,7 +78,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
     gatherdata → savedata
     # runcmds .→ extractcells .→ savecells
-    return steps = (;
+    return (;
         download=download,
         compute=compute,
         makeinputs=makeinputs,
@@ -93,7 +93,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe)
         saveparams=saveparams,
     )
 end
-function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
+function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2})
     conf = expand(r.config, VariableCellOptimization())
     steps = map((
         ComputeVolume(VariableCellOptimization()),
@@ -107,8 +107,6 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         SaveData(VariableCellOptimization()),
         FitEquationOfState(VariableCellOptimization()),
         SaveParameters(VariableCellOptimization()),
-        CreateInput(SelfConsistentField()),
-        WriteInput(SelfConsistentField()),
     )) do action
         think(action, conf)
     end
@@ -145,18 +143,11 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
     saveparams = ArgDependentJob(
         first(iterate(steps)); name="save EOS parameters in vc-relax"
     )
-    makeinputs2 = map(
-        thunk -> ArgDependentJob(thunk; name="make input in SCF"), first(iterate(steps))
-    )
-    writeinputs2 = map(
-        thunk -> ArgDependentJob(thunk; name="write input in SCF"), first(iterate(steps))
-    )
     compute .→
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
     gatherdata → savedata
     runcmds .→ extractcells .→ savecells
-    extractcells .→ makeinputs2 .→ writeinputs2
-    return steps = (;
+    return (;
         compute=compute,
         makeinputs=makeinputs,
         writeinputs=writeinputs,
@@ -170,10 +161,30 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe)
         saveparams=saveparams,
     )
 end
+function stage(::SelfConsistentField, r::ParallelEosFittingRecipe, ::Val{3})
+    conf = expand(r.config, SelfConsistentField())
+    steps = map((
+        CreateInput(SelfConsistentField()), WriteInput(SelfConsistentField())
+    )) do action
+        think(action, conf)
+    end
+    steps = Iterators.Stateful(steps)
+    makeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="update input in SCF"), first(iterate(steps))
+    )
+    writeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="write input in SCF"), first(iterate(steps))
+    )
+    makeinputs .→ writeinputs
+    return (; makeinputs=makeinputs, writeinputs=writeinputs)
+end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
-    stage₁, stage₂ = stage(SelfConsistentField(), r), stage(VariableCellOptimization(), r)
+    stage₁, stage₂, stage₃ = stage(SelfConsistentField(), r, Val(1)),
+    stage(VariableCellOptimization(), r, Val(2)),
+    stage(SelfConsistentField(), r, Val(3))
     stage₁.saveparams .→ stage₂.compute
+    stage₂.extractcells .→ stage₃.makeinputs
     return Workflow(stage₁.download)
 end
 function build(::Type{Workflow}, file)
