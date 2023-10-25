@@ -11,7 +11,7 @@ using ExpressBase:
     think
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows: Workflow, eachjob, run!
+using SimpleWorkflows: Workflow, run!
 using Thinkers: Thunk, setargs!
 
 using ..Config: StaticConfig, expand

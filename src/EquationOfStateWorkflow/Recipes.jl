@@ -5,7 +5,7 @@ using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, →
 using ExpressBase: SelfConsistentField, VariableCellOptimization, think
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
-using SimpleWorkflows: Workflow, eachjob, run!
+using SimpleWorkflows: Workflow, run!
 
 using ..Config: StaticConfig, expand
 using ..EquationOfStateWorkflow:
