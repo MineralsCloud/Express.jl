@@ -28,8 +28,14 @@ think(action::ExtractCell, conf::Conf) =
 think(action::SaveCell, conf::Conf) = collect(
     Thunk(
         action(
-            joinpath(dirname(file), string(nameof(typeof(Calculation(action))))) *
-            conf.data.cell.extension,
+            joinpath(
+                dirname(file),
+                join(
+                    (string(nameof(typeof(Calculation(action))))),
+                    conf.data.cell.extension,
+                ),
+                '.',
+            ),
         ),
     ) for file in last.(conf.io)
 )
