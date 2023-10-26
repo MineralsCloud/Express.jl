@@ -31,10 +31,9 @@ think(action::SaveCell, conf::Conf) = collect(
             joinpath(
                 dirname(file),
                 join(
-                    (string(nameof(typeof(Calculation(action))))),
-                    conf.data.cell.extension,
+                    (string(nameof(typeof(Calculation(action)))), conf.data.cell.extension),
+                    '.',
                 ),
-                '.',
             ),
         ),
     ) for file in last.(conf.io)
