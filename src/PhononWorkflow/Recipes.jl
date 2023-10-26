@@ -255,6 +255,7 @@ function build(::Type{Workflow}, r::VDOSRecipe)
     stages[1].makeinputs .→ stages[2].makeinputs
     stages[2].makeinputs .→ stages[3].makeinputs
     stages[2].makeinputs .→ stages[4].makeinputs
+    stages[3].makeinputs .→ stages[4].makeinputs
     return Workflow(stages[1].download)
 end
 function build(::Type{Workflow}, file)
