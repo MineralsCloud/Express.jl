@@ -28,7 +28,7 @@ function stage(::SelfConsistentField, r::Recipe)
     conf = expand(r.config, SelfConsistentField())
     steps = map((
         DownloadPotentials(SelfConsistentField()),
-        # CreateInput(SelfConsistentField()),
+        CreateInput(SelfConsistentField()),
         # WriteInput(SelfConsistentField()),
         RunCmd(SelfConsistentField()),
         # ExtractData(SelfConsistentField()),
@@ -39,7 +39,7 @@ function stage(::SelfConsistentField, r::Recipe)
     end
     steps = Iterators.Stateful(steps)
     download = Job(first(iterate(steps)); name="download potentials")
-    # makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), first(iterate(steps)))
+    makeinputs = map(thunk -> Job(thunk; name="update input in SCF"), first(iterate(steps)))
     # writeinputs = map(
     #     thunk -> ArgDependentJob(thunk; name="write input in SCF"), first(iterate(steps))
     # )
@@ -47,16 +47,16 @@ function stage(::SelfConsistentField, r::Recipe)
         thunk -> ConditionalJob(thunk; name="run ab initio software in SCF"),
         first(iterate(steps)),
     )
-    extractdata = map(
-        thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"),
-        first(iterate(steps)),
-    )
-    gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in SCF")
-    savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in SCF")
-    download .→ runcmds
+    # extractdata = map(
+    #     thunk -> ConditionalJob(thunk; name="extract E(V) data in SCF"),
+    #     first(iterate(steps)),
+    # )
+    # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in SCF")
+    # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in SCF")
+    download .→ makeinputs .→ runcmds
     return steps = (;
         download=download,
-        # makeinputs=makeinputs,
+        makeinputs=makeinputs,
         # writeinputs=writeinputs,
         runcmds=runcmds,
         # extractdata=extractdata,
@@ -190,7 +190,7 @@ function stage(::PhononDispersion, r::PhononDispersionRecipe)
         # savedata=savedata,
     )
 end
-function stage(::PhononDensityOfStates, r::PhononDispersionRecipe)
+function stage(::PhononDensityOfStates, r::VDOSRecipe)
     conf = expand(r.config, PhononDensityOfStates())
     steps = map((
         CreateInput(PhononDensityOfStates()),
@@ -239,10 +239,10 @@ function build(::Type{Workflow}, r::PhononDispersionRecipe)
         stage(RealSpaceForceConstants(), r),
         stage(PhononDispersion(), r),
     ]
-    stage[1].runcmds .→ stage[2].runcmds
-    stage[2].runcmds .→ stage[3].runcmds
-    stage[2].runcmds .→ stage[4].runcmds
-    stage[3].runcmds .→ stage[4].runcmds
+    stages[1].makeinputs .→ stages[2].makeinputs
+    stages[2].makeinputs .→ stages[3].makeinputs
+    stages[2].makeinputs .→ stages[4].makeinputs
+    stages[3].makeinputs .→ stages[4].makeinputs
     return Workflow(stages[1].download)
 end
 function build(::Type{Workflow}, r::VDOSRecipe)
@@ -252,9 +252,9 @@ function build(::Type{Workflow}, r::VDOSRecipe)
         stage(RealSpaceForceConstants(), r),
         stage(PhononDensityOfStates(), r),
     ]
-    stage[1].runcmds .→ stage[2].runcmds
-    stage[2].runcmds .→ stage[3].runcmds
-    stage[2].runcmds .→ stage[4].runcmds
+    stages[1].makeinputs .→ stages[2].makeinputs
+    stages[2].makeinputs .→ stages[3].makeinputs
+    stages[2].makeinputs .→ stages[4].makeinputs
     return Workflow(stages[1].download)
 end
 function build(::Type{Workflow}, file)
