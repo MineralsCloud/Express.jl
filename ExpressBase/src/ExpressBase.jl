@@ -28,6 +28,10 @@ struct SelfConsistentField <: ElectronicStructure end
 struct NonSelfConsistentField <: ElectronicStructure end
 struct BandStructure <: ElectronicStructure end
 struct DFTPlusU <: ElectronicStructure end
+# MD
+abstract type MolecularDynamics <: Calculation end
+struct IonDynamics <: MolecularDynamics end
+struct VariableCellMolecularDynamics <: MolecularDynamics end
 # Optimization
 abstract type Optimization <: Calculation end
 struct FixedCellOptimization <: Optimization end
