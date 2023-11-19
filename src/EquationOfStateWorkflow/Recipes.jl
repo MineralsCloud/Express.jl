@@ -16,6 +16,7 @@ using ..EquationOfStateWorkflow:
     RunCmd,
     ExtractData,
     ExtractCell,
+    DetectSymmetries,
     SaveCell,
     GatherData,
     SaveData,
@@ -102,6 +103,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2}
         RunCmd(VariableCellOptimization()),
         ExtractCell(VariableCellOptimization()),
         SaveCell(VariableCellOptimization()),
+        DetectSymmetries(VariableCellOptimization()),
         ExtractData(VariableCellOptimization()),
         GatherData(VariableCellOptimization()),
         SaveData(VariableCellOptimization()),
@@ -133,6 +135,10 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2}
     savecells = map(
         thunk -> ArgDependentJob(thunk; name="save cell in vc-relax"), first(iterate(steps))
     )
+    detectsymmetries = map(
+        thunk -> ArgDependentJob(thunk; name="detect symmetries of cells"),
+        first(iterate(steps)),
+    )
     extractdata = map(
         thunk -> ConditionalJob(thunk; name="extract E(V) data in vc-relax"),
         first(iterate(steps)),
@@ -147,6 +153,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2}
     makeinputs .→ writeinputs .→ runcmds .→ extractdata .→ gatherdata → fiteos → saveparams
     gatherdata → savedata
     runcmds .→ extractcells .→ savecells
+    extractcells .→ detectsymmetries
     return (;
         compute=compute,
         makeinputs=makeinputs,
@@ -154,6 +161,7 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2}
         runcmds=runcmds,
         extractcells=extractcells,
         savecells=savecells,
+        detectsymmetries=detectsymmetries,
         extractdata=extractdata,
         gatherdata=gatherdata,
         savedata=savedata,
