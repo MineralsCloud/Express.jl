@@ -1,4 +1,4 @@
-module EquationOfStateWorkflow
+module EquationOfState
 
 include("Config.jl")
 include("actions.jl")

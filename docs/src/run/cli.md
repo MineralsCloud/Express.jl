@@ -19,7 +19,7 @@ and submit it to a workload manager like [Slurm](https://www.schedmd.com/).
 However, users can also request an interactive session and run code Julia REPL.
 
 ```julia-repl
-julia> using Express.EquationOfStateWorkflow.Recipes
+julia> using Express.EquationOfState.Recipes
 
 julia> using QuantumESPRESSOExpress
 
