@@ -33,10 +33,10 @@ struct DFTPlusU <: ElectronicStructure end
 abstract type MolecularDynamics <: Calculation end
 struct IonDynamics <: MolecularDynamics end
 struct VariableCellMolecularDynamics <: MolecularDynamics end
-# Optimization
-abstract type Optimization <: Calculation end
-struct FixedCellOptimization <: Optimization end
-struct VariableCellOptimization <: Optimization end
+# Structural optimization
+abstract type StructuralOptimization <: Calculation end
+struct FixedCellOptimization <: StructuralOptimization end
+struct VariableCellOptimization <: StructuralOptimization end
 # Phonon
 abstract type LatticeDynamics <: Calculation end
 struct LinearResponse <: LatticeDynamics end
@@ -49,6 +49,7 @@ struct QuasiHarmonicApproximation <: Calculation end
 const SCF = SelfConsistentField
 const NSCF = NonSelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
+const Optimization = StructuralOptimization
 const VDOS = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For British users
 const QHA = QuasiHarmonicApproximation
