@@ -223,7 +223,7 @@ workflow (an equation of state workflow in this case). And after the following J
 commands:
 
 ```julia
-using Express.PhononWorkflow.Recipes
+using Express.Phonon.Recipes
 using QuantumESPRESSOExpress
 
 wf = buildworkflow("phonon.yaml")

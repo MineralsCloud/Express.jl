@@ -5,7 +5,7 @@ module Express
 include("ConvergenceTest/ConvergenceTest.jl")
 include("EquationOfState/EquationOfState.jl")
 # include("StaticElasticity/StaticElasticity.jl")
-include("PhononWorkflow/PhononWorkflow.jl")
+include("Phonon/Phonon.jl")
 # include("QuasiHarmonicApprox/QuasiHarmonicApprox.jl")
 
 end

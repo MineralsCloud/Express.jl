@@ -15,7 +15,7 @@ using SimpleWorkflows: Workflow, run!
 using Thinkers: Thunk, setargs!
 
 using ..Config: StaticConfig, expand
-using ..PhononWorkflow: DownloadPotentials, CreateInput, WriteInput, RunCmd
+using ..Phonon: DownloadPotentials, CreateInput, WriteInput, RunCmd
 
 struct PhononDispersionRecipe <: Recipe
     config

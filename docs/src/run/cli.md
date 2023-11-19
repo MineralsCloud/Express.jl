@@ -28,7 +28,7 @@ julia> workflow = buildworkflow("eos.toml");
 julia> run!(workflow);
 ```
 
-For phonon and the QHA workflow, run `using Express.PhononWorkflow.Recipes`
+For phonon and the QHA workflow, run `using Express.Phonon.Recipes`
 and `using Express.QuasiHarmonicApprox.Recipes` in the first step.
 
 In an EOS workflow, the final results include outputs returned by Quantum ESPRESSO, a list
