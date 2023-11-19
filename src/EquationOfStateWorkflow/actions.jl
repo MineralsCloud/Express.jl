@@ -26,7 +26,7 @@ using ExpressBase:
     WriteInput
 using ExpressBase.Config: _uparse
 using ExpressBase.Files: save, load, extension
-using Spglib: get_dataset
+using Spglib: SpglibCell, get_dataset
 using Unitful: Pressure, Volume
 using UnitfulParsableString: string
 
@@ -62,7 +62,7 @@ end
 struct DetectSymmetries{T} <: Action{T}
     calculation::T
 end
-(::DetectSymmetries)(cell) = get_dataset(cell)
+(::DetectSymmetries)(cell) = get_dataset(SpglibCell(cell))
 
 struct GatherData{T} <: Action{T}
     calculation::T
