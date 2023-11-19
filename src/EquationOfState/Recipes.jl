@@ -8,7 +8,7 @@ using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, run!
 
 using ..Config: StaticConfig, expand
-using ..EquationOfStateWorkflow:
+using ..EquationOfState:
     DownloadPotentials,
     ComputeVolume,
     CreateInput,

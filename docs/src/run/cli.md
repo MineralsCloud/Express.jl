@@ -19,7 +19,7 @@ and submit it to a workload manager like [Slurm](https://www.schedmd.com/).
 However, users can also request an interactive session and run code Julia REPL.
 
 ```julia-repl
-julia> using Express.EquationOfStateWorkflow.Recipes
+julia> using Express.EquationOfState.Recipes
 
 julia> using QuantumESPRESSOExpress
 
@@ -28,8 +28,8 @@ julia> workflow = buildworkflow("eos.toml");
 julia> run!(workflow);
 ```
 
-For phonon and the QHA workflow, run `using Express.PhononWorkflow.Recipes`
-and `using Express.QuasiHarmonicApproxWorkflow.Recipes` in the first step.
+For phonon and the QHA workflow, run `using Express.Phonon.Recipes`
+and `using Express.QuasiHarmonicApprox.Recipes` in the first step.
 
 In an EOS workflow, the final results include outputs returned by Quantum ESPRESSO, a list
 of raw data (volume-energy pairs), and a fitted EOS. If something goes wrong, the workflow

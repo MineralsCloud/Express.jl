@@ -2,5 +2,5 @@ using Express
 using Test
 
 @testset "Express.jl" begin
-    include("QuasiHarmonicApproxWorkflow.jl")
+    include("QuasiHarmonicApprox.jl")
 end

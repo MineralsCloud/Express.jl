@@ -1,4 +1,4 @@
-module PhononWorkflow
+module ConvergenceTest
 
 include("Config.jl")
 include("actions.jl")

@@ -6,7 +6,7 @@ using ExpressBase.Recipes: Recipe
 using EasyJobsBase: Job
 using SimpleWorkflows: Workflow, run!, →
 
-using ..QuasiHarmonicApproxWorkflow: MakeInput, CalculateThermodyn, Plot
+using ..QuasiHarmonicApprox: MakeInput, CalculateThermodyn, Plot
 
 import ...Express: jobify
 
