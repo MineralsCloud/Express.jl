@@ -1,4 +1,4 @@
-module QuasiHarmonicApproxWorkflow
+module QuasiHarmonicApprox
 
 include("Config.jl")
 include("actions.jl")

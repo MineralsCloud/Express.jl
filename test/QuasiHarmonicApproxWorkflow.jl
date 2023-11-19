@@ -1,8 +1,8 @@
-module QuasiHarmonicApproxWorkflow
+module QuasiHarmonicApprox
 
 using ExpressBase.Files: load
-using Express.QuasiHarmonicApproxWorkflow: QuasiHarmonicApproximation
-using Express.QuasiHarmonicApproxWorkflow.Config: ExpandConfig
+using Express.QuasiHarmonicApprox: QuasiHarmonicApproximation
+using Express.QuasiHarmonicApprox.Config: ExpandConfig
 using Test
 
 @testset "Load a configuration file: silicon" begin
