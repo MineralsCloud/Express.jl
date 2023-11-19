@@ -1,4 +1,4 @@
-module ConvergenceTestWorkflow
+module ConvergenceTest
 
 include("Config.jl")
 include("actions.jl")

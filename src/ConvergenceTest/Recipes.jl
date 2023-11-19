@@ -8,7 +8,7 @@ using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, run!
 
 using ..Config: StaticConfig, expand
-using ..ConvergenceTestWorkflow:
+using ..ConvergenceTest:
     DownloadPotentials,
     CreateInput,
     WriteInput,
