@@ -1,23 +1,22 @@
 module ExpressBase
 
 export SelfConsistentField,
+    FixedIonSelfConsistentField,
     NonSelfConsistentField,
     BandStructure,
     DFTPlusU,
     FixedCellOptimization,
     VariableCellOptimization,
-    DensityFunctionalPerturbationTheory,
-    RealSpaceForceConstants,
+    LinearResponse,
+    FourierTransform,
     PhononDispersion,
     PhononDensityOfStates,
     ZoneCenterPhonons,
+    ZoneCentrePhonons,
     QuasiHarmonicApproximation,
     SCF,
     NSCF,
-    FixedIonSelfConsistentField,
-    DFPT,
     VDOS,
-    ZoneCentrePhonons,
     QHA
 
 # See https://www.quantum-espresso.org/Doc/pw_user_guide/node10.html
@@ -38,8 +37,8 @@ struct FixedCellOptimization <: Optimization end
 struct VariableCellOptimization <: Optimization end
 # Phonon
 abstract type LatticeDynamics <: Calculation end
-struct DensityFunctionalPerturbationTheory <: LatticeDynamics end
-struct RealSpaceForceConstants <: LatticeDynamics end
+struct LinearResponse <: LatticeDynamics end
+struct FourierTransform <: LatticeDynamics end
 struct PhononDispersion <: LatticeDynamics end
 struct PhononDensityOfStates <: LatticeDynamics end
 struct ZoneCenterPhonons <: LatticeDynamics end
@@ -48,7 +47,6 @@ struct QuasiHarmonicApproximation <: Calculation end
 const SCF = SelfConsistentField
 const NSCF = NonSelfConsistentField
 const FixedIonSelfConsistentField = SelfConsistentField
-const DFPT = DensityFunctionalPerturbationTheory
 const VDOS = PhononDensityOfStates
 const ZoneCentrePhonons = ZoneCenterPhonons  # For British users
 const QHA = QuasiHarmonicApproximation
