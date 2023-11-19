@@ -4,8 +4,8 @@ using Configurations: from_dict
 using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, getresult, eachparent, →
 using ExpressBase:
     SelfConsistentField,
-    DensityFunctionalPerturbationTheory,
-    RealSpaceForceConstants,
+    LinearResponse,
+    FourierTransform,
     PhononDispersion,
     PhononDensityOfStates,
     think
@@ -64,15 +64,15 @@ function stage(::SelfConsistentField, r::Recipe)
         # savedata=savedata,
     )
 end
-function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
-    conf = expand(r.config, DensityFunctionalPerturbationTheory())
+function stage(::LinearResponse, r::Recipe)
+    conf = expand(r.config, LinearResponse())
     steps = map((
-        CreateInput(DensityFunctionalPerturbationTheory()),
-        WriteInput(DensityFunctionalPerturbationTheory()),
-        RunCmd(DensityFunctionalPerturbationTheory()),
-        # ExtractData(DensityFunctionalPerturbationTheory()),
-        # GatherData(DensityFunctionalPerturbationTheory()),
-        # SaveData(DensityFunctionalPerturbationTheory()),
+        CreateInput(LinearResponse()),
+        WriteInput(LinearResponse()),
+        RunCmd(LinearResponse()),
+        # ExtractData(LinearResponse()),
+        # GatherData(LinearResponse()),
+        # SaveData(LinearResponse()),
     )) do action
         think(action, conf)
     end
@@ -102,15 +102,15 @@ function stage(::DensityFunctionalPerturbationTheory, r::Recipe)
         # savedata=savedata,
     )
 end
-function stage(::RealSpaceForceConstants, r::Recipe)
-    conf = expand(r.config, RealSpaceForceConstants())
+function stage(::FourierTransform, r::Recipe)
+    conf = expand(r.config, FourierTransform())
     steps = map((
-        CreateInput(RealSpaceForceConstants()),
-        WriteInput(RealSpaceForceConstants()),
-        RunCmd(RealSpaceForceConstants()),
-        # ExtractData(RealSpaceForceConstants()),
-        # GatherData(RealSpaceForceConstants()),
-        # SaveData(RealSpaceForceConstants()),
+        CreateInput(FourierTransform()),
+        WriteInput(FourierTransform()),
+        RunCmd(FourierTransform()),
+        # ExtractData(FourierTransform()),
+        # GatherData(FourierTransform()),
+        # SaveData(FourierTransform()),
     )) do action
         think(action, conf)
     end
@@ -235,8 +235,8 @@ end
 function build(::Type{Workflow}, r::PhononDispersionRecipe)
     stages = [
         stage(SelfConsistentField(), r),
-        stage(DensityFunctionalPerturbationTheory(), r),
-        stage(RealSpaceForceConstants(), r),
+        stage(LinearResponse(), r),
+        stage(FourierTransform(), r),
         stage(PhononDispersion(), r),
     ]
     stages[1].makeinputs .→ stages[2].makeinputs
@@ -248,8 +248,8 @@ end
 function build(::Type{Workflow}, r::VDOSRecipe)
     stages = [
         stage(SelfConsistentField(), r),
-        stage(DensityFunctionalPerturbationTheory(), r),
-        stage(RealSpaceForceConstants(), r),
+        stage(LinearResponse(), r),
+        stage(FourierTransform(), r),
         stage(PhononDensityOfStates(), r),
     ]
     stages[1].makeinputs .→ stages[2].makeinputs
