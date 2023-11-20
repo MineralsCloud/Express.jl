@@ -7,6 +7,6 @@ include("MolecularDynamics/MolecularDynamics.jl")
 include("EquationOfState/EquationOfState.jl")
 # include("StaticElasticity/StaticElasticity.jl")
 include("Phonon/Phonon.jl")
-# include("QuasiHarmonicApprox/QuasiHarmonicApprox.jl")
+# include("QHA/QHA.jl")
 
 end
