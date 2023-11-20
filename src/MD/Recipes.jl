@@ -2,12 +2,18 @@ module Recipes
 
 using Configurations: from_dict
 using EasyJobsBase: Job, ConditionalJob, ArgDependentJob, →
-using ExpressBase: IonDynamics, VariableCellMolecularDynamics, think
+using ExpressBase:
+    FixedCellOptimization,
+    VariableCellOptimization,
+    IonDynamics,
+    VariableCellMolecularDynamics,
+    think
 using ExpressBase.Files: load
 using ExpressBase.Recipes: Recipe
 using SimpleWorkflows: Workflow, run!
 
 using ..Config: StaticConfig, expand
+using ..MD: DownloadPotentials, CreateInput, WriteInput, RunCmd, ExtractCell
 
 struct IonDynamicsRecipe <: Recipe
     config
@@ -16,6 +22,28 @@ struct VariableCellMolecularDynamicsRecipe <: Recipe
     config
 end
 
+function stage(::FixedCellOptimization, r::IonDynamicsRecipe)
+    conf = expand(r.config, FixedCellOptimization())
+    steps = map((ExtractCell(FixedCellOptimization()),)) do action
+        think(action, conf)
+    end
+    steps = Iterators.Stateful(steps)
+    extractcells = map(
+        thunk -> Job(thunk; name="extract cell in relax"), first(iterate(steps))
+    )
+    return (; extractcells=extractcells,)
+end
+function stage(::VariableCellOptimization, r::VariableCellMolecularDynamicsRecipe)
+    conf = expand(r.config, VariableCellOptimization())
+    steps = map((ExtractCell(VariableCellOptimization()),)) do action
+        think(action, conf)
+    end
+    steps = Iterators.Stateful(steps)
+    extractcells = map(
+        thunk -> Job(thunk; name="extract cell in vc-relax"), first(iterate(steps))
+    )
+    return (; extractcells=extractcells,)
+end
 function stage(::IonDynamics, r::IonDynamicsRecipe)
     conf = expand(r.config, IonDynamics())
     steps = map((
@@ -31,7 +59,9 @@ function stage(::IonDynamics, r::IonDynamicsRecipe)
     end
     steps = Iterators.Stateful(steps)
     download = Job(first(iterate(steps)); name="download potentials")
-    makeinputs = map(thunk -> Job(thunk; name="update input in MD"), first(iterate(steps)))
+    makeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="update input in MD"), first(iterate(steps))
+    )
     writeinputs = map(
         thunk -> ArgDependentJob(thunk; name="write input in MD"), first(iterate(steps))
     )
@@ -71,7 +101,9 @@ function stage(::VariableCellMolecularDynamics, r::VariableCellMolecularDynamics
     end
     steps = Iterators.Stateful(steps)
     download = Job(first(iterate(steps)); name="download potentials")
-    makeinputs = map(thunk -> Job(thunk; name="update input in MD"), first(iterate(steps)))
+    makeinputs = map(
+        thunk -> ArgDependentJob(thunk; name="update input in MD"), first(iterate(steps))
+    )
     writeinputs = map(
         thunk -> ArgDependentJob(thunk; name="write input in MD"), first(iterate(steps))
     )
@@ -98,8 +130,16 @@ function stage(::VariableCellMolecularDynamics, r::VariableCellMolecularDynamics
 end
 
 function build(::Type{Workflow}, r::IonDynamicsRecipe)
-    stages = [stage(IonDynamics(), r)]
-    return Workflow(stages[1].download)
+    stage₁ = stage(FixedCellOptimization(), r)
+    stage₂ = stage(IonDynamicsRecipe(), r)
+    stage₁.extractcells .→ stage₂.makeinputs
+    return Workflow(stage₂.download)
+end
+function build(::Type{Workflow}, r::VariableCellMolecularDynamicsRecipe)
+    stage₁ = stage(VariableCellOptimization(), r)
+    stage₂ = stage(VariableCellMolecularDynamics(), r)
+    stage₁.extractcells .→ stage₂.makeinputs
+    return Workflow(stage₂.download)
 end
 function build(::Type{Workflow}, file)
     dict = load(file)
