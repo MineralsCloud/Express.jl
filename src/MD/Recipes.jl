@@ -135,7 +135,7 @@ end
 
 function build(::Type{Workflow}, r::IonDynamicsRecipe)
     stage₁ = stage(FixedCellOptimization(), r)
-    stage₂ = stage(IonDynamicsRecipe(), r)
+    stage₂ = stage(IonDynamics(), r)
     stage₁.extractcells .→ stage₂.makeinputs
     return Workflow(stage₁.download)
 end
