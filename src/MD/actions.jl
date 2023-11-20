@@ -1,6 +1,7 @@
 using AbInitioSoftwareBase: Input
 using EasyJobsBase: Job
 using ExpressBase:
+    MolecularDynamics,
     IonDynamics,
     VariableCellMolecularDynamics,
     Action,
