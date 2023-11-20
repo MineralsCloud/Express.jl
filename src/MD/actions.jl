@@ -10,6 +10,10 @@ using ExpressBase:
     WriteInput
 using ExpressBase.Files: save
 
+struct ExtractCell{T} <: Action{T}
+    calculation::T
+end
+
 struct CreateInput{T} <: Action{T}
     calculation::T
 end
