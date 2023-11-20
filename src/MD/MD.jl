@@ -1,4 +1,4 @@
-module MolecularDynamics
+module MD
 
 include("Config.jl")
 include("actions.jl")

@@ -1,4 +1,4 @@
-module QuasiHarmonicApprox
+module QHA
 
 include("Config.jl")
 include("actions.jl")
