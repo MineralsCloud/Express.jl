@@ -24,25 +24,35 @@ end
 
 function stage(::FixedCellOptimization, r::IonDynamicsRecipe)
     conf = expand(r.config, FixedCellOptimization())
-    steps = map((ExtractCell(FixedCellOptimization()),)) do action
+    steps = map((
+        DownloadPotentials(FixedCellOptimization()),
+        ExtractCell(FixedCellOptimization()),
+    )) do action
         think(action, conf)
     end
     steps = Iterators.Stateful(steps)
+    download = Job(first(iterate(steps)); name="download potentials")
     extractcells = map(
         thunk -> Job(thunk; name="extract cell in relax"), first(iterate(steps))
     )
-    return (; extractcells=extractcells,)
+    download .→ extractcells
+    return (; download, extractcells)
 end
 function stage(::VariableCellOptimization, r::VariableCellMolecularDynamicsRecipe)
     conf = expand(r.config, VariableCellOptimization())
-    steps = map((ExtractCell(VariableCellOptimization()),)) do action
+    steps = map((
+        DownloadPotentials(VariableCellOptimization()),
+        ExtractCell(VariableCellOptimization()),
+    )) do action
         think(action, conf)
     end
     steps = Iterators.Stateful(steps)
+    download = Job(first(iterate(steps)); name="download potentials")
     extractcells = map(
         thunk -> Job(thunk; name="extract cell in vc-relax"), first(iterate(steps))
     )
-    return (; extractcells=extractcells,)
+    download .→ extractcells
+    return (; download, extractcells)
 end
 function stage(::IonDynamics, r::IonDynamicsRecipe)
     conf = expand(r.config, IonDynamics())
@@ -58,7 +68,6 @@ function stage(::IonDynamics, r::IonDynamicsRecipe)
         think(action, conf)
     end
     steps = Iterators.Stateful(steps)
-    download = Job(first(iterate(steps)); name="download potentials")
     makeinputs = map(
         thunk -> ArgDependentJob(thunk; name="update input in MD"), first(iterate(steps))
     )
@@ -75,21 +84,19 @@ function stage(::IonDynamics, r::IonDynamicsRecipe)
     # )
     # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in MD")
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in MD")
-    download .→ makeinputs .→ writeinputs .→ runcmds
+    makeinputs .→ writeinputs .→ runcmds
     return steps = (;
-        download=download,
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 function stage(::VariableCellMolecularDynamics, r::VariableCellMolecularDynamicsRecipe)
     conf = expand(r.config, VariableCellMolecularDynamics())
     steps = map((
-        DownloadPotentials(VariableCellMolecularDynamics()),
         CreateInput(VariableCellMolecularDynamics()),
         WriteInput(VariableCellMolecularDynamics()),
         RunCmd(VariableCellMolecularDynamics()),
@@ -100,7 +107,6 @@ function stage(::VariableCellMolecularDynamics, r::VariableCellMolecularDynamics
         think(action, conf)
     end
     steps = Iterators.Stateful(steps)
-    download = Job(first(iterate(steps)); name="download potentials")
     makeinputs = map(
         thunk -> ArgDependentJob(thunk; name="update input in MD"), first(iterate(steps))
     )
@@ -117,15 +123,14 @@ function stage(::VariableCellMolecularDynamics, r::VariableCellMolecularDynamics
     # )
     # gatherdata = ArgDependentJob(first(iterate(steps)); name="gather E(V) data in MD")
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in MD")
-    download .→ makeinputs .→ writeinputs .→ runcmds
+    makeinputs .→ writeinputs .→ runcmds
     return steps = (;
-        download=download,
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 
