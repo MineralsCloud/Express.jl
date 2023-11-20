@@ -55,13 +55,13 @@ function stage(::SelfConsistentField, r::Recipe)
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in SCF")
     download .→ makeinputs .→ runcmds
     return steps = (;
-        download=download,
-        makeinputs=makeinputs,
-        # writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        download,
+        makeinputs,
+        # writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 function stage(::LinearResponse, r::Recipe)
@@ -94,12 +94,12 @@ function stage(::LinearResponse, r::Recipe)
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in DFPT")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 function stage(::FourierTransform, r::Recipe)
@@ -132,12 +132,12 @@ function stage(::FourierTransform, r::Recipe)
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in IFC")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 function stage(::PhononDispersion, r::PhononDispersionRecipe)
@@ -182,12 +182,12 @@ function stage(::PhononDispersion, r::PhononDispersionRecipe)
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in phonon dispersion")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 function stage(::PhononDensityOfStates, r::VDOSRecipe)
@@ -223,12 +223,12 @@ function stage(::PhononDensityOfStates, r::VDOSRecipe)
     # savedata = ArgDependentJob(first(iterate(steps)); name="save E(V) data in phonon dispersion")
     makeinputs .→ writeinputs .→ runcmds
     return steps = (;
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractdata=extractdata,
-        # gatherdata=gatherdata,
-        # savedata=savedata,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractdata,
+        # gatherdata,
+        # savedata,
     )
 end
 

@@ -80,18 +80,18 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe, ::Val{1})
     gatherdata → savedata
     # runcmds .→ extractcells .→ savecells
     return (;
-        download=download,
-        compute=compute,
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        # extractcells=extractcells,
-        # savecells=savecells,
-        extractdata=extractdata,
-        gatherdata=gatherdata,
-        savedata=savedata,
-        fiteos=fiteos,
-        saveparams=saveparams,
+        download,
+        compute,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        # extractcells,
+        # savecells,
+        extractdata,
+        gatherdata,
+        savedata,
+        fiteos,
+        saveparams,
     )
 end
 function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2})
@@ -155,18 +155,18 @@ function stage(::VariableCellOptimization, r::ParallelEosFittingRecipe, ::Val{2}
     runcmds .→ extractcells .→ savecells
     extractcells .→ detectsymmetries
     return (;
-        compute=compute,
-        makeinputs=makeinputs,
-        writeinputs=writeinputs,
-        runcmds=runcmds,
-        extractcells=extractcells,
-        savecells=savecells,
-        detectsymmetries=detectsymmetries,
-        extractdata=extractdata,
-        gatherdata=gatherdata,
-        savedata=savedata,
-        fiteos=fiteos,
-        saveparams=saveparams,
+        compute,
+        makeinputs,
+        writeinputs,
+        runcmds,
+        extractcells,
+        savecells,
+        detectsymmetries,
+        extractdata,
+        gatherdata,
+        savedata,
+        fiteos,
+        saveparams,
     )
 end
 function stage(::SelfConsistentField, r::ParallelEosFittingRecipe, ::Val{3})
@@ -184,7 +184,7 @@ function stage(::SelfConsistentField, r::ParallelEosFittingRecipe, ::Val{3})
         thunk -> ArgDependentJob(thunk; name="write input in SCF"), first(iterate(steps))
     )
     makeinputs .→ writeinputs
-    return (; makeinputs=makeinputs, writeinputs=writeinputs)
+    return (; makeinputs, writeinputs)
 end
 
 function build(::Type{Workflow}, r::ParallelEosFittingRecipe)
