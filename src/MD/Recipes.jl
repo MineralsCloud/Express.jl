@@ -138,13 +138,13 @@ function build(::Type{Workflow}, r::IonDynamicsRecipe)
     stage₁ = stage(FixedCellOptimization(), r)
     stage₂ = stage(IonDynamicsRecipe(), r)
     stage₁.extractcells .→ stage₂.makeinputs
-    return Workflow(stage₂.download)
+    return Workflow(stage₁.download)
 end
 function build(::Type{Workflow}, r::VariableCellMolecularDynamicsRecipe)
     stage₁ = stage(VariableCellOptimization(), r)
     stage₂ = stage(VariableCellMolecularDynamics(), r)
     stage₁.extractcells .→ stage₂.makeinputs
-    return Workflow(stage₂.download)
+    return Workflow(stage₁.download)
 end
 function build(::Type{Workflow}, file)
     dict = load(file)
