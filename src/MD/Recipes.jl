@@ -57,7 +57,6 @@ end
 function stage(::IonDynamics, r::IonDynamicsRecipe)
     conf = expand(r.config, IonDynamics())
     steps = map((
-        DownloadPotentials(IonDynamics()),
         CreateInput(IonDynamics()),
         WriteInput(IonDynamics()),
         RunCmd(IonDynamics()),
