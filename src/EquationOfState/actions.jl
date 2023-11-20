@@ -39,11 +39,12 @@ end
     action(pressure, PressureEquation(parameters))
 function (action::ComputeVolume)(pressure::Pressure, eos::PressureEquation)
     possible_volumes = vsolve(eos, pressure)
-    return if length(possible_volumes) > 1
+    volume = if length(possible_volumes) > 1
         _choose(possible_volumes, pressure, eos)
     else
         only(possible_volumes)
     end
+    return volume, pressure
 end
 
 struct CreateInput{T} <: Action{T}
