@@ -24,7 +24,7 @@ end
 
 @option struct StaticConfig <: AbstractConfig
     recipe::String
-    template::String
+    templates::Vector{String}
     at::Union{Pressures,Volumes}
     io::IO = IO()
     data::Data = Data()
@@ -60,7 +60,7 @@ function expand(config::StaticConfig, calculation::Calculation)
     conf = Conf()
     conf.cli = config.cli
     conf.calculation = calculation
-    _update!(conf, config.template)
+    _update!(conf, config.templates)
     _update!(conf, config.at)
     _update!(conf, config.io, config.at)
     _update!(conf, config.data)
