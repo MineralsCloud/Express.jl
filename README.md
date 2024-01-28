@@ -100,9 +100,9 @@ Contributions are very welcome, as are feature requests and suggestions. Please 
 [issue][issues-url] if you encounter any problems. The [Contributing](@ref) page has
 guidelines that should be followed when opening pull requests and contributing code.
 
-## Star History
+## Stargazers over time
 
-[![Star History Chart](https://api.star-history.com/svg?repos=MineralsCloud/Express.jl&type=Date)](https://star-history.com/#MineralsCloud/Express.jl&Date)
+[![Stargazers over time](https://starchart.cc/MineralsCloud/Express.jl.svg?variant=adaptive)](https://starchart.cc/MineralsCloud/Express.jl)
 
 [discussions-url]: https://github.com/MineralsCloud/Express.jl/discussions
 [issues-url]: https://github.com/MineralsCloud/Express.jl/issues
